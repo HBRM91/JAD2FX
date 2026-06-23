@@ -109,7 +109,7 @@ async function queryOpenRouter(config: RouteConfig): Promise<string> {
 
 // ─── Gemini (fallback / quality-first primary) ───────────────────────────────
 
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-2.5-flash';
 
 async function queryGemini(config: RouteConfig): Promise<string> {
   const key = process.env.GEMINI_API_KEY ?? process.env.API_KEY;
