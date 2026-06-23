@@ -75,7 +75,7 @@ export async function fetchBkamVirement(corsProxy: string): Promise<BkamVirement
     return _virementToday.data;
   }
   const data = await bkamGet<BkamVirementRate[]>(
-    proxyPath(corsProxy, 'bkam', 'CoursVirement'),
+    proxyPath(corsProxy, 'bkam', 'cours/Version1/api/CoursVirement'),
   );
   _virementToday = { data, ts: Date.now() };
   return data;
@@ -87,18 +87,9 @@ export async function fetchBkamVirementDate(corsProxy: string, date: string): Pr
   const cached = _virementByDate.get(date);
   if (cached && Date.now() - cached.ts < HIST_CACHE_MS) return cached.data;
 
-  // Try with date query param first, then as path segment
-  let data: BkamVirementRate[];
-  try {
-    data = await bkamGet<BkamVirementRate[]>(
-      proxyPath(corsProxy, 'bkam', 'CoursVirement', { date }),
-    );
-    if (!Array.isArray(data) || data.length === 0) throw new Error('empty');
-  } catch {
-    data = await bkamGet<BkamVirementRate[]>(
-      proxyPath(corsProxy, 'bkam', `CoursVirement/${date}`),
-    );
-  }
+  const data = await bkamGet<BkamVirementRate[]>(
+    proxyPath(corsProxy, 'bkam', 'cours/Version1/api/CoursVirement', { date }),
+  );
 
   _virementByDate.set(date, { data, ts: Date.now() });
   return data;
@@ -111,17 +102,17 @@ export async function fetchBkamBBE(corsProxy: string): Promise<BkamBBERate[]> {
     return _bbeToday.data;
   }
   const data = await bkamGet<BkamBBERate[]>(
-    proxyPath(corsProxy, 'bkam', 'CoursBBE'),
+    proxyPath(corsProxy, 'bkam', 'cours/Version1/api/CoursBBE'),
   );
   _bbeToday = { data, ts: Date.now() };
   return data;
 }
 
-// ─── CourbeBDT — BDT yield curve ─────────────────────────────────────────────
+// ─── CourbeBDT — BDT yield curve (requires separate BDT subscription) ────────
 
 export async function fetchBkamBdt(corsProxy: string): Promise<BkamBdtPoint[]> {
   return bkamGet<BkamBdtPoint[]>(
-    proxyPath(corsProxy, 'bkam-bdt', 'CourbeBDT'),
+    proxyPath(corsProxy, 'bkam-bdt', 'mo/Version1/api/CourbeBDT'),
   );
 }
 
