@@ -271,7 +271,7 @@ const BilletsPage: React.FC = () => {
         <div className="p-4 border-b border-slate-100 flex items-center justify-between">
           <h2 className="text-sm font-bold text-navy-900 uppercase tracking-wider flex items-center gap-2">
             <Banknote size={14} className="text-gold-600" />
-            Cours Billets — 14 devises BKAM
+            Cours Billets — 20 devises
           </h2>
           {rows.some(r => r.bbeSource === 'BKAM_OFFICIAL') && (
             <span className="text-[9px] font-mono px-2 py-0.5 rounded border border-emerald-300 bg-emerald-50 text-emerald-700">

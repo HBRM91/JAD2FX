@@ -6,9 +6,15 @@ import { AdminConfig } from '../types';
 
 // Per-currency dealer spread halves (pips) for bid/ask around mid
 const DEFAULT_SPREAD_PIPS: Record<string, number> = {
+  // G10
   EUR: 8, USD: 6, GBP: 10, CHF: 7, JPY: 6,
-  CAD: 8, SAR: 3, AED: 3, KWD: 4, QAR: 3,
-  DKK: 9, NOK: 10, SEK: 10, CNY: 11,
+  CAD: 8, NOK: 10, SEK: 10, DKK: 9,
+  // CNY
+  CNY: 11,
+  // Gulf (tightly managed / pegged)
+  AED: 3, SAR: 3, QAR: 3, KWD: 4, OMR: 3, BHD: 3, JOD: 4,
+  // North African (less liquid, wider spreads)
+  TND: 6, DZD: 5, LYD: 8,
 };
 
 // Deterministic micro-movement: σ ≈ 0.15% intraday, applied each tick

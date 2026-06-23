@@ -198,7 +198,7 @@ export interface FixingDayRow {
   usdMad_basket: number;
   usdMad_div_bps: number;
 
-  // All 14 BKAM cross-rates (MAD per currency unit, bkamUnit applied)
+  // All 20 currency cross-rates against MAD (bkamUnit applied)
   allRates: Record<string, number>;
 
   source: 'BKAM_OFFICIAL' | 'ECB_PROXY' | 'COMPUTED';

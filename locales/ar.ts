@@ -44,7 +44,7 @@ const ar: Record<string, string> = {
 
   // Billets page
   'billets.title': 'مكتب الصرف — أسعار الأوراق النقدية',
-  'billets.subtitle': 'أسعار صرف الأوراق النقدية لـ 14 عملة BKAM · شراء / بيع استرشادي',
+  'billets.subtitle': 'أسعار صرف الأوراق النقدية لـ 20 عملة · شراء / بيع استرشادي',
   'billets.officialLink': 'الأسعار الرسمية لأوراق BKAM ↗',
   'billets.vsBillet': 'مقارنة بالتحويل',
   'billets.cashNote': 'أسعار الأوراق النقدية أقل ملاءمة من أسعار التحويل المصرفي (تكاليف المناولة + عمولة مكتب الصرف).',

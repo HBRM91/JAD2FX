@@ -2,8 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChatMessage } from '../types';
 import { GEMINI_SYSTEM_INSTRUCTION } from '../constants';
 import { retrieveContext, getDocumentCount } from '../services/ragService';
-import { routeQuery, getAvailableProviders, PROVIDER_LABELS, PROVIDER_COLORS } from '../services/llmRouter';
-import { Send, Bot, ShieldAlert, Briefcase, BookOpen, Zap } from 'lucide-react';
+import { routeQuery, getAvailableProviders } from '../services/llmRouter';
+import { Send, Bot, Briefcase, BookOpen } from 'lucide-react';
 
 const ChatInterface: React.FC = () => {
   const [input, setInput] = useState('');
@@ -16,7 +16,6 @@ const ChatInterface: React.FC = () => {
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeProvider, setActiveProvider] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
@@ -38,7 +37,6 @@ const ChatInterface: React.FC = () => {
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
-    setActiveProvider(null);
 
     try {
       const context = retrieveContext(text, 3);
@@ -52,8 +50,6 @@ const ChatInterface: React.FC = () => {
         temperature: 0.3,
       });
 
-      setActiveProvider(result.provider);
-
       const isUpsell = result.text.toLowerCase().includes("consultation") ||
                        result.text.toLowerCase().includes("expert");
 
@@ -63,8 +59,6 @@ const ChatInterface: React.FC = () => {
         text: result.text,
         timestamp: new Date(),
         isUpsell,
-        provider: result.provider,
-        isFallback: result.isFallback,
       }]);
     } catch {
       setMessages(prev => [...prev, {
@@ -101,13 +95,6 @@ const ChatInterface: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {/* Provider status badge */}
-          {available.length > 0 && (
-            <div className="flex items-center gap-1 text-[9px] text-emerald-400 bg-emerald-900/20 border border-emerald-700/30 px-2 py-0.5 rounded-full">
-              <Zap size={8} />
-              {available[0] === 'groq' ? 'Groq Free' : available[0] === 'openrouter' ? 'OpenRouter' : 'Gemini'}
-            </div>
-          )}
           <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
             <BookOpen size={11} />
             <span>Office des Changes</span>
@@ -129,17 +116,6 @@ const ChatInterface: React.FC = () => {
                   <p key={i} className={`${i > 0 ? 'mt-1' : ''} last:mb-0`}>{line}</p>
                 ))}
               </div>
-
-              {/* Provider badge on model messages */}
-              {msg.role === 'model' && msg.provider && (
-                <div className={`mt-1 flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded border ${
-                  PROVIDER_COLORS[msg.provider as keyof typeof PROVIDER_COLORS] ?? 'bg-slate-800 text-slate-400 border-slate-700'
-                }`}>
-                  <Zap size={8} />
-                  {PROVIDER_LABELS[msg.provider as keyof typeof PROVIDER_LABELS] ?? msg.provider}
-                  {msg.isFallback && <span className="text-amber-400 ml-1">↩ fallback</span>}
-                </div>
-              )}
 
               {msg.isUpsell && (
                 <div className="mt-2 bg-gold-50 border border-gold-200 p-3 rounded-lg flex items-center gap-3 w-full">

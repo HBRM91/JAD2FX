@@ -209,7 +209,7 @@ function AppInner() {
                     <h2 className="text-3xl font-bold mb-2 tracking-widest uppercase">JAD2FX</h2>
                     <p className="text-gold-500 text-xs uppercase tracking-widest mb-4">Outil de Données de Change — by JAD2 Advisory</p>
                     <p className="text-slate-300 mb-6 max-w-lg text-sm">
-                      Données indicatives sur les 14 devises cotées par Bank Al-Maghrib, simulateur pédagogique de forwards/swaps et référentiel réglementaire Office des Changes.
+                      Données indicatives sur 20 devises (14 cotées BKAM + 6 régionales), simulateur pédagogique de forwards/swaps et référentiel réglementaire Office des Changes.
                     </p>
                     <div className="text-[10px] text-slate-400 border border-navy-600/40 rounded px-3 py-1.5 mb-4 inline-block">
                       Données indicatives à titre de référence — Pour conseil : <span className="text-gold-400">jad2advisory.com</span>
@@ -236,7 +236,7 @@ function AppInner() {
                   {[
                     { label: 'FX Forwards', desc: 'CIP calculator', view: 'FORWARDS' as ViewState, icon: TrendingUp },
                     { label: 'FX Swaps',    desc: 'Near/Far legs',  view: 'SWAPS'    as ViewState, icon: ArrowLeftRight },
-                    { label: 'FX Tableau',  desc: '14 BKAM pairs',  view: 'DASHBOARD' as ViewState, icon: LayoutDashboard },
+                    { label: 'FX Tableau',  desc: '20 devises',  view: 'DASHBOARD' as ViewState, icon: LayoutDashboard },
                   ].map(item => (
                     <button
                       key={item.view}
@@ -354,7 +354,7 @@ function AppInner() {
                 <h3 className="text-base font-bold text-navy-900 mt-5">Fonctionnalités</h3>
                 <ul className="space-y-1.5">
                   {[
-                    'Données indicatives sur les 14 devises officiellement cotées par BKAM contre le MAD',
+                    'Données indicatives sur 20 devises (14 cotées BKAM + 6 régionales calculées par taux croisés)',
                     'Simulateur pédagogique de forwards (formule CIP) et de swaps de change',
                     'Référentiel de la réglementation de l\'Office des Changes (circulaires, instructions)',
                     'Courbes de taux interpolées à titre informatif et pédagogique uniquement',

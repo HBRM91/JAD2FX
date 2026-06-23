@@ -9,37 +9,55 @@ export const THEME_COLORS = {
   BG_LIGHT: '#F8FAFC'
 };
 
-export const DISCLAIMER_TEXT = `JAD2FX est une plateforme d'information fournissant des taux de change indicatifs et des simulations pédagogiques sur les 14 devises cotées par Bank Al-Maghrib. Les taux sont calculés à partir des références ECB/Frankfurter et sont fournis à titre informatif uniquement — ils ne constituent pas des cours officiels BKAM ni des prix de transaction fermes. JAD2 Advisory est un cabinet de conseil stratégique et de formation en gestion du risque de change, enregistré au Registre de Commerce de Casablanca. JAD2 Advisory n'est pas un intermédiaire financier agréé par Bank Al-Maghrib et n'exécute aucune transaction de change. Pour l'exécution de transactions de change, veuillez vous adresser à un établissement de crédit agréé.`;
+export const DISCLAIMER_TEXT = `JAD2FX est une plateforme d'information fournissant des taux de change indicatifs et des simulations pédagogiques sur 20 devises (14 cotées par Bank Al-Maghrib + 6 devises régionales calculées par taux croisés). Les taux sont calculés à partir des cours officiels BKAM et des références ECB/Frankfurter et sont fournis à titre informatif uniquement — ils ne constituent pas des cours officiels BKAM ni des prix de transaction fermes. JAD2 Advisory est un cabinet de conseil stratégique et de formation en gestion du risque de change, enregistré au Registre de Commerce de Casablanca. JAD2 Advisory n'est pas un intermédiaire financier agréé par Bank Al-Maghrib et n'exécute aucune transaction de change. Pour l'exécution de transactions de change, veuillez vous adresser à un établissement de crédit agréé.`;
 
 export const DISCLAIMER_SHORT = "Données indicatives à titre pédagogique · JAD2 Advisory : conseil stratégique & formation — non intermédiaire financier";
 
-// ─── BKAM Official Currency List ─────────────────────────────────────────────
-// All currencies officially quoted by Bank Al-Maghrib against the Moroccan Dirham
-// Order matches official BKAM cotation page: https://www.bkam.ma/en/Markets/Key-indicators/Foreign-exchange-market
+// ─── BKAM Currency List ───────────────────────────────────────────────────────
+// G10 (BKAM-quoted) → CNY → Gulf/Arabic → North African (cross-rates)
+// Note: OMR, BHD, JOD, TND, DZD, LYD are computed via USD cross; not direct BKAM quotes.
 export const BKAM_CURRENCIES: CurrencyInfo[] = [
-  { code: 'USD', name: 'US Dollar',        nameFr: 'Dollar américain',     flag: '🇺🇸', bkamUnit: 1   },
-  { code: 'EUR', name: 'Euro',             nameFr: 'Euro',                 flag: '🇪🇺', bkamUnit: 1   },
-  { code: 'AED', name: 'UAE Dirham',       nameFr: 'Dirham des Émirats',   flag: '🇦🇪', bkamUnit: 1   },
-  { code: 'QAR', name: 'Qatari Riyal',    nameFr: 'Riyal qatarien',       flag: '🇶🇦', bkamUnit: 1   },
-  { code: 'SAR', name: 'Saudi Riyal',      nameFr: 'Riyal saoudien',       flag: '🇸🇦', bkamUnit: 1   },
-  { code: 'KWD', name: 'Kuwaiti Dinar',   nameFr: 'Dinar koweïtien',      flag: '🇰🇼', bkamUnit: 1   },
-  { code: 'GBP', name: 'British Pound',    nameFr: 'Livre sterling',       flag: '🇬🇧', bkamUnit: 1   },
-  { code: 'CHF', name: 'Swiss Franc',      nameFr: 'Franc suisse',         flag: '🇨🇭', bkamUnit: 1   },
-  { code: 'JPY', name: 'Japanese Yen',     nameFr: 'Yen japonais',         flag: '🇯🇵', bkamUnit: 100 },
-  { code: 'DKK', name: 'Danish Krone',    nameFr: 'Couronne danoise',      flag: '🇩🇰', bkamUnit: 1   },
-  { code: 'NOK', name: 'Norwegian Krone', nameFr: 'Couronne norvégienne',  flag: '🇳🇴', bkamUnit: 1   },
-  { code: 'SEK', name: 'Swedish Krona',   nameFr: 'Couronne suédoise',     flag: '🇸🇪', bkamUnit: 1   },
-  { code: 'CAD', name: 'Canadian Dollar',  nameFr: 'Dollar canadien',      flag: '🇨🇦', bkamUnit: 1   },
-  { code: 'CNY', name: 'Chinese Yuan',    nameFr: 'Yuan renminbi',         flag: '🇨🇳', bkamUnit: 1   },
+  // ── G10 (as quoted by BKAM) ─────────────────────────────────────────────
+  { code: 'USD', name: 'US Dollar',         nameFr: 'Dollar américain',      flag: '🇺🇸', bkamUnit: 1   },
+  { code: 'EUR', name: 'Euro',              nameFr: 'Euro',                  flag: '🇪🇺', bkamUnit: 1   },
+  { code: 'GBP', name: 'British Pound',     nameFr: 'Livre sterling',        flag: '🇬🇧', bkamUnit: 1   },
+  { code: 'CHF', name: 'Swiss Franc',       nameFr: 'Franc suisse',          flag: '🇨🇭', bkamUnit: 1   },
+  { code: 'JPY', name: 'Japanese Yen',      nameFr: 'Yen japonais',          flag: '🇯🇵', bkamUnit: 100 },
+  { code: 'CAD', name: 'Canadian Dollar',   nameFr: 'Dollar canadien',       flag: '🇨🇦', bkamUnit: 1   },
+  { code: 'NOK', name: 'Norwegian Krone',   nameFr: 'Couronne norvégienne',  flag: '🇳🇴', bkamUnit: 1   },
+  { code: 'SEK', name: 'Swedish Krona',     nameFr: 'Couronne suédoise',     flag: '🇸🇪', bkamUnit: 1   },
+  { code: 'DKK', name: 'Danish Krone',      nameFr: 'Couronne danoise',      flag: '🇩🇰', bkamUnit: 1   },
+  // ── CNY ─────────────────────────────────────────────────────────────────
+  { code: 'CNY', name: 'Chinese Yuan',      nameFr: 'Yuan renminbi',         flag: '🇨🇳', bkamUnit: 1   },
+  // ── Gulf / Arabic ────────────────────────────────────────────────────────
+  { code: 'AED', name: 'UAE Dirham',        nameFr: 'Dirham des Émirats',    flag: '🇦🇪', bkamUnit: 1   },
+  { code: 'SAR', name: 'Saudi Riyal',       nameFr: 'Riyal saoudien',        flag: '🇸🇦', bkamUnit: 1   },
+  { code: 'QAR', name: 'Qatari Riyal',      nameFr: 'Riyal qatarien',        flag: '🇶🇦', bkamUnit: 1   },
+  { code: 'KWD', name: 'Kuwaiti Dinar',     nameFr: 'Dinar koweïtien',       flag: '🇰🇼', bkamUnit: 1   },
+  { code: 'OMR', name: 'Omani Rial',        nameFr: 'Rial omanais',          flag: '🇴🇲', bkamUnit: 1   },
+  { code: 'BHD', name: 'Bahraini Dinar',    nameFr: 'Dinar bahreïni',        flag: '🇧🇭', bkamUnit: 1   },
+  { code: 'JOD', name: 'Jordanian Dinar',   nameFr: 'Dinar jordanien',       flag: '🇯🇴', bkamUnit: 1   },
+  // ── North African (indicative cross-rates) ───────────────────────────────
+  { code: 'TND', name: 'Tunisian Dinar',    nameFr: 'Dinar tunisien',        flag: '🇹🇳', bkamUnit: 1   },
+  { code: 'DZD', name: 'Algerian Dinar',    nameFr: 'Dinar algérien',        flag: '🇩🇿', bkamUnit: 100 },
+  { code: 'LYD', name: 'Libyan Dinar',      nameFr: 'Dinar libyen',          flag: '🇱🇾', bkamUnit: 1   },
 ];
 
-// Fixed USD values for Gulf currencies (pegged/quasi-pegged to USD)
-// These are not available from ECB/Frankfurter
+// USD equivalence for currencies not available from ECB/Frankfurter.
+// Gulf pegs are official; North African rates are approximate floating cross-rates.
 export const GULF_USD_RATES: Record<string, number> = {
-  SAR: 0.266667,  // 1 SAR = 0.2667 USD (1 USD = 3.75 SAR, official peg)
-  AED: 0.272294,  // 1 AED = 0.2723 USD (1 USD = 3.6725 AED, official peg)
-  QAR: 0.274725,  // 1 QAR = 0.2747 USD (1 USD = 3.64 QAR, official peg)
-  KWD: 3.25000,   // 1 KWD ≈ 3.25 USD (managed float)
+  // Gulf — official pegs
+  SAR: 0.266667,  // 1 USD = 3.75 SAR  (official peg)
+  AED: 0.272294,  // 1 USD = 3.6725 AED (official peg)
+  QAR: 0.274725,  // 1 USD = 3.64 QAR  (official peg)
+  KWD: 3.25000,   // 1 KWD ≈ 3.25 USD  (managed float)
+  OMR: 2.60869,   // 1 USD = 0.3835 OMR (official peg)
+  BHD: 2.65957,   // 1 USD = 0.376 BHD  (official peg)
+  JOD: 1.41044,   // 1 USD = 0.709 JOD  (official peg)
+  // North African — approximate floating rates (updated periodically)
+  TND: 0.32258,   // ~1 USD = 3.10 TND  (indicative)
+  DZD: 0.00743,   // ~1 USD = 134.6 DZD (indicative; bkamUnit=100 → rate per 100 DZD)
+  LYD: 0.20833,   // ~1 USD = 4.80 LYD  (indicative)
 };
 
 // ─── BKAM Basket Configuration ───────────────────────────────────────────────

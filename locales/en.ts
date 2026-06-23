@@ -44,7 +44,7 @@ const en: Record<string, string> = {
 
   // Billets page
   'billets.title': 'Bureau de Change — Banknote Exchange Rates',
-  'billets.subtitle': 'Cash banknote rates for 14 BKAM currencies · Indicative Buy / Sell',
+  'billets.subtitle': 'Cash banknote rates for 20 currencies · Indicative Buy / Sell',
   'billets.officialLink': 'Official BKAM banknote rates ↗',
   'billets.vsBillet': 'vs Transfer',
   'billets.cashNote': 'Banknote rates are less favorable than wire transfer rates (cash handling costs + OC commission).',
