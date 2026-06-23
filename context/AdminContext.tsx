@@ -1,7 +1,7 @@
 import React, {
   createContext, useContext, useState, useCallback, useEffect, useRef,
 } from 'react';
-import { AdminConfig, BlotterEntry, LivePriceEntry, ClientTier, TierConfig } from '../types';
+import { AdminConfig, BlotterEntry, LivePriceEntry, ClientTier, TierConfig, AuditEntry } from '../types';
 
 export const DEFAULT_TIER_COMMISSIONS: Record<ClientTier, TierConfig> = {
   CORPORATE: {
@@ -58,6 +58,7 @@ export const DEFAULT_ADMIN_CONFIG: AdminConfig = {
     { pair: 'USD/MAD', min:  9.60, max: 10.20, enabled: false },
   ],
   tierCommissions: DEFAULT_TIER_COMMISSIONS,
+  corsProxyUrl: '',
 };
 
 const ADMIN_PASSCODE = 'JAD2ADMIN';
@@ -78,6 +79,10 @@ interface AdminContextType {
   blotter:         BlotterEntry[];
   addBlotterEntry: (e: Omit<BlotterEntry, 'id' | 'time'>) => void;
   clearBlotter:    () => void;
+
+  auditLog:       AuditEntry[];
+  addAuditEntry:  (action: string, detail: string) => void;
+  clearAuditLog:  () => void;
 
   livePrices:     LivePriceEntry[];
   setLivePrices:  (p: LivePriceEntry[]) => void;
@@ -104,6 +109,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [blotter, setBlotter] = useState<BlotterEntry[]>([]);
   const blotterIdRef = useRef(0);
 
+  // Audit log — circular buffer of 200 entries
+  const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
+  const auditIdRef = useRef(0);
+
   // Live prices fed by the streaming hook
   const [livePrices, setLivePricesState]   = useState<LivePriceEntry[]>([]);
   const [lastPriceUpdate, setLastPriceUpdate] = useState<string | null>(null);
@@ -115,6 +124,14 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const updateConfig = useCallback((patch: Partial<AdminConfig>) => {
     setConfigState(prev => ({ ...prev, ...patch }));
+    const keys = Object.keys(patch).join(', ');
+    setAuditLog(prev => [{
+      id: String(++auditIdRef.current),
+      time: new Date().toISOString(),
+      action: 'CONFIG_UPDATE',
+      detail: `Fields updated: ${keys}`,
+      user: 'ADMIN',
+    }, ...prev].slice(0, 200));
   }, []);
 
   const resetConfig = useCallback(() => {
@@ -147,6 +164,18 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const clearBlotter = useCallback(() => setBlotter([]), []);
 
+  const addAuditEntry = useCallback((action: string, detail: string) => {
+    setAuditLog(prev => [{
+      id: String(++auditIdRef.current),
+      time: new Date().toISOString(),
+      action,
+      detail,
+      user: 'ADMIN',
+    }, ...prev].slice(0, 200));
+  }, []);
+
+  const clearAuditLog = useCallback(() => setAuditLog([]), []);
+
   const setLivePrices = useCallback((prices: LivePriceEntry[]) => {
     setLivePricesState(prices);
     setLastPriceUpdate(new Date().toISOString());
@@ -157,6 +186,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       config, updateConfig, resetConfig,
       isAdmin, login, logout,
       blotter, addBlotterEntry, clearBlotter,
+      auditLog, addAuditEntry, clearAuditLog,
       livePrices, setLivePrices, lastPriceUpdate,
     }}>
       {children}

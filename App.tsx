@@ -11,11 +11,14 @@ import SwapSimulator      from './components/SwapSimulator';
 import LivePricer         from './components/LivePricer';
 import AdminDashboard     from './components/AdminDashboard';
 import BkamFixing         from './components/BkamFixing';
+import BilletsPage        from './components/BilletsPage';
+import CommoditiesPage    from './components/CommoditiesPage';
 import { AdminProvider }  from './context/AdminContext';
+import { I18nProvider, useI18n, Locale } from './context/I18nContext';
 import {
   Building2, FileText, LayoutDashboard, Menu, Shield,
   Globe, ChevronRight, TrendingUp, ArrowLeftRight, Activity,
-  Lock, X, BarChart2,
+  Lock, X, BarChart2, Banknote, PackageOpen,
 } from 'lucide-react';
 
 // ─── Determines whether a view uses dark terminal bg ─────────────────────────
@@ -28,6 +31,7 @@ function AppInner() {
   const [view, setView]             = useState<ViewState>('HOME');
   const [tickerRates, setTickerRates] = useState<LiveRate[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { t, locale, setLocale, isRTL } = useI18n();
 
   const isDark = TERMINAL_VIEWS.includes(view);
 
@@ -42,19 +46,30 @@ function AppInner() {
   // ── Nav items ─────────────────────────────────────────────────────────────
 
   const NAV_ITEMS: { label: string; view: ViewState; icon: React.ElementType }[] = [
-    { label: 'Actualités',   view: 'HOME',      icon: Globe },
-    { label: 'Taux FX',     view: 'DASHBOARD', icon: LayoutDashboard },
-    { label: 'Analyses',    view: 'ANALYSIS',  icon: FileText },
-    { label: 'Fixing BKAM', view: 'FIXING',   icon: BarChart2 },
-    { label: 'Forwards',    view: 'FORWARDS',  icon: TrendingUp },
-    { label: 'FX Swaps',    view: 'SWAPS',     icon: ArrowLeftRight },
-    { label: 'Live Pricer', view: 'LIVE',      icon: Activity },
-    { label: 'Admin',       view: 'ADMIN',     icon: Lock },
-    { label: 'À Propos',    view: 'ABOUT',     icon: Building2 },
+    { label: t('nav.home'),        view: 'HOME',        icon: Globe },
+    { label: t('nav.dashboard'),   view: 'DASHBOARD',   icon: LayoutDashboard },
+    { label: t('nav.analysis'),    view: 'ANALYSIS',    icon: FileText },
+    { label: t('nav.fixing'),      view: 'FIXING',      icon: BarChart2 },
+    { label: t('nav.billets'),     view: 'BILLETS',     icon: Banknote },
+    { label: t('nav.commodities'), view: 'COMMODITIES', icon: PackageOpen },
+    { label: t('nav.forwards'),    view: 'FORWARDS',    icon: TrendingUp },
+    { label: t('nav.swaps'),       view: 'SWAPS',       icon: ArrowLeftRight },
+    { label: t('nav.live'),        view: 'LIVE',        icon: Activity },
+    { label: t('nav.admin'),       view: 'ADMIN',       icon: Lock },
+    { label: t('nav.about'),       view: 'ABOUT',       icon: Building2 },
+  ];
+
+  const LOCALE_OPTIONS: { code: Locale; label: string }[] = [
+    { code: 'fr', label: 'FR' },
+    { code: 'en', label: 'EN' },
+    { code: 'ar', label: 'عر' },
   ];
 
   return (
-    <div className={`min-h-screen flex flex-col font-sans ${isDark ? 'bg-[#070F1A] text-slate-200' : 'bg-slate-50 text-slate-800'}`}>
+    <div
+      className={`min-h-screen flex flex-col font-sans ${isDark ? 'bg-[#070F1A] text-slate-200' : 'bg-slate-50 text-slate-800'}`}
+      dir={isRTL ? 'rtl' : 'ltr'}
+    >
 
       {/* ── Navbar ── */}
       <nav className="bg-navy-900 sticky top-0 z-50 border-b border-navy-800 shadow-xl">
@@ -91,21 +106,38 @@ function AppInner() {
             </div>
 
             {/* Right side */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
+              {/* Language switcher */}
+              <div className="hidden sm:flex items-center rounded border border-navy-700 overflow-hidden">
+                {LOCALE_OPTIONS.map(opt => (
+                  <button
+                    key={opt.code}
+                    onClick={() => setLocale(opt.code)}
+                    className={`px-2.5 py-1 text-[10px] font-bold tracking-wider transition ${
+                      locale === opt.code
+                        ? 'bg-gold-500 text-navy-900'
+                        : 'text-slate-400 hover:text-white hover:bg-navy-800'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+
               <a
                 href="https://jad2advisory.com"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gold-500 text-navy-900 rounded hover:bg-gold-400 transition"
               >
-                Conseil FX →
+                {t('nav.advisory')}
               </a>
               <button
                 onClick={() => navTo('ADMIN')}
                 className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-400 border border-navy-700 rounded hover:text-white hover:border-navy-500 transition"
               >
                 <Lock size={11} />
-                Admin
+                {t('nav.admin')}
               </button>
               <button
                 className="lg:hidden text-slate-300 hover:text-white p-1"
@@ -261,9 +293,11 @@ function AppInner() {
           </div>
         )}
 
-        {view === 'DASHBOARD' && <FxDashboard />}
-        {view === 'ANALYSIS'  && <MarketAnalysis />}
-        {view === 'FIXING'    && <BkamFixing />}
+        {view === 'DASHBOARD'   && <FxDashboard />}
+        {view === 'ANALYSIS'    && <MarketAnalysis />}
+        {view === 'FIXING'      && <BkamFixing />}
+        {view === 'BILLETS'     && <BilletsPage />}
+        {view === 'COMMODITIES' && <CommoditiesPage />}
 
         {/* Terminal views — dark panel wrapper */}
         {TERMINAL_VIEWS.includes(view) && (
@@ -341,8 +375,8 @@ function AppInner() {
         <div className="bg-gold-500/10 border-b border-gold-600/20 py-4">
           <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-bold text-white">Besoin d'un conseil FX professionnel?</p>
-              <p className="text-xs text-slate-400">Couverture de change · Structuration · Conformité Office des Changes</p>
+              <p className="text-sm font-bold text-white">{t('footer.advisory')}</p>
+              <p className="text-xs text-slate-400">{t('footer.advisoryDesc')}</p>
             </div>
             <a
               href="https://jad2advisory.com"
@@ -350,7 +384,7 @@ function AppInner() {
               rel="noopener noreferrer"
               className="flex-shrink-0 px-5 py-2 bg-gold-500 text-navy-900 text-sm font-bold rounded hover:bg-gold-400 transition"
             >
-              JAD2 Advisory →
+              {t('footer.cta')}
             </a>
           </div>
         </div>
@@ -360,21 +394,21 @@ function AppInner() {
           <div className="max-w-7xl mx-auto px-4 text-center">
             <div className="flex justify-center items-center gap-2 mb-3">
               <Shield size={14} className="text-slate-500" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Mentions Légales & Conformité</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t('footer.legal')}</span>
             </div>
             <p className="text-[10px] leading-relaxed max-w-3xl mx-auto text-slate-500">{DISCLAIMER_TEXT}</p>
             <div className="flex flex-wrap justify-center gap-4 mt-4 text-[10px] text-slate-600">
-              <span>Non réglementé AMMC</span>
+              <span>{t('disclaimer.notRegulated')}</span>
               <span>·</span>
-              <span>Non agréé BAM</span>
+              <span>{t('disclaimer.noInvestmentAdvice')}</span>
               <span>·</span>
-              <span>Cours à titre indicatif</span>
+              <span>{t('common.indicative')}</span>
               <span>·</span>
-              <span>Données: ECB/Frankfurter API</span>
+              <span>ECB/Frankfurter · Yahoo Finance</span>
               <span>·</span>
               <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400">jad2advisory.com</a>
             </div>
-            <p className="text-[10px] mt-4 text-slate-600">© 2025 JAD2FX · JAD2 Advisory · Casablanca, Maroc</p>
+            <p className="text-[10px] mt-4 text-slate-600">{t('footer.copyright')}</p>
           </div>
         </div>
       </footer>
@@ -382,12 +416,14 @@ function AppInner() {
   );
 }
 
-// ─── Root export (wraps with AdminProvider) ───────────────────────────────────
+// ─── Root export ─────────────────────────────────────────────────────────────
 
 export default function App() {
   return (
-    <AdminProvider>
-      <AppInner />
-    </AdminProvider>
+    <I18nProvider>
+      <AdminProvider>
+        <AppInner />
+      </AdminProvider>
+    </I18nProvider>
   );
 }

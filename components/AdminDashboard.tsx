@@ -1,14 +1,16 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import {
   Shield, LogOut, Settings, Activity, BarChart2, TrendingUp,
   AlertTriangle, FileText, RefreshCw, Lock, Eye, EyeOff,
   ChevronDown, RotateCcw, Plus, Trash2, CheckCircle, XCircle,
+  ClipboardList, Bot, Send, Search,
 } from 'lucide-react';
-import { BKAM_CURRENCIES } from '../constants';
+import { BKAM_CURRENCIES, GEMINI_SYSTEM_INSTRUCTION } from '../constants';
 import { useAdmin, DEFAULT_TIER_COMMISSIONS } from '../context/AdminContext';
 import { getDefaultCurve, CURVE_META } from '../services/interestRates';
 import { STANDARD_TENORS } from '../services/forwardEngine';
-import { BlotterEntry, ClientTier, TierConfig } from '../types';
+import { BlotterEntry, ClientTier, TierConfig, AuditEntry } from '../types';
+import { GoogleGenAI } from '@google/genai';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -165,6 +167,24 @@ function SystemTab() {
           <span>2m (default)</span>
           <span>5m (max)</span>
         </div>
+      </div>
+
+      {/* CORS Proxy URL */}
+      <div className="bg-navy-800 border border-navy-600 rounded p-4 space-y-2">
+        <div>
+          <p className="text-sm font-bold text-white">Yahoo Finance CORS Proxy</p>
+          <p className="text-xs text-slate-500">Optional Cloudflare Worker URL to proxy Yahoo Finance requests (e.g. https://your-worker.workers.dev)</p>
+        </div>
+        <input
+          type="url"
+          value={config.corsProxyUrl ?? ''}
+          onChange={e => updateConfig({ corsProxyUrl: e.target.value })}
+          placeholder="https://your-cf-worker.workers.dev"
+          className="w-full bg-navy-900 border border-navy-600 rounded px-3 py-2 text-white text-sm font-mono focus:outline-none focus:border-gold-500 placeholder:text-slate-600"
+        />
+        {config.corsProxyUrl && (
+          <p className="text-[10px] text-emerald-400">✓ Proxy configured — commodities will use this URL</p>
+        )}
       </div>
     </div>
   );
@@ -878,23 +898,214 @@ function PricingTab() {
   );
 }
 
+// ─── AUDIT Tab ────────────────────────────────────────────────────────────────
+
+const AUDIT_ACTION_COLOR: Record<string, string> = {
+  CONFIG_UPDATE: 'text-blue-400 bg-blue-900/30',
+  LOGIN:         'text-emerald-400 bg-emerald-900/30',
+  LOGOUT:        'text-slate-400 bg-slate-700/30',
+  OVERRIDE:      'text-red-400 bg-red-900/30',
+  RESET:         'text-orange-400 bg-orange-900/30',
+};
+
+function AuditTab() {
+  const { auditLog, clearAuditLog, addAuditEntry } = useAdmin();
+  const [search, setSearch] = useState('');
+
+  const filtered = search
+    ? auditLog.filter(e => e.action.toLowerCase().includes(search.toLowerCase()) || e.detail.toLowerCase().includes(search.toLowerCase()))
+    : auditLog;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="relative flex-1 min-w-[180px]">
+          <Search size={11} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Filter actions..."
+            className="w-full bg-navy-800 border border-navy-600 rounded px-3 py-2 pl-8 text-white text-xs focus:outline-none focus:border-gold-500"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] text-slate-500">{filtered.length} entries</span>
+          <button
+            onClick={clearAuditLog}
+            className="px-3 py-1.5 text-xs text-slate-400 border border-navy-600 rounded hover:border-red-600 hover:text-red-400 transition flex items-center gap-1.5"
+          >
+            <Trash2 size={11} /> Clear
+          </button>
+        </div>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="text-center py-12 text-slate-600 text-sm">No audit entries</div>
+      ) : (
+        <div className="overflow-x-auto rounded border border-navy-700">
+          <table className="w-full text-xs font-mono min-w-[560px]">
+            <thead>
+              <tr className="bg-navy-800 text-slate-500 uppercase text-[10px] border-b border-navy-700">
+                {['Time', 'Action', 'Detail', 'User'].map(h => (
+                  <th key={h} className="text-left py-2.5 px-3 font-medium">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map(entry => (
+                <tr key={entry.id} className="border-b border-navy-800 hover:bg-navy-800/40">
+                  <td className="py-2 px-3 text-slate-500 whitespace-nowrap">
+                    {new Date(entry.time).toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    <br />
+                    <span className="text-[9px]">{new Date(entry.time).toLocaleDateString('fr-MA')}</span>
+                  </td>
+                  <td className="py-2 px-3">
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${AUDIT_ACTION_COLOR[entry.action] ?? 'text-slate-400 bg-slate-700/30'}`}>
+                      {entry.action}
+                    </span>
+                  </td>
+                  <td className="py-2 px-3 text-slate-300 max-w-[300px] truncate">{entry.detail}</td>
+                  <td className="py-2 px-3 text-gold-500 font-bold">{entry.user}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── CONSULTANT AI Tab ────────────────────────────────────────────────────────
+
+const CONSULTANT_SYSTEM = `You are an expert internal FX consultant assistant for JAD2 Advisory, Casablanca, Morocco.
+You have deep expertise in:
+- Moroccan FX market (MAD/BKAM basket, Office des Changes regulations)
+- FX hedging strategies: forwards, swaps, options, cross-currency
+- Corporate treasury management for Moroccan exporters/importers
+- BAM/OC compliance: Circ. 01/2024, rapatriement, comptes devises (CPEC/CDE)
+- Emerging market FX dynamics (MAD peg structure, Gulf currency analysis)
+
+This is an INTERNAL tool for JAD2 Advisory consultants ONLY — not a public interface.
+You MAY provide advisory-grade analysis, scenario modeling, and strategic recommendations.
+Always cite relevant OC regulation when applicable.
+Respond in the language of the question (French, English, or Arabic).`;
+
+interface ConsultantMsg { id: string; role: 'user' | 'model'; text: string; ts: Date; }
+
+function ConsultantTab() {
+  const [messages, setMessages] = useState<ConsultantMsg[]>([{
+    id: '0', role: 'model', ts: new Date(),
+    text: 'JAD2 Advisory Internal Assistant — accès consultant uniquement.\n\nJe peux vous aider avec : stratégies de couverture, structuration de forwards/swaps, analyse réglementaire OC, scénarios de risque de change, préparation de dossiers clients.\n\n⚡ Cet outil est réservé aux consultants JAD2 Advisory.',
+  }]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+
+  const send = async () => {
+    const text = input.trim();
+    if (!text || !process.env.API_KEY) return;
+    setInput('');
+    setMessages(prev => [...prev, { id: Date.now().toString(), role: 'user', text, ts: new Date() }]);
+    setLoading(true);
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const res = await ai.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: [{ role: 'user', parts: [{ text }] }],
+        config: { systemInstruction: CONSULTANT_SYSTEM, thinkingConfig: { thinkingBudget: 0 } },
+      });
+      setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: 'model', text: res.text ?? '—', ts: new Date() }]);
+    } catch {
+      setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: 'model', text: 'Erreur — vérifiez la clé API Gemini.', ts: new Date() }]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-[540px]">
+      <div className="flex items-center gap-2 mb-3 pb-3 border-b border-navy-700">
+        <div className="p-1.5 bg-gold-500/10 rounded">
+          <Bot size={16} className="text-gold-400" />
+        </div>
+        <div>
+          <p className="text-sm font-bold text-white tracking-wider">JAD2 Advisory — Assistant Interne</p>
+          <p className="text-[10px] text-slate-500">Outil consultant · Accès admin requis · Gemini 2.0 Flash</p>
+        </div>
+        <div className="ml-auto text-[10px] font-bold bg-red-900/30 text-red-400 border border-red-800/40 px-2 py-0.5 rounded">
+          INTERNAL ONLY
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto space-y-3 pr-1 mb-3">
+        {messages.map(msg => (
+          <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[88%] px-3 py-2.5 rounded-lg text-xs leading-relaxed ${
+              msg.role === 'user'
+                ? 'bg-navy-700 text-white'
+                : 'bg-navy-800 border border-navy-600 text-slate-200'
+            }`}>
+              {msg.text.split('\n').map((line, i) => <p key={i} className={i > 0 ? 'mt-1' : ''}>{line}</p>)}
+            </div>
+          </div>
+        ))}
+        {loading && (
+          <div className="flex items-center gap-2 text-[10px] text-slate-500 ml-2">
+            <div className="flex gap-1">
+              {[0, 150, 300].map(d => (
+                <div key={d} className="w-1.5 h-1.5 bg-gold-500 rounded-full animate-bounce" style={{ animationDelay: `${d}ms` }} />
+              ))}
+            </div>
+            Analyzing...
+          </div>
+        )}
+        <div ref={endRef} />
+      </div>
+
+      <div className="flex gap-0 border border-navy-600 rounded overflow-hidden focus-within:border-gold-500 transition">
+        <input
+          type="text"
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && send()}
+          placeholder="Analyse stratégie, réglementation OC, structuration..."
+          className="flex-1 bg-navy-800 px-4 py-2.5 text-white text-xs focus:outline-none placeholder:text-slate-600"
+        />
+        <button
+          onClick={send}
+          disabled={loading || !input.trim()}
+          className="bg-gold-500 hover:bg-gold-400 text-navy-900 px-4 transition disabled:opacity-50"
+        >
+          <Send size={13} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-type AdminTab = 'SYSTEM' | 'RATES' | 'CURVES' | 'FORWARDS' | 'SPREADS' | 'PRICING' | 'ALERTS' | 'BLOTTER';
+type AdminTab = 'SYSTEM' | 'RATES' | 'CURVES' | 'FORWARDS' | 'SPREADS' | 'PRICING' | 'ALERTS' | 'BLOTTER' | 'AUDIT' | 'CONSULTANT';
 
 const TABS: { id: AdminTab; label: string; icon: React.ElementType }[] = [
-  { id: 'SYSTEM',   label: 'System',   icon: Activity },
-  { id: 'RATES',    label: 'Rates',    icon: BarChart2 },
-  { id: 'CURVES',   label: 'Curves',   icon: TrendingUp },
-  { id: 'FORWARDS', label: 'Forwards', icon: Settings },
-  { id: 'SPREADS',  label: 'Spreads',  icon: BarChart2 },
-  { id: 'PRICING',  label: 'Pricing',  icon: TrendingUp },
-  { id: 'ALERTS',   label: 'Alerts',   icon: AlertTriangle },
-  { id: 'BLOTTER',  label: 'Blotter',  icon: FileText },
+  { id: 'SYSTEM',     label: 'System',     icon: Activity },
+  { id: 'RATES',      label: 'Rates',      icon: BarChart2 },
+  { id: 'CURVES',     label: 'Curves',     icon: TrendingUp },
+  { id: 'FORWARDS',   label: 'Forwards',   icon: Settings },
+  { id: 'SPREADS',    label: 'Spreads',    icon: BarChart2 },
+  { id: 'PRICING',    label: 'Pricing',    icon: TrendingUp },
+  { id: 'ALERTS',     label: 'Alerts',     icon: AlertTriangle },
+  { id: 'BLOTTER',    label: 'Blotter',    icon: FileText },
+  { id: 'AUDIT',      label: 'Audit',      icon: ClipboardList },
+  { id: 'CONSULTANT', label: 'Consultant', icon: Bot },
 ];
 
 export default function AdminDashboard() {
-  const { isAdmin, login, logout, blotter, resetConfig } = useAdmin();
+  const { isAdmin, login, logout, blotter, auditLog, resetConfig } = useAdmin();
   const [activeTab, setActiveTab] = useState<AdminTab>('SYSTEM');
 
   if (!isAdmin) return <LoginGate onLogin={login} />;
@@ -959,14 +1170,16 @@ export default function AdminDashboard() {
 
         {/* Tab content */}
         <div className="p-5">
-          {activeTab === 'SYSTEM'   && <SystemTab />}
-          {activeTab === 'RATES'    && <RatesTab />}
-          {activeTab === 'CURVES'   && <CurvesTab />}
-          {activeTab === 'FORWARDS' && <ForwardsTab />}
-          {activeTab === 'SPREADS'  && <SpreadsTab />}
-          {activeTab === 'PRICING'  && <PricingTab />}
-          {activeTab === 'ALERTS'   && <AlertsTab />}
-          {activeTab === 'BLOTTER'  && <BlotterTab />}
+          {activeTab === 'SYSTEM'     && <SystemTab />}
+          {activeTab === 'RATES'      && <RatesTab />}
+          {activeTab === 'CURVES'     && <CurvesTab />}
+          {activeTab === 'FORWARDS'   && <ForwardsTab />}
+          {activeTab === 'SPREADS'    && <SpreadsTab />}
+          {activeTab === 'PRICING'    && <PricingTab />}
+          {activeTab === 'ALERTS'     && <AlertsTab />}
+          {activeTab === 'BLOTTER'    && <BlotterTab />}
+          {activeTab === 'AUDIT'      && <AuditTab />}
+          {activeTab === 'CONSULTANT' && <ConsultantTab />}
         </div>
       </div>
     </div>

@@ -1,0 +1,94 @@
+const fr: Record<string, string> = {
+  // Navigation
+  'nav.home': 'Actualités',
+  'nav.dashboard': 'Taux FX',
+  'nav.analysis': 'Analyses',
+  'nav.fixing': 'Fixing BKAM',
+  'nav.billets': 'Billets',
+  'nav.commodities': 'Matières Premières',
+  'nav.forwards': 'Forwards',
+  'nav.swaps': 'FX Swaps',
+  'nav.live': 'Live Pricer',
+  'nav.admin': 'Admin',
+  'nav.about': 'À Propos',
+  'nav.advisory': 'Conseil FX →',
+
+  // Common
+  'common.buy': 'Achat',
+  'common.sell': 'Vente',
+  'common.rate': 'Taux',
+  'common.loading': 'Chargement…',
+  'common.refresh': 'Actualiser',
+  'common.source': 'Source',
+  'common.currency': 'Devise',
+  'common.date': 'Date',
+  'common.change': 'Variation',
+  'common.spread': 'Écart',
+  'common.commission': 'Commission',
+  'common.mid': 'Milieu',
+  'common.high': 'Haut',
+  'common.low': 'Bas',
+  'common.close': 'Fermer',
+  'common.last': 'Dernier',
+  'common.updated': 'Mis à jour',
+  'common.official': 'Officiel',
+  'common.estimated': 'Estimé',
+  'common.pair': 'Paire',
+  'common.tenor': 'Échéance',
+  'common.notional': 'Notionnel',
+  'common.indicative': 'Indicatif',
+  'common.fallback': 'Données par défaut',
+  'common.live': 'En direct',
+  'common.offline': 'Hors ligne',
+
+  // Billets page
+  'billets.title': 'Bureau de Change — Cours Billets de Banque',
+  'billets.subtitle': 'Taux de change billets pour les 14 devises BKAM · Achat / Vente indicatifs',
+  'billets.officialLink': 'Cours officiels billets BKAM ↗',
+  'billets.vsBillet': 'vs Virement',
+  'billets.cashNote': 'Les cours billets sont moins favorables que les cours virements (coûts logistiques espèces + OC commission).',
+  'billets.ocCommission': 'Commission OC Billets',
+
+  // Commodities page
+  'commodities.title': 'Matières Premières — Impact MAD',
+  'commodities.subtitle': 'Cours indicatifs · Marchés internationaux · Impact pour les entreprises marocaines',
+  'commodities.all': 'Toutes',
+  'commodities.energy': 'Énergie',
+  'commodities.preciousMetals': 'Métaux Précieux',
+  'commodities.industrialMetals': 'Métaux Industriels',
+  'commodities.agriculture': 'Agriculture',
+  'commodities.madEquiv': 'Équivalent MAD',
+  'commodities.moroccanContext': 'Pertinence Maroc',
+  'commodities.source': 'Source: Yahoo Finance — Cours indicatifs pour entreprises marocaines',
+  'commodities.corsNote': 'Données en direct via Yahoo Finance. Configurez un proxy CORS dans Admin si les données ne se chargent pas.',
+  'commodities.week52': 'Plage 52s',
+  'commodities.fallbackNotice': 'Données de référence affichées (connexion Yahoo Finance indisponible)',
+
+  // Disclaimer
+  'disclaimer.short': 'Cours indicatifs uniquement • Pas de conseil en investissement • Non régulé AMMC/BAM',
+  'disclaimer.noInvestmentAdvice': 'Pas de conseil en investissement au sens de la Loi n° 44-12',
+  'disclaimer.notRegulated': 'Non agréé AMMC/BAM',
+  'disclaimer.forAdvisory': 'Pour conseil personnalisé: jad2advisory.com',
+  'disclaimer.cndp': 'Conformité Loi 09-08 (CNDP): données non conservées',
+
+  // Actions
+  'action.viewOfficialRates': 'Cours officiels BKAM',
+  'action.contactAdvisory': 'Contacter JAD2 Advisory →',
+  'action.downloadCSV': 'Télécharger CSV',
+  'action.getQuote': 'Obtenir un devis réel',
+  'action.bookAppointment': 'Prendre rendez-vous',
+
+  // Tiers
+  'tier.CORPORATE': 'Grande Entreprise / MNC',
+  'tier.SME': 'PME',
+  'tier.TPE': 'TPE / Auto-Entrepreneur',
+  'tier.INDIVIDUAL': 'Particulier',
+
+  // Footer
+  'footer.advisory': 'Besoin d\'un conseil FX professionnel?',
+  'footer.advisoryDesc': 'Couverture de change · Structuration · Conformité Office des Changes',
+  'footer.cta': 'JAD2 Advisory →',
+  'footer.legal': 'Mentions Légales & Conformité',
+  'footer.copyright': '© 2025 JAD2FX · JAD2 Advisory · Casablanca, Maroc',
+};
+export default fr;

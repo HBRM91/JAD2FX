@@ -166,6 +166,7 @@ export interface AdminConfig {
   isLive: boolean;
   alertThresholds: { pair: string; min: number; max: number; enabled: boolean }[];
   tierCommissions: Record<ClientTier, TierConfig>;
+  corsProxyUrl: string;
 }
 
 export interface BlotterEntry {
@@ -203,8 +204,40 @@ export interface FixingDayRow {
   source: 'API' | 'COMPUTED';
 }
 
+// ─── Commodities ─────────────────────────────────────────────────────────────
+export type CommodityCategory = 'ENERGY' | 'PRECIOUS_METALS' | 'INDUSTRIAL_METALS' | 'AGRICULTURE';
+
+export interface CommodityQuote {
+  symbol: string;
+  name: string;
+  nameFr: string;
+  nameAr: string;
+  category: CommodityCategory;
+  price: number;
+  change: number;
+  changePercent: number;
+  high52w: number;
+  low52w: number;
+  madEquiv: number;
+  unit: string;
+  source: 'LIVE' | 'FALLBACK';
+  moroccanRelevance: string;
+  moroccanRelevanceFr: string;
+  moroccanRelevanceAr: string;
+  timestamp: string;
+}
+
+// ─── Audit ────────────────────────────────────────────────────────────────────
+export interface AuditEntry {
+  id: string;
+  time: string;
+  action: string;
+  detail: string;
+  user: 'ADMIN';
+}
+
 // ─── Navigation ───────────────────────────────────────────────────────────────
-export type ViewState = 'HOME' | 'DASHBOARD' | 'ANALYSIS' | 'FIXING' | 'FORWARDS' | 'SWAPS' | 'LIVE' | 'ADMIN' | 'ABOUT';
+export type ViewState = 'HOME' | 'DASHBOARD' | 'ANALYSIS' | 'FIXING' | 'BILLETS' | 'COMMODITIES' | 'FORWARDS' | 'SWAPS' | 'LIVE' | 'ADMIN' | 'ABOUT';
 export type DashboardTab = 'VIREMENTS' | 'BILLETS' | 'GLOBAL_FX';
 
 // ─── Chat ─────────────────────────────────────────────────────────────────────
