@@ -109,10 +109,12 @@ export async function fetchBkamBBE(corsProxy: string): Promise<BkamBBERate[]> {
 }
 
 // ─── CourbeBDT — BDT yield curve (requires separate BDT subscription) ────────
+// Query param is `dateCourbe` (YYYY-MM-DD); defaults to yesterday when omitted.
 
-export async function fetchBkamBdt(corsProxy: string): Promise<BkamBdtPoint[]> {
+export async function fetchBkamBdt(corsProxy: string, dateCourbe?: string): Promise<BkamBdtPoint[]> {
+  const params = dateCourbe ? { dateCourbe } : undefined;
   return bkamGet<BkamBdtPoint[]>(
-    proxyPath(corsProxy, 'bkam-bdt', 'mo/Version1/api/CourbeBDT'),
+    proxyPath(corsProxy, 'bkam-bdt', 'mo/Version1/api/CourbeBDT', params),
   );
 }
 
