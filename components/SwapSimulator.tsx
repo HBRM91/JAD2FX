@@ -1,0 +1,483 @@
+import React, { useState, useMemo, useCallback } from 'react';
+import { ArrowLeftRight, RotateCcw, RotateCw, ChevronDown, Trash2 } from 'lucide-react';
+import { BKAM_CURRENCIES } from '../constants';
+import { STANDARD_TENORS, buildFxSwap, buildRollEvent } from '../services/forwardEngine';
+import { useAdmin } from '../context/AdminContext';
+import { RollEvent } from '../types';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function fmt4(v: number) { return v.toFixed(4); }
+function fmtPips(v: number) { return (v >= 0 ? '+' : '') + v.toFixed(2); }
+function fmtMAD(v: number) {
+  return new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 0 }).format(v);
+}
+
+// ─── Swap Leg Card ─────────────────────────────────────────────────────────────
+
+function LegCard({
+  label, tenor, days, rate, pips, direction, currency,
+}: {
+  label: 'NEAR' | 'FAR';
+  tenor: string; days: number; rate: number;
+  pips: number; direction: 'BUY' | 'SELL'; currency: string;
+}) {
+  const isBuy = direction === 'BUY';
+  return (
+    <div className={`flex-1 rounded-lg border p-4 ${
+      label === 'NEAR'
+        ? 'border-blue-800 bg-blue-950/20'
+        : 'border-purple-800 bg-purple-950/20'
+    }`}>
+      <div className="flex items-center justify-between mb-3">
+        <span className={`text-xs font-bold uppercase tracking-widest ${
+          label === 'NEAR' ? 'text-blue-400' : 'text-purple-400'
+        }`}>
+          {label} LEG
+        </span>
+        <span className={`text-xs font-bold px-2 py-0.5 rounded ${
+          isBuy ? 'bg-emerald-800/40 text-emerald-400' : 'bg-red-800/40 text-red-400'
+        }`}>
+          {direction}
+        </span>
+      </div>
+      <div className="space-y-1.5 font-mono text-sm">
+        <div className="flex justify-between">
+          <span className="text-slate-500 text-xs">Tenor</span>
+          <span className="text-white font-bold">{tenor}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-slate-500 text-xs">Days</span>
+          <span className="text-slate-300">{days}d</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-slate-500 text-xs">Rate</span>
+          <span className="text-gold-400 font-bold">{fmt4(rate)}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-slate-500 text-xs">Fwd Pts</span>
+          <span className={pips >= 0 ? 'text-emerald-400' : 'text-red-400'}>{fmtPips(pips)}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Roll Event Row ────────────────────────────────────────────────────────────
+
+function RollRow({
+  event, onRemove,
+}: { event: RollEvent; onRemove: () => void }) {
+  const isRollover = event.type === 'ROLLOVER';
+  return (
+    <tr className="border-b border-navy-800 hover:bg-navy-800/40 text-xs font-mono">
+      <td className="py-2 pr-3">
+        <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${
+          isRollover ? 'bg-blue-900/40 text-blue-400' : 'bg-orange-900/40 text-orange-400'
+        }`}>
+          {event.type.slice(4)}
+        </span>
+      </td>
+      <td className="text-slate-300 pr-3">{event.pair}</td>
+      <td className="text-slate-400 pr-3">{event.fromTenor} → {event.toTenor}</td>
+      <td className="text-right pr-3">
+        <span className={event.rollCostPips >= 0 ? 'text-emerald-400' : 'text-red-400'}>
+          {fmtPips(event.rollCostPips)}
+        </span>
+      </td>
+      <td className="text-right text-gold-400 pr-3">{fmtMAD(event.rollCostMAD)} MAD</td>
+      <td className="text-right text-slate-500 text-[10px] pr-3">
+        {event.timestamp.slice(11, 19)}
+      </td>
+      <td className="text-right">
+        <button
+          onClick={onRemove}
+          className="text-slate-600 hover:text-red-400 transition p-0.5"
+        >
+          <Trash2 size={11} />
+        </button>
+      </td>
+    </tr>
+  );
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
+export default function SwapSimulator() {
+  const { config, livePrices, addBlotterEntry } = useAdmin();
+
+  // Swap inputs
+  const [currency, setCurrency]       = useState('EUR');
+  const [notional, setNotional]       = useState(1_000_000);
+  const [nearTenor, setNearTenor]     = useState('1M');
+  const [farTenor, setFarTenor]       = useState('3M');
+  const [nearDir, setNearDir]         = useState<'BUY' | 'SELL'>('BUY');
+
+  // Roll event builder
+  const [rollType, setRollType]       = useState<'ROLLOVER' | 'ROLLUNDER'>('ROLLOVER');
+  const [rollFrom, setRollFrom]       = useState('3M');
+  const [rollTo, setRollTo]           = useState('6M');
+
+  // Local roll history (up to 20 entries)
+  const [rollLog, setRollLog] = useState<RollEvent[]>([]);
+
+  const spotEntry = livePrices.find(p => p.currency === currency);
+  const spot      = config.spotOverrides[currency] ?? spotEntry?.mid ?? 0;
+
+  const swap = useMemo(() => {
+    if (!spot || nearTenor === farTenor) return null;
+    try {
+      return buildFxSwap(
+        currency, spot, notional, nearTenor, farTenor, nearDir,
+        config.forwardMarkupBps,
+        config.curveOverrides['MAD'],
+        config.curveOverrides[currency],
+      );
+    } catch { return null; }
+  }, [currency, spot, notional, nearTenor, farTenor, nearDir, config.forwardMarkupBps, config.curveOverrides]);
+
+  const computedRoll = useMemo(() => {
+    if (!spot || rollFrom === rollTo) return null;
+    try {
+      return buildRollEvent(
+        rollType, currency, spot, notional, rollFrom, rollTo,
+        config.forwardMarkupBps,
+        config.curveOverrides['MAD'],
+        config.curveOverrides[currency],
+      );
+    } catch { return null; }
+  }, [rollType, currency, spot, notional, rollFrom, rollTo, config.forwardMarkupBps, config.curveOverrides]);
+
+  const handleBookSwap = useCallback(() => {
+    if (!swap) return;
+    addBlotterEntry({
+      action: 'SWAP',
+      pair: swap.pair,
+      tenor: `${nearTenor}/${farTenor}`,
+      rate: swap.nearLeg.rate,
+      fwdPtsPips: swap.swapPointsPips,
+      notional: swap.notional,
+      details: `FX Swap ${nearDir} near @ ${fmt4(swap.nearLeg.rate)} / sell far @ ${fmt4(swap.farLeg.rate)} · ${fmtPips(swap.swapPointsPips)} pips`,
+    });
+  }, [swap, nearTenor, farTenor, nearDir, addBlotterEntry]);
+
+  const handleBookRoll = useCallback(() => {
+    if (!computedRoll) return;
+    addBlotterEntry({
+      action: 'ROLL',
+      pair: computedRoll.pair,
+      tenor: `${computedRoll.fromTenor}→${computedRoll.toTenor}`,
+      rate: computedRoll.toRate,
+      fwdPtsPips: computedRoll.rollCostPips,
+      notional: computedRoll.notional,
+      details: `${computedRoll.type} ${computedRoll.fromTenor}→${computedRoll.toTenor} · ${fmtPips(computedRoll.rollCostPips)} pips · ${fmtMAD(computedRoll.rollCostMAD)} MAD`,
+    });
+    setRollLog(prev => [computedRoll, ...prev].slice(0, 20));
+  }, [computedRoll, addBlotterEntry]);
+
+  const curInfo = BKAM_CURRENCIES.find(c => c.code === currency);
+  const tenorOptions = STANDARD_TENORS as unknown as string[];
+
+  return (
+    <div className="space-y-5">
+
+      {/* ── Header ── */}
+      <div>
+        <h2 className="text-2xl font-serif font-bold text-white flex items-center gap-3">
+          <ArrowLeftRight size={22} className="text-gold-500" />
+          FX Swap Simulator
+        </h2>
+        <p className="text-slate-400 text-sm mt-0.5">
+          Two-leg swaps · Rollover / roll-under events · Live P&L
+        </p>
+      </div>
+
+      {/* ── Swap Section ── */}
+      <div className="bg-navy-900 border border-navy-700 rounded-lg p-5 space-y-5">
+        <h3 className="text-[10px] font-bold uppercase tracking-widest text-gold-500 border-b border-navy-700 pb-2">
+          FX Swap Construction
+        </h3>
+
+        {/* Currency + Notional + Near direction */}
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">Currency</label>
+            <div className="relative">
+              <select
+                value={currency}
+                onChange={e => setCurrency(e.target.value)}
+                className="w-full appearance-none bg-navy-800 border border-navy-600 text-white text-sm rounded px-3 py-2 pr-7 focus:outline-none focus:border-gold-500"
+              >
+                {BKAM_CURRENCIES.map(c => (
+                  <option key={c.code} value={c.code}>{c.flag} {c.code}/MAD</option>
+                ))}
+              </select>
+              <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">Notional ({currency})</label>
+            <input
+              type="number"
+              value={notional}
+              onChange={e => setNotional(Math.max(0, Number(e.target.value)))}
+              step={100_000}
+              className="w-full bg-navy-800 border border-navy-600 text-white text-sm rounded px-3 py-2 focus:outline-none focus:border-gold-500 font-mono"
+            />
+          </div>
+
+          <div>
+            <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">Near Side</label>
+            <div className="flex gap-2 h-9">
+              {(['BUY', 'SELL'] as const).map(d => (
+                <button
+                  key={d}
+                  onClick={() => setNearDir(d)}
+                  className={`flex-1 text-sm font-bold rounded transition ${
+                    nearDir === d
+                      ? d === 'BUY' ? 'bg-emerald-600 text-white' : 'bg-red-600 text-white'
+                      : 'bg-navy-800 text-slate-400 border border-navy-600'
+                  }`}
+                >
+                  {d}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Tenor selectors */}
+        <div className="grid grid-cols-2 gap-6">
+          {(['NEAR', 'FAR'] as const).map(leg => {
+            const val  = leg === 'NEAR' ? nearTenor : farTenor;
+            const setV = leg === 'NEAR' ? setNearTenor : setFarTenor;
+            const color = leg === 'NEAR' ? 'bg-blue-600 text-white' : 'bg-purple-600 text-white';
+            return (
+              <div key={leg}>
+                <label className={`block text-[10px] font-bold mb-2 uppercase tracking-wider ${
+                  leg === 'NEAR' ? 'text-blue-400' : 'text-purple-400'
+                }`}>
+                  {leg} Tenor
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {tenorOptions.map(t => (
+                    <button
+                      key={t}
+                      onClick={() => setV(t)}
+                      className={`px-2.5 py-1.5 text-xs font-mono font-bold rounded transition ${
+                        val === t ? color : 'bg-navy-800 text-slate-300 border border-navy-600 hover:bg-navy-700'
+                      }`}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Swap results */}
+        {swap ? (
+          <>
+            <div className="flex gap-4">
+              <LegCard
+                label="NEAR"
+                tenor={swap.nearLeg.tenorLabel}
+                days={swap.nearLeg.tenorDays}
+                rate={swap.nearLeg.rate}
+                pips={swap.nearLeg.forwardPointsPips}
+                direction={swap.nearLeg.direction}
+                currency={currency}
+              />
+
+              <div className="flex flex-col items-center justify-center gap-1 text-slate-600">
+                <ArrowLeftRight size={18} />
+                <span className="text-[10px] font-mono text-gold-500">
+                  {fmtPips(swap.swapPointsPips)}
+                </span>
+                <span className="text-[10px] text-slate-500">pips</span>
+              </div>
+
+              <LegCard
+                label="FAR"
+                tenor={swap.farLeg.tenorLabel}
+                days={swap.farLeg.tenorDays}
+                rate={swap.farLeg.rate}
+                pips={swap.farLeg.forwardPointsPips}
+                direction={swap.farLeg.direction}
+                currency={currency}
+              />
+            </div>
+
+            {/* Swap summary strip */}
+            <div className="grid grid-cols-4 gap-3">
+              {[
+                { label: 'Swap Points', value: fmtPips(swap.swapPointsPips) + ' pips', color: swap.swapPointsPips >= 0 ? 'text-emerald-400' : 'text-red-400' },
+                { label: 'Swap Cost MAD', value: fmtMAD(Math.abs(swap.swapPointsRaw) * swap.notional), color: 'text-gold-400' },
+                { label: 'MAD Near/Far', value: `${(swap.madRateNear * 100).toFixed(2)}% / ${(swap.madRateFar * 100).toFixed(2)}%`, color: 'text-slate-300' },
+                { label: `${currency} Near/Far`, value: `${(swap.fcyRateNear * 100).toFixed(2)}% / ${(swap.fcyRateFar * 100).toFixed(2)}%`, color: 'text-slate-300' },
+              ].map(item => (
+                <div key={item.label} className="bg-navy-800 rounded p-2.5 text-center">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{item.label}</p>
+                  <p className={`text-sm font-mono font-bold ${item.color}`}>{item.value}</p>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={handleBookSwap}
+              className="w-full py-2.5 bg-gold-500 hover:bg-gold-400 text-navy-900 text-sm font-bold rounded transition"
+            >
+              Book Swap to Blotter
+            </button>
+          </>
+        ) : (
+          <div className="text-center py-6 text-slate-500 text-sm">
+            {!spot
+              ? 'No spot rate — fetch live prices or set override in Admin'
+              : nearTenor === farTenor
+              ? 'Near and far tenors must be different'
+              : 'Configure swap parameters'}
+          </div>
+        )}
+      </div>
+
+      {/* ── Roll Event Builder ── */}
+      <div className="bg-navy-900 border border-navy-700 rounded-lg p-5 space-y-4">
+        <h3 className="text-[10px] font-bold uppercase tracking-widest text-gold-500 border-b border-navy-700 pb-2 flex items-center gap-2">
+          <RotateCw size={12} />
+          Roll Event Builder — Rollover / Roll-Under
+        </h3>
+
+        <div className="grid grid-cols-3 gap-4">
+          {/* Type */}
+          <div>
+            <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">Event Type</label>
+            <div className="flex gap-2">
+              {(['ROLLOVER', 'ROLLUNDER'] as const).map(t => (
+                <button
+                  key={t}
+                  onClick={() => setRollType(t)}
+                  className={`flex-1 py-2 text-xs font-bold rounded transition ${
+                    rollType === t
+                      ? t === 'ROLLOVER' ? 'bg-blue-600 text-white' : 'bg-orange-600 text-white'
+                      : 'bg-navy-800 text-slate-400 border border-navy-600'
+                  }`}
+                >
+                  {t === 'ROLLOVER' ? 'Rollover' : 'Roll-Under'}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* From Tenor */}
+          <div>
+            <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">From Tenor</label>
+            <div className="relative">
+              <select
+                value={rollFrom}
+                onChange={e => setRollFrom(e.target.value)}
+                className="w-full appearance-none bg-navy-800 border border-navy-600 text-white text-sm rounded px-3 py-2 pr-7 focus:outline-none focus:border-gold-500 font-mono"
+              >
+                {tenorOptions.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+              <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+
+          {/* To Tenor */}
+          <div>
+            <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">To Tenor</label>
+            <div className="relative">
+              <select
+                value={rollTo}
+                onChange={e => setRollTo(e.target.value)}
+                className="w-full appearance-none bg-navy-800 border border-navy-600 text-white text-sm rounded px-3 py-2 pr-7 focus:outline-none focus:border-gold-500 font-mono"
+              >
+                {tenorOptions.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+              <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            </div>
+          </div>
+        </div>
+
+        {/* Roll result */}
+        {computedRoll ? (
+          <div className="space-y-3">
+            <div className="grid grid-cols-4 gap-3">
+              {[
+                { label: 'From Rate', value: fmt4(computedRoll.fromRate) },
+                { label: 'To Rate',   value: fmt4(computedRoll.toRate) },
+                {
+                  label: 'Roll Cost (pips)',
+                  value: fmtPips(computedRoll.rollCostPips),
+                  color: computedRoll.rollCostPips >= 0 ? 'text-emerald-400' : 'text-red-400',
+                },
+                {
+                  label: 'Roll Cost (MAD)',
+                  value: fmtMAD(computedRoll.rollCostMAD) + ' MAD',
+                  color: 'text-gold-400',
+                },
+              ].map(item => (
+                <div key={item.label} className="bg-navy-800 rounded p-2.5 text-center">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{item.label}</p>
+                  <p className={`text-sm font-mono font-bold ${item.color ?? 'text-white'}`}>{item.value}</p>
+                </div>
+              ))}
+            </div>
+            <button
+              onClick={handleBookRoll}
+              className="w-full py-2.5 bg-gold-500 hover:bg-gold-400 text-navy-900 text-sm font-bold rounded transition flex items-center justify-center gap-2"
+            >
+              <RotateCw size={14} />
+              Execute Roll &amp; Add to Log
+            </button>
+          </div>
+        ) : (
+          <div className="text-center py-4 text-slate-500 text-sm">
+            {!spot ? 'No spot rate available' : rollFrom === rollTo ? 'From and To tenors must differ' : 'Configure roll parameters'}
+          </div>
+        )}
+      </div>
+
+      {/* ── Roll Event Log ── */}
+      {rollLog.length > 0 && (
+        <div className="bg-navy-900 border border-navy-700 rounded-lg p-5 overflow-x-auto">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-[10px] font-bold uppercase tracking-widest text-gold-500 flex items-center gap-2">
+              <RotateCcw size={12} />
+              Roll Event Log ({rollLog.length})
+            </h3>
+            <button
+              onClick={() => setRollLog([])}
+              className="text-xs text-slate-500 hover:text-red-400 transition flex items-center gap-1"
+            >
+              <Trash2 size={11} /> Clear
+            </button>
+          </div>
+          <table className="w-full text-xs font-mono min-w-[560px]">
+            <thead>
+              <tr className="text-slate-500 text-[10px] uppercase border-b border-navy-700">
+                {['Type', 'Pair', 'Tenors', 'Pips', 'Cost MAD', 'Time', ''].map(h => (
+                  <th key={h} className={`pb-2 pr-3 last:pr-0 ${h === '' ? 'text-right' : 'text-left'}`}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rollLog.map((e, i) => (
+                <React.Fragment key={e.id}>
+                  <RollRow
+                    event={e}
+                    onRemove={() => setRollLog(prev => prev.filter((_, j) => j !== i))}
+                  />
+                </React.Fragment>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}

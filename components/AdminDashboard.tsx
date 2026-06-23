@@ -1,0 +1,802 @@
+import React, { useState, useMemo } from 'react';
+import {
+  Shield, LogOut, Settings, Activity, BarChart2, TrendingUp,
+  AlertTriangle, FileText, RefreshCw, Lock, Eye, EyeOff,
+  ChevronDown, RotateCcw, Plus, Trash2, CheckCircle, XCircle,
+} from 'lucide-react';
+import { BKAM_CURRENCIES } from '../constants';
+import { useAdmin } from '../context/AdminContext';
+import { getDefaultCurve, CURVE_META } from '../services/interestRates';
+import { STANDARD_TENORS } from '../services/forwardEngine';
+import { BlotterEntry } from '../types';
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const FMT4 = (v: number) => v.toFixed(4);
+const FMT_PCT = (v: number) => (v * 100).toFixed(3) + '%';
+const FMT_MAD = (v: number) =>
+  new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 0 }).format(v);
+
+const ACTION_COLOR: Record<string, string> = {
+  SPOT:     'text-blue-400 bg-blue-900/30',
+  FORWARD:  'text-gold-400 bg-yellow-900/30',
+  SWAP:     'text-purple-400 bg-purple-900/30',
+  ROLL:     'text-orange-400 bg-orange-900/30',
+  OVERRIDE: 'text-red-400 bg-red-900/30',
+  ALERT:    'text-pink-400 bg-pink-900/30',
+};
+
+// ─── Login Gate ───────────────────────────────────────────────────────────────
+
+function LoginGate({ onLogin }: { onLogin: (pw: string) => boolean }) {
+  const [pw, setPw] = useState('');
+  const [show, setShow] = useState(false);
+  const [err, setErr] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (onLogin(pw)) { setErr(false); }
+    else { setErr(true); setPw(''); }
+  };
+
+  return (
+    <div className="flex items-center justify-center py-24">
+      <div className="bg-navy-900 border border-navy-700 rounded-xl p-10 w-80 space-y-6">
+        <div className="text-center">
+          <div className="w-14 h-14 bg-gold-500/10 border border-gold-600/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Lock size={24} className="text-gold-500" />
+          </div>
+          <h2 className="text-lg font-serif font-bold text-white">Admin Access</h2>
+          <p className="text-xs text-slate-500 mt-1">Enter your admin passcode</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="relative">
+            <input
+              type={show ? 'text' : 'password'}
+              value={pw}
+              onChange={e => { setPw(e.target.value); setErr(false); }}
+              placeholder="Passcode"
+              className={`w-full bg-navy-800 border rounded px-3 py-2.5 text-white text-sm focus:outline-none font-mono tracking-widest ${
+                err ? 'border-red-500' : 'border-navy-600 focus:border-gold-500'
+              }`}
+            />
+            <button
+              type="button"
+              onClick={() => setShow(s => !s)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+            >
+              {show ? <EyeOff size={14} /> : <Eye size={14} />}
+            </button>
+          </div>
+          {err && <p className="text-xs text-red-400">Invalid passcode</p>}
+          <button
+            type="submit"
+            className="w-full py-2.5 bg-gold-500 hover:bg-gold-400 text-navy-900 font-bold text-sm rounded transition"
+          >
+            Authenticate
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ─── Tab Button ───────────────────────────────────────────────────────────────
+
+function TabBtn({
+  label, icon: Icon, active, onClick,
+}: { label: string; icon: React.ElementType; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-1.5 px-3 py-2 text-xs font-bold uppercase tracking-wider transition whitespace-nowrap border-b-2 ${
+        active
+          ? 'border-gold-500 text-gold-400'
+          : 'border-transparent text-slate-500 hover:text-slate-300'
+      }`}
+    >
+      <Icon size={12} />
+      {label}
+    </button>
+  );
+}
+
+// ─── SYSTEM Tab ───────────────────────────────────────────────────────────────
+
+function SystemTab() {
+  const { config, updateConfig, livePrices, lastPriceUpdate } = useAdmin();
+  const intervalSecs = Math.round(config.refreshIntervalMs / 1000);
+
+  return (
+    <div className="space-y-5">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: 'Live Mode', value: config.isLive ? 'ENABLED' : 'DISABLED',
+            color: config.isLive ? 'text-emerald-400' : 'text-red-400' },
+          { label: 'Last Price Update',
+            value: lastPriceUpdate ? new Date(lastPriceUpdate).toLocaleTimeString('fr-MA', { hour12: false }) : '—',
+            color: 'text-slate-300' },
+          { label: 'Pairs Loaded', value: `${livePrices.length} / 14`, color: 'text-slate-300' },
+          { label: 'Refresh Interval', value: `${intervalSecs}s`, color: 'text-gold-400' },
+        ].map(item => (
+          <div key={item.label} className="bg-navy-800 border border-navy-600 rounded p-3">
+            <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{item.label}</p>
+            <p className={`text-sm font-mono font-bold ${item.color}`}>{item.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Live toggle */}
+      <div className="bg-navy-800 border border-navy-600 rounded p-4 flex items-center justify-between">
+        <div>
+          <p className="text-sm font-bold text-white">Live Mode</p>
+          <p className="text-xs text-slate-500">Controls whether rates stream from Frankfurter API</p>
+        </div>
+        <button
+          onClick={() => updateConfig({ isLive: !config.isLive })}
+          className={`w-12 h-6 rounded-full relative transition-colors ${config.isLive ? 'bg-emerald-600' : 'bg-slate-700'}`}
+        >
+          <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${config.isLive ? 'left-6' : 'left-0.5'}`} />
+        </button>
+      </div>
+
+      {/* Refresh interval slider */}
+      <div className="bg-navy-800 border border-navy-600 rounded p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-bold text-white">Refresh Interval</p>
+            <p className="text-xs text-slate-500">How often to poll Frankfurter API for new rates</p>
+          </div>
+          <span className="text-gold-400 font-mono font-bold text-lg">{intervalSecs}s</span>
+        </div>
+        <input
+          type="range"
+          min={30}
+          max={300}
+          step={15}
+          value={intervalSecs}
+          onChange={e => updateConfig({ refreshIntervalMs: Number(e.target.value) * 1000 })}
+          className="w-full accent-gold-500"
+        />
+        <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+          <span>30s (min)</span>
+          <span>1m</span>
+          <span>2m (default)</span>
+          <span>5m (max)</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── RATES Tab ────────────────────────────────────────────────────────────────
+
+function RatesTab() {
+  const { config, updateConfig, livePrices } = useAdmin();
+  const [editValues, setEditValues] = useState<Record<string, string>>({});
+
+  const handleSetOverride = (code: string) => {
+    const v = parseFloat(editValues[code] ?? '');
+    if (isNaN(v) || v <= 0) return;
+    updateConfig({ spotOverrides: { ...config.spotOverrides, [code]: v } });
+    setEditValues(prev => { const n = { ...prev }; delete n[code]; return n; });
+  };
+
+  const handleClear = (code: string) => {
+    const next = { ...config.spotOverrides };
+    delete next[code];
+    updateConfig({ spotOverrides: next });
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-slate-500">
+        Override spot rates manually. Live market rates are used when no override is set.
+      </p>
+      <div className="overflow-x-auto rounded border border-navy-700">
+        <table className="w-full text-xs font-mono min-w-[520px]">
+          <thead>
+            <tr className="bg-navy-800 text-slate-500 uppercase text-[10px] border-b border-navy-700">
+              {['Pair', 'Live Mid', 'Override', '', 'Status'].map(h => (
+                <th key={h} className="text-left py-2.5 px-3 font-medium">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {BKAM_CURRENCIES.map(c => {
+              const live     = livePrices.find(p => p.currency === c.code);
+              const override = config.spotOverrides[c.code];
+              const hasOvr   = override !== undefined;
+              return (
+                <tr key={c.code} className="border-b border-navy-800 hover:bg-navy-800/40">
+                  <td className="py-2 px-3">
+                    <div className="flex items-center gap-2">
+                      <span>{c.flag}</span>
+                      <span className="text-white font-bold">{c.code}/MAD</span>
+                    </div>
+                  </td>
+                  <td className="px-3 text-slate-300">
+                    {live ? FMT4(live.mid) : <span className="text-slate-600">—</span>}
+                  </td>
+                  <td className="px-3">
+                    <input
+                      type="number"
+                      step="0.0001"
+                      value={editValues[c.code] ?? (hasOvr ? String(override) : '')}
+                      onChange={e => setEditValues(prev => ({ ...prev, [c.code]: e.target.value }))}
+                      placeholder={live ? FMT4(live.mid) : 'e.g. 10.8234'}
+                      className="w-28 bg-navy-900 border border-navy-600 rounded px-2 py-1 text-white focus:outline-none focus:border-gold-500"
+                    />
+                  </td>
+                  <td className="px-3 space-x-1">
+                    <button
+                      onClick={() => handleSetOverride(c.code)}
+                      className="px-2 py-1 bg-gold-500 text-navy-900 rounded text-[10px] font-bold hover:bg-gold-400 transition"
+                    >
+                      Set
+                    </button>
+                    {hasOvr && (
+                      <button
+                        onClick={() => handleClear(c.code)}
+                        className="px-2 py-1 bg-navy-700 border border-navy-500 text-slate-300 rounded text-[10px] hover:text-red-400 transition"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </td>
+                  <td className="px-3">
+                    {hasOvr ? (
+                      <span className="text-amber-400 text-[10px] font-bold">OVERRIDE {FMT4(override!)}</span>
+                    ) : (
+                      <span className="text-slate-600 text-[10px]">market</span>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ─── CURVES Tab ───────────────────────────────────────────────────────────────
+
+function CurvesTab() {
+  const { config, updateConfig } = useAdmin();
+  const [selCcy, setSelCcy] = useState('MAD');
+
+  const allCurrencies = ['MAD', ...BKAM_CURRENCIES.map(c => c.code)];
+  const defaultCurve  = useMemo(() => getDefaultCurve(selCcy), [selCcy]);
+  const overrides     = config.curveOverrides[selCcy] ?? {};
+  const meta          = CURVE_META[selCcy] ?? { label: selCcy, benchmark: selCcy };
+
+  const handleRateChange = (tenor: string, raw: string) => {
+    const v = parseFloat(raw);
+    if (isNaN(v)) return;
+    const next = { ...config.curveOverrides, [selCcy]: { ...overrides, [tenor]: v / 100 } };
+    updateConfig({ curveOverrides: next });
+  };
+
+  const handleResetTenor = (tenor: string) => {
+    const next = { ...overrides };
+    delete next[tenor];
+    updateConfig({ curveOverrides: { ...config.curveOverrides, [selCcy]: next } });
+  };
+
+  const handleResetAll = () => {
+    const next = { ...config.curveOverrides };
+    delete next[selCcy];
+    updateConfig({ curveOverrides: next });
+  };
+
+  const hasAnyOverride = Object.keys(overrides).length > 0;
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <p className="text-xs text-slate-500">
+            Edit yield curve rates used for CIP forward pricing. Rates in % p.a.
+          </p>
+          <p className="text-[10px] text-slate-600 mt-0.5">{meta.label} — {meta.benchmark}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          {hasAnyOverride && (
+            <button
+              onClick={handleResetAll}
+              className="text-xs text-slate-400 hover:text-red-400 transition flex items-center gap-1"
+            >
+              <RotateCcw size={11} /> Reset All
+            </button>
+          )}
+          <div className="relative">
+            <select
+              value={selCcy}
+              onChange={e => setSelCcy(e.target.value)}
+              className="appearance-none bg-navy-800 border border-navy-600 text-white text-sm rounded px-3 py-1.5 pr-7 focus:outline-none focus:border-gold-500"
+            >
+              {allCurrencies.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+            <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          </div>
+        </div>
+      </div>
+
+      {defaultCurve.length === 0 ? (
+        <p className="text-slate-500 text-sm text-center py-8">No default curve for {selCcy}</p>
+      ) : (
+        <div className="overflow-x-auto rounded border border-navy-700">
+          <table className="w-full text-xs font-mono min-w-[400px]">
+            <thead>
+              <tr className="bg-navy-800 text-slate-500 uppercase text-[10px] border-b border-navy-700">
+                {['Tenor', 'Default %', 'Override %', 'Effective %', ''].map(h => (
+                  <th key={h} className="text-left py-2.5 px-3 font-medium">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {defaultCurve.map(pt => {
+                const ovr = overrides[pt.tenor];
+                const eff = ovr !== undefined ? ovr : pt.rate;
+                const hasOvr = ovr !== undefined;
+                return (
+                  <tr key={pt.tenor} className={`border-b border-navy-800 hover:bg-navy-800/40 ${hasOvr ? 'bg-amber-950/10' : ''}`}>
+                    <td className={`py-2 px-3 font-bold ${hasOvr ? 'text-amber-400' : 'text-white'}`}>{pt.tenor}</td>
+                    <td className="px-3 text-slate-500">{(pt.rate * 100).toFixed(3)}</td>
+                    <td className="px-3">
+                      <input
+                        type="number"
+                        step="0.001"
+                        defaultValue={hasOvr ? (ovr! * 100).toFixed(3) : ''}
+                        placeholder={(pt.rate * 100).toFixed(3)}
+                        onBlur={e => handleRateChange(pt.tenor, e.target.value)}
+                        className="w-20 bg-navy-900 border border-navy-600 rounded px-2 py-0.5 text-white focus:outline-none focus:border-amber-500"
+                      />
+                    </td>
+                    <td className={`px-3 font-bold ${hasOvr ? 'text-amber-400' : 'text-slate-300'}`}>
+                      {(eff * 100).toFixed(3)}%
+                    </td>
+                    <td className="px-3">
+                      {hasOvr && (
+                        <button
+                          onClick={() => handleResetTenor(pt.tenor)}
+                          className="text-slate-600 hover:text-red-400 transition"
+                        >
+                          <RotateCcw size={11} />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── FORWARDS Tab ─────────────────────────────────────────────────────────────
+
+function ForwardsTab() {
+  const { config, updateConfig } = useAdmin();
+
+  return (
+    <div className="space-y-5">
+      <p className="text-xs text-slate-500">
+        Forward markup adds basis points on top of the CIP forward rate, widening the dealer's spread.
+      </p>
+
+      {/* Markup slider */}
+      <div className="bg-navy-800 border border-navy-600 rounded p-4 space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-bold text-white">Forward Markup</p>
+            <p className="text-xs text-slate-500">Applied to all forward calculations</p>
+          </div>
+          <span className="text-gold-400 font-mono font-bold text-xl">{config.forwardMarkupBps} bps</span>
+        </div>
+        <input
+          type="range" min={0} max={100} step={1}
+          value={config.forwardMarkupBps}
+          onChange={e => updateConfig({ forwardMarkupBps: Number(e.target.value) })}
+          className="w-full accent-gold-500"
+        />
+        <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+          <span>0 bps (raw CIP)</span><span>25 bps</span><span>50 bps</span><span>100 bps</span>
+        </div>
+      </div>
+
+      {/* Dealer spread pips */}
+      <div className="space-y-2">
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider">Dealer Spread Pips (per currency)</p>
+        <div className="overflow-x-auto rounded border border-navy-700">
+          <table className="w-full text-xs font-mono min-w-[400px]">
+            <thead>
+              <tr className="bg-navy-800 text-slate-500 text-[10px] uppercase border-b border-navy-700">
+                <th className="text-left py-2 px-3">Currency</th>
+                <th className="text-right px-3">Total Pips</th>
+                <th className="text-right px-3">Half-Spread</th>
+                <th className="px-3 w-40">Adjust</th>
+              </tr>
+            </thead>
+            <tbody>
+              {BKAM_CURRENCIES.map(c => {
+                const pips = config.dealerSpreadPips?.[c.code] ?? 8;
+                return (
+                  <tr key={c.code} className="border-b border-navy-800 hover:bg-navy-800/40">
+                    <td className="py-1.5 px-3">
+                      <span className="mr-2">{c.flag}</span>
+                      <span className="text-white font-bold">{c.code}</span>
+                    </td>
+                    <td className="text-right px-3 text-gold-400 font-bold">{pips}</td>
+                    <td className="text-right px-3 text-slate-400">±{pips / 2}</td>
+                    <td className="px-3">
+                      <input
+                        type="range" min={1} max={50} step={1}
+                        value={pips}
+                        onChange={e => updateConfig({
+                          dealerSpreadPips: {
+                            ...config.dealerSpreadPips,
+                            [c.code]: Number(e.target.value),
+                          },
+                        })}
+                        className="w-full accent-gold-500"
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── SPREADS Tab ──────────────────────────────────────────────────────────────
+
+function SpreadsTab() {
+  const { config, updateConfig } = useAdmin();
+
+  const virPct = (config.virementSpreadPct * 100).toFixed(2);
+  const bilPct = (config.billetSpreadPct * 100).toFixed(2);
+
+  return (
+    <div className="space-y-5">
+      <p className="text-xs text-slate-500">
+        Controls the BKAM-style spread applied to spot rates for the FX Dashboard.
+      </p>
+
+      {[
+        {
+          key: 'virementSpreadPct' as const,
+          label: 'Virement Spread',
+          value: config.virementSpreadPct,
+          display: virPct + '%',
+          desc: 'Wire transfer spread (±0.8% each side by default)',
+          min: 0.1, max: 3, step: 0.05,
+        },
+        {
+          key: 'billetSpreadPct' as const,
+          label: 'Billet Spread',
+          value: config.billetSpreadPct,
+          display: bilPct + '%',
+          desc: 'Cash banknote spread (±1.8% each side by default)',
+          min: 0.1, max: 5, step: 0.1,
+        },
+      ].map(item => (
+        <div key={item.key} className="bg-navy-800 border border-navy-600 rounded p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold text-white">{item.label}</p>
+              <p className="text-xs text-slate-500">{item.desc}</p>
+            </div>
+            <span className="text-gold-400 font-mono font-bold text-xl">{item.display}</span>
+          </div>
+          <input
+            type="range"
+            min={item.min} max={item.max} step={item.step}
+            value={item.value * 100}
+            onChange={e => updateConfig({ [item.key]: Number(e.target.value) / 100 })}
+            className="w-full accent-gold-500"
+          />
+          <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+            <span>{item.min}%</span><span>{item.max / 2}%</span><span>{item.max}%</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── ALERTS Tab ───────────────────────────────────────────────────────────────
+
+function AlertsTab() {
+  const { config, updateConfig } = useAdmin();
+  const [newPair, setNewPair] = useState('');
+  const [newMin, setNewMin]   = useState('');
+  const [newMax, setNewMax]   = useState('');
+
+  const thresholds = config.alertThresholds ?? [];
+
+  const toggle = (i: number) => {
+    const next = thresholds.map((t, j) => j === i ? { ...t, enabled: !t.enabled } : t);
+    updateConfig({ alertThresholds: next });
+  };
+
+  const remove = (i: number) => {
+    updateConfig({ alertThresholds: thresholds.filter((_, j) => j !== i) });
+  };
+
+  const add = () => {
+    const min = parseFloat(newMin);
+    const max = parseFloat(newMax);
+    if (!newPair || isNaN(min) || isNaN(max) || min >= max) return;
+    updateConfig({ alertThresholds: [...thresholds, { pair: newPair, min, max, enabled: true }] });
+    setNewPair(''); setNewMin(''); setNewMax('');
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-slate-500">
+        Set price alert thresholds. Alerts trigger when mid rate moves outside the [min, max] band.
+      </p>
+
+      <div className="overflow-x-auto rounded border border-navy-700">
+        <table className="w-full text-xs font-mono min-w-[480px]">
+          <thead>
+            <tr className="bg-navy-800 text-slate-500 text-[10px] uppercase border-b border-navy-700">
+              {['Pair', 'Min', 'Max', 'Status', 'Toggle', ''].map(h => (
+                <th key={h} className="text-left py-2.5 px-3 font-medium">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {thresholds.map((t, i) => (
+              <tr key={i} className="border-b border-navy-800 hover:bg-navy-800/40">
+                <td className="py-2 px-3 font-bold text-white">{t.pair}</td>
+                <td className="px-3 text-emerald-400">{t.min}</td>
+                <td className="px-3 text-red-400">{t.max}</td>
+                <td className="px-3">
+                  {t.enabled
+                    ? <span className="text-emerald-400 flex items-center gap-1"><CheckCircle size={11} /> Active</span>
+                    : <span className="text-slate-500 flex items-center gap-1"><XCircle size={11} /> Off</span>
+                  }
+                </td>
+                <td className="px-3">
+                  <button
+                    onClick={() => toggle(i)}
+                    className={`w-10 h-5 rounded-full relative transition-colors ${t.enabled ? 'bg-emerald-600' : 'bg-slate-700'}`}
+                  >
+                    <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform ${t.enabled ? 'left-5' : 'left-0.5'}`} />
+                  </button>
+                </td>
+                <td className="px-3">
+                  <button onClick={() => remove(i)} className="text-slate-600 hover:text-red-400">
+                    <Trash2 size={11} />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Add new */}
+      <div className="bg-navy-800 border border-navy-600 rounded p-4 space-y-3">
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+          <Plus size={11} /> Add Alert
+        </p>
+        <div className="grid grid-cols-4 gap-2">
+          {[
+            { placeholder: 'Pair e.g. EUR/MAD', value: newPair, set: setNewPair },
+            { placeholder: 'Min rate', value: newMin, set: setNewMin },
+            { placeholder: 'Max rate', value: newMax, set: setNewMax },
+          ].map((f, i) => (
+            <input
+              key={i}
+              value={f.value}
+              onChange={e => f.set(e.target.value)}
+              placeholder={f.placeholder}
+              className="bg-navy-900 border border-navy-600 text-white text-xs rounded px-2 py-1.5 focus:outline-none focus:border-gold-500 font-mono col-span-1"
+            />
+          ))}
+          <button
+            onClick={add}
+            className="px-3 py-1.5 bg-gold-500 text-navy-900 text-xs font-bold rounded hover:bg-gold-400 transition"
+          >
+            Add
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── BLOTTER Tab ──────────────────────────────────────────────────────────────
+
+function BlotterTab() {
+  const { blotter, clearBlotter, addBlotterEntry } = useAdmin();
+  const [filter, setFilter] = useState<string>('ALL');
+
+  const actions = ['ALL', 'SPOT', 'FORWARD', 'SWAP', 'ROLL', 'OVERRIDE', 'ALERT'] as const;
+
+  const filtered = filter === 'ALL'
+    ? blotter
+    : blotter.filter(e => e.action === filter);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div className="flex gap-1 flex-wrap">
+          {actions.map(a => (
+            <button
+              key={a}
+              onClick={() => setFilter(a)}
+              className={`px-2.5 py-1 text-[10px] font-bold uppercase rounded transition ${
+                filter === a ? 'bg-gold-500 text-navy-900' : 'bg-navy-800 text-slate-400 border border-navy-600 hover:text-white'
+              }`}
+            >
+              {a}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={clearBlotter}
+          className="text-xs text-slate-500 hover:text-red-400 transition flex items-center gap-1"
+        >
+          <Trash2 size={11} /> Clear All
+        </button>
+      </div>
+
+      <div className="overflow-x-auto rounded border border-navy-700">
+        <table className="w-full text-xs font-mono min-w-[600px]">
+          <thead>
+            <tr className="bg-navy-800 text-slate-500 text-[10px] uppercase border-b border-navy-700">
+              {['Time', 'Action', 'Pair', 'Tenor', 'Rate', 'Fwd Pts', 'Notional', 'Details'].map(h => (
+                <th key={h} className="text-left py-2.5 px-3 font-medium">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="py-8 text-center text-slate-600">
+                  No entries {filter !== 'ALL' && `for ${filter}`}
+                </td>
+              </tr>
+            ) : (
+              filtered.map(entry => (
+                <tr key={entry.id} className="border-b border-navy-800 hover:bg-navy-800/40">
+                  <td className="py-1.5 px-3 text-slate-500 text-[10px]">
+                    {new Date(entry.time).toLocaleTimeString('fr-MA', { hour12: false })}
+                  </td>
+                  <td className="px-3">
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold ${ACTION_COLOR[entry.action] ?? 'text-slate-400'}`}>
+                      {entry.action}
+                    </span>
+                  </td>
+                  <td className="px-3 text-white font-bold">{entry.pair}</td>
+                  <td className="px-3 text-slate-400">{entry.tenor ?? '—'}</td>
+                  <td className="px-3 text-gold-400">{entry.rate.toFixed(4)}</td>
+                  <td className="px-3">
+                    {entry.fwdPtsPips !== undefined ? (
+                      <span className={entry.fwdPtsPips >= 0 ? 'text-emerald-400' : 'text-red-400'}>
+                        {entry.fwdPtsPips >= 0 ? '+' : ''}{entry.fwdPtsPips.toFixed(2)}
+                      </span>
+                    ) : <span className="text-slate-600">—</span>}
+                  </td>
+                  <td className="px-3 text-slate-300">
+                    {entry.notional ? FMT_MAD(entry.notional) : '—'}
+                  </td>
+                  <td className="px-3 text-slate-500 max-w-[180px] truncate" title={entry.details}>
+                    {entry.details ?? '—'}
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
+type AdminTab = 'SYSTEM' | 'RATES' | 'CURVES' | 'FORWARDS' | 'SPREADS' | 'ALERTS' | 'BLOTTER';
+
+const TABS: { id: AdminTab; label: string; icon: React.ElementType }[] = [
+  { id: 'SYSTEM',   label: 'System',   icon: Activity },
+  { id: 'RATES',    label: 'Rates',    icon: BarChart2 },
+  { id: 'CURVES',   label: 'Curves',   icon: TrendingUp },
+  { id: 'FORWARDS', label: 'Forwards', icon: Settings },
+  { id: 'SPREADS',  label: 'Spreads',  icon: BarChart2 },
+  { id: 'ALERTS',   label: 'Alerts',   icon: AlertTriangle },
+  { id: 'BLOTTER',  label: 'Blotter',  icon: FileText },
+];
+
+export default function AdminDashboard() {
+  const { isAdmin, login, logout, blotter, resetConfig } = useAdmin();
+  const [activeTab, setActiveTab] = useState<AdminTab>('SYSTEM');
+
+  if (!isAdmin) return <LoginGate onLogin={login} />;
+
+  return (
+    <div className="space-y-5">
+
+      {/* ── Terminal header ── */}
+      <div className="bg-navy-900 border border-navy-700 rounded-lg p-5">
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded bg-gold-500/10 border border-gold-600/30 flex items-center justify-center">
+              <Shield size={20} className="text-gold-500" />
+            </div>
+            <div>
+              <h2 className="text-lg font-serif font-bold text-white flex items-center gap-2">
+                Admin Terminal
+                <span className="text-[10px] bg-emerald-900/40 border border-emerald-700/40 text-emerald-400 px-2 py-0.5 rounded font-mono font-bold">
+                  AUTHENTICATED
+                </span>
+              </h2>
+              <p className="text-xs text-slate-500">KhouyaFX Institutional Control Panel · {new Date().toLocaleDateString('fr-MA')}</p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={resetConfig}
+              className="px-3 py-1.5 text-xs text-slate-400 border border-navy-600 rounded hover:border-red-600 hover:text-red-400 transition flex items-center gap-1.5"
+            >
+              <RotateCcw size={11} /> Reset All
+            </button>
+            <button
+              onClick={logout}
+              className="px-3 py-1.5 text-xs bg-navy-800 text-slate-300 border border-navy-600 rounded hover:text-red-400 hover:border-red-600 transition flex items-center gap-1.5"
+            >
+              <LogOut size={11} /> Logout
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Tab bar ── */}
+      <div className="bg-navy-900 border border-navy-700 rounded-lg overflow-hidden">
+        <div className="flex items-center border-b border-navy-700 px-4 overflow-x-auto">
+          {TABS.map(tab => (
+            <React.Fragment key={tab.id}>
+              <TabBtn
+                label={tab.label}
+                icon={tab.icon}
+                active={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+              />
+            </React.Fragment>
+          ))}
+          {blotter.length > 0 && activeTab !== 'BLOTTER' && (
+            <span className="ml-auto flex-shrink-0 bg-gold-500 text-navy-900 text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+              {Math.min(blotter.length, 9)}
+            </span>
+          )}
+        </div>
+
+        {/* Tab content */}
+        <div className="p-5">
+          {activeTab === 'SYSTEM'   && <SystemTab />}
+          {activeTab === 'RATES'    && <RatesTab />}
+          {activeTab === 'CURVES'   && <CurvesTab />}
+          {activeTab === 'FORWARDS' && <ForwardsTab />}
+          {activeTab === 'SPREADS'  && <SpreadsTab />}
+          {activeTab === 'ALERTS'   && <AlertsTab />}
+          {activeTab === 'BLOTTER'  && <BlotterTab />}
+        </div>
+      </div>
+    </div>
+  );
+}
