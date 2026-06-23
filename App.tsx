@@ -10,11 +10,12 @@ import ForwardCalculator  from './components/ForwardCalculator';
 import SwapSimulator      from './components/SwapSimulator';
 import LivePricer         from './components/LivePricer';
 import AdminDashboard     from './components/AdminDashboard';
+import BkamFixing         from './components/BkamFixing';
 import { AdminProvider }  from './context/AdminContext';
 import {
   Building2, FileText, LayoutDashboard, Menu, Shield,
   Globe, ChevronRight, TrendingUp, ArrowLeftRight, Activity,
-  Lock, X,
+  Lock, X, BarChart2,
 } from 'lucide-react';
 
 // ─── Determines whether a view uses dark terminal bg ─────────────────────────
@@ -44,6 +45,7 @@ function AppInner() {
     { label: 'Actualités',   view: 'HOME',      icon: Globe },
     { label: 'Taux FX',     view: 'DASHBOARD', icon: LayoutDashboard },
     { label: 'Analyses',    view: 'ANALYSIS',  icon: FileText },
+    { label: 'Fixing BKAM', view: 'FIXING',   icon: BarChart2 },
     { label: 'Forwards',    view: 'FORWARDS',  icon: TrendingUp },
     { label: 'FX Swaps',    view: 'SWAPS',     icon: ArrowLeftRight },
     { label: 'Live Pricer', view: 'LIVE',      icon: Activity },
@@ -261,6 +263,7 @@ function AppInner() {
 
         {view === 'DASHBOARD' && <FxDashboard />}
         {view === 'ANALYSIS'  && <MarketAnalysis />}
+        {view === 'FIXING'    && <BkamFixing />}
 
         {/* Terminal views — dark panel wrapper */}
         {TERMINAL_VIEWS.includes(view) && (

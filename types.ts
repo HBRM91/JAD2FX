@@ -167,8 +167,31 @@ export interface BlotterEntry {
   details?: string;
 }
 
+// ─── BKAM Fixing ─────────────────────────────────────────────────────────────
+export interface FixingDayRow {
+  date: string;           // ISO "2025-06-23"
+  dateLabel: string;      // "Lun 23 Juin"
+  eurUsd: number;         // EUR/USD from ECB
+
+  // EUR/MAD
+  eurMad_ecb: number;     // ECB reference rate (proxy for BKAM fixing)
+  eurMad_basket: number;  // Theoretical BKAM basket parity
+  eurMad_div_bps: number; // Divergence (actual − basket) × 10 000
+  eurMad_div_pct: number; // Divergence as % of basket
+
+  // USD/MAD
+  usdMad_ecb: number;
+  usdMad_basket: number;
+  usdMad_div_bps: number;
+
+  // All 14 BKAM cross-rates (MAD per currency unit, bkamUnit applied)
+  allRates: Record<string, number>;
+
+  source: 'API' | 'COMPUTED';
+}
+
 // ─── Navigation ───────────────────────────────────────────────────────────────
-export type ViewState = 'HOME' | 'DASHBOARD' | 'ANALYSIS' | 'FORWARDS' | 'SWAPS' | 'LIVE' | 'ADMIN' | 'ABOUT';
+export type ViewState = 'HOME' | 'DASHBOARD' | 'ANALYSIS' | 'FIXING' | 'FORWARDS' | 'SWAPS' | 'LIVE' | 'ADMIN' | 'ABOUT';
 export type DashboardTab = 'VIREMENTS' | 'BILLETS' | 'GLOBAL_FX';
 
 // ─── Chat ─────────────────────────────────────────────────────────────────────
