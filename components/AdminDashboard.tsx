@@ -5,12 +5,12 @@ import {
   ChevronDown, RotateCcw, Plus, Trash2, CheckCircle, XCircle,
   ClipboardList, Bot, Send, Search,
 } from 'lucide-react';
-import { BKAM_CURRENCIES, GEMINI_SYSTEM_INSTRUCTION } from '../constants';
+import { BKAM_CURRENCIES } from '../constants';
 import { useAdmin, DEFAULT_TIER_COMMISSIONS } from '../context/AdminContext';
 import { getDefaultCurve, CURVE_META } from '../services/interestRates';
 import { STANDARD_TENORS } from '../services/forwardEngine';
 import { BlotterEntry, ClientTier, TierConfig, AuditEntry } from '../types';
-import { GoogleGenAI } from '@google/genai';
+import { routeQuery, getAvailableProviders, PROVIDER_LABELS, PROVIDER_COLORS } from '../services/llmRouter';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -992,7 +992,7 @@ You MAY provide advisory-grade analysis, scenario modeling, and strategic recomm
 Always cite relevant OC regulation when applicable.
 Respond in the language of the question (French, English, or Arabic).`;
 
-interface ConsultantMsg { id: string; role: 'user' | 'model'; text: string; ts: Date; }
+interface ConsultantMsg { id: string; role: 'user' | 'model'; text: string; ts: Date; provider?: string; isFallback?: boolean; }
 
 function ConsultantTab() {
   const [messages, setMessages] = useState<ConsultantMsg[]>([{
@@ -1002,25 +1002,30 @@ function ConsultantTab() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
+  const available = getAvailableProviders();
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
   const send = async () => {
     const text = input.trim();
-    if (!text || !process.env.API_KEY) return;
+    if (!text || available.length === 0) return;
     setInput('');
     setMessages(prev => [...prev, { id: Date.now().toString(), role: 'user', text, ts: new Date() }]);
     setLoading(true);
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const res = await ai.models.generateContent({
-        model: 'gemini-2.0-flash',
-        contents: [{ role: 'user', parts: [{ text }] }],
-        config: { systemInstruction: CONSULTANT_SYSTEM, thinkingConfig: { thinkingBudget: 0 } },
+      const result = await routeQuery({
+        strategy: 'quality-first',
+        systemPrompt: CONSULTANT_SYSTEM,
+        userMessage: text,
+        maxTokens: 1200,
+        temperature: 0.4,
       });
-      setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: 'model', text: res.text ?? '—', ts: new Date() }]);
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(), role: 'model', text: result.text, ts: new Date(),
+        provider: result.provider, isFallback: result.isFallback,
+      }]);
     } catch {
-      setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: 'model', text: 'Erreur — vérifiez la clé API Gemini.', ts: new Date() }]);
+      setMessages(prev => [...prev, { id: (Date.now() + 1).toString(), role: 'model', text: 'Erreur — aucun fournisseur LLM disponible. Vérifiez votre .env.', ts: new Date() }]);
     } finally {
       setLoading(false);
     }
@@ -1034,7 +1039,11 @@ function ConsultantTab() {
         </div>
         <div>
           <p className="text-sm font-bold text-white tracking-wider">JAD2 Advisory — Assistant Interne</p>
-          <p className="text-[10px] text-slate-500">Outil consultant · Accès admin requis · Gemini 2.0 Flash</p>
+          <p className="text-[10px] text-slate-500">
+            quality-first: {available.length > 0
+              ? available.map(p => PROVIDER_LABELS[p]).join(' → ')
+              : 'aucun fournisseur configuré'}
+          </p>
         </div>
         <div className="ml-auto text-[10px] font-bold bg-red-900/30 text-red-400 border border-red-800/40 px-2 py-0.5 rounded">
           INTERNAL ONLY
@@ -1043,7 +1052,7 @@ function ConsultantTab() {
 
       <div className="flex-1 overflow-y-auto space-y-3 pr-1 mb-3">
         {messages.map(msg => (
-          <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+          <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
             <div className={`max-w-[88%] px-3 py-2.5 rounded-lg text-xs leading-relaxed ${
               msg.role === 'user'
                 ? 'bg-navy-700 text-white'
@@ -1051,6 +1060,15 @@ function ConsultantTab() {
             }`}>
               {msg.text.split('\n').map((line, i) => <p key={i} className={i > 0 ? 'mt-1' : ''}>{line}</p>)}
             </div>
+            {msg.role === 'model' && msg.provider && (
+              <div className={`mt-0.5 flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded border ${
+                PROVIDER_COLORS[msg.provider as keyof typeof PROVIDER_COLORS] ?? 'bg-slate-800 text-slate-400 border-slate-700'
+              }`}>
+                <Send size={7} />
+                {PROVIDER_LABELS[msg.provider as keyof typeof PROVIDER_LABELS] ?? msg.provider}
+                {msg.isFallback && <span className="text-amber-400 ml-1">↩ fallback</span>}
+              </div>
+            )}
           </div>
         ))}
         {loading && (

@@ -247,6 +247,8 @@ export interface ChatMessage {
   text: string;
   timestamp: Date;
   isUpsell?: boolean;
+  provider?: string;
+  isFallback?: boolean;
 }
 
 export interface RegDocument {

@@ -2,10 +2,8 @@ import React, { useState, useRef, useEffect } from 'react';
 import { ChatMessage } from '../types';
 import { GEMINI_SYSTEM_INSTRUCTION } from '../constants';
 import { retrieveContext, getDocumentCount } from '../services/ragService';
-import { Send, Bot, ShieldAlert, Briefcase, BookOpen } from 'lucide-react';
-import { GoogleGenAI } from "@google/genai";
-
-const GEMINI_MODEL = 'gemini-2.0-flash';
+import { routeQuery, getAvailableProviders, PROVIDER_LABELS, PROVIDER_COLORS } from '../services/llmRouter';
+import { Send, Bot, ShieldAlert, Briefcase, BookOpen, Zap } from 'lucide-react';
 
 const ChatInterface: React.FC = () => {
   const [input, setInput] = useState('');
@@ -18,15 +16,17 @@ const ChatInterface: React.FC = () => {
     }
   ]);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeProvider, setActiveProvider] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
-  useEffect(() => { scrollToBottom(); }, [messages]);
+  const available = getAvailableProviders();
+  const hasAnyKey = available.length > 0;
 
   const handleSend = async () => {
     const text = input.trim();
-    if (!text || !process.env.API_KEY) return;
+    if (!text || !hasAnyKey) return;
 
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
@@ -38,40 +38,39 @@ const ChatInterface: React.FC = () => {
     setMessages(prev => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
+    setActiveProvider(null);
 
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-      // Real RAG: retrieve relevant OC regulation context
       const context = retrieveContext(text, 3);
+      const userMessage = `REGULATORY CONTEXT (Office des Changes documents):\n\n${context}\n\n---\nUSER QUESTION: ${text}`;
 
-      const prompt = `REGULATORY CONTEXT (Office des Changes documents):\n\n${context}\n\n---\nUSER QUESTION: ${text}`;
-
-      const response = await ai.models.generateContent({
-        model: GEMINI_MODEL,
-        contents: [{ role: 'user', parts: [{ text: prompt }] }],
-        config: {
-          systemInstruction: GEMINI_SYSTEM_INSTRUCTION,
-          thinkingConfig: { thinkingBudget: 0 },
-        },
+      const result = await routeQuery({
+        strategy: 'cost-first',
+        systemPrompt: GEMINI_SYSTEM_INSTRUCTION,
+        userMessage,
+        maxTokens: 900,
+        temperature: 0.3,
       });
 
-      const replyText = response.text ?? "Unable to retrieve regulation.";
-      const isUpsell = replyText.toLowerCase().includes("consultation") ||
-                       replyText.toLowerCase().includes("expert");
+      setActiveProvider(result.provider);
+
+      const isUpsell = result.text.toLowerCase().includes("consultation") ||
+                       result.text.toLowerCase().includes("expert");
 
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'model',
-        text: replyText,
+        text: result.text,
         timestamp: new Date(),
         isUpsell,
+        provider: result.provider,
+        isFallback: result.isFallback,
       }]);
     } catch {
       setMessages(prev => [...prev, {
         id: (Date.now() + 1).toString(),
         role: 'model',
-        text: "System is currently updating regulatory indices. Please try again in a moment.",
+        text: "Service temporairement indisponible. Veuillez réessayer dans un moment.",
         timestamp: new Date(),
       }]);
     } finally {
@@ -101,9 +100,18 @@ const ChatInterface: React.FC = () => {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
-          <BookOpen size={11} />
-          <span>Office des Changes</span>
+        <div className="flex items-center gap-2">
+          {/* Provider status badge */}
+          {available.length > 0 && (
+            <div className="flex items-center gap-1 text-[9px] text-emerald-400 bg-emerald-900/20 border border-emerald-700/30 px-2 py-0.5 rounded-full">
+              <Zap size={8} />
+              {available[0] === 'groq' ? 'Groq Free' : available[0] === 'openrouter' ? 'OpenRouter' : 'Gemini'}
+            </div>
+          )}
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+            <BookOpen size={11} />
+            <span>Office des Changes</span>
+          </div>
         </div>
       </div>
 
@@ -121,6 +129,17 @@ const ChatInterface: React.FC = () => {
                   <p key={i} className={`${i > 0 ? 'mt-1' : ''} last:mb-0`}>{line}</p>
                 ))}
               </div>
+
+              {/* Provider badge on model messages */}
+              {msg.role === 'model' && msg.provider && (
+                <div className={`mt-1 flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded border ${
+                  PROVIDER_COLORS[msg.provider as keyof typeof PROVIDER_COLORS] ?? 'bg-slate-800 text-slate-400 border-slate-700'
+                }`}>
+                  <Zap size={8} />
+                  {PROVIDER_LABELS[msg.provider as keyof typeof PROVIDER_LABELS] ?? msg.provider}
+                  {msg.isFallback && <span className="text-amber-400 ml-1">↩ fallback</span>}
+                </div>
+              )}
 
               {msg.isUpsell && (
                 <div className="mt-2 bg-gold-50 border border-gold-200 p-3 rounded-lg flex items-center gap-3 w-full">
@@ -158,19 +177,24 @@ const ChatInterface: React.FC = () => {
           </div>
         )}
 
-        {/* Suggested questions (only on first load) */}
         {messages.length === 1 && !isLoading && (
           <div className="space-y-2">
             <p className="text-[10px] text-slate-400 uppercase tracking-wider">Suggested questions</p>
             {SUGGESTED.map((q, i) => (
               <button
                 key={i}
-                onClick={() => { setInput(q); }}
+                onClick={() => setInput(q)}
                 className="block w-full text-left text-xs px-3 py-2 bg-white border border-slate-200 rounded-lg hover:border-navy-900 hover:text-navy-900 text-slate-600 transition"
               >
                 {q}
               </button>
             ))}
+          </div>
+        )}
+
+        {!hasAnyKey && (
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-[10px] text-amber-700">
+            ⚠️ Aucune clé API configurée. Ajoutez <code className="font-mono bg-amber-100 px-1">GROQ_API_KEY</code> dans votre fichier <code className="font-mono bg-amber-100 px-1">.env</code> pour activer le chatbot (gratuit).
           </div>
         )}
 
@@ -183,7 +207,7 @@ const ChatInterface: React.FC = () => {
           <ShieldAlert size={11} className="text-amber-600 mt-0.5 flex-shrink-0" />
           <p className="text-[10px] text-amber-700 leading-tight font-medium">
             <strong>Information pédagogique uniquement — ZÉRO conseil en investissement.</strong>{' '}
-            Non agréé AMMC/BAM (Loi n° 44-12). Conseil personnalisé en couverture de change :{' '}
+            Non agréé AMMC/BAM (Loi n° 44-12). Conseil personnalisé :{' '}
             <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="underline font-bold">jad2advisory.com</a>
           </p>
         </div>
@@ -200,12 +224,13 @@ const ChatInterface: React.FC = () => {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && handleSend()}
-            placeholder="Ask about OC regulations..."
-            className="flex-1 px-4 py-3 bg-white focus:outline-none text-sm text-slate-800 placeholder:text-slate-400"
+            placeholder={hasAnyKey ? "Posez votre question sur la réglementation OC..." : "Clé API requise — voir .env.example"}
+            disabled={!hasAnyKey}
+            className="flex-1 px-4 py-3 bg-white focus:outline-none text-sm text-slate-800 placeholder:text-slate-400 disabled:bg-slate-50 disabled:cursor-not-allowed"
           />
           <button
             onClick={handleSend}
-            disabled={isLoading || !input.trim()}
+            disabled={isLoading || !input.trim() || !hasAnyKey}
             className="bg-navy-900 hover:bg-navy-800 text-white px-5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send size={15} />
