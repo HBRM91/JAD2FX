@@ -5,10 +5,10 @@ import {
   ChevronDown, RotateCcw, Plus, Trash2, CheckCircle, XCircle,
 } from 'lucide-react';
 import { BKAM_CURRENCIES } from '../constants';
-import { useAdmin } from '../context/AdminContext';
+import { useAdmin, DEFAULT_TIER_COMMISSIONS } from '../context/AdminContext';
 import { getDefaultCurve, CURVE_META } from '../services/interestRates';
 import { STANDARD_TENORS } from '../services/forwardEngine';
-import { BlotterEntry } from '../types';
+import { BlotterEntry, ClientTier, TierConfig } from '../types';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -708,9 +708,179 @@ function BlotterTab() {
   );
 }
 
+// ─── PRICING Tab ─────────────────────────────────────────────────────────────
+
+const TIER_ORDER: ClientTier[] = ['CORPORATE', 'SME', 'TPE', 'INDIVIDUAL'];
+const TIER_COLORS: Record<ClientTier, string> = {
+  CORPORATE: 'border-purple-700/50 bg-purple-950/20',
+  SME:       'border-blue-700/50 bg-blue-950/20',
+  TPE:       'border-amber-700/50 bg-amber-950/20',
+  INDIVIDUAL:'border-slate-600/50 bg-slate-900/20',
+};
+const TIER_LABEL_COLORS: Record<ClientTier, string> = {
+  CORPORATE: 'text-purple-400',
+  SME:       'text-blue-400',
+  TPE:       'text-amber-400',
+  INDIVIDUAL:'text-slate-300',
+};
+
+function PricingTab() {
+  const { config, updateConfig, livePrices } = useAdmin();
+  const tiers = config.tierCommissions ?? DEFAULT_TIER_COMMISSIONS;
+
+  // Use EUR/MAD from live prices or fallback
+  const eurMadBase = livePrices.find(p => p.currency === 'EUR')?.mid ?? 10.82;
+  const virSpread  = config.virementSpreadPct;
+  const bilSpread  = config.billetSpreadPct;
+
+  const updateTier = (tier: ClientTier, patch: Partial<TierConfig>) => {
+    updateConfig({
+      tierCommissions: {
+        ...tiers,
+        [tier]: { ...tiers[tier], ...patch },
+      },
+    });
+  };
+
+  const resetTier = (tier: ClientTier) => {
+    updateConfig({
+      tierCommissions: {
+        ...tiers,
+        [tier]: DEFAULT_TIER_COMMISSIONS[tier],
+      },
+    });
+  };
+
+  const calcRate = (base: number, spreadPct: number, commBps: number, side: 'buy' | 'sell') => {
+    const totalPct = spreadPct + commBps / 10000;
+    return side === 'sell' ? base * (1 + totalPct) : base * (1 - totalPct);
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="bg-navy-800 border border-navy-600 rounded p-4">
+        <p className="text-xs font-bold text-white mb-1 flex items-center gap-2">
+          <RefreshCw size={12} className="text-gold-400" />
+          Base Rate (EUR/MAD Live)
+        </p>
+        <p className="text-2xl font-mono font-bold text-gold-400">{eurMadBase.toFixed(4)}</p>
+        <p className="text-[10px] text-slate-500 mt-0.5">
+          Virement base spread: {(virSpread * 100).toFixed(2)}% · Billet base spread: {(bilSpread * 100).toFixed(2)}%
+          · Configure in SPREADS tab
+        </p>
+      </div>
+
+      <p className="text-xs text-slate-500">
+        Commercial commission in basis points (bps) added on top of the BKAM base spread per client segment.
+        1 bps = 0.01%. These are admin-configurable and not disclosed to end users beyond the quoted rate.
+      </p>
+
+      {TIER_ORDER.map(tier => {
+        const t = tiers[tier];
+        const virSell = calcRate(eurMadBase, virSpread, t.virementCommBps, 'sell');
+        const virBuy  = calcRate(eurMadBase, virSpread, t.virementCommBps, 'buy');
+        const bilSell = calcRate(eurMadBase, bilSpread, t.billetCommBps,   'sell');
+        const bilBuy  = calcRate(eurMadBase, bilSpread, t.billetCommBps,   'buy');
+        const totalVirPct = ((virSpread + t.virementCommBps / 10000) * 100).toFixed(3);
+        const totalBilPct = ((bilSpread + t.billetCommBps / 10000) * 100).toFixed(3);
+
+        return (
+          <div key={tier} className={`border rounded-lg p-4 space-y-4 ${TIER_COLORS[tier]}`}>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className={`text-sm font-bold uppercase tracking-wider ${TIER_LABEL_COLORS[tier]}`}>{t.label}</p>
+                <p className="text-[11px] text-slate-400">{t.description}</p>
+              </div>
+              <button
+                onClick={() => resetTier(tier)}
+                className="text-[10px] text-slate-500 hover:text-amber-400 flex items-center gap-1 transition"
+              >
+                <RotateCcw size={10} /> Reset
+              </button>
+            </div>
+
+            {/* Live rate preview */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-navy-900/60 rounded p-3">
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Virement EUR/MAD</p>
+                <div className="flex justify-between font-mono text-sm">
+                  <span className="text-emerald-400 font-bold">{virBuy.toFixed(4)}</span>
+                  <span className="text-[10px] text-slate-500 self-center">↔</span>
+                  <span className="text-red-400 font-bold">{virSell.toFixed(4)}</span>
+                </div>
+                <p className="text-[9px] text-slate-500 mt-0.5">Buy / Sell · Total spread: {totalVirPct}%</p>
+              </div>
+              <div className="bg-navy-900/60 rounded p-3">
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Billet EUR/MAD</p>
+                <div className="flex justify-between font-mono text-sm">
+                  <span className="text-emerald-400 font-bold">{bilBuy.toFixed(4)}</span>
+                  <span className="text-[10px] text-slate-500 self-center">↔</span>
+                  <span className="text-red-400 font-bold">{bilSell.toFixed(4)}</span>
+                </div>
+                <p className="text-[9px] text-slate-500 mt-0.5">Buy / Sell · Total spread: {totalBilPct}%</p>
+              </div>
+            </div>
+
+            {/* Sliders */}
+            <div className="space-y-3">
+              {[
+                {
+                  label: 'Virement Commission',
+                  value: t.virementCommBps,
+                  key: 'virementCommBps' as const,
+                  min: 0, max: 300, color: 'text-emerald-400',
+                },
+                {
+                  label: 'Billet Commission',
+                  value: t.billetCommBps,
+                  key: 'billetCommBps' as const,
+                  min: 0, max: 500, color: 'text-amber-400',
+                },
+                {
+                  label: 'Forward Markup',
+                  value: t.forwardMarkupBps,
+                  key: 'forwardMarkupBps' as const,
+                  min: 0, max: 200, color: 'text-purple-400',
+                },
+              ].map(item => (
+                <div key={item.key} className="space-y-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-slate-400 uppercase tracking-wider">{item.label}</span>
+                    <span className={`text-xs font-mono font-bold ${item.color}`}>
+                      {item.value} bps ({(item.value / 100).toFixed(2)}%)
+                    </span>
+                  </div>
+                  <input
+                    type="range"
+                    min={item.min} max={item.max} step={5}
+                    value={item.value}
+                    onChange={e => updateTier(tier, { [item.key]: Number(e.target.value) })}
+                    className="w-full accent-gold-500 h-1"
+                  />
+                  <div className="flex justify-between text-[9px] text-slate-600 font-mono">
+                    <span>0</span><span>{item.max / 2} bps</span><span>{item.max} bps</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+
+      <div className="bg-amber-950/30 border border-amber-800/40 rounded p-3">
+        <p className="text-[10px] text-amber-400 leading-relaxed">
+          ⚠️ Ces commissions sont des paramètres internes. Les cours publiés aux clients sont les cours finaux (base + spread + commission).
+          Conformément à la réglementation OC, les intermédiaires agréés doivent afficher leurs grilles tarifaires dans leurs locaux.
+          JAD2FX est un outil pédagogique — ces paramètres ne constituent pas des cours contraignants.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-type AdminTab = 'SYSTEM' | 'RATES' | 'CURVES' | 'FORWARDS' | 'SPREADS' | 'ALERTS' | 'BLOTTER';
+type AdminTab = 'SYSTEM' | 'RATES' | 'CURVES' | 'FORWARDS' | 'SPREADS' | 'PRICING' | 'ALERTS' | 'BLOTTER';
 
 const TABS: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: 'SYSTEM',   label: 'System',   icon: Activity },
@@ -718,6 +888,7 @@ const TABS: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: 'CURVES',   label: 'Curves',   icon: TrendingUp },
   { id: 'FORWARDS', label: 'Forwards', icon: Settings },
   { id: 'SPREADS',  label: 'Spreads',  icon: BarChart2 },
+  { id: 'PRICING',  label: 'Pricing',  icon: TrendingUp },
   { id: 'ALERTS',   label: 'Alerts',   icon: AlertTriangle },
   { id: 'BLOTTER',  label: 'Blotter',  icon: FileText },
 ];
@@ -793,6 +964,7 @@ export default function AdminDashboard() {
           {activeTab === 'CURVES'   && <CurvesTab />}
           {activeTab === 'FORWARDS' && <ForwardsTab />}
           {activeTab === 'SPREADS'  && <SpreadsTab />}
+          {activeTab === 'PRICING'  && <PricingTab />}
           {activeTab === 'ALERTS'   && <AlertsTab />}
           {activeTab === 'BLOTTER'  && <BlotterTab />}
         </div>

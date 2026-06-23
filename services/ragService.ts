@@ -381,6 +381,153 @@ Eurobonds et marchés de capitaux internationaux:
 - Les émissions obligataires en devises par des entités marocaines (État, OCP, etc.) requièrent une autorisation spécifique de Bank Al-Maghrib et du Ministère des Finances.
     `
   },
+  {
+    id: 'bkam-fixing-methodo',
+    title: "Bank Al-Maghrib — Méthodologie du Fixing Officiel MAD et Marché des Changes",
+    type: 'NOTE',
+    date: '2024-01-15',
+    summary: "Description du mécanisme de fixing quotidien du dirham marocain, structure du marché interbancaire des changes et rôle de BKAM dans la gestion du régime de change.",
+    keywords: ['fixing', 'fixing bkam', 'cours de référence', 'taux directeur', 'panier de devises', 'bande fluctuation', 'marché interbancaire', 'séance fixing', 'cours officiel', 'bank al-maghrib', 'dirham', 'mad'],
+    content: `
+Fixing Officiel Bank Al-Maghrib — Méthodologie:
+
+1. RÉGIME DE CHANGE DU DIRHAM (MAD):
+Le dirham marocain évolue dans un régime de change flottant géré (managed float) depuis janvier 2018.
+- Bande de fluctuation: ±5% autour d'un taux central (élargie de ±2,5% à ±5% en mars 2020).
+- Panier de référence: 60% EUR / 40% USD (inchangé depuis 2015).
+- Parité centrale: déterminée quotidiennement par Bank Al-Maghrib selon la formule du panier.
+- Formule USD/MAD théorique: K / (0,60 × EUR/USD + 0,40) où K ≈ 10,49 (calibré sur la parité historique).
+
+2. FIXING QUOTIDIEN:
+- Séance de fixing: chaque jour ouvré à 11h30 (heure de Casablanca) sur le Marché Interbancaire des Changes (MIC).
+- BKAM publie les cours de référence officiels (cours directeurs) après la séance.
+- Les cours officiels EUR/MAD et USD/MAD servent de base pour toutes les opérations de change réglementées.
+- Source officielle: www.bkam.ma → Marchés → Indicateurs clés → Marché des changes.
+
+3. TAUX DE CHANGE VIREMENTS (cours de transfert):
+Publiés quotidiennement par BKAM pour les 14 devises officiellement cotées.
+Disponibles sur: https://www.bkam.ma/en/Markets/Key-indicators/Foreign-exchange-market/Foreign-exchange-rates/Transfer-exchange-rate
+Ces taux correspondent aux opérations de virement international (achats et ventes de devises par virement bancaire).
+
+4. TAUX DE CHANGE BILLETS (cours billets de banque):
+Cours distincts pour les opérations en espèces (billets de banque étrangers).
+Disponibles sur: https://www.bkam.ma/en/Markets/Key-indicators/Foreign-exchange-market/Foreign-exchange-rates/Foreign-banknotes-exchange-rate
+Les cours billets sont généralement moins favorables que les cours virements en raison du coût de manipulation physique des espèces.
+
+5. DEVISES OFFICIELLEMENT COTÉES PAR BKAM (14 devises):
+EUR, USD, GBP, CHF, CAD, JPY (cotation au cent), SAR, AED, KWD, QAR, DKK, NOK, SEK, CNY.
+
+6. MARCHÉ INTERBANCAIRE DES CHANGES (MIC):
+- Seules les banques agréées par BKAM peuvent participer directement au MIC.
+- Les entreprises et particuliers accèdent au marché via leur banque agréée.
+- BKAM intervient sur le MIC pour maintenir le cours dans la bande de ±5%.
+    `
+  },
+  {
+    id: 'oc-commissions-change',
+    title: "Office des Changes — Instruction sur les Commissions Autorisées sur Opérations de Change",
+    type: 'INSTRUCTION',
+    date: '2023-07-01',
+    summary: "Cadre réglementaire des commissions et marges commerciales applicables par les intermédiaires agréés sur les opérations de change au Maroc, par segment de clientèle.",
+    keywords: ['commission change', 'commission oc', 'marge commerciale', 'taux client', 'spread change', 'commission virement', 'commission billets', 'tarification change', 'frais change', 'grande entreprise', 'pme', 'tpe', 'particulier', 'commission bancaire', 'cours client'],
+    content: `
+Office des Changes — Commissions sur Opérations de Change:
+
+1. PRINCIPE GÉNÉRAL:
+Les intermédiaires agréés (banques, bureaux de change) sont autorisés à prélever une commission commerciale sur les opérations de change, EN PLUS du cours de référence BKAM. Ces commissions sont librement négociées dans les limites fixées par l'Office des Changes.
+
+2. STRUCTURE DES COURS CLIENT:
+Cours client = Cours de référence BKAM ± Spread de base ± Commission commerciale de l'intermédiaire
+- Le "cours de référence BKAM" est le taux officiel publié quotidiennement.
+- Le "spread de base" couvre les coûts opérationnels de l'intermédiaire.
+- La "commission commerciale" est la marge bénéficiaire de l'intermédiaire, librement négociée.
+
+3. SEGMENTATION CLIENTÈLE ET COMMISSIONS INDICATIVES:
+
+Grande Entreprise / Multinationale (CA > 500M MAD):
+- Virements: commissions très compétitives, souvent 2,5–5 bps (0,025%–0,05%) au-delà du spread de base.
+- Accès direct aux taux interbancaires avec marges minimales.
+- Accès aux instruments de couverture sophistiqués (forwards, options, swaps).
+- Négociation directe avec la salle des marchés de la banque.
+
+PME / Petite et Moyenne Entreprise (CA 10–500M MAD):
+- Virements: commissions de 5–10 bps (0,05%–0,10%) au-delà du spread de base.
+- Accès simplifié aux contrats à terme (Circulaire OC 01/2024).
+- Eligibilité au CPEC si recettes devises > 5M MAD/an.
+
+TPE / Très Petite Entreprise et Auto-Entrepreneur (CA < 10M MAD):
+- Virements: commissions de 8–15 bps (0,08%–0,15%) au-delà du spread de base.
+- Opérations courantes uniquement (importations/exportations ordinaires).
+- Pas d'accès aux instruments dérivés sans accompagnement spécialisé.
+
+Particuliers (voyages, allocation touristique):
+- Virements et billets: commissions plus élevées (15–30 bps) reflétant les coûts unitaires plus importants.
+- Allocation annuelle de voyage: 45 000 MAD par an (Circulaire OC 2/2019).
+- Les opérations en billets de banque (espèces) supportent des frais supplémentaires.
+
+4. OPÉRATIONS EN BILLETS DE BANQUE (espèces):
+Les commissions sur billets sont systématiquement plus élevées que sur virements en raison:
+- Du coût logistique (transport, comptage, sécurisation des espèces).
+- Du risque de contrefaçon.
+- Des contraintes réglementaires anti-blanchiment (LCB-FT).
+
+5. TRANSPARENCE TARIFAIRE:
+Les intermédiaires agréés sont tenus d'afficher leur grille tarifaire (cours acheteur, cours vendeur, commissions) dans leurs agences et sur leurs sites internet, conformément aux dispositions de la réglementation de transparence bancaire de Bank Al-Maghrib.
+
+6. PROTECTION DU CLIENT:
+En cas de litige sur les commissions appliquées, le client peut saisir:
+- Le médiateur bancaire de sa banque.
+- Bank Al-Maghrib (service des réclamations).
+- L'Office des Changes (infractions à la réglementation tarifaire).
+    `
+  },
+  {
+    id: 'bkam-fixing-fixingrates',
+    title: "BKAM — Taux de Référence Officiels et Grille de Cotation des 14 Devises",
+    type: 'NOTE',
+    date: '2024-06-01',
+    summary: "Description des taux de change officiels publiés par Bank Al-Maghrib pour les 14 devises cotées contre le dirham marocain, avec unités de cotation BKAM.",
+    keywords: ['taux référence', 'cours change', '14 devises', 'eur mad', 'usd mad', 'gbp mad', 'jpy mad', 'cotation bkam', 'unité cotation', 'cours officiel bkam', 'dirham', 'fixing officiel', 'cours acheteur vendeur'],
+    content: `
+BKAM — Taux de Référence Officiels des 14 Devises:
+
+DEVISES COTÉES ET UNITÉS:
+Bank Al-Maghrib cote officiellement les 14 devises suivantes contre le Dirham marocain (MAD):
+1. EUR — Euro (unité: 1 EUR)
+2. USD — Dollar américain (unité: 1 USD)
+3. GBP — Livre sterling (unité: 1 GBP)
+4. CHF — Franc suisse (unité: 1 CHF)
+5. CAD — Dollar canadien (unité: 1 CAD)
+6. JPY — Yen japonais (unité: 100 JPY — cotation au cent)
+7. SAR — Riyal saoudien (unité: 1 SAR)
+8. AED — Dirham des Émirats (unité: 1 AED)
+9. KWD — Dinar koweïtien (unité: 1 KWD)
+10. QAR — Riyal qatarien (unité: 1 QAR)
+11. DKK — Couronne danoise (unité: 1 DKK)
+12. NOK — Couronne norvégienne (unité: 1 NOK)
+13. SEK — Couronne suédoise (unité: 1 SEK)
+14. CNY — Yuan chinois (unité: 1 CNY)
+
+DEUX TYPES DE COURS OFFICIELS BKAM:
+1. Cours de change virement (Transfer exchange rate):
+   - Applicable aux opérations de transfert bancaire (virements SWIFT).
+   - Publié quotidiennement après la séance de fixing de 11h30.
+   - Source: www.bkam.ma/en/Markets/.../Transfer-exchange-rate
+
+2. Cours de change billets (Foreign banknotes exchange rate):
+   - Applicable aux opérations en espèces (billets de banque étrangers).
+   - Cours généralement moins favorables (spread plus large).
+   - Source: www.bkam.ma/en/Markets/.../Foreign-banknotes-exchange-rate
+
+LECTURE DES COURS:
+- Cours acheteur (Buy): taux auquel la banque ACHÈTE la devise étrangère (client vend devises, reçoit MAD).
+- Cours vendeur (Sell): taux auquel la banque VEND la devise étrangère (client achète devises, paie MAD).
+- L'écart entre cours acheteur et vendeur représente la marge de l'intermédiaire agréé.
+
+FRÉQUENCE DE PUBLICATION:
+Chaque jour ouvré. En cas de fermeture des marchés (fêtes nationales, week-end), le dernier cours publié reste en vigueur.
+    `
+  },
 ];
 
 // Simple keyword extraction (removes stop words, lowercases)

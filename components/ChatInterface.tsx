@@ -13,7 +13,7 @@ const ChatInterface: React.FC = () => {
     {
       id: '1',
       role: 'model',
-      text: `Salam. Je suis l'Assistant Réglementaire JAD2FX, alimenté par une base de ${getDocumentCount()} circulaires et instructions de l'Office des Changes.\n\nPosez-moi vos questions sur: paiements import/export, allocations voyage, couverture de change, investissements étrangers, comptes en devises, ou toute circulaire OC.\n\n⚠️ Information réglementaire uniquement — Pas de conseil en investissement — Pour conseil personnalisé: jad2advisory.com`,
+      text: `Salam. Je suis l'Assistant Réglementaire JAD2FX — ${getDocumentCount()} documents OC & BKAM indexés.\n\nJe peux vous renseigner sur : délais de rapatriement, allocations voyage, commissions OC autorisées, fixing BKAM, comptes devises (CPEC/CDE), couverture de change (cadre réglementaire), investissements étrangers.\n\n🚫 Ce que je ne fais PAS : conseil en investissement, recommandations d'achat/vente, stratégies de couverture personnalisées.\n\nPour conseil structuré sur vos besoins FX → jad2advisory.com`,
       timestamp: new Date(),
     }
   ]);
@@ -182,12 +182,13 @@ const ChatInterface: React.FC = () => {
         <div className="flex items-start gap-2">
           <ShieldAlert size={11} className="text-amber-600 mt-0.5 flex-shrink-0" />
           <p className="text-[10px] text-amber-700 leading-tight font-medium">
-            Informations réglementaires uniquement — Pas de conseil en investissement au sens de la Loi n° 44-12 — Non agréé AMMC.{' '}
-            Consultez <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="underline font-bold">jad2advisory.com</a> pour conseil personnalisé.
+            <strong>Information pédagogique uniquement — ZÉRO conseil en investissement.</strong>{' '}
+            Non agréé AMMC/BAM (Loi n° 44-12). Conseil personnalisé en couverture de change :{' '}
+            <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="underline font-bold">jad2advisory.com</a>
           </p>
         </div>
         <p className="text-[10px] text-amber-600/70">
-          🔒 Conformité Loi 09-08 (CNDP): Vos questions ne sont pas associées à votre identité et ne sont pas conservées.
+          🔒 Loi 09-08 (CNDP) : Vos questions ne sont pas associées à votre identité et ne sont pas conservées.
         </p>
       </div>
 

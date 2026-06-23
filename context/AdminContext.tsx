@@ -1,7 +1,42 @@
 import React, {
   createContext, useContext, useState, useCallback, useEffect, useRef,
 } from 'react';
-import { AdminConfig, BlotterEntry, LivePriceEntry } from '../types';
+import { AdminConfig, BlotterEntry, LivePriceEntry, ClientTier, TierConfig } from '../types';
+
+export const DEFAULT_TIER_COMMISSIONS: Record<ClientTier, TierConfig> = {
+  CORPORATE: {
+    label: 'Large Corporate / MNC',
+    labelFr: 'Grande Entreprise / Multinationale',
+    description: 'CA > 500M MAD · Accès produits dérivés · Négociation directe',
+    virementCommBps: 25,
+    billetCommBps:   60,
+    forwardMarkupBps: 10,
+  },
+  SME: {
+    label: 'SME / PME',
+    labelFr: 'Petite et Moyenne Entreprise',
+    description: 'CA 10–500M MAD · Couverture OC Circ. 01/2024 · Forwards autorisés',
+    virementCommBps: 50,
+    billetCommBps:   120,
+    forwardMarkupBps: 20,
+  },
+  TPE: {
+    label: 'TPE / Auto-Entrepreneur',
+    labelFr: 'Très Petite Entreprise',
+    description: 'CA < 10M MAD · Opérations courantes import/export',
+    virementCommBps: 80,
+    billetCommBps:   180,
+    forwardMarkupBps: 35,
+  },
+  INDIVIDUAL: {
+    label: 'Individual / Particulier',
+    labelFr: 'Particulier',
+    description: 'Voyages & allocation annuelle 45 000 MAD · Billets de banque',
+    virementCommBps: 120,
+    billetCommBps:   250,
+    forwardMarkupBps: 60,
+  },
+};
 
 // ─── Defaults ─────────────────────────────────────────────────────────────────
 
@@ -22,6 +57,7 @@ export const DEFAULT_ADMIN_CONFIG: AdminConfig = {
     { pair: 'EUR/MAD', min: 10.50, max: 11.20, enabled: false },
     { pair: 'USD/MAD', min:  9.60, max: 10.20, enabled: false },
   ],
+  tierCommissions: DEFAULT_TIER_COMMISSIONS,
 };
 
 const ADMIN_PASSCODE = 'JAD2ADMIN';

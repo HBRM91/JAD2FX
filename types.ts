@@ -142,6 +142,18 @@ export interface LivePriceEntry {
   lastUpdated: string;
 }
 
+// ─── Client Tiers ─────────────────────────────────────────────────────────────
+export type ClientTier = 'CORPORATE' | 'SME' | 'TPE' | 'INDIVIDUAL';
+
+export interface TierConfig {
+  label: string;
+  labelFr: string;
+  description: string;
+  virementCommBps: number;   // commercial commission on top of BKAM fixing (bps)
+  billetCommBps: number;     // commercial commission for banknotes (bps)
+  forwardMarkupBps: number;  // forward markup for this tier (bps)
+}
+
 // ─── Admin ────────────────────────────────────────────────────────────────────
 export interface AdminConfig {
   refreshIntervalMs: number;
@@ -153,6 +165,7 @@ export interface AdminConfig {
   dealerSpreadPips: Record<string, number>;
   isLive: boolean;
   alertThresholds: { pair: string; min: number; max: number; enabled: boolean }[];
+  tierCommissions: Record<ClientTier, TierConfig>;
 }
 
 export interface BlotterEntry {

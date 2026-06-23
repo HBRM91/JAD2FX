@@ -4,12 +4,13 @@ import {
   CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
-import { FixingDayRow } from '../types';
+import { FixingDayRow, ClientTier } from '../types';
 import { BKAM_CURRENCIES } from '../constants';
 import { fetchFixingHistory } from '../services/bkamFixing';
+import { useAdmin, DEFAULT_TIER_COMMISSIONS } from '../context/AdminContext';
 import {
   RefreshCw, AlertTriangle, Info, TrendingUp, TrendingDown,
-  Minus, Database,
+  Minus, Database, Users,
 } from 'lucide-react';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -96,10 +97,21 @@ function DivergenceBar(props: { x?: number; y?: number; width?: number; height?:
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+const TIER_ORDER: ClientTier[] = ['CORPORATE', 'SME', 'TPE', 'INDIVIDUAL'];
+const TIER_ACCENT: Record<ClientTier, string> = {
+  CORPORATE: 'text-purple-700 bg-purple-50 border-purple-200',
+  SME:       'text-blue-700 bg-blue-50 border-blue-200',
+  TPE:       'text-amber-700 bg-amber-50 border-amber-200',
+  INDIVIDUAL:'text-slate-700 bg-slate-50 border-slate-200',
+};
+
 export default function BkamFixing() {
+  const { config } = useAdmin();
   const [rows,    setRows]    = useState<FixingDayRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState<string | null>(null);
+
+  const tiers = config.tierCommissions ?? DEFAULT_TIER_COMMISSIONS;
 
   const load = async () => {
     setLoading(true);
@@ -537,6 +549,90 @@ export default function BkamFixing() {
               </table>
             </div>
           </div>
+
+          {/* ── Tiered pricing grid ── */}
+          {latest && (
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h3 className="text-sm font-bold text-navy-900 uppercase tracking-wider flex items-center gap-2">
+                    <Users size={14} className="text-gold-600" />
+                    Grille Tarifaire Indicative par Segment Client — EUR/MAD
+                  </h3>
+                  <p className="text-[10px] text-slate-400 mt-0.5">
+                    Commissions commerciales configurables dans Admin → Onglet Pricing · Cours indicatifs uniquement
+                  </p>
+                </div>
+                <a
+                  href="https://www.bkam.ma/en/Markets/Key-indicators/Foreign-exchange-market/Foreign-exchange-rates/Transfer-exchange-rate"
+                  target="_blank" rel="noopener noreferrer"
+                  className="text-[10px] text-blue-600 underline whitespace-nowrap"
+                >
+                  Cours officiels BKAM ↗
+                </a>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[700px] text-sm">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-100 text-[10px] uppercase tracking-wider text-slate-500">
+                      <th className="text-left px-5 py-3 font-semibold">Segment</th>
+                      <th className="text-right px-4 py-3 font-semibold">Comm. Virement</th>
+                      <th className="text-right px-4 py-3 font-semibold">EUR/MAD Achat (Virement)</th>
+                      <th className="text-right px-4 py-3 font-semibold">EUR/MAD Vente (Virement)</th>
+                      <th className="text-right px-4 py-3 font-semibold">Comm. Billet</th>
+                      <th className="text-right px-5 py-3 font-semibold">EUR/MAD Vente (Billet)</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {TIER_ORDER.map(tier => {
+                      const t = tiers[tier];
+                      const base = latest.eurMad_ecb;
+                      const virTotal = config.virementSpreadPct + t.virementCommBps / 10000;
+                      const bilTotal = config.billetSpreadPct   + t.billetCommBps   / 10000;
+                      const virBuy  = base * (1 - virTotal);
+                      const virSell = base * (1 + virTotal);
+                      const bilSell = base * (1 + bilTotal);
+                      return (
+                        <React.Fragment key={tier}>
+                          <tr className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                            <td className="px-5 py-3">
+                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${TIER_ACCENT[tier]}`}>
+                                {t.label}
+                              </span>
+                              <p className="text-[10px] text-slate-400 mt-0.5">{t.description}</p>
+                            </td>
+                            <td className="text-right px-4 py-3 font-mono text-slate-500 text-xs">
+                              +{t.virementCommBps} bps
+                            </td>
+                            <td className="text-right px-4 py-3 font-mono font-bold text-emerald-700">
+                              {virBuy.toFixed(4)}
+                            </td>
+                            <td className="text-right px-4 py-3 font-mono font-bold text-red-700">
+                              {virSell.toFixed(4)}
+                            </td>
+                            <td className="text-right px-4 py-3 font-mono text-slate-500 text-xs">
+                              +{t.billetCommBps} bps
+                            </td>
+                            <td className="text-right px-5 py-3 font-mono font-bold text-red-700">
+                              {bilSell.toFixed(4)}
+                            </td>
+                          </tr>
+                        </React.Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <div className="px-5 py-3 bg-slate-50 border-t border-slate-100">
+                <p className="text-[10px] text-slate-400">
+                  Base BKAM fixing: <span className="font-mono font-bold text-navy-900">{latest.eurMad_ecb.toFixed(4)}</span> EUR/MAD ·
+                  Spread virement de base: <span className="font-mono">{(config.virementSpreadPct * 100).toFixed(2)}%</span> ·
+                  Spread billet de base: <span className="font-mono">{(config.billetSpreadPct * 100).toFixed(2)}%</span> ·
+                  Commissions configurables par Admin · <a href="https://www.jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 underline font-bold">Conseil FX → JAD2 Advisory</a>
+                </p>
+              </div>
+            </div>
+          )}
 
           {/* ── Legal footer ── */}
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-1.5">
