@@ -49,7 +49,7 @@ export default function ForwardCalculator() {
   const [notional, setNotional]     = useState(1_000_000);
   const [direction, setDirection]   = useState<'BUY' | 'SELL'>('BUY');
   const [customDate, setCustomDate] = useState('');
-  const [booked, setBooked]         = useState(false);
+  const [saved, setSaved]           = useState(false);
 
   const spotEntry = livePrices.find(p => p.currency === currency);
   const spot      = config.spotOverrides[currency] ?? spotEntry?.mid ?? 0;
@@ -88,7 +88,7 @@ export default function ForwardCalculator() {
     return settlementDate(tenor);
   }, [tenor, customDate]);
 
-  const handleBook = useCallback(() => {
+  const handleSave = useCallback(() => {
     if (!quote) return;
     addBlotterEntry({
       action: 'FORWARD',
@@ -97,10 +97,10 @@ export default function ForwardCalculator() {
       rate: quote.forwardRate,
       fwdPtsPips: quote.forwardPointsPips,
       notional: quote.notional,
-      details: `${direction} ${fmtMAD(notional)} ${currency} @ ${fmt4(quote.forwardRate)} (${fmtPips(quote.forwardPointsPips)} pips)`,
+      details: `[SIM] ${direction} ${fmtMAD(notional)} ${currency} @ ${fmt4(quote.forwardRate)} (${fmtPips(quote.forwardPointsPips)} pips) — INDICATIF`,
     });
-    setBooked(true);
-    setTimeout(() => setBooked(false), 2000);
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   }, [quote, direction, notional, currency, addBlotterEntry]);
 
   const curInfo = BKAM_CURRENCIES.find(c => c.code === currency);
@@ -111,13 +111,16 @@ export default function ForwardCalculator() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-serif font-bold text-white flex items-center gap-3">
+          <h2 className="text-2xl font-bold text-white flex items-center gap-3 tracking-widest uppercase">
             <Calculator size={22} className="text-gold-500" />
-            FX Forward Calculator
+            Simulateur Forward FX
           </h2>
           <p className="text-slate-400 text-sm mt-0.5">
-            CIP pricing · Cubic spline interpolation · All 14 BKAM pairs
+            Formule CIP · Interpolation cubique · 14 paires BKAM
           </p>
+          <div className="mt-1 inline-flex items-center gap-1.5 text-[10px] bg-amber-900/30 border border-amber-700/40 text-amber-400 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+            ⚠️ Simulation Pédagogique — Cours Indicatifs Uniquement
+          </div>
         </div>
         {spotEntry && (
           <div className="text-right font-mono">
@@ -134,7 +137,7 @@ export default function ForwardCalculator() {
         {/* Inputs */}
         <div className="bg-navy-900 border border-navy-700 rounded-lg p-5 space-y-4">
           <h3 className="text-[10px] font-bold uppercase tracking-widest text-gold-500 border-b border-navy-700 pb-2">
-            Trade Parameters
+            Paramètres de Simulation
           </h3>
 
           {/* Currency + Direction */}
@@ -271,7 +274,7 @@ export default function ForwardCalculator() {
 
               {/* Cost box */}
               <div className="mt-4 bg-navy-800 rounded-lg p-4 text-center border border-navy-600">
-                <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Net Forward Cost / Gain</p>
+                <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">Coût Net Indicatif Forward</p>
                 <p className="text-3xl font-mono font-bold text-gold-400">
                   {fmtMAD(quote.netCostMAD)} MAD
                 </p>
@@ -280,16 +283,29 @@ export default function ForwardCalculator() {
                 </p>
               </div>
 
+              <div className="text-[10px] text-amber-400/80 text-center mt-2">
+                ⚠️ Simulation indicative uniquement — pas un devis contraignant
+              </div>
+
               <button
-                onClick={handleBook}
-                className={`mt-3 w-full py-2.5 text-sm font-bold rounded transition ${
-                  booked
-                    ? 'bg-emerald-600 text-white'
-                    : 'bg-gold-500 hover:bg-gold-400 text-navy-900'
+                onClick={handleSave}
+                className={`mt-2 w-full py-2.5 text-sm font-bold rounded transition ${
+                  saved
+                    ? 'bg-emerald-700 text-white'
+                    : 'bg-navy-800 hover:bg-navy-700 text-gold-400 border border-gold-600/40'
                 }`}
               >
-                {booked ? '✓ Booked to Blotter' : 'Book to Blotter'}
+                {saved ? '✓ Simulation enregistrée' : 'Enregistrer la Simulation'}
               </button>
+
+              <a
+                href="https://jad2advisory.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block w-full text-center py-2 mt-1 bg-gold-500 hover:bg-gold-400 text-navy-900 text-xs font-bold rounded transition"
+              >
+                Obtenir un devis réel → JAD2 Advisory
+              </a>
             </>
           ) : (
             <div className="flex-1 flex items-center justify-center">

@@ -72,7 +72,7 @@ const FxDashboard: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `khouyafx_rates_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `jad2fx_cours_indicatifs_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -164,7 +164,7 @@ const FxDashboard: React.FC = () => {
             <tr className="bg-gold-50/50">
               <td className="px-4 py-2 font-bold text-navy-900 flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-gold-500" />
-                Khouya Fair Value
+                JAD2FX Référence Indicative
               </td>
               <td className="px-4 py-2 text-right font-mono font-bold text-green-700">{buy.toFixed(4)}</td>
               <td className="px-4 py-2 text-right font-mono font-bold text-red-600">{sell.toFixed(4)}</td>
@@ -192,6 +192,12 @@ const FxDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* Indicative notice */}
+      <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5 text-xs text-amber-800">
+        <span className="font-bold flex-shrink-0">⚠️ COURS INDICATIFS</span>
+        <span>Ces taux sont calculés à titre indicatif sur base de la méthode du panier BKAM (60% EUR / 40% USD). Ils ne constituent pas des cours officiels Bank Al-Maghrib et ne sont pas contraignants. Données ECB via Frankfurter API. Pour des cours officiels, consultez <a href="https://www.bkam.ma" target="_blank" rel="noopener noreferrer" className="underline">bkam.ma</a> ou un <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="underline">intermédiaire agréé</a>.</span>
+      </div>
+
       {/* Controls Bar */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-sm">
         <div className="flex bg-slate-100 rounded-lg p-1 gap-1">

@@ -13,7 +13,7 @@ const ChatInterface: React.FC = () => {
     {
       id: '1',
       role: 'model',
-      text: `Salam. I am the Khouya FX Regulatory Assistant, powered by a knowledge base of ${getDocumentCount()} Office des Changes circulaires and instructions.\n\nAsk me about: import/export payments, travel allocations, FX hedging, foreign investment, comptes en devises, or any OC circular.`,
+      text: `Salam. Je suis l'Assistant Réglementaire JAD2FX, alimenté par une base de ${getDocumentCount()} circulaires et instructions de l'Office des Changes.\n\nPosez-moi vos questions sur: paiements import/export, allocations voyage, couverture de change, investissements étrangers, comptes en devises, ou toute circulaire OC.\n\n⚠️ Information réglementaire uniquement — Pas de conseil en investissement — Pour conseil personnalisé: jad2advisory.com`,
       timestamp: new Date(),
     }
   ]);
@@ -95,9 +95,9 @@ const ChatInterface: React.FC = () => {
             <Bot size={20} className="text-gold-400" />
           </div>
           <div>
-            <h3 className="text-white font-serif font-medium tracking-wide">Regulatory Assistant</h3>
-            <p className="text-[10px] text-slate-300 uppercase tracking-wider">
-              RAG • {getDocumentCount()} OC Documents
+            <h3 className="text-white font-bold tracking-widest uppercase text-sm">JAD2FX Assistant</h3>
+            <p className="text-[10px] text-slate-300 tracking-wider">
+              Réglementation OC · {getDocumentCount()} Documents · by JAD2 Advisory
             </p>
           </div>
         </div>
@@ -126,12 +126,17 @@ const ChatInterface: React.FC = () => {
                 <div className="mt-2 bg-gold-50 border border-gold-200 p-3 rounded-lg flex items-center gap-3 w-full">
                   <Briefcase className="text-navy-900 flex-shrink-0" size={16} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-navy-900">Expert Consultation Recommended</p>
-                    <p className="text-[10px] text-navy-700">Complex FX structuring case — our specialists can assist.</p>
+                    <p className="text-xs font-bold text-navy-900">Cas Complexe — Conseil JAD2 Advisory</p>
+                    <p className="text-[10px] text-navy-700">Ce scénario nécessite un accompagnement personnalisé par nos experts en structuration de change.</p>
                   </div>
-                  <button className="text-xs bg-navy-900 text-white px-3 py-1.5 rounded hover:bg-navy-800 transition flex-shrink-0">
-                    Book
-                  </button>
+                  <a
+                    href="https://jad2advisory.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs bg-gold-500 text-navy-900 px-3 py-1.5 rounded hover:bg-gold-400 transition flex-shrink-0 font-bold"
+                  >
+                    Contacter →
+                  </a>
                 </div>
               )}
 
@@ -172,12 +177,17 @@ const ChatInterface: React.FC = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Disclaimer */}
-      <div className="bg-slate-100 px-4 py-2 border-t border-slate-200 flex items-start gap-2">
-        <ShieldAlert size={11} className="text-slate-500 mt-0.5 flex-shrink-0" />
-        <p className="text-[10px] text-slate-500 leading-tight">
-          Answers based on public OC circulaires indexed in our RAG system. May not reflect latest amendments.{' '}
-          <span className="font-bold">Not Financial/Legal Advice.</span>
+      {/* Legal + CNDP disclaimer */}
+      <div className="bg-amber-50 border-t border-amber-200 px-4 py-2 space-y-1">
+        <div className="flex items-start gap-2">
+          <ShieldAlert size={11} className="text-amber-600 mt-0.5 flex-shrink-0" />
+          <p className="text-[10px] text-amber-700 leading-tight font-medium">
+            Informations réglementaires uniquement — Pas de conseil en investissement au sens de la Loi n° 44-12 — Non agréé AMMC.{' '}
+            Consultez <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="underline font-bold">jad2advisory.com</a> pour conseil personnalisé.
+          </p>
+        </div>
+        <p className="text-[10px] text-amber-600/70">
+          🔒 Conformité Loi 09-08 (CNDP): Vos questions ne sont pas associées à votre identité et ne sont pas conservées.
         </p>
       </div>
 

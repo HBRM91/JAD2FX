@@ -24,9 +24,9 @@ export const DEFAULT_ADMIN_CONFIG: AdminConfig = {
   ],
 };
 
-const ADMIN_PASSCODE = 'KFXADMIN'; // change before production
-const STORAGE_KEY    = 'khouyafx_admin_config';
-const ADMIN_KEY      = 'khouyafx_admin_unlocked';
+const ADMIN_PASSCODE = 'JAD2ADMIN';
+const STORAGE_KEY    = 'jad2fx_admin_config';
+const ADMIN_KEY      = 'jad2fx_admin_unlocked';
 
 // ─── Context type ─────────────────────────────────────────────────────────────
 

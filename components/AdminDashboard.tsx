@@ -739,13 +739,13 @@ export default function AdminDashboard() {
               <Shield size={20} className="text-gold-500" />
             </div>
             <div>
-              <h2 className="text-lg font-serif font-bold text-white flex items-center gap-2">
-                Admin Terminal
+              <h2 className="text-lg font-bold text-white flex items-center gap-2 tracking-widest uppercase">
+                JAD2FX Admin Terminal
                 <span className="text-[10px] bg-emerald-900/40 border border-emerald-700/40 text-emerald-400 px-2 py-0.5 rounded font-mono font-bold">
                   AUTHENTICATED
                 </span>
               </h2>
-              <p className="text-xs text-slate-500">KhouyaFX Institutional Control Panel · {new Date().toLocaleDateString('fr-MA')}</p>
+              <p className="text-xs text-slate-500">JAD2 Advisory · Panneau de Contrôle · {new Date().toLocaleDateString('fr-MA')}</p>
             </div>
           </div>
 

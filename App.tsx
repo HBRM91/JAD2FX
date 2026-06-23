@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ViewState, LiveRate } from './types';
-import { DEFAULT_BASKET_CONFIG, MARKET_NEWS, DISCLAIMER_TEXT } from './constants';
+import { DEFAULT_BASKET_CONFIG, MARKET_NEWS, DISCLAIMER_TEXT, DISCLAIMER_SHORT } from './constants';
 import { fetchAllMadRates } from './services/fxRates';
 import FxDashboard        from './components/FxDashboard';
 import ChatInterface      from './components/ChatInterface';
@@ -62,11 +62,11 @@ function AppInner() {
             {/* Logo */}
             <div className="flex items-center gap-3 cursor-pointer flex-shrink-0" onClick={() => navTo('HOME')}>
               <div className="w-9 h-9 bg-gradient-to-br from-gold-400 to-gold-600 rounded flex items-center justify-center shadow-lg">
-                <span className="font-serif font-bold text-navy-900 text-xl">K</span>
+                <span className="font-serif font-bold text-navy-900 text-xl">J</span>
               </div>
               <div className="hidden sm:block">
-                <h1 className="font-serif text-lg font-bold text-white tracking-wide leading-none">Khouya FX</h1>
-                <p className="text-[10px] text-gold-500 uppercase tracking-widest">Financial Intelligence</p>
+                <h1 className="font-bold text-white tracking-widest leading-none text-base uppercase">JAD2FX</h1>
+                <p className="text-[10px] text-gold-500 tracking-widest">by JAD2 Advisory</p>
               </div>
             </div>
 
@@ -90,9 +90,17 @@ function AppInner() {
 
             {/* Right side */}
             <div className="flex items-center gap-3">
+              <a
+                href="https://jad2advisory.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gold-500 text-navy-900 rounded hover:bg-gold-400 transition"
+              >
+                Conseil FX →
+              </a>
               <button
                 onClick={() => navTo('ADMIN')}
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gold-500 text-navy-900 rounded hover:bg-gold-400 transition"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-400 border border-navy-700 rounded hover:text-white hover:border-navy-500 transition"
               >
                 <Lock size={11} />
                 Admin
@@ -128,6 +136,13 @@ function AppInner() {
         )}
       </nav>
 
+      {/* ── Compliance Banner ── */}
+      <div className="bg-amber-950/80 border-b border-amber-800/50 px-4 py-1.5 text-center">
+        <p className="text-[10px] text-amber-300 font-medium tracking-wide">
+          ⚠️ {DISCLAIMER_SHORT}
+        </p>
+      </div>
+
       {/* ── Ticker ── */}
       <RatesTicker rates={tickerRates} />
 
@@ -146,16 +161,20 @@ function AppInner() {
                   <div className="absolute top-0 right-0 w-64 h-64 bg-gold-500 opacity-5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
                   <div className="relative z-10">
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {['FX Forwards', 'Swaps', 'Live Pricer'].map(t => (
+                      {['Simulation Pédagogique', 'Données Indicatives', 'Réglementation OC'].map(t => (
                         <span key={t} className="text-[10px] bg-gold-500/10 border border-gold-500/30 text-gold-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
                           {t}
                         </span>
                       ))}
                     </div>
-                    <h2 className="text-3xl font-serif font-bold mb-4">Institutional FX Intelligence</h2>
+                    <h2 className="text-3xl font-bold mb-2 tracking-widest uppercase">JAD2FX</h2>
+                    <p className="text-gold-500 text-xs uppercase tracking-widest mb-4">Outil de Données de Change — by JAD2 Advisory</p>
                     <p className="text-slate-300 mb-6 max-w-lg text-sm">
-                      Full-spectrum FX platform: live BKAM rates, CIP forward pricing, swap simulation, yield curve management — all 14 MAD pairs.
+                      Données indicatives sur les 14 devises cotées par Bank Al-Maghrib, simulateur pédagogique de forwards/swaps et référentiel réglementaire Office des Changes.
                     </p>
+                    <div className="text-[10px] text-amber-400 bg-amber-900/20 border border-amber-800/30 rounded px-3 py-1.5 mb-4 inline-block">
+                      ⚠️ Taux indicatifs uniquement — Pas de conseil en investissement — Non agréé AMMC/BAM
+                    </div>
                     <div className="flex flex-wrap gap-3">
                       <button
                         onClick={() => navTo('LIVE')}
@@ -224,10 +243,16 @@ function AppInner() {
               <div className="sticky top-24 space-y-4">
                 <ChatInterface />
                 <div className="p-4 bg-white rounded-lg border border-slate-200 shadow-sm text-center">
-                  <p className="text-sm font-semibold text-navy-900 mb-2">Need Custom Hedging?</p>
-                  <button className="w-full py-2 bg-navy-900 text-white text-xs font-bold rounded hover:bg-navy-800 transition">
-                    Contact Our Experts
-                  </button>
+                  <p className="text-sm font-semibold text-navy-900 mb-1">Besoin d'un conseil FX structuré?</p>
+                  <p className="text-xs text-slate-500 mb-3">Forwards, couvertures, rapatriement de fonds — expertise JAD2 Advisory</p>
+                  <a
+                    href="https://jad2advisory.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block w-full py-2 bg-gold-500 text-navy-900 text-xs font-bold rounded hover:bg-gold-400 transition"
+                  >
+                    Contacter JAD2 Advisory →
+                  </a>
                 </div>
               </div>
             </div>
@@ -248,48 +273,106 @@ function AppInner() {
         )}
 
         {view === 'ABOUT' && (
-          <div className="max-w-3xl mx-auto bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-            <h2 className="text-3xl font-serif font-bold text-navy-900 mb-6">About Khouya FX</h2>
-            <div className="prose prose-slate space-y-4 text-slate-700">
-              <p>
-                Khouya FX is a private initiative founded by a collective of Moroccan financial experts and former banking executives. Our mission is to democratize access to institutional-grade foreign exchange data and regulatory clarity.
-              </p>
-              <p>
-                We operate with a commitment to <strong>transparency</strong> and <strong>education</strong>, working in alignment with the overarching goals of financial inclusion promoted by national authorities.
-              </p>
-              <h3 className="text-xl font-serif font-bold text-navy-900 mt-6">Platform Features</h3>
-              <ul className="space-y-1 text-sm">
-                {[
-                  'Live BKAM FX rates — all 14 official MAD pairs (EUR, USD, GBP, CHF, JPY, CAD, DKK, NOK, SEK, SAR, AED, KWD, QAR, CNY)',
-                  'FX Forward Calculator — CIP formula with natural cubic spline yield curve interpolation',
-                  'FX Swap Simulator — near/far leg pricing, rollover & roll-under events',
-                  'Near-live price streaming — bid/ask with configurable refresh interval',
-                  'Admin Terminal — Bloomberg-style control panel for rate overrides and curve management',
-                  'RAG Chatbot — Office des Changes regulatory intelligence',
-                ].map(f => (
-                  <li key={f} className="flex items-start gap-2">
-                    <span className="text-gold-600 mt-0.5">▸</span>
-                    <span>{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <p className="text-xs text-slate-500 mt-8 border-t border-slate-100 pt-4">
-                Khouya FX uses open data from Bank Al-Maghrib and the Office des Changes. We are an independent entity and not affiliated with any specific bank. All rates are indicative.
-              </p>
+          <div className="max-w-3xl mx-auto space-y-5">
+            <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 bg-gradient-to-br from-gold-400 to-gold-600 rounded flex items-center justify-center">
+                  <span className="font-bold text-navy-900 text-lg">J</span>
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-navy-900 tracking-widest uppercase">JAD2FX</h2>
+                  <p className="text-xs text-gold-600 tracking-wider">Outil de Données de Change — by JAD2 Advisory</p>
+                </div>
+              </div>
+
+              <div className="space-y-4 text-slate-700 text-sm">
+                <p>
+                  <strong>JAD2FX</strong> est l'outil en ligne de données de change et de simulation pédagogique de <strong>JAD2 Advisory</strong>. Il est conçu pour permettre aux entreprises et professionnels marocains de comprendre les dynamiques du marché des changes MAD et la réglementation de l'Office des Changes.
+                </p>
+                <p>
+                  Cet outil ne constitue pas et ne doit pas être interprété comme un conseil en investissement, une recommandation d'achat ou de vente de devises, ni une offre de service de change. <strong>JAD2FX n'est pas agréé par l'AMMC ni par Bank Al-Maghrib</strong> pour la prestation de services d'investissement ou de change.
+                </p>
+
+                <h3 className="text-base font-bold text-navy-900 mt-5">Fonctionnalités</h3>
+                <ul className="space-y-1.5">
+                  {[
+                    'Données indicatives sur les 14 devises officiellement cotées par BKAM contre le MAD',
+                    'Simulateur pédagogique de forwards (formule CIP) et de swaps de change',
+                    'Référentiel de la réglementation de l\'Office des Changes (circulaires, instructions)',
+                    'Courbes de taux interpolées à titre informatif uniquement',
+                    'Toutes les simulations sont illustratives et ne constituent pas des devis contraignants',
+                  ].map(f => (
+                    <li key={f} className="flex items-start gap-2">
+                      <span className="text-gold-600 mt-0.5 flex-shrink-0">▸</span>
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <h3 className="text-base font-bold text-navy-900 mt-5">JAD2 Advisory</h3>
+                <p>
+                  Pour des besoins de conseil personnalisé en matière de couverture de change, de structuration d'opérations, ou d'accompagnement réglementaire Office des Changes, veuillez contacter notre équipe de conseillers.
+                </p>
+                <a
+                  href="https://jad2advisory.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-5 py-2.5 bg-gold-500 text-navy-900 font-bold text-sm rounded hover:bg-gold-400 transition"
+                >
+                  Visiter jad2advisory.com →
+                </a>
+
+                <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                  <p className="text-xs text-amber-800 font-semibold mb-1">Mention Légale Obligatoire</p>
+                  <p className="text-xs text-amber-700 leading-relaxed">{DISCLAIMER_TEXT}</p>
+                </div>
+              </div>
             </div>
           </div>
         )}
       </main>
 
       {/* ── Footer ── */}
-      <footer className="bg-navy-900 text-slate-400 py-8 border-t border-navy-800">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <div className="flex justify-center items-center gap-2 mb-4">
-            <Shield size={16} />
-            <span className="text-xs font-bold uppercase tracking-widest text-white">Compliance & Security</span>
+      <footer className="bg-navy-900 text-slate-400 border-t border-navy-800">
+        {/* Advisory CTA strip */}
+        <div className="bg-gold-500/10 border-b border-gold-600/20 py-4">
+          <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-bold text-white">Besoin d'un conseil FX professionnel?</p>
+              <p className="text-xs text-slate-400">Couverture de change · Structuration · Conformité Office des Changes</p>
+            </div>
+            <a
+              href="https://jad2advisory.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-shrink-0 px-5 py-2 bg-gold-500 text-navy-900 text-sm font-bold rounded hover:bg-gold-400 transition"
+            >
+              JAD2 Advisory →
+            </a>
           </div>
-          <p className="text-[10px] leading-relaxed max-w-2xl mx-auto opacity-70">{DISCLAIMER_TEXT}</p>
-          <p className="text-[10px] mt-4 opacity-50">© 2025 Khouya FX · Casablanca, Morocco</p>
+        </div>
+
+        {/* Legal disclaimer */}
+        <div className="py-6">
+          <div className="max-w-7xl mx-auto px-4 text-center">
+            <div className="flex justify-center items-center gap-2 mb-3">
+              <Shield size={14} className="text-slate-500" />
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Mentions Légales & Conformité</span>
+            </div>
+            <p className="text-[10px] leading-relaxed max-w-3xl mx-auto text-slate-500">{DISCLAIMER_TEXT}</p>
+            <div className="flex flex-wrap justify-center gap-4 mt-4 text-[10px] text-slate-600">
+              <span>Non réglementé AMMC</span>
+              <span>·</span>
+              <span>Non agréé BAM</span>
+              <span>·</span>
+              <span>Cours à titre indicatif</span>
+              <span>·</span>
+              <span>Données: ECB/Frankfurter API</span>
+              <span>·</span>
+              <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400">jad2advisory.com</a>
+            </div>
+            <p className="text-[10px] mt-4 text-slate-600">© 2025 JAD2FX · JAD2 Advisory · Casablanca, Maroc</p>
+          </div>
         </div>
       </footer>
     </div>

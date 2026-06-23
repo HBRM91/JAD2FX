@@ -141,13 +141,16 @@ export default function LivePricer() {
       {/* ── Header bar ── */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-2xl font-serif font-bold text-white flex items-center gap-3">
+          <h2 className="text-2xl font-bold text-white flex items-center gap-3 tracking-widest uppercase">
             <Activity size={22} className="text-gold-500" />
-            Live Price Board
+            Tableau de Bord — Cours Indicatifs
           </h2>
           <p className="text-slate-400 text-sm mt-0.5">
-            All 14 BKAM pairs · Bid / Ask / Mid · {intervalSecs}s refresh cycle
+            14 paires BKAM · Bid / Ask / Mid · Cycle {intervalSecs}s
           </p>
+          <div className="mt-1 inline-flex items-center gap-1.5 text-[10px] bg-amber-900/30 border border-amber-700/40 text-amber-400 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+            ⚠️ Cours Indicatifs — Non Officiels BKAM — Non Réglementé AMMC/BAM
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
@@ -275,11 +278,16 @@ export default function LivePricer() {
         </div>
       )}
 
-      {/* ── Bid/Ask legend ── */}
-      <div className="flex items-center gap-6 text-[10px] text-slate-500 font-mono px-1">
-        <span><span className="text-red-400 font-bold">BID</span> — dealer buys FCY</span>
-        <span><span className="text-emerald-400 font-bold">ASK</span> — dealer sells FCY</span>
-        <span>Rates are indicative, refreshed every {intervalSecs}s</span>
+      {/* ── Legal footer ── */}
+      <div className="space-y-1.5">
+        <div className="flex flex-wrap items-center gap-4 text-[10px] text-slate-500 font-mono px-1">
+          <span><span className="text-red-400 font-bold">BID</span> — cours acheteur indicatif</span>
+          <span><span className="text-emerald-400 font-bold">ASK</span> — cours vendeur indicatif</span>
+          <span>Source: ECB/Frankfurter API — rafraîchi toutes les {intervalSecs}s</span>
+        </div>
+        <p className="text-[10px] text-amber-600/70 px-1">
+          ⚠️ Ces cours sont indicatifs uniquement et ne constituent pas des cours officiels BKAM. Toute opération de change réelle doit être réalisée auprès d'un intermédiaire agréé Bank Al-Maghrib. Pour conseil: <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="underline text-amber-500">jad2advisory.com</a>
+        </p>
       </div>
     </div>
   );

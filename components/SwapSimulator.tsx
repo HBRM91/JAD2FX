@@ -183,19 +183,22 @@ export default function SwapSimulator() {
 
       {/* ── Header ── */}
       <div>
-        <h2 className="text-2xl font-serif font-bold text-white flex items-center gap-3">
+        <h2 className="text-2xl font-bold text-white flex items-center gap-3 tracking-widest uppercase">
           <ArrowLeftRight size={22} className="text-gold-500" />
-          FX Swap Simulator
+          Simulateur Swap FX
         </h2>
         <p className="text-slate-400 text-sm mt-0.5">
-          Two-leg swaps · Rollover / roll-under events · Live P&L
+          Jambes near/far · Rollover / roll-under · Calcul indicatif du coût
         </p>
+        <div className="mt-1 inline-flex items-center gap-1.5 text-[10px] bg-amber-900/30 border border-amber-700/40 text-amber-400 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+          ⚠️ Simulation Pédagogique — Cours Indicatifs Uniquement
+        </div>
       </div>
 
       {/* ── Swap Section ── */}
       <div className="bg-navy-900 border border-navy-700 rounded-lg p-5 space-y-5">
         <h3 className="text-[10px] font-bold uppercase tracking-widest text-gold-500 border-b border-navy-700 pb-2">
-          FX Swap Construction
+          Construction de la Simulation Swap
         </h3>
 
         {/* Currency + Notional + Near direction */}
@@ -326,12 +329,25 @@ export default function SwapSimulator() {
               ))}
             </div>
 
-            <button
-              onClick={handleBookSwap}
-              className="w-full py-2.5 bg-gold-500 hover:bg-gold-400 text-navy-900 text-sm font-bold rounded transition"
-            >
-              Book Swap to Blotter
-            </button>
+            <div className="text-[10px] text-amber-400/80 text-center">
+              ⚠️ Simulation indicative uniquement — pas un devis contraignant
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={handleBookSwap}
+                className="py-2.5 bg-navy-800 hover:bg-navy-700 text-gold-400 border border-gold-600/40 text-sm font-bold rounded transition"
+              >
+                Enregistrer la Simulation
+              </button>
+              <a
+                href="https://jad2advisory.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="py-2.5 bg-gold-500 hover:bg-gold-400 text-navy-900 text-sm font-bold rounded transition text-center"
+              >
+                Devis Réel → JAD2 Advisory
+              </a>
+            </div>
           </>
         ) : (
           <div className="text-center py-6 text-slate-500 text-sm">
@@ -432,7 +448,7 @@ export default function SwapSimulator() {
               className="w-full py-2.5 bg-gold-500 hover:bg-gold-400 text-navy-900 text-sm font-bold rounded transition flex items-center justify-center gap-2"
             >
               <RotateCw size={14} />
-              Execute Roll &amp; Add to Log
+              Simuler le Roll &amp; Ajouter au Journal
             </button>
           </div>
         ) : (

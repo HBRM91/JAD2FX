@@ -1,6 +1,6 @@
 import { BasketConfig, CurrencyInfo } from './types';
 
-export const APP_NAME = "Khouya FX";
+export const APP_NAME = "JAD2FX";
 
 export const THEME_COLORS = {
   NAVY: '#0F2645',
@@ -9,7 +9,9 @@ export const THEME_COLORS = {
   BG_LIGHT: '#F8FAFC'
 };
 
-export const DISCLAIMER_TEXT = "Disclaimer: All data and exchange rates provided on this platform are for informational purposes only and do not constitute financial advice or a binding offer. Rates are indicative and subject to change. Khouya FX accepts no liability for errors or omissions. Please verify with your financial institution and the Office des Changes.";
+export const DISCLAIMER_TEXT = `JAD2FX est un outil d'information et de simulation pédagogique sur les marchés de change. Les données affichées sont des cours à titre INDICATIF UNIQUEMENT et ne constituent pas une offre ferme, un conseil en investissement, ni une recommandation financière au sens de la Loi n° 44-12 relative à l'appel public à l'épargne et de la réglementation de l'AMMC. JAD2FX n'est pas un établissement de crédit agréé par Bank Al-Maghrib, ni un intermédiaire agréé de change au sens du Dahir n° 1-93-147. Les simulations produites (forwards, swaps, rolls) sont exclusivement pédagogiques et ne sauraient être invoquées comme base d'une opération de change réelle. Toute opération de change doit être réalisée auprès d'un intermédiaire agréé et dans le respect de la réglementation de l'Office des Changes. JAD2FX et ses éditeurs déclinent toute responsabilité pour les pertes ou dommages résultant d'une utilisation des données à des fins transactionnelles. Pour des besoins de conseil ou de couverture de change structurée, veuillez contacter JAD2 Advisory (jad2advisory.com). | FOR INFORMATION ONLY — NOT INVESTMENT ADVICE — NOT REGULATED BY AMMC OR BAM.`;
+
+export const DISCLAIMER_SHORT = "Taux indicatifs uniquement • Pas de conseil en investissement • Non régulé AMMC/BAM • Pour conseil: jad2advisory.com";
 
 // ─── BKAM Official Currency List ─────────────────────────────────────────────
 // All currencies officially quoted by Bank Al-Maghrib against the Moroccan Dirham
@@ -60,7 +62,7 @@ export const BANKS = [
   'Société Générale Maroc',
 ];
 
-// Simulated bank spread premium over Khouya fair value
+// Simulated bank spread premium over JAD2FX reference rate (illustrative — not sourced from official data)
 export const BANK_SPREAD_PREMIUM = [0.0035, 0.0042, 0.0038, 0.0051, 0.0044];
 
 // ─── Mock Data (kept for chart fallback / testing) ───────────────────────────
@@ -89,18 +91,20 @@ export const MARKET_NEWS = [
 
 // ─── RAG Chatbot System Prompt ────────────────────────────────────────────────
 export const GEMINI_SYSTEM_INSTRUCTION = `
-You are the "Khouya FX Regulatory Assistant," a senior consultant specialized in Moroccan FX regulation.
+You are the "JAD2FX Regulatory Assistant," a senior specialist in Moroccan FX regulation and Office des Changes compliance, operating as a knowledge tool for JAD2 Advisory (jad2advisory.com).
 
 **Objective:**
 Provide concise, legally grounded answers using ONLY the regulatory context documents provided in each query. Cite document titles and dates when referencing specific rules.
 
-**Strict Guidelines:**
+**Strict Legal Guidelines:**
 1. **Brevity:** Answers under 120 words unless strictly necessary. Use bullet points.
 2. **Citations:** Reference the circular or instruction title (e.g., "Per Circulaire 01/2024…").
-3. **No Speculation:** Never predict MAD exchange rates or BKAM policy changes.
-4. **Upsell on complexity:** If the user asks about "hedging >100% exposure," "capital repatriation," "investissements marocains à l'étranger >5M MAD," or "blocked funds," add: "This is a complex case. We recommend scheduling a consultation with our FX Structuring Experts."
-5. **Knowledge gap:** If the context does not cover the question, reply: "This specific scenario is not covered in our reference documents. Please consult the Office des Changes directly at oc.gov.ma."
-6. **Mandatory Footer:** End every reply with: "*Info only. Not financial advice.*"
+3. **No Speculation:** Never predict MAD exchange rates or BKAM policy changes. Never recommend specific FX transactions.
+4. **No Investment Advice:** You are an information tool only. Never provide personalized investment recommendations. You are not regulated by AMMC.
+5. **Escalation on complexity:** If the user asks about hedging >100% exposure, capital repatriation, investissements marocains à l'étranger >5M MAD, blocked funds, or structured products, reply: "Ce cas est complexe et nécessite un conseil personnalisé. Nous vous recommandons de prendre rendez-vous avec les experts de JAD2 Advisory sur jad2advisory.com."
+6. **Knowledge gap:** If the context does not cover the question, reply: "Ce scénario spécifique n'est pas couvert par nos documents de référence. Veuillez consulter directement l'Office des Changes à oc.gov.ma."
+7. **Mandatory Footer:** End EVERY reply with: "*Information réglementaire uniquement — Pas de conseil en investissement au sens de la Loi n° 44-12 — Pour conseil personnalisé: jad2advisory.com*"
+8. **Data Privacy:** Never ask users for personally identifiable information. Do not store or repeat personal data.
 
-**Persona:** Professional (Big 4 style), Helpful, uses "We" (Khouya FX). Bilingual FR/EN.
+**Persona:** Professional (Big 4 / compliance style), Helpful, bilingual FR/EN, uses "JAD2 Advisory" when referring to the advisory entity.
 `;
