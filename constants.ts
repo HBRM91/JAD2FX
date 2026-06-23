@@ -15,21 +15,22 @@ export const DISCLAIMER_SHORT = "Taux indicatifs uniquement • Pas de conseil e
 
 // ─── BKAM Official Currency List ─────────────────────────────────────────────
 // All currencies officially quoted by Bank Al-Maghrib against the Moroccan Dirham
+// Order matches official BKAM cotation page: https://www.bkam.ma/en/Markets/Key-indicators/Foreign-exchange-market
 export const BKAM_CURRENCIES: CurrencyInfo[] = [
-  { code: 'EUR', name: 'Euro',             nameFr: 'Euro',            flag: '🇪🇺', bkamUnit: 1 },
-  { code: 'USD', name: 'US Dollar',        nameFr: 'Dollar américain',flag: '🇺🇸', bkamUnit: 1 },
-  { code: 'GBP', name: 'British Pound',    nameFr: 'Livre sterling',  flag: '🇬🇧', bkamUnit: 1 },
-  { code: 'CHF', name: 'Swiss Franc',      nameFr: 'Franc suisse',    flag: '🇨🇭', bkamUnit: 1 },
-  { code: 'CAD', name: 'Canadian Dollar',  nameFr: 'Dollar canadien', flag: '🇨🇦', bkamUnit: 1 },
-  { code: 'JPY', name: 'Japanese Yen',     nameFr: 'Yen japonais',    flag: '🇯🇵', bkamUnit: 100 },
-  { code: 'SAR', name: 'Saudi Riyal',      nameFr: 'Riyal saoudien',  flag: '🇸🇦', bkamUnit: 1 },
-  { code: 'AED', name: 'UAE Dirham',       nameFr: 'Dirham émirien',  flag: '🇦🇪', bkamUnit: 1 },
-  { code: 'KWD', name: 'Kuwaiti Dinar',   nameFr: 'Dinar koweïtien', flag: '🇰🇼', bkamUnit: 1 },
-  { code: 'QAR', name: 'Qatari Riyal',    nameFr: 'Riyal qatarien',  flag: '🇶🇦', bkamUnit: 1 },
-  { code: 'DKK', name: 'Danish Krone',    nameFr: 'Couronne danoise', flag: '🇩🇰', bkamUnit: 1 },
-  { code: 'NOK', name: 'Norwegian Krone', nameFr: 'Couronne norvégienne', flag: '🇳🇴', bkamUnit: 1 },
-  { code: 'SEK', name: 'Swedish Krona',   nameFr: 'Couronne suédoise', flag: '🇸🇪', bkamUnit: 1 },
-  { code: 'CNY', name: 'Chinese Yuan',    nameFr: 'Yuan chinois',    flag: '🇨🇳', bkamUnit: 1 },
+  { code: 'USD', name: 'US Dollar',        nameFr: 'Dollar américain',     flag: '🇺🇸', bkamUnit: 1   },
+  { code: 'EUR', name: 'Euro',             nameFr: 'Euro',                 flag: '🇪🇺', bkamUnit: 1   },
+  { code: 'AED', name: 'UAE Dirham',       nameFr: 'Dirham des Émirats',   flag: '🇦🇪', bkamUnit: 1   },
+  { code: 'QAR', name: 'Qatari Riyal',    nameFr: 'Riyal qatarien',       flag: '🇶🇦', bkamUnit: 1   },
+  { code: 'SAR', name: 'Saudi Riyal',      nameFr: 'Riyal saoudien',       flag: '🇸🇦', bkamUnit: 1   },
+  { code: 'KWD', name: 'Kuwaiti Dinar',   nameFr: 'Dinar koweïtien',      flag: '🇰🇼', bkamUnit: 1   },
+  { code: 'GBP', name: 'British Pound',    nameFr: 'Livre sterling',       flag: '🇬🇧', bkamUnit: 1   },
+  { code: 'CHF', name: 'Swiss Franc',      nameFr: 'Franc suisse',         flag: '🇨🇭', bkamUnit: 1   },
+  { code: 'JPY', name: 'Japanese Yen',     nameFr: 'Yen japonais',         flag: '🇯🇵', bkamUnit: 100 },
+  { code: 'DKK', name: 'Danish Krone',    nameFr: 'Couronne danoise',      flag: '🇩🇰', bkamUnit: 1   },
+  { code: 'NOK', name: 'Norwegian Krone', nameFr: 'Couronne norvégienne',  flag: '🇳🇴', bkamUnit: 1   },
+  { code: 'SEK', name: 'Swedish Krona',   nameFr: 'Couronne suédoise',     flag: '🇸🇪', bkamUnit: 1   },
+  { code: 'CAD', name: 'Canadian Dollar',  nameFr: 'Dollar canadien',      flag: '🇨🇦', bkamUnit: 1   },
+  { code: 'CNY', name: 'Chinese Yuan',    nameFr: 'Yuan renminbi',         flag: '🇨🇳', bkamUnit: 1   },
 ];
 
 // Fixed USD values for Gulf currencies (pegged/quasi-pegged to USD)
