@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { BKAM_CURRENCIES } from '../constants';
+import { BKAM_CURRENCIES, DEFAULT_BASKET_CONFIG } from '../constants';
 import { useAdmin, DEFAULT_TIER_COMMISSIONS } from '../context/AdminContext';
 import { fetchAllMadRates } from '../services/fxRates';
-import { DEFAULT_BASKET_CONFIG } from '../constants';
+import { fetchBkamBBE, bbeToMadPerUnit } from '../services/bkamApi';
 import { ClientTier } from '../types';
 import { useI18n } from '../context/I18nContext';
 import {
@@ -50,6 +50,7 @@ interface BilletRow {
   virementBuy: number;
   virementSell: number;
   source: string;
+  bbeSource: 'BKAM_OFFICIAL' | 'COMPUTED';
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -69,17 +70,41 @@ const BilletsPage: React.FC = () => {
   const buildRows = useCallback(async () => {
     setLoading(true);
     try {
-      const { rates } = await fetchAllMadRates(DEFAULT_BASKET_CONFIG);
+      const corsProxy = config.corsProxyUrl || undefined;
+      const [rateResult, bbeResult] = await Promise.allSettled([
+        fetchAllMadRates(DEFAULT_BASKET_CONFIG, corsProxy),
+        corsProxy ? fetchBkamBBE(corsProxy) : Promise.reject('no proxy'),
+      ]);
+
+      const rates = rateResult.status === 'fulfilled' ? rateResult.value.rates : [];
+
+      // Build BKAM BBE per-unit map (bid/ask per 1 currency unit)
+      const bbeMap = bbeResult.status === 'fulfilled'
+        ? bbeToMadPerUnit(bbeResult.value)
+        : {};
+
       const built: BilletRow[] = BKAM_CURRENCIES.map(cur => {
-        const live = rates.find(r => r.currency === cur.code);
-        const mid  = live?.mid ?? 0;
+        const live  = rates.find(r => r.currency === cur.code);
+        const mid   = live?.mid ?? 0;
         const vBuy  = live?.virementBuy  ?? mid * (1 - DEFAULT_BASKET_CONFIG.virementSpreadPercent);
         const vSell = live?.virementSell ?? mid * (1 + DEFAULT_BASKET_CONFIG.virementSpreadPercent);
 
-        // Billets = virement ± extra billet spread
-        const bSpread = config.billetSpreadPct ?? DEFAULT_BASKET_CONFIG.billetSpreadPercent;
-        const bBuy  = mid * (1 - bSpread);
-        const bSell = mid * (1 + bSpread);
+        const bbePair = bbeMap[cur.code];
+        let bBuy: number, bSell: number;
+        let bbeSource: 'BKAM_OFFICIAL' | 'COMPUTED';
+
+        if (bbePair) {
+          // Official BKAM BBE rates (already per 1 unit)
+          bBuy  = bbePair.bid;
+          bSell = bbePair.ask;
+          bbeSource = 'BKAM_OFFICIAL';
+        } else {
+          // Compute from mid with billet spread
+          const bSpread = config.billetSpreadPct ?? DEFAULT_BASKET_CONFIG.billetSpreadPercent;
+          bBuy  = mid * (1 - bSpread);
+          bSell = mid * (1 + bSpread);
+          bbeSource = 'COMPUTED';
+        }
 
         return {
           code: cur.code,
@@ -91,6 +116,7 @@ const BilletsPage: React.FC = () => {
           virementBuy:    vBuy  * cur.bkamUnit,
           virementSell:   vSell * cur.bkamUnit,
           source: live?.source ?? 'FALLBACK',
+          bbeSource,
         };
       });
       setRows(built);
@@ -98,7 +124,7 @@ const BilletsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [config.billetSpreadPct]);
+  }, [config.billetSpreadPct, config.corsProxyUrl]);
 
   useEffect(() => { buildRows(); }, [buildRows]);
 
@@ -247,6 +273,11 @@ const BilletsPage: React.FC = () => {
             <Banknote size={14} className="text-gold-600" />
             Cours Billets — 14 devises BKAM
           </h2>
+          {rows.some(r => r.bbeSource === 'BKAM_OFFICIAL') && (
+            <span className="text-[9px] font-mono px-2 py-0.5 rounded border border-emerald-300 bg-emerald-50 text-emerald-700">
+              ✓ BKAM CoursBBE Officiel
+            </span>
+          )}
           <div className="text-[10px] text-slate-400">
             Segment: <span className={`font-bold ${TIER_LABEL[selectedTier]}`}>{t(`tier.${selectedTier}`)}</span>
           </div>
@@ -292,6 +323,9 @@ const BilletsPage: React.FC = () => {
                         </div>
                         {row.bkamUnit !== 1 && (
                           <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">×{row.bkamUnit}</span>
+                        )}
+                        {row.bbeSource === 'BKAM_OFFICIAL' && (
+                          <span className="text-[8px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-1 py-0.5 rounded font-mono">OFF</span>
                         )}
                       </div>
                     </td>

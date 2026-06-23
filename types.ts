@@ -201,7 +201,7 @@ export interface FixingDayRow {
   // All 14 BKAM cross-rates (MAD per currency unit, bkamUnit applied)
   allRates: Record<string, number>;
 
-  source: 'API' | 'COMPUTED';
+  source: 'BKAM_OFFICIAL' | 'ECB_PROXY' | 'COMPUTED';
 }
 
 // ─── Commodities ─────────────────────────────────────────────────────────────

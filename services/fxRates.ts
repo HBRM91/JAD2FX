@@ -1,5 +1,6 @@
 import { BasketConfig, LiveRate, ChartDataPoint } from '../types';
 import { BKAM_CURRENCIES, GULF_USD_RATES } from '../constants';
+import { fetchBkamVirement, virementToMadPerUnit } from './bkamApi';
 
 const FRANKFURTER_URL = 'https://api.frankfurter.app/latest?from=EUR';
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
@@ -12,7 +13,7 @@ interface EurRateCache {
 
 let rateCache: EurRateCache | null = null;
 
-// Fallback EUR-based rates (approximate, used if API call fails)
+// Fallback EUR-based rates (approximate, used if all API calls fail)
 const FALLBACK_EUR_RATES: Record<string, number> = {
   USD: 1.085, GBP: 0.860, CHF: 0.945, JPY: 162.5, CAD: 1.480,
   DKK: 7.460, NOK: 11.60, SEK: 11.40, CNY: 7.880,
@@ -33,10 +34,6 @@ async function fetchEurRates(): Promise<{ rates: Record<string, number>; date: s
 
     // Enrich with Gulf currencies via USD peg cross
     for (const [code, usdValue] of Object.entries(GULF_USD_RATES)) {
-      // EUR/X = (EUR/USD) / (USD/X) ... but usdValue = X/USD
-      // So EUR/X = EUR/USD / (X/USD) = eurUsd / usdValue? No...
-      // usdValue = how many USD one unit of X is worth
-      // EUR/X = how many X per 1 EUR = (EUR/USD) / (X/USD) = eurUsd / usdValue
       enriched[code] = eurUsd / usdValue;
     }
 
@@ -53,27 +50,99 @@ async function fetchEurRates(): Promise<{ rates: Record<string, number>; date: s
 }
 
 function isFallback(eurRates: Record<string, number>): boolean {
-  // Simple heuristic: if USD rate is exactly the fallback value
   return eurRates['USD'] === FALLBACK_EUR_RATES['USD'];
 }
 
-export async function fetchAllMadRates(config: BasketConfig): Promise<{
+// ─── BKAM-first rate fetching ──────────────────────────────────────────────────
+// Cache for BKAM-sourced rates (MAD per 1 unit)
+interface BkamRateCache {
+  madPerUnit: Record<string, number>;
+  timestamp: number;
+}
+let bkamCache: BkamRateCache | null = null;
+const BKAM_CACHE_MS = 10 * 60 * 1000;
+
+async function tryFetchBkamMadRates(corsProxyUrl: string): Promise<Record<string, number> | null> {
+  if (bkamCache && Date.now() - bkamCache.timestamp < BKAM_CACHE_MS) {
+    return bkamCache.madPerUnit;
+  }
+  try {
+    const rates = await fetchBkamVirement(corsProxyUrl);
+    if (!rates.length) return null;
+    const madPerUnit = virementToMadPerUnit(rates);
+    if (!madPerUnit['USD'] || !madPerUnit['EUR']) return null;
+    bkamCache = { madPerUnit, timestamp: Date.now() };
+    return madPerUnit;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: string): Promise<{
   rates: LiveRate[];
   ratesDate: string;
   lastFetch: string;
 }> {
+  const rates: LiveRate[] = [];
+
+  // ── Primary: BKAM CoursVirement ──────────────────────────────────────────
+  if (corsProxyUrl) {
+    const bkamMad = await tryFetchBkamMadRates(corsProxyUrl);
+    if (bkamMad) {
+      const usdMadMid = bkamMad['USD'];
+      const eurMadMid = bkamMad['EUR'];
+
+      for (const currency of BKAM_CURRENCIES) {
+        let rawMid: number;
+
+        if (currency.code === 'EUR') {
+          rawMid = eurMadMid;
+        } else if (currency.code === 'USD') {
+          rawMid = usdMadMid;
+        } else if (bkamMad[currency.code] !== undefined) {
+          // BKAM directly quotes this currency (e.g. GBP, CHF, JPY, etc.)
+          rawMid = bkamMad[currency.code];
+        } else if (GULF_USD_RATES[currency.code]) {
+          // Gulf pegs — derive from USD/MAD
+          rawMid = GULF_USD_RATES[currency.code] * usdMadMid;
+        } else {
+          continue;
+        }
+
+        const displayMid = rawMid * currency.bkamUnit;
+        const vS = config.virementSpreadPercent;
+        const bS = config.billetSpreadPercent;
+
+        rates.push({
+          currency: currency.code,
+          pair: `${currency.code}/MAD`,
+          mid: +displayMid.toFixed(4),
+          virementBuy:  +(displayMid * (1 - vS)).toFixed(4),
+          virementSell: +(displayMid * (1 + vS)).toFixed(4),
+          billetBuy:    +(displayMid * (1 - bS)).toFixed(4),
+          billetSell:   +(displayMid * (1 + bS)).toFixed(4),
+          change24h: 0,
+          source: 'CALCULATED',
+          timestamp: new Date().toISOString(),
+        });
+      }
+
+      if (rates.length > 0) {
+        return { rates, ratesDate: new Date().toISOString().slice(0, 10), lastFetch: new Date().toISOString() };
+      }
+    }
+  }
+
+  // ── Fallback: Frankfurter ECB cross rates ─────────────────────────────────
   const { rates: eurRates, date: ratesDate } = await fetchEurRates();
   const eurUsd = eurRates['USD'];
   const source = isFallback(eurRates) ? 'FALLBACK' : (rateCache ? 'CACHED' : 'CALCULATED');
 
-  // BKAM basket formula: USD/MAD mid
   const usdMadMid = config.referenceBasketValue / (config.eurWeight * eurUsd + config.usdWeight);
   const eurMadMid = usdMadMid * eurUsd;
 
-  const rates: LiveRate[] = [];
-
   for (const currency of BKAM_CURRENCIES) {
-    let rawMid: number; // MAD per 1 unit of currency
+    let rawMid: number;
 
     if (currency.code === 'EUR') {
       rawMid = eurMadMid;
@@ -82,14 +151,11 @@ export async function fetchAllMadRates(config: BasketConfig): Promise<{
     } else {
       const eurXRate = eurRates[currency.code];
       if (!eurXRate) continue;
-      // X/USD = EUR/USD / EUR/X   (how many USD 1 unit of X is worth)
       const xToUsd = eurUsd / eurXRate;
       rawMid = xToUsd * usdMadMid;
     }
 
-    // BKAM quotes JPY per 100 units; apply bkamUnit multiplier for display
     const displayMid = rawMid * currency.bkamUnit;
-
     const vS = config.virementSpreadPercent;
     const bS = config.billetSpreadPercent;
 
@@ -101,7 +167,7 @@ export async function fetchAllMadRates(config: BasketConfig): Promise<{
       virementSell: +(displayMid * (1 + vS)).toFixed(4),
       billetBuy:    +(displayMid * (1 - bS)).toFixed(4),
       billetSell:   +(displayMid * (1 + bS)).toFixed(4),
-      change24h: 0, // Would require historical API call
+      change24h: 0,
       source: source as LiveRate['source'],
       timestamp: new Date().toISOString(),
     });
@@ -114,11 +180,10 @@ export async function fetchAllMadRates(config: BasketConfig): Promise<{
 export function generateIntradayData(mid: number, pair: string): ChartDataPoint[] {
   const hours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
   const seed = pair.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  const volatility = mid * 0.0015; // 0.15% intraday volatility
+  const volatility = mid * 0.0015;
 
   let current = mid * 0.999;
   return hours.map((time, i) => {
-    // Deterministic wave using seed
     const wave = Math.sin((seed + i * 1.7) * 0.9) * volatility;
     const trend = (i / hours.length) * volatility * 0.5;
     current = mid * 0.999 + wave + trend;

@@ -1,5 +1,6 @@
 import { FixingDayRow } from '../types';
 import { BKAM_CURRENCIES, GULF_USD_RATES, DEFAULT_BASKET_CONFIG } from '../constants';
+import { fetchBkamVirementDate, getLastNWorkingDays as bkamWorkingDays } from './bkamApi';
 
 const K     = DEFAULT_BASKET_CONFIG.referenceBasketValue; // 10.49
 const EUR_W = DEFAULT_BASKET_CONFIG.eurWeight;            // 0.60
@@ -10,7 +11,6 @@ const ECB_CODES = BKAM_CURRENCIES
   .filter(c => c.code !== 'EUR' && !GULF_USD_RATES[c.code])
   .map(c => c.code);
 
-// We also need MAD so we get the actual ECB-published EUR/MAD rate
 const QUERY_SYMBOLS = [...ECB_CODES, 'MAD'].join(',');
 
 // ─── Working-day helpers ──────────────────────────────────────────────────────
@@ -44,9 +44,9 @@ function formatDateLabel(iso: string): string {
   return `${FR_DAYS[d.getUTCDay()]} ${d.getUTCDate()} ${FR_MONTHS[d.getUTCMonth()]}`;
 }
 
-// ─── Row builder ──────────────────────────────────────────────────────────────
+// ─── Row builder from ECB/Frankfurter rates ───────────────────────────────────
 
-function buildRow(date: string, rates: Record<string, number>): FixingDayRow {
+function buildRow(date: string, rates: Record<string, number>, source: FixingDayRow['source'] = 'ECB_PROXY'): FixingDayRow {
   const eurUsd     = rates['USD'];
   const eurMad_ecb = rates['MAD'];
   const usdMad_ecb = eurMad_ecb / eurUsd;
@@ -69,7 +69,6 @@ function buildRow(date: string, rates: Record<string, number>): FixingDayRow {
     } else {
       const eurPerX = rates[c.code];
       if (!eurPerX) continue;
-      // MAD per X = (EUR/MAD) / (EUR/X) = eurMad_ecb / eurPerX
       madPerUnit = eurMad_ecb / eurPerX;
     }
     allRates[c.code] = +(madPerUnit * c.bkamUnit).toFixed(4);
@@ -87,7 +86,51 @@ function buildRow(date: string, rates: Record<string, number>): FixingDayRow {
     usdMad_basket:   +usdMad_basket.toFixed(4),
     usdMad_div_bps:  +usdMad_div_bps.toFixed(1),
     allRates,
-    source: 'API',
+    source,
+  };
+}
+
+// ─── Row builder from BKAM official CoursVirement data ───────────────────────
+
+function buildRowFromBkam(date: string, madByCode: Record<string, number>): FixingDayRow {
+  // madByCode: currency code → MAD per 1 unit (already normalized by uniteDevise)
+  const usdMad_ecb = madByCode['USD'];
+  const eurMad_ecb = madByCode['EUR'];
+
+  if (!usdMad_ecb || !eurMad_ecb) throw new Error('Missing USD or EUR rate');
+
+  const eurUsd = eurMad_ecb / usdMad_ecb;
+  const { usdMad: usdMad_basket, eurMad: eurMad_basket } = basketParity(eurUsd);
+
+  const eurMad_div_bps = ((eurMad_ecb - eurMad_basket) / eurMad_basket) * 10000;
+  const eurMad_div_pct = ((eurMad_ecb - eurMad_basket) / eurMad_basket) * 100;
+  const usdMad_div_bps = ((usdMad_ecb - usdMad_basket) / usdMad_basket) * 10000;
+
+  const allRates: Record<string, number> = {};
+  for (const c of BKAM_CURRENCIES) {
+    const perUnit = madByCode[c.code];
+    if (perUnit !== undefined) {
+      // perUnit is per-1-unit; multiply by bkamUnit for display (e.g. per 100 JPY)
+      allRates[c.code] = +(perUnit * c.bkamUnit).toFixed(4);
+    } else if (GULF_USD_RATES[c.code]) {
+      // Gulf pegs — derive from USD/MAD
+      allRates[c.code] = +(GULF_USD_RATES[c.code] * usdMad_ecb * c.bkamUnit).toFixed(4);
+    }
+  }
+
+  return {
+    date,
+    dateLabel: formatDateLabel(date),
+    eurUsd:          +eurUsd.toFixed(4),
+    eurMad_ecb:      +eurMad_ecb.toFixed(4),
+    eurMad_basket:   +eurMad_basket.toFixed(4),
+    eurMad_div_bps:  +eurMad_div_bps.toFixed(1),
+    eurMad_div_pct:  +eurMad_div_pct.toFixed(4),
+    usdMad_ecb:      +usdMad_ecb.toFixed(4),
+    usdMad_basket:   +usdMad_basket.toFixed(4),
+    usdMad_div_bps:  +usdMad_div_bps.toFixed(1),
+    allRates,
+    source: 'BKAM_OFFICIAL',
   };
 }
 
@@ -135,8 +178,39 @@ function buildFallbackRow(date: string): FixingDayRow {
 
 // ─── Main export ──────────────────────────────────────────────────────────────
 
-export async function fetchFixingHistory(nDays = 5): Promise<FixingDayRow[]> {
-  // Fetch a few extra working days in case of API gaps (e.g. public holidays)
+export async function fetchFixingHistory(nDays = 5, corsProxyUrl?: string): Promise<FixingDayRow[]> {
+  // ── Primary: BKAM official CoursVirement ─────────────────────────────────
+  if (corsProxyUrl) {
+    try {
+      const workingDays = bkamWorkingDays(nDays + 2);
+      const settled = await Promise.allSettled(
+        workingDays.map(d => fetchBkamVirementDate(corsProxyUrl, d)),
+      );
+
+      const bkamRows: FixingDayRow[] = [];
+      for (let i = 0; i < settled.length; i++) {
+        const r = settled[i];
+        if (r.status !== 'fulfilled' || !r.value.length) continue;
+        try {
+          const madMap: Record<string, number> = {};
+          for (const rate of r.value) {
+            if (rate.uniteDevise > 0) madMap[rate.libDevise] = rate.moyen / rate.uniteDevise;
+          }
+          bkamRows.push(buildRowFromBkam(workingDays[i], madMap));
+        } catch {
+          // Skip if USD/EUR missing for this date
+        }
+      }
+
+      if (bkamRows.length >= Math.min(nDays, 3)) {
+        return bkamRows.slice(-nDays);
+      }
+    } catch {
+      // Fall through to ECB
+    }
+  }
+
+  // ── Fallback: Frankfurter ECB time series ─────────────────────────────────
   const workingDays = getLastNWorkingDays(nDays + 3);
   const startDate   = workingDays[0];
   const endDate     = workingDays[workingDays.length - 1];
@@ -151,9 +225,8 @@ export async function fetchFixingHistory(nDays = 5): Promise<FixingDayRow[]> {
     const sortedDates = Object.keys(data.rates).sort();
     const targetDates = sortedDates.slice(-nDays);
 
-    return targetDates.map(d => buildRow(d, data.rates[d]));
+    return targetDates.map(d => buildRow(d, data.rates[d], 'ECB_PROXY'));
   } catch {
-    // Return estimated fallback rows when API is unreachable
     return getLastNWorkingDays(nDays).map(d => buildFallbackRow(d));
   }
 }
