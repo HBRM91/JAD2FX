@@ -13,6 +13,8 @@
  */
 
 const ALLOWED_ORIGINS = [
+  'https://jad2fx.pages.dev',
+  'https://ce86f572.jad2fx.pages.dev',
   'https://jad2fx.com',
   'http://localhost:5173',
   'http://localhost:4173',
