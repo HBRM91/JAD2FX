@@ -127,8 +127,8 @@ const BilletsPage: React.FC = () => {
                 <p className="text-xs text-gold-500 tracking-wider">{t('billets.subtitle')}</p>
               </div>
             </div>
-            <div className="text-[10px] text-amber-400 bg-amber-900/20 border border-amber-800/30 rounded px-3 py-1.5 inline-block">
-              ⚠️ {t('disclaimer.short')}
+            <div className="text-[10px] text-slate-400 border border-navy-600/30 rounded px-3 py-1.5 inline-block">
+              {t('disclaimer.short')}
             </div>
           </div>
         </div>
@@ -232,8 +232,8 @@ const BilletsPage: React.FC = () => {
                 Elles se distinguent des commissions virement par les coûts logistiques supplémentaires :
                 transport de fonds, assurance, stockage sécurisé, et manutention des espèces.
               </p>
-              <p className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
-                ⚠️ Taux indicatifs — pour devis contraignant: <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="font-bold underline">jad2advisory.com</a>
+              <p className="text-[10px] text-slate-400 border border-slate-200 rounded px-2 py-1">
+                Taux indicatifs — pour un devis : <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-500 font-medium">jad2advisory.com</a>
               </p>
             </div>
           )}
@@ -335,9 +335,8 @@ const BilletsPage: React.FC = () => {
       </div>
 
       {/* Legal */}
-      <div className="flex items-start gap-2 text-[10px] text-slate-400">
-        <ShieldAlert size={11} className="text-amber-500 mt-0.5 flex-shrink-0" />
-        <p>{t('disclaimer.short')} · {t('disclaimer.noInvestmentAdvice')} · {t('disclaimer.cndp')}</p>
+      <div className="text-[10px] text-slate-500">
+        <p>{t('disclaimer.short')} · {t('disclaimer.noInvestmentAdvice')}</p>
       </div>
     </div>
   );

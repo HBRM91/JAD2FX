@@ -11,7 +11,7 @@ const ChatInterface: React.FC = () => {
     {
       id: '1',
       role: 'model',
-      text: `Salam. Je suis l'Assistant Réglementaire JAD2FX — ${getDocumentCount()} documents OC & BKAM indexés.\n\nJe peux vous renseigner sur : délais de rapatriement, allocations voyage, commissions OC autorisées, fixing BKAM, comptes devises (CPEC/CDE), couverture de change (cadre réglementaire), investissements étrangers.\n\n🚫 Ce que je ne fais PAS : conseil en investissement, recommandations d'achat/vente, stratégies de couverture personnalisées.\n\nPour conseil structuré sur vos besoins FX → jad2advisory.com`,
+      text: `Bonjour. Je suis l'Assistant Réglementaire JAD2FX — ${getDocumentCount()} documents OC & BKAM indexés.\n\nJe peux vous renseigner sur la réglementation marocaine des changes : délais de rapatriement, allocations voyage, commissions OC, fixing BKAM, comptes devises (CPEC/CDE), couverture de change, investissements étrangers.\n\nPour une consultation personnalisée ou un accompagnement sur vos opérations de change, JAD2 Advisory est à votre disposition — jad2advisory.com`,
       timestamp: new Date(),
     }
   ]);
@@ -201,18 +201,11 @@ const ChatInterface: React.FC = () => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Legal + CNDP disclaimer */}
-      <div className="bg-amber-50 border-t border-amber-200 px-4 py-2 space-y-1">
-        <div className="flex items-start gap-2">
-          <ShieldAlert size={11} className="text-amber-600 mt-0.5 flex-shrink-0" />
-          <p className="text-[10px] text-amber-700 leading-tight font-medium">
-            <strong>Information pédagogique uniquement — ZÉRO conseil en investissement.</strong>{' '}
-            Non agréé AMMC/BAM (Loi n° 44-12). Conseil personnalisé :{' '}
-            <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="underline font-bold">jad2advisory.com</a>
-          </p>
-        </div>
-        <p className="text-[10px] text-amber-600/70">
-          🔒 Loi 09-08 (CNDP) : Vos questions ne sont pas associées à votre identité et ne sont pas conservées.
+      {/* Legal note */}
+      <div className="border-t border-slate-100 px-4 py-2.5 flex items-center justify-between gap-4">
+        <p className="text-[10px] text-slate-400 leading-tight">
+          Informations réglementaires uniquement · Vos questions ne sont pas conservées ·{' '}
+          <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-500 font-medium">jad2advisory.com</a>
         </p>
       </div>
 

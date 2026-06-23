@@ -148,8 +148,8 @@ export default function LivePricer() {
           <p className="text-slate-400 text-sm mt-0.5">
             14 paires BKAM · Bid / Ask / Mid · Cycle {intervalSecs}s
           </p>
-          <div className="mt-1 inline-flex items-center gap-1.5 text-[10px] bg-amber-900/30 border border-amber-700/40 text-amber-400 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
-            ⚠️ Cours Indicatifs — Non Officiels BKAM — Non Réglementé AMMC/BAM
+          <div className="mt-1 inline-flex items-center gap-1.5 text-[10px] border border-navy-600/30 text-slate-500 px-2 py-0.5 rounded tracking-wide">
+            Cours indicatifs · Non officiels BKAM · Pour conseil : jad2advisory.com
           </div>
         </div>
 
@@ -285,8 +285,8 @@ export default function LivePricer() {
           <span><span className="text-emerald-400 font-bold">ASK</span> — cours vendeur indicatif</span>
           <span>Source: ECB/Frankfurter API — rafraîchi toutes les {intervalSecs}s</span>
         </div>
-        <p className="text-[10px] text-amber-600/70 px-1">
-          ⚠️ Ces cours sont indicatifs uniquement et ne constituent pas des cours officiels BKAM. Toute opération de change réelle doit être réalisée auprès d'un intermédiaire agréé Bank Al-Maghrib. Pour conseil: <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="underline text-amber-500">jad2advisory.com</a>
+        <p className="text-[10px] text-slate-600 px-1">
+          Cours indicatifs dérivés des références ECB/Frankfurter. Pour opérations de change ou conseil professionnel : <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400">jad2advisory.com</a>
         </p>
       </div>
     </div>

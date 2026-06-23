@@ -65,11 +65,11 @@ const ar: Record<string, string> = {
   'commodities.fallbackNotice': 'تُعرض بيانات مرجعية (اتصال Yahoo Finance غير متاح)',
 
   // Disclaimer
-  'disclaimer.short': 'أسعار استرشادية فقط • لا تمثل نصيحة استثمارية • غير مرخصة من AMMC/BAM',
-  'disclaimer.noInvestmentAdvice': 'لا تمثل نصيحة استثمارية وفق القانون رقم 44-12',
-  'disclaimer.notRegulated': 'غير معتمدة من AMMC/BAM',
-  'disclaimer.forAdvisory': 'للاستشارة الشخصية: jad2advisory.com',
-  'disclaimer.cndp': 'الامتثال للقانون 09-08 (CNDP): لا يتم الاحتفاظ بالبيانات',
+  'disclaimer.short': 'بيانات سوق استرشادية للإشارة · الاستشارة المهنية: jad2advisory.com',
+  'disclaimer.noInvestmentAdvice': 'للأغراض المعلوماتية فقط',
+  'disclaimer.notRegulated': 'أسعار استرشادية — ليست تسعيرات رسمية لبنك المغرب',
+  'disclaimer.forAdvisory': 'للاستشارة المهنية: jad2advisory.com',
+  'disclaimer.cndp': 'لا يتم حفظ استفساراتك أو ربطها بهويتك.',
 
   // Actions
   'action.viewOfficialRates': 'الأسعار الرسمية BKAM',

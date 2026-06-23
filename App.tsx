@@ -171,9 +171,9 @@ function AppInner() {
       </nav>
 
       {/* ── Compliance Banner ── */}
-      <div className="bg-amber-950/80 border-b border-amber-800/50 px-4 py-1.5 text-center">
-        <p className="text-[10px] text-amber-300 font-medium tracking-wide">
-          ⚠️ {DISCLAIMER_SHORT}
+      <div className="bg-navy-900/60 border-b border-navy-700/40 px-4 py-1 text-center">
+        <p className="text-[10px] text-slate-500 tracking-wide">
+          {DISCLAIMER_SHORT}
         </p>
       </div>
 
@@ -206,8 +206,8 @@ function AppInner() {
                     <p className="text-slate-300 mb-6 max-w-lg text-sm">
                       Données indicatives sur les 14 devises cotées par Bank Al-Maghrib, simulateur pédagogique de forwards/swaps et référentiel réglementaire Office des Changes.
                     </p>
-                    <div className="text-[10px] text-amber-400 bg-amber-900/20 border border-amber-800/30 rounded px-3 py-1.5 mb-4 inline-block">
-                      ⚠️ Taux indicatifs uniquement — Pas de conseil en investissement — Non agréé AMMC/BAM
+                    <div className="text-[10px] text-slate-400 border border-navy-600/40 rounded px-3 py-1.5 mb-4 inline-block">
+                      Données indicatives à titre de référence — Pour conseil : <span className="text-gold-400">jad2advisory.com</span>
                     </div>
                     <div className="flex flex-wrap gap-3">
                       <button
@@ -359,9 +359,9 @@ function AppInner() {
                   Visiter jad2advisory.com →
                 </a>
 
-                <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                  <p className="text-xs text-amber-800 font-semibold mb-1">Mention Légale Obligatoire</p>
-                  <p className="text-xs text-amber-700 leading-relaxed">{DISCLAIMER_TEXT}</p>
+                <div className="mt-6 p-4 bg-slate-50 border border-slate-200 rounded-lg">
+                  <p className="text-[11px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Note d'information</p>
+                  <p className="text-xs text-slate-500 leading-relaxed">{DISCLAIMER_TEXT}</p>
                 </div>
               </div>
             </div>
@@ -390,20 +390,10 @@ function AppInner() {
         </div>
 
         {/* Legal disclaimer */}
-        <div className="py-6">
+        <div className="py-5">
           <div className="max-w-7xl mx-auto px-4 text-center">
-            <div className="flex justify-center items-center gap-2 mb-3">
-              <Shield size={14} className="text-slate-500" />
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">{t('footer.legal')}</span>
-            </div>
-            <p className="text-[10px] leading-relaxed max-w-3xl mx-auto text-slate-500">{DISCLAIMER_TEXT}</p>
-            <div className="flex flex-wrap justify-center gap-4 mt-4 text-[10px] text-slate-600">
-              <span>{t('disclaimer.notRegulated')}</span>
-              <span>·</span>
-              <span>{t('disclaimer.noInvestmentAdvice')}</span>
-              <span>·</span>
-              <span>{t('common.indicative')}</span>
-              <span>·</span>
+            <p className="text-[10px] leading-relaxed max-w-3xl mx-auto text-slate-600">{DISCLAIMER_TEXT}</p>
+            <div className="flex flex-wrap justify-center gap-4 mt-3 text-[10px] text-slate-700">
               <span>ECB/Frankfurter · Yahoo Finance</span>
               <span>·</span>
               <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400">jad2advisory.com</a>

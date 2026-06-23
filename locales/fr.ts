@@ -65,11 +65,11 @@ const fr: Record<string, string> = {
   'commodities.fallbackNotice': 'Données de référence affichées (connexion Yahoo Finance indisponible)',
 
   // Disclaimer
-  'disclaimer.short': 'Cours indicatifs uniquement • Pas de conseil en investissement • Non régulé AMMC/BAM',
-  'disclaimer.noInvestmentAdvice': 'Pas de conseil en investissement au sens de la Loi n° 44-12',
-  'disclaimer.notRegulated': 'Non agréé AMMC/BAM',
-  'disclaimer.forAdvisory': 'Pour conseil personnalisé: jad2advisory.com',
-  'disclaimer.cndp': 'Conformité Loi 09-08 (CNDP): données non conservées',
+  'disclaimer.short': 'Données indicatives à titre de référence · Conseil professionnel : jad2advisory.com',
+  'disclaimer.noInvestmentAdvice': 'À titre informatif uniquement',
+  'disclaimer.notRegulated': 'Cours de marché indicatifs — non officiels BKAM',
+  'disclaimer.forAdvisory': 'Pour conseil personnalisé : jad2advisory.com',
+  'disclaimer.cndp': 'Vos questions ne sont pas conservées ni associées à votre identité.',
 
   // Actions
   'action.viewOfficialRates': 'Cours officiels BKAM',

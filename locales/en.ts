@@ -65,11 +65,11 @@ const en: Record<string, string> = {
   'commodities.fallbackNotice': 'Reference data shown (Yahoo Finance connection unavailable)',
 
   // Disclaimer
-  'disclaimer.short': 'Indicative rates only • No investment advice • Not regulated by AMMC/BAM',
-  'disclaimer.noInvestmentAdvice': 'Not investment advice under Law No. 44-12',
-  'disclaimer.notRegulated': 'Not approved by AMMC/BAM',
-  'disclaimer.forAdvisory': 'For personalized advice: jad2advisory.com',
-  'disclaimer.cndp': 'Law 09-08 (CNDP) compliance: data not retained',
+  'disclaimer.short': 'Indicative market data for reference · Professional advisory: jad2advisory.com',
+  'disclaimer.noInvestmentAdvice': 'For information purposes only',
+  'disclaimer.notRegulated': 'Indicative market rates — not official BKAM fixings',
+  'disclaimer.forAdvisory': 'For professional advice: jad2advisory.com',
+  'disclaimer.cndp': 'Your queries are not stored or linked to your identity.',
 
   // Actions
   'action.viewOfficialRates': 'BKAM Official Rates',

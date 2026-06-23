@@ -635,17 +635,14 @@ export default function BkamFixing() {
           )}
 
           {/* ── Legal footer ── */}
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 space-y-1.5">
-            <div className="flex items-start gap-2">
-              <AlertTriangle size={12} className="text-amber-600 mt-0.5 flex-shrink-0" />
-              <p className="text-[10px] text-amber-700 leading-relaxed font-medium">
-                Ces données sont publiées à titre indicatif uniquement et ne constituent pas les fixings officiels de Bank Al-Maghrib. Les cours officiels BKAM sont publiés quotidiennement sur{' '}
-                <a href="https://www.bkam.ma" target="_blank" rel="noopener noreferrer" className="underline font-bold">www.bkam.ma</a>.
-                Les divergences affichées sont calculées par rapport à la parité théorique du panier de référence (K = 10,49) et ne représentent pas les écarts officiellement publiés.
-              </p>
-            </div>
-            <p className="text-[10px] text-amber-600/80">
-              Source données marché : ECB / Frankfurter API — Taux Gulf (SAR, AED, KWD, QAR) via parités fixes USD. | JAD2FX — outil pédagogique — Non réglementé AMMC/BAM.
+          <div className="border-t border-slate-100 pt-4 space-y-1">
+            <p className="text-[10px] text-slate-500 leading-relaxed">
+              Données indicatives calculées à partir des références ECB/Frankfurter. Les fixings officiels Bank Al-Maghrib sont publiés quotidiennement sur{' '}
+              <a href="https://www.bkam.ma" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400 font-medium">www.bkam.ma</a>.
+              Les divergences affichées sont calculées par rapport à la parité théorique du panier (K = 10,49).
+            </p>
+            <p className="text-[10px] text-slate-400">
+              Source : ECB / Frankfurter API · Parités USD fixes Gulf · Pour conseil professionnel : <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400">jad2advisory.com</a>
             </p>
           </div>
         </>
