@@ -10,6 +10,7 @@ const fr: Record<string, string> = {
   'nav.swaps': 'FX Swaps',
   'nav.live': 'Live Pricer',
   'nav.admin': 'Admin',
+  'nav.report': 'Rapport Marché',
   'nav.about': 'À Propos',
   'nav.advisory': 'Conseil FX →',
 

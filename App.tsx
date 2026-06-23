@@ -13,12 +13,13 @@ import AdminDashboard     from './components/AdminDashboard';
 import BkamFixing         from './components/BkamFixing';
 import BilletsPage        from './components/BilletsPage';
 import CommoditiesPage    from './components/CommoditiesPage';
+import MarketReportPage   from './components/MarketReport';
 import { AdminProvider }  from './context/AdminContext';
 import { I18nProvider, useI18n, Locale } from './context/I18nContext';
 import {
   Building2, FileText, LayoutDashboard, Menu, Shield,
   Globe, ChevronRight, TrendingUp, ArrowLeftRight, Activity,
-  Lock, X, BarChart2, Banknote, PackageOpen,
+  Lock, X, BarChart2, Banknote, PackageOpen, Newspaper,
 } from 'lucide-react';
 
 // ─── Determines whether a view uses dark terminal bg ─────────────────────────
@@ -56,6 +57,7 @@ function AppInner() {
     { label: t('nav.swaps'),       view: 'SWAPS',       icon: ArrowLeftRight },
     { label: t('nav.live'),        view: 'LIVE',        icon: Activity },
     { label: t('nav.admin'),       view: 'ADMIN',       icon: Lock },
+    { label: t('nav.report'),      view: 'REPORT',      icon: Newspaper },
     { label: t('nav.about'),       view: 'ABOUT',       icon: Building2 },
   ];
 
@@ -298,6 +300,7 @@ function AppInner() {
         {view === 'FIXING'      && <BkamFixing />}
         {view === 'BILLETS'     && <BilletsPage />}
         {view === 'COMMODITIES' && <CommoditiesPage />}
+        {view === 'REPORT'      && <MarketReportPage />}
 
         {/* Terminal views — dark panel wrapper */}
         {TERMINAL_VIEWS.includes(view) && (

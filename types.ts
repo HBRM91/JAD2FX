@@ -237,8 +237,52 @@ export interface AuditEntry {
 }
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
-export type ViewState = 'HOME' | 'DASHBOARD' | 'ANALYSIS' | 'FIXING' | 'BILLETS' | 'COMMODITIES' | 'FORWARDS' | 'SWAPS' | 'LIVE' | 'ADMIN' | 'ABOUT';
+export type ViewState = 'HOME' | 'DASHBOARD' | 'ANALYSIS' | 'FIXING' | 'BILLETS' | 'COMMODITIES' | 'FORWARDS' | 'SWAPS' | 'LIVE' | 'ADMIN' | 'ABOUT' | 'REPORT';
 export type DashboardTab = 'VIREMENTS' | 'BILLETS' | 'GLOBAL_FX';
+
+// ─── Market Reports ───────────────────────────────────────────────────────────
+
+export interface RadarEntry {
+  currency: string;
+  flag: string;
+  currentRate: number;
+  weeklyChangeBps: number;
+  headline: string;
+  headlineAr: string;
+  sentiment: 'BULLISH' | 'BEARISH' | 'NEUTRAL';
+  expectation: string;
+  expectationAr: string;
+  sourceUrl?: string;
+}
+
+export interface MarketReport {
+  id: string;
+  createdAt: string;
+  publishedAt: string | null;
+  titleFr: string;
+  titleAr: string;
+  excerptFr: string;
+  excerptAr: string;
+  contentFr: string;
+  contentAr: string;
+  radarData: RadarEntry[];
+  llmModel: string;
+  tavilyQueries: string[];
+  adminNotes: string;
+  isPublished: boolean;
+  generation: {
+    durationMs: number;
+    tavilySearchCount: number;
+  };
+}
+
+export interface ReportSettings {
+  editorialLine: string;
+  editorialLineAr: string;
+  defaultQueries: string[];
+  defaultModel: string;
+  autoPublish: boolean;
+}
 
 // ─── Chat ─────────────────────────────────────────────────────────────────────
 export interface ChatMessage {

@@ -1,3 +1,16 @@
 name = "jad2fx-yahoo-proxy"
 main = "yahoo-proxy.js"
 compatibility_date = "2024-01-01"
+
+# ── KV namespace for market reports ──────────────────────────────────────────
+# Run:  wrangler kv:namespace create REPORTS_KV
+# Then replace the placeholder below with the id it returns.
+[[kv_namespaces]]
+binding = "REPORTS_KV"
+id = "REPLACE_WITH_YOUR_KV_NAMESPACE_ID"
+
+# ── Required secrets (set via: wrangler secret put <NAME>) ───────────────────
+# BKAM_FX_KEY      — BKAM FX API subscription key
+# BKAM_BDT_KEY     — BKAM BDT/MONIA subscription key
+# TAVILY_KEY       — Tavily search API key
+# ADMIN_PASSCODE   — Must match VITE_ADMIN_PASSCODE in .env

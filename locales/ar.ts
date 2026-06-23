@@ -10,6 +10,7 @@ const ar: Record<string, string> = {
   'nav.swaps': 'مقايضات العملات',
   'nav.live': 'الأسعار اللحظية',
   'nav.admin': 'الإدارة',
+  'nav.report': 'تقرير السوق',
   'nav.about': 'حول',
   'nav.advisory': 'استشارة الصرف ←',
 

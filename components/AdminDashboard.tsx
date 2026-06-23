@@ -11,6 +11,7 @@ import { getDefaultCurve, CURVE_META } from '../services/interestRates';
 import { STANDARD_TENORS } from '../services/forwardEngine';
 import { BlotterEntry, ClientTier, TierConfig, AuditEntry } from '../types';
 import { routeQuery, getAvailableProviders, PROVIDER_LABELS, PROVIDER_COLORS } from '../services/llmRouter';
+import ReportsAdmin from './admin/ReportsAdmin';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -1107,7 +1108,7 @@ function ConsultantTab() {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-type AdminTab = 'SYSTEM' | 'RATES' | 'CURVES' | 'FORWARDS' | 'SPREADS' | 'PRICING' | 'ALERTS' | 'BLOTTER' | 'AUDIT' | 'CONSULTANT';
+type AdminTab = 'SYSTEM' | 'RATES' | 'CURVES' | 'FORWARDS' | 'SPREADS' | 'PRICING' | 'ALERTS' | 'BLOTTER' | 'AUDIT' | 'CONSULTANT' | 'REPORTS';
 
 const TABS: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: 'SYSTEM',     label: 'System',     icon: Activity },
@@ -1120,6 +1121,7 @@ const TABS: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: 'BLOTTER',    label: 'Blotter',    icon: FileText },
   { id: 'AUDIT',      label: 'Audit',      icon: ClipboardList },
   { id: 'CONSULTANT', label: 'Consultant', icon: Bot },
+  { id: 'REPORTS',    label: 'Rapports',   icon: FileText },
 ];
 
 export default function AdminDashboard() {
@@ -1198,6 +1200,7 @@ export default function AdminDashboard() {
           {activeTab === 'BLOTTER'    && <BlotterTab />}
           {activeTab === 'AUDIT'      && <AuditTab />}
           {activeTab === 'CONSULTANT' && <ConsultantTab />}
+          {activeTab === 'REPORTS'    && <ReportsAdmin />}
         </div>
       </div>
     </div>

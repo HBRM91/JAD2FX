@@ -10,6 +10,7 @@ const en: Record<string, string> = {
   'nav.swaps': 'FX Swaps',
   'nav.live': 'Live Pricer',
   'nav.admin': 'Admin',
+  'nav.report': 'Market Report',
   'nav.about': 'About',
   'nav.advisory': 'FX Advisory →',
 
