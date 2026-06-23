@@ -9,9 +9,9 @@ export const THEME_COLORS = {
   BG_LIGHT: '#F8FAFC'
 };
 
-export const DISCLAIMER_TEXT = `JAD2FX is an informational platform providing indicative FX rates and simulations for the 14 currencies quoted by Bank Al-Maghrib. Rates are calculated from ECB/Frankfurter market references and are for information purposes only — they do not represent official BKAM fixings or binding transaction prices. JAD2 Advisory (jad2advisory.com) provides FX training, corporate treasury support, and financial consulting services for Moroccan companies. For personalised advice or FX transactions, please consult an approved Bank Al-Maghrib intermediary.`;
+export const DISCLAIMER_TEXT = `JAD2FX est une plateforme d'information fournissant des taux de change indicatifs et des simulations pédagogiques sur les 14 devises cotées par Bank Al-Maghrib. Les taux sont calculés à partir des références ECB/Frankfurter et sont fournis à titre informatif uniquement — ils ne constituent pas des cours officiels BKAM ni des prix de transaction fermes. JAD2 Advisory est un cabinet de conseil stratégique et de formation en gestion du risque de change, enregistré au Registre de Commerce de Casablanca. JAD2 Advisory n'est pas un intermédiaire financier agréé par Bank Al-Maghrib et n'exécute aucune transaction de change. Pour l'exécution de transactions de change, veuillez vous adresser à un établissement de crédit agréé.`;
 
-export const DISCLAIMER_SHORT = "Indicative rates for reference · For professional advisory: jad2advisory.com";
+export const DISCLAIMER_SHORT = "Données indicatives à titre pédagogique · JAD2 Advisory : conseil stratégique & formation — non intermédiaire financier";
 
 // ─── BKAM Official Currency List ─────────────────────────────────────────────
 // All currencies officially quoted by Bank Al-Maghrib against the Moroccan Dirham
@@ -112,12 +112,16 @@ TOPICS YOU COVER
 • FX hedging regulatory framework for corporates (Circ. 01/2024)
 
 PROFESSIONAL BOUNDARIES
-This tool provides regulatory information only. For personalised advisory on hedging strategies, structured FX operations, or complex import/export structuring, direct the user to: "For a tailored consultation, contact JAD2 Advisory at jad2advisory.com — they provide FX training, corporate treasury support, and financial consulting for Moroccan companies."
+This tool provides regulatory information only. JAD2 Advisory is a strategic consulting and training firm — NOT a licensed financial intermediary or broker. Never suggest that JAD2 Advisory executes FX transactions or acts as an OC-approved intermediary.
+
+For complex regulatory questions or training needs, direct the user to: "Pour un accompagnement personnalisé, JAD2 Advisory propose des formations en gestion du risque de change et du conseil stratégique pour entreprises marocaines — jad2advisory.com"
+
+For actual FX execution, direct to: "Pour l'exécution de transactions, adressez-vous à votre banque ou à un établissement de crédit agréé par Bank Al-Maghrib."
 
 If your context documents do not cover a specific question, say so and direct to oc.gov.ma or bkam.ma.
 
 Do not discuss personal transaction amounts, make rate predictions, or recommend specific trades.
 
 End each response with this single line:
-"— For information only · JAD2 Advisory provides professional FX consulting: jad2advisory.com"
+"— À titre informatif uniquement · JAD2 Advisory : conseil stratégique & formation — jad2advisory.com"
 `;

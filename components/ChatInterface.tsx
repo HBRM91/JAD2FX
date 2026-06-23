@@ -11,7 +11,7 @@ const ChatInterface: React.FC = () => {
     {
       id: '1',
       role: 'model',
-      text: `Bonjour. Je suis l'Assistant Réglementaire JAD2FX — ${getDocumentCount()} documents OC & BKAM indexés.\n\nJe peux vous renseigner sur la réglementation marocaine des changes : délais de rapatriement, allocations voyage, commissions OC, fixing BKAM, comptes devises (CPEC/CDE), couverture de change, investissements étrangers.\n\nPour une consultation personnalisée ou un accompagnement sur vos opérations de change, JAD2 Advisory est à votre disposition — jad2advisory.com`,
+      text: `Bonjour. Je suis l'Assistant Réglementaire JAD2FX — ${getDocumentCount()} documents OC & BKAM indexés.\n\nJe peux vous renseigner sur la réglementation marocaine des changes : délais de rapatriement, allocations voyage, commissions OC, fixing BKAM, comptes devises (CPEC/CDE), couverture de change, investissements étrangers.\n\nPour une formation ou un accompagnement stratégique en gestion du risque de change, JAD2 Advisory est à votre disposition — jad2advisory.com`,
       timestamp: new Date(),
     }
   ]);
@@ -145,8 +145,8 @@ const ChatInterface: React.FC = () => {
                 <div className="mt-2 bg-gold-50 border border-gold-200 p-3 rounded-lg flex items-center gap-3 w-full">
                   <Briefcase className="text-navy-900 flex-shrink-0" size={16} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-navy-900">Cas Complexe — Conseil JAD2 Advisory</p>
-                    <p className="text-[10px] text-navy-700">Ce scénario nécessite un accompagnement personnalisé par nos experts en structuration de change.</p>
+                    <p className="text-xs font-bold text-navy-900">Formation & Conseil Stratégique — JAD2 Advisory</p>
+                    <p className="text-[10px] text-navy-700">JAD2 Advisory propose formations et conseil stratégique en gestion du risque de change pour entreprises marocaines.</p>
                   </div>
                   <a
                     href="https://jad2advisory.com"

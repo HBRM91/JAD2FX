@@ -3,7 +3,6 @@ import { ViewState, LiveRate } from './types';
 import { DEFAULT_BASKET_CONFIG, MARKET_NEWS, DISCLAIMER_TEXT, DISCLAIMER_SHORT } from './constants';
 import { fetchAllMadRates } from './services/fxRates';
 import FxDashboard        from './components/FxDashboard';
-import ChatInterface      from './components/ChatInterface';
 import MarketAnalysis     from './components/MarketAnalysis';
 import RatesTicker        from './components/RatesTicker';
 import ForwardCalculator  from './components/ForwardCalculator';
@@ -14,6 +13,8 @@ import BkamFixing         from './components/BkamFixing';
 import BilletsPage        from './components/BilletsPage';
 import CommoditiesPage    from './components/CommoditiesPage';
 import MarketReportPage   from './components/MarketReport';
+import FloatingChat       from './components/FloatingChat';
+import Jad2Logo           from './components/Jad2Logo';
 import { AdminProvider }  from './context/AdminContext';
 import { I18nProvider, useI18n, Locale } from './context/I18nContext';
 import {
@@ -80,12 +81,14 @@ function AppInner() {
 
             {/* Logo */}
             <div className="flex items-center gap-3 cursor-pointer flex-shrink-0" onClick={() => navTo('HOME')}>
-              <div className="w-9 h-9 bg-gradient-to-br from-gold-400 to-gold-600 rounded flex items-center justify-center shadow-lg">
-                <span className="font-serif font-bold text-navy-900 text-xl">J</span>
+              <Jad2Logo width={80} showAdvisory={false} className="hidden sm:block" />
+              {/* Mobile: compact "J2" mark */}
+              <div className="sm:hidden w-9 h-9 bg-gradient-to-br from-gold-500 to-gold-700 rounded flex items-center justify-center shadow-lg">
+                <span className="font-serif font-bold text-navy-900 text-base">J2</span>
               </div>
-              <div className="hidden sm:block">
-                <h1 className="font-bold text-white tracking-widest leading-none text-base uppercase">JAD2FX</h1>
-                <p className="text-[10px] text-gold-500 tracking-widest">by JAD2 Advisory</p>
+              <div className="hidden sm:block border-l border-navy-700 pl-3">
+                <h1 className="font-bold text-white tracking-widest leading-none text-sm uppercase">JAD2FX</h1>
+                <p className="text-[10px] text-slate-500 tracking-wider">Outil de données de change</p>
               </div>
             </div>
 
@@ -274,21 +277,38 @@ function AppInner() {
               </div>
             </div>
 
-            {/* Sidebar: Chatbot */}
+            {/* Sidebar: JAD2 Advisory card */}
             <div className="lg:col-span-1">
               <div className="sticky top-24 space-y-4">
-                <ChatInterface />
-                <div className="p-4 bg-white rounded-lg border border-slate-200 shadow-sm text-center">
-                  <p className="text-sm font-semibold text-navy-900 mb-1">Besoin d'un conseil FX structuré?</p>
-                  <p className="text-xs text-slate-500 mb-3">Forwards, couvertures, rapatriement de fonds — expertise JAD2 Advisory</p>
+                {/* Brand card */}
+                <div className="bg-navy-900 rounded-xl p-6 flex flex-col items-center text-center gap-4 shadow-xl border border-navy-700">
+                  <Jad2Logo width={130} showAdvisory={true} />
+                  <div>
+                    <p className="text-xs font-bold text-white mb-1 uppercase tracking-wider">Cabinet de Conseil Stratégique</p>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                      Formation en gestion du risque de change · Conseil stratégique · Accompagnement réglementaire Office des Changes
+                    </p>
+                  </div>
                   <a
                     href="https://jad2advisory.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-full py-2 bg-gold-500 text-navy-900 text-xs font-bold rounded hover:bg-gold-400 transition"
+                    className="block w-full py-2.5 bg-gold-500 text-navy-900 text-xs font-bold rounded hover:bg-gold-400 transition"
                   >
-                    Contacter JAD2 Advisory →
+                    jad2advisory.com →
                   </a>
+                  <p className="text-[9px] text-slate-600 leading-relaxed">
+                    JAD2 Advisory est un cabinet de conseil et de formation, non un intermédiaire financier agréé par Bank Al-Maghrib.
+                  </p>
+                </div>
+
+                {/* Chatbot hint */}
+                <div className="p-4 bg-white rounded-lg border border-slate-200 shadow-sm text-center">
+                  <p className="text-sm font-semibold text-navy-900 mb-1">Assistant Réglementaire</p>
+                  <p className="text-xs text-slate-500 mb-3">Posez vos questions OC & BKAM via le bouton flottant en bas à droite</p>
+                  <div className="flex items-center justify-center gap-2 text-xs text-gold-600 font-bold">
+                    <span>💬</span> Cliquez sur l'icône chat →
+                  </div>
                 </div>
               </div>
             </div>
@@ -315,11 +335,9 @@ function AppInner() {
         {view === 'ABOUT' && (
           <div className="max-w-3xl mx-auto space-y-5">
             <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 bg-gradient-to-br from-gold-400 to-gold-600 rounded flex items-center justify-center">
-                  <span className="font-bold text-navy-900 text-lg">J</span>
-                </div>
-                <div>
+              <div className="flex items-center gap-4 mb-6">
+                <Jad2Logo width={110} showAdvisory={true} />
+                <div className="border-l border-slate-200 pl-4">
                   <h2 className="text-2xl font-bold text-navy-900 tracking-widest uppercase">JAD2FX</h2>
                   <p className="text-xs text-gold-600 tracking-wider">Outil de Données de Change — by JAD2 Advisory</p>
                 </div>
@@ -330,7 +348,7 @@ function AppInner() {
                   <strong>JAD2FX</strong> est l'outil en ligne de données de change et de simulation pédagogique de <strong>JAD2 Advisory</strong>. Il est conçu pour permettre aux entreprises et professionnels marocains de comprendre les dynamiques du marché des changes MAD et la réglementation de l'Office des Changes.
                 </p>
                 <p>
-                  Cet outil ne constitue pas et ne doit pas être interprété comme un conseil en investissement, une recommandation d'achat ou de vente de devises, ni une offre de service de change. <strong>JAD2FX n'est pas agréé par l'AMMC ni par Bank Al-Maghrib</strong> pour la prestation de services d'investissement ou de change.
+                  Cet outil ne constitue pas et ne doit pas être interprété comme un conseil en investissement, une recommandation d'achat ou de vente de devises, ni une offre de service de change. <strong>JAD2FX n'est pas agréé par l'AMMC ni par Bank Al-Maghrib</strong> pour la prestation de services d'investissement ou de change. Pour l'exécution de transactions de change, adressez-vous à un établissement de crédit agréé.
                 </p>
 
                 <h3 className="text-base font-bold text-navy-900 mt-5">Fonctionnalités</h3>
@@ -339,7 +357,7 @@ function AppInner() {
                     'Données indicatives sur les 14 devises officiellement cotées par BKAM contre le MAD',
                     'Simulateur pédagogique de forwards (formule CIP) et de swaps de change',
                     'Référentiel de la réglementation de l\'Office des Changes (circulaires, instructions)',
-                    'Courbes de taux interpolées à titre informatif uniquement',
+                    'Courbes de taux interpolées à titre informatif et pédagogique uniquement',
                     'Toutes les simulations sont illustratives et ne constituent pas des devis contraignants',
                   ].map(f => (
                     <li key={f} className="flex items-start gap-2">
@@ -349,9 +367,12 @@ function AppInner() {
                   ))}
                 </ul>
 
-                <h3 className="text-base font-bold text-navy-900 mt-5">JAD2 Advisory</h3>
+                <h3 className="text-base font-bold text-navy-900 mt-5">JAD2 Advisory — Cabinet de Conseil Stratégique & Formation</h3>
                 <p>
-                  Pour des besoins de conseil personnalisé en matière de couverture de change, de structuration d'opérations, ou d'accompagnement réglementaire Office des Changes, veuillez contacter notre équipe de conseillers.
+                  JAD2 Advisory est un cabinet de conseil stratégique et de formation en gestion du risque de change, enregistré au Registre de Commerce de Casablanca. Nos services incluent la formation des équipes financières, le conseil en stratégie de couverture et l'accompagnement réglementaire Office des Changes.
+                </p>
+                <p className="text-xs text-slate-500 bg-amber-50 border border-amber-100 rounded p-3">
+                  ⚠️ <strong>JAD2 Advisory n'est pas un intermédiaire financier agréé par Bank Al-Maghrib</strong> et n'exécute aucune transaction de change. Nos prestations sont exclusivement des services de conseil stratégique et de formation.
                 </p>
                 <a
                   href="https://jad2advisory.com"
@@ -363,7 +384,7 @@ function AppInner() {
                 </a>
 
                 <div className="mt-6 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                  <p className="text-[11px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Note d'information</p>
+                  <p className="text-[11px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Mentions Légales & Conformité</p>
                   <p className="text-xs text-slate-500 leading-relaxed">{DISCLAIMER_TEXT}</p>
                 </div>
               </div>
@@ -372,14 +393,17 @@ function AppInner() {
         )}
       </main>
 
+      {/* ── Floating chatbot widget (visible on all views) ── */}
+      <FloatingChat />
+
       {/* ── Footer ── */}
       <footer className="bg-navy-900 text-slate-400 border-t border-navy-800">
         {/* Advisory CTA strip */}
         <div className="bg-gold-500/10 border-b border-gold-600/20 py-4">
           <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-bold text-white">{t('footer.advisory')}</p>
-              <p className="text-xs text-slate-400">{t('footer.advisoryDesc')}</p>
+              <p className="text-sm font-bold text-white">Formation & Conseil Stratégique en Gestion du Risque de Change</p>
+              <p className="text-xs text-slate-400">Cabinet de conseil stratégique · Formation · Accompagnement réglementaire OC — <em>Non intermédiaire financier</em></p>
             </div>
             <a
               href="https://jad2advisory.com"
@@ -387,7 +411,7 @@ function AppInner() {
               rel="noopener noreferrer"
               className="flex-shrink-0 px-5 py-2 bg-gold-500 text-navy-900 text-sm font-bold rounded hover:bg-gold-400 transition"
             >
-              {t('footer.cta')}
+              JAD2 Advisory →
             </a>
           </div>
         </div>

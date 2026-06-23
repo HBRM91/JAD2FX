@@ -220,10 +220,10 @@ export default {
     const url = new URL(request.url);
     const pathname = url.pathname;
 
-    // ── BKAM BDT proxy ────────────────────────────────────────────────────────
+    // ── BKAM obligataire/BDT proxy (MONIA subscription covers Marché Obligataire) ─
     if (pathname.startsWith('/bkam-bdt/')) {
       if (request.method !== 'GET') return new Response('Method Not Allowed', { status: 405 });
-      return handleBkam(pathname.slice('/bkam-bdt/'.length), url.searchParams.toString(), env.BKAM_BDT_KEY, origin);
+      return handleBkam(pathname.slice('/bkam-bdt/'.length), url.searchParams.toString(), env.BKAM_MONIA_KEY, origin);
     }
 
     // ── BKAM FX proxy ─────────────────────────────────────────────────────────
