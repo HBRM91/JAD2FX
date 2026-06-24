@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { ArrowLeftRight, RotateCcw, RotateCw, ChevronDown, Trash2, TrendingDown } from 'lucide-react';
 import { BKAM_CURRENCIES } from '../constants';
+import ComplianceBanner from './ComplianceBanner';
 import { STANDARD_TENORS, buildFxSwap, buildRollEvent } from '../services/forwardEngine';
 import { useAdmin } from '../context/AdminContext';
 import { RollEvent } from '../types';
@@ -183,6 +184,7 @@ export default function SwapSimulator() {
 
   return (
     <div className="space-y-5">
+      <ComplianceBanner toolName="FX Swap Simulator" />
 
       {/* ── Header ── */}
       <div>

@@ -8,6 +8,7 @@ import {
   DollarSign, AlertTriangle, BookOpen,
 } from 'lucide-react';
 import { BKAM_CURRENCIES } from '../constants';
+import ComplianceBanner from './ComplianceBanner';
 import {
   STANDARD_TENORS,
   buildForwardQuote,
@@ -308,8 +309,10 @@ export default function ForwardCalculator() {
   const tabMtm    = locale === 'ar' ? 'MTM' : 'MTM';
 
   return (
-    <div className="space-y-0">
+    <div className="space-y-4">
+      <ComplianceBanner toolName="Forward Calculator" />
 
+      <div className="space-y-0">
       {/* ── Bloomberg-style header ── */}
       <div className="bg-navy-950 border border-navy-700 rounded-t-xl px-6 py-4">
         <div className="flex items-center justify-between flex-wrap gap-4">
@@ -675,6 +678,7 @@ export default function ForwardCalculator() {
         {activeTab === 'MTM' && (
           <MtmSection spot={spot} currency={currency} />
         )}
+      </div>
       </div>
     </div>
   );
