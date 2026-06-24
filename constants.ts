@@ -107,10 +107,43 @@ export const MOCK_RATES_USD = [
 ];
 
 // ─── News Feed ────────────────────────────────────────────────────────────────
+// Editorial market intelligence — indicative, updated periodically
 export const MARKET_NEWS = [
-  { id: 1, title: "EUR/USD Impact on Dirham Peg", category: "Global Markets", time: "2h ago", summary: "ECB rate cuts may tighten the spread against the Dirham basket." },
-  { id: 2, title: "New Circulaire 01/2024 Analysis", category: "Réglementation", time: "5h ago", summary: "Office des Changes extends hedging coverage to 100% of underlying import value for PMEs." },
-  { id: 3, title: "Foreign Reserves Update", category: "Bank Al-Maghrib", time: "1d ago", summary: "Official reserves reached 360 billion MAD, covering 5 months of imports." }
+  {
+    id: 1,
+    title: "EUR/MAD : L'ancre européenne domine la dynamique du panier",
+    category: "Bank Al-Maghrib",
+    time: "Éditorial",
+    summary: "Avec 60% du panier de référence BKAM indexé sur l'euro, la politique monétaire de la BCE constitue la variable exogène la plus déterminante pour le dirham. La stabilisation du cycle de normalisation des taux BCE, combinée à un EUR/USD gravitant autour de 1,08–1,12, ancre la parité centrale USD/MAD dans un corridor étroit de 9,92–10,05. L'utilisation des bandes BKAM reste en zone neutre (35–65%) — une configuration favorable à la visibilité des entreprises exportatrices en EUR."
+  },
+  {
+    id: 2,
+    title: "Phosphates OCP & hydrocarbures : la matrice asymétrique du compte courant",
+    category: "Macro Maroc",
+    time: "Éditorial",
+    summary: "Les recettes d'exportation d'OCP — libellées majoritairement en USD — génèrent un flux structurel de devises qui amortit la pression de dépréciation du dirham issue de la facture pétrolière (également en USD). Cette couverture naturelle partielle réduit le besoin net d'intervention de BKAM, mais expose la balance des paiements à une double vulnérabilité si les cours des phosphates et du Brent évoluent défavorablement en simultané — un scénario à intégrer dans les stress tests de trésorerie corporate."
+  },
+  {
+    id: 3,
+    title: "Circulaire OC n° 01/2024 : une refonte majeure du cadre de couverture",
+    category: "Réglementation",
+    time: "Éditorial",
+    summary: "La Circulaire 01/2024 de l'Office des Changes élargit la couverture autorisée à 100% de l'exposition commerciale sous-jacente (imports et exports), et officialise les options de change vanille (puts pour importateurs, calls pour exportateurs). C'est la réforme la plus significative de l'arsenal de couverture depuis la Phase II de libéralisation (2020). Les entreprises disposant de comptes CPEC ou CDE doivent réviser leur politique de couverture pour intégrer les nouvelles limites et instruments autorisés."
+  },
+  {
+    id: 4,
+    title: "Remises MRE & tourisme : saisonnalité et impact EUR/MAD",
+    category: "Flux de Capitaux",
+    time: "Éditorial",
+    summary: "Les transferts des Marocains résidant à l'étranger (MRE) dépassent structurellement 9 Mds EUR annuels, avec un pic saisonnier en Q2–Q3 (Ramadan / retour estival). Combinés à l'accélération des recettes touristiques, ces flux créent une pression acheteuse prévisible sur EUR/MAD entre mai et septembre. Les trésoriers corporate devraient anticiper ce biais saisonnier dans le calendrier de débouclement de leurs couvertures à terme EUR."
+  },
+  {
+    id: 5,
+    title: "Phase III du régime de change : signaux et préconditions BKAM",
+    category: "Politique Monétaire",
+    time: "Éditorial",
+    summary: "Les discussions BKAM–FMI (Ligne de Précaution et de Liquidité) réaffirment l'objectif d'élargissement progressif des bandes d'intervention au-delà du ±5% actuel. Le Gouverneur Jouahri a conditionné cette transition à trois indicateurs : réserves officielles > 5 mois d'importations, inflation ancrée près de 2%, et consolidation du compte courant. À horizon 2027, un passage à ±7,5% est plausible — les directions financières devraient stress-tester leurs expositions MAD à cette nouvelle amplitude potentielle."
+  }
 ];
 
 // ─── RAG Chatbot System Prompt ────────────────────────────────────────────────

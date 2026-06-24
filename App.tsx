@@ -484,7 +484,7 @@ function AppInner() {
                         <span className="text-[9px] text-navy-500 italic">Éditorial</span>
                       </div>
                       <h4 className="text-[13px] font-semibold text-slate-100 mb-1 leading-snug">{news.title}</h4>
-                      <p className="text-[11px] text-navy-400 line-clamp-2 leading-relaxed">{news.summary}</p>
+                      <p className="text-[11px] text-navy-400 line-clamp-3 leading-relaxed">{news.summary}</p>
                     </div>
                   ))}
                 </div>
