@@ -20,6 +20,7 @@ import MarketSessionsClock from './components/MarketSessionsClock';
 import DisclaimerModal    from './components/DisclaimerModal';
 import CurrencyHeatmap   from './components/CurrencyHeatmap';
 import BkamBandsVisualizer from './components/BkamBandsVisualizer';
+import ResourcesPage from './components/ResourcesPage';
 import FxCrossMatrix      from './components/FxCrossMatrix';
 import MarketRadar        from './components/MarketRadar';
 import { AdminProvider, useAdmin } from './context/AdminContext';
@@ -72,8 +73,9 @@ const NAV_GROUPS: NavGroup[] = [
     id: 'research',
     label: 'Recherche',
     items: [
-      { label: 'Market Report IA',   view: 'REPORT',      icon: Newspaper, desc: 'Rapport hebdo Groq/Gemini' },
-      { label: 'Réglementation OC',  view: 'REGULATIONS', icon: Scale,     desc: 'Circulaires Office des Changes' },
+      { label: 'Market Report IA',   view: 'REPORT',      icon: Newspaper,    desc: 'Rapport hebdo Groq/Gemini' },
+      { label: 'Réglementation OC',  view: 'REGULATIONS', icon: Scale,        desc: 'Circulaires Office des Changes' },
+      { label: 'Ressources',         view: 'RESOURCES',   icon: ExternalLink, desc: 'Liens institutionnels & data' },
     ],
   },
 ];
@@ -567,6 +569,7 @@ function AppInner() {
         {view === 'FORWARDS'    && <ForwardCalculator />}
         {view === 'SWAPS'       && <SwapSimulator />}
         {view === 'BANDS'       && <BkamBandsVisualizer />}
+        {view === 'RESOURCES'   && <ResourcesPage />}
 
         {view === 'LIVE' && (
           <div className="space-y-6">
