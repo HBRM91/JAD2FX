@@ -11,6 +11,7 @@ const ar: Record<string, string> = {
   'nav.live': 'الأسعار اللحظية',
   'nav.admin': 'الإدارة',
   'nav.report': 'تقرير السوق',
+  'nav.regulations': 'الأنظمة',
   'nav.about': 'حول',
   'nav.advisory': 'استشارة الصرف ←',
 

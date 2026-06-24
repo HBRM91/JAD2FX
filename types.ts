@@ -238,7 +238,7 @@ export interface AuditEntry {
 }
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
-export type ViewState = 'HOME' | 'DASHBOARD' | 'ANALYSIS' | 'FIXING' | 'BILLETS' | 'COMMODITIES' | 'FORWARDS' | 'SWAPS' | 'LIVE' | 'ADMIN' | 'ABOUT' | 'REPORT';
+export type ViewState = 'HOME' | 'DASHBOARD' | 'ANALYSIS' | 'FIXING' | 'BILLETS' | 'COMMODITIES' | 'FORWARDS' | 'SWAPS' | 'LIVE' | 'ADMIN' | 'ABOUT' | 'REPORT' | 'REGULATIONS';
 export type DashboardTab = 'VIREMENTS' | 'BILLETS' | 'GLOBAL_FX';
 
 // ─── Market Reports ───────────────────────────────────────────────────────────

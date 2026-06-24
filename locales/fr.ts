@@ -11,6 +11,7 @@ const fr: Record<string, string> = {
   'nav.live': 'Live Pricer',
   'nav.admin': 'Admin',
   'nav.report': 'Rapport Marché',
+  'nav.regulations': 'Réglementation',
   'nav.about': 'À Propos',
   'nav.advisory': 'Conseil FX →',
 

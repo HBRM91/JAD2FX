@@ -13,17 +13,19 @@ import BkamFixing         from './components/BkamFixing';
 import BilletsPage        from './components/BilletsPage';
 import CommoditiesPage    from './components/CommoditiesPage';
 import MarketReportPage   from './components/MarketReport';
+import RegulationsPage    from './components/RegulationsPage';
 import FloatingChat       from './components/FloatingChat';
 import Jad2Logo           from './components/Jad2Logo';
 import MarketSessionsClock from './components/MarketSessionsClock';
 import CurrencyHeatmap   from './components/CurrencyHeatmap';
 import FxCrossMatrix      from './components/FxCrossMatrix';
+import MarketRadar        from './components/MarketRadar';
 import { AdminProvider }  from './context/AdminContext';
 import { I18nProvider, useI18n, Locale } from './context/I18nContext';
 import {
   Building2, FileText, LayoutDashboard, Menu, Shield,
   Globe, ChevronRight, TrendingUp, ArrowLeftRight, Activity,
-  Lock, X, BarChart2, Banknote, PackageOpen, Newspaper,
+  Lock, X, BarChart2, Banknote, PackageOpen, Newspaper, Scale,
 } from 'lucide-react';
 
 // ─── Determines whether a view uses dark terminal bg ─────────────────────────
@@ -61,8 +63,9 @@ function AppInner() {
     { label: t('nav.swaps'),       view: 'SWAPS',       icon: ArrowLeftRight },
     { label: t('nav.live'),        view: 'LIVE',        icon: Activity },
     { label: t('nav.admin'),       view: 'ADMIN',       icon: Lock },
-    { label: t('nav.report'),      view: 'REPORT',      icon: Newspaper },
-    { label: t('nav.about'),       view: 'ABOUT',       icon: Building2 },
+    { label: t('nav.report'),       view: 'REPORT',       icon: Newspaper },
+    { label: t('nav.regulations'),  view: 'REGULATIONS',  icon: Scale },
+    { label: t('nav.about'),        view: 'ABOUT',        icon: Building2 },
   ];
 
   const LOCALE_OPTIONS: { code: Locale; label: string }[] = [
@@ -195,6 +198,7 @@ function AppInner() {
 
         {/* HOME */}
         {view === 'HOME' && (
+          <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
               {/* Hero */}
@@ -316,6 +320,9 @@ function AppInner() {
               </div>
             </div>
           </div>
+          {/* Market Radar — full width below the hero grid */}
+          <MarketRadar tickerRates={tickerRates} />
+          </div>
         )}
 
         {view === 'DASHBOARD'   && (
@@ -328,7 +335,8 @@ function AppInner() {
         {view === 'FIXING'      && <BkamFixing />}
         {view === 'BILLETS'     && <BilletsPage />}
         {view === 'COMMODITIES' && <CommoditiesPage />}
-        {view === 'REPORT'      && <MarketReportPage />}
+        {view === 'REPORT'       && <MarketReportPage />}
+        {view === 'REGULATIONS'  && <RegulationsPage />}
 
         {/* Terminal views — dark panel wrapper */}
         {TERMINAL_VIEWS.includes(view) && (

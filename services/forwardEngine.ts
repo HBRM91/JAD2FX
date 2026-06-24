@@ -15,6 +15,7 @@
 
 import { ForwardQuote, FxSwapQuote, RollEvent, SwapLeg } from '../types';
 import { getRate, TENOR_YEARS } from './interestRates';
+import { settlementDateWithHolidays } from './holidays';
 
 // ─── Tenor helpers ────────────────────────────────────────────────────────────
 
@@ -39,12 +40,9 @@ export function addDays(date: Date, days: number): Date {
   return d;
 }
 
+/** Holiday-aware settlement date (Moroccan calendar, Modified Following). */
 export function settlementDate(tenor: string, tradeDate = new Date()): string {
-  const spot = addDays(tradeDate, 2); // T+2 spot convention
-  const days = tenorToDays(tenor);
-  if (tenor === 'ON') return addDays(tradeDate, 1).toISOString().slice(0, 10);
-  if (tenor === 'TN') return spot.toISOString().slice(0, 10);
-  return addDays(spot, days).toISOString().slice(0, 10);
+  return settlementDateWithHolidays(tenor, tradeDate);
 }
 
 export function customDateToYears(isoDate: string, tradeDate = new Date()): number {

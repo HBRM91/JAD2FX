@@ -7,8 +7,10 @@ interface Session {
   cityAr: string;
   cityFr: string;
   tz: string;
-  open: number;   // hour in local time session opens
-  close: number;  // hour in local time session closes
+  open: number;      // hour in local time session opens
+  openMin?: number;  // optional opening minute (default 0)
+  close: number;
+  closeMin?: number; // optional closing minute (default 0)
   color: string;
   bgColor: string;
   borderColor: string;
@@ -18,7 +20,7 @@ const SESSIONS: Session[] = [
   {
     city: 'Casablanca', cityAr: 'الدار البيضاء', cityFr: 'Casablanca',
     tz: 'Africa/Casablanca',
-    open: 9, close: 17,
+    open: 8, openMin: 30, close: 15, closeMin: 30,
     color: 'text-gold-400',
     bgColor: 'bg-gold-500/10',
     borderColor: 'border-gold-700',
@@ -53,11 +55,19 @@ function getLocalTime(tz: string): Date {
   return new Date(new Date().toLocaleString('en-US', { timeZone: tz }));
 }
 
+function sessionMinutes(session: Session): { openTotalMin: number; closeTotalMin: number } {
+  return {
+    openTotalMin: session.open * 60 + (session.openMin ?? 0),
+    closeTotalMin: session.close * 60 + (session.closeMin ?? 0),
+  };
+}
+
 function isSessionOpen(session: Session): boolean {
   const local = getLocalTime(session.tz);
-  const h = local.getHours();
+  const currentMin = local.getHours() * 60 + local.getMinutes();
   const isWeekday = local.getDay() >= 1 && local.getDay() <= 5;
-  return isWeekday && h >= session.open && h < session.close;
+  const { openTotalMin, closeTotalMin } = sessionMinutes(session);
+  return isWeekday && currentMin >= openTotalMin && currentMin < closeTotalMin;
 }
 
 function formatTime(tz: string, locale: string): string {
@@ -123,7 +133,7 @@ export default function MarketSessionsClock() {
                 )}
               </div>
               <div className="text-[9px] text-slate-600 mt-0.5 font-mono">
-                {locale === 'ar' ? `${session.open}:00–${session.close}:00` : `${session.open}:00–${session.close}:00`}
+                {`${String(session.open).padStart(2,'0')}:${String(session.openMin ?? 0).padStart(2,'0')}–${String(session.close).padStart(2,'0')}:${String(session.closeMin ?? 0).padStart(2,'0')}`}
               </div>
             </div>
           );
