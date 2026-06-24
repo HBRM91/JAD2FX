@@ -19,6 +19,7 @@ import Jad2Logo           from './components/Jad2Logo';
 import MarketSessionsClock from './components/MarketSessionsClock';
 import DisclaimerModal    from './components/DisclaimerModal';
 import CurrencyHeatmap   from './components/CurrencyHeatmap';
+import BkamBandsVisualizer from './components/BkamBandsVisualizer';
 import FxCrossMatrix      from './components/FxCrossMatrix';
 import MarketRadar        from './components/MarketRadar';
 import { AdminProvider, useAdmin } from './context/AdminContext';
@@ -64,6 +65,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Forward Calculator', view: 'FORWARDS',  icon: TrendingUp,    desc: 'Couverture CIP terme' },
       { label: 'FX Swap Simulator',  view: 'SWAPS',     icon: ArrowLeftRight, desc: 'Near / Far legs' },
       { label: 'Analyse de Marché',  view: 'ANALYSIS',  icon: FileText,       desc: 'Indicateurs & drift' },
+      { label: 'Bandes BKAM',        view: 'BANDS',     icon: BarChart2,      desc: 'Cage ±5% & oiseau' },
     ],
   },
   {
@@ -429,10 +431,11 @@ function AppInner() {
                 </div>
 
                 {/* Quick-access tool tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-navy-800/70">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 pt-5 border-t border-navy-800/70">
                   {[
                     { label: 'FX Forwards',    desc: 'CIP couverture terme',   view: 'FORWARDS'    as ViewState, icon: TrendingUp,    color: 'text-blue-400',   bg: 'bg-blue-500/8' },
                     { label: 'FX Swaps',       desc: 'Near / Far legs',        view: 'SWAPS'       as ViewState, icon: ArrowLeftRight, color: 'text-purple-400', bg: 'bg-purple-500/8' },
+                    { label: 'Bandes BKAM',    desc: 'Cage ±5% & oiseau',     view: 'BANDS'       as ViewState, icon: BarChart2,      color: 'text-gold-400',   bg: 'bg-gold-500/8' },
                     { label: 'Market Report',  desc: 'Analyse IA hebdo',       view: 'REPORT'      as ViewState, icon: Newspaper,      color: 'text-emerald-400', bg: 'bg-emerald-500/8' },
                     { label: 'Réglementation', desc: 'Office des Changes',     view: 'REGULATIONS' as ViewState, icon: Scale,          color: 'text-amber-400',  bg: 'bg-amber-500/8' },
                   ].map(item => (
@@ -563,6 +566,7 @@ function AppInner() {
         {view === 'REGULATIONS' && <RegulationsPage />}
         {view === 'FORWARDS'    && <ForwardCalculator />}
         {view === 'SWAPS'       && <SwapSimulator />}
+        {view === 'BANDS'       && <BkamBandsVisualizer />}
 
         {view === 'LIVE' && (
           <div className="space-y-6">
