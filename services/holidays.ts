@@ -180,6 +180,17 @@ export function getTodayHolidays(date: Date = new Date()): string[] {
   return holidays;
 }
 
+// ─── Jumu'ah liquidity flag ───────────────────────────────────────────────────
+// Gulf & Levant markets observe reduced liquidity on Fridays (Jumu'ah prayer).
+
+const JUMUAH_CURRENCIES = new Set(['SAR', 'AED', 'QAR', 'KWD', 'JOD', 'BHD', 'OMR']);
+
+/** Returns true if the given currency has reduced Friday liquidity (Jumu'ah). */
+export function isJumuahReducedLiquidity(currency: string, date: Date = new Date()): boolean {
+  const riyadhDate = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Riyadh' }));
+  return JUMUAH_CURRENCIES.has(currency) && riyadhDate.getDay() === 5;
+}
+
 // ─── Internal: tenor → calendar days (approximate) ───────────────────────────
 
 function tenorToCalDays(tenor: string): number {

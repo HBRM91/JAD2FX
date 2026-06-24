@@ -18,12 +18,13 @@ interface RadarQuote {
   flag?: string;
 }
 
-// ─── Yahoo Finance fetcher (commodity/FX symbols) ─────────────────────────────
+// ─── Yahoo Finance fetcher via Worker proxy ───────────────────────────────────
 
-async function fetchYahooPrice(symbol: string): Promise<{ price: number; change: number; pct: number } | null> {
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
+async function fetchYahooPrice(symbol: string, corsProxy: string): Promise<{ price: number; change: number; pct: number } | null> {
+  const base = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1d`;
+  const url = corsProxy ? `${corsProxy.replace(/\/$/, '')}/${encodeURIComponent(base)}` : base;
   try {
-    const res = await fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(6000) });
+    const res = await fetch(url, { headers: { Accept: 'application/json' }, signal: AbortSignal.timeout(8000) });
     if (!res.ok) return null;
     const data = await res.json();
     const meta = data?.chart?.result?.[0]?.meta;
@@ -61,26 +62,48 @@ const RADAR_ITEMS: Array<{
 // Map from our FX pseudo-symbol to Frankfurter cross-rate computation
 const FX_SYMBOLS = new Set(['EUR/USD', 'GBP/USD', 'USD/CHF', 'USD/JPY', 'USD/SEK', 'USD/DKK', 'USD/NOK']);
 
-// Frankfurter-based cross rates from EUR
+// Frankfurter ECB cross rates with real daily % change (today vs previous business day)
 async function fetchFxRadarRates(): Promise<Record<string, { price: number; pct: number }>> {
   try {
+    // Get yesterday's date (Frankfurter /latest returns the last published ECB rate)
+    const yest = new Date();
+    yest.setDate(yest.getDate() - 1);
+    const yestStr = yest.toISOString().slice(0, 10);
+
     const [todayRes, yestRes] = await Promise.all([
       fetch('https://api.frankfurter.app/latest?from=EUR', { signal: AbortSignal.timeout(6000) }),
-      fetch('https://api.frankfurter.app/latest?from=EUR', { signal: AbortSignal.timeout(6000) }),
+      fetch(`https://api.frankfurter.app/${yestStr}?from=EUR`, { signal: AbortSignal.timeout(6000) }),
     ]);
     if (!todayRes.ok) return {};
     const today = await todayRes.json();
     const rates = today.rates as Record<string, number>;
     const usd = rates['USD'] ?? 1;
 
+    // Previous rates (fall back to today if yesterday unavailable)
+    let prev: Record<string, number> = rates;
+    if (yestRes.ok) {
+      const yestData = await yestRes.json();
+      if (yestData.rates) prev = yestData.rates as Record<string, number>;
+    }
+    const prevUsd = prev['USD'] ?? usd;
+
+    function pct(today: number, prev: number) { return prev ? (today - prev) / prev * 100 : 0; }
+
     const result: Record<string, { price: number; pct: number }> = {};
-    result['EUR/USD'] = { price: usd, pct: 0 };
-    result['GBP/USD'] = { price: usd / (rates['GBP'] ?? 1), pct: 0 };
-    result['USD/CHF'] = { price: (rates['CHF'] ?? 1) / usd, pct: 0 };
-    result['USD/JPY'] = { price: (rates['JPY'] ?? 1) / usd, pct: 0 };
-    result['USD/SEK'] = { price: (rates['SEK'] ?? 1) / usd, pct: 0 };
-    result['USD/DKK'] = { price: (rates['DKK'] ?? 1) / usd, pct: 0 };
-    result['USD/NOK'] = { price: (rates['NOK'] ?? 1) / usd, pct: 0 };
+    const gbp = rates['GBP'] ?? 1; const prevGbp = prev['GBP'] ?? gbp;
+    const chf = rates['CHF'] ?? 1; const prevChf = prev['CHF'] ?? chf;
+    const jpy = rates['JPY'] ?? 1; const prevJpy = prev['JPY'] ?? jpy;
+    const sek = rates['SEK'] ?? 1; const prevSek = prev['SEK'] ?? sek;
+    const dkk = rates['DKK'] ?? 1; const prevDkk = prev['DKK'] ?? dkk;
+    const nok = rates['NOK'] ?? 1; const prevNok = prev['NOK'] ?? nok;
+
+    result['EUR/USD'] = { price: usd,        pct: pct(usd, prevUsd) };
+    result['GBP/USD'] = { price: usd / gbp,  pct: pct(usd / gbp, prevUsd / prevGbp) };
+    result['USD/CHF'] = { price: chf / usd,  pct: pct(chf / usd, prevChf / prevUsd) };
+    result['USD/JPY'] = { price: jpy / usd,  pct: pct(jpy / usd, prevJpy / prevUsd) };
+    result['USD/SEK'] = { price: sek / usd,  pct: pct(sek / usd, prevSek / prevUsd) };
+    result['USD/DKK'] = { price: dkk / usd,  pct: pct(dkk / usd, prevDkk / prevUsd) };
+    result['USD/NOK'] = { price: nok / usd,  pct: pct(nok / usd, prevNok / prevUsd) };
     return result;
   } catch { return {}; }
 }
@@ -142,11 +165,12 @@ export default function MarketRadar({ tickerRates }: Props) {
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
+    const corsProxy: string = process.env.CORS_PROXY_URL ?? '';
     try {
       const fxRates = await fetchFxRadarRates();
       const commoditySymbols = RADAR_ITEMS.filter(i => !FX_SYMBOLS.has(i.symbol));
       const commResults = await Promise.all(
-        commoditySymbols.map(def => fetchYahooPrice(def.symbol))
+        commoditySymbols.map(def => fetchYahooPrice(def.symbol, corsProxy))
       );
 
       const result: RadarQuote[] = RADAR_ITEMS.map(def => {

@@ -14,8 +14,22 @@
  */
 
 import { ForwardQuote, FxSwapQuote, RollEvent, SwapLeg } from '../types';
-import { getRate, TENOR_YEARS } from './interestRates';
+import { getRate, TENOR_YEARS, DEFAULT_CURVES } from './interestRates';
 import { settlementDateWithHolidays } from './holidays';
+
+// ─── Day-count conventions (per §4.6 spec) ───────────────────────────────────
+// Act/360: USD, EUR, CHF, CAD, DKK, SEK, NOK, JPY, CNY and Gulf currencies
+// Act/365: GBP, MAD (and all others not listed)
+
+const ACT_360_CURRENCIES = new Set([
+  'USD', 'EUR', 'CHF', 'CAD', 'DKK', 'SEK', 'NOK', 'JPY', 'CNY',
+  'AED', 'SAR', 'QAR', 'KWD', 'OMR', 'BHD', 'JOD',
+  'ZAR', 'INR', 'BRL', 'TRY',
+]);
+
+export function getDayCountBasis(currency: string): 360 | 365 {
+  return ACT_360_CURRENCIES.has(currency) ? 360 : 365;
+}
 
 // ─── Tenor helpers ────────────────────────────────────────────────────────────
 
@@ -56,6 +70,9 @@ export function customDateToYears(isoDate: string, tradeDate = new Date()): numb
 /**
  * Compute a single forward rate via CIP.
  * Returns { forwardRate, forwardPointsRaw, forwardPointsPips }.
+ *
+ * tenorYears is always Act/365 (MAD domestic basis).
+ * tenorYearsForeign overrides the foreign leg basis when provided (Act/360 currencies).
  */
 export function computeForward(
   spot: number,
@@ -63,13 +80,16 @@ export function computeForward(
   rForeign: number,
   tenorYears: number,
   markupBps = 0,
+  tenorYearsForeign?: number,
 ): {
   forwardRate: number;
   forwardPointsRaw: number;
   forwardPointsPips: number;
 } {
+  const T_d = tenorYears;
+  const T_f = tenorYearsForeign ?? tenorYears;
   // CIP (simple interest, money-market convention)
-  const fwd = spot * (1 + rDomestic * tenorYears) / (1 + rForeign * tenorYears);
+  const fwd = spot * (1 + rDomestic * T_d) / (1 + rForeign * T_f);
 
   // Dealer markup (adds bps to forward rate to widen spread slightly)
   const markup = (markupBps / 10_000) * spot;
@@ -97,12 +117,13 @@ export function buildForwardQuote(
     : tenorToYears(tenor);
 
   const tenorDays = Math.round(tenorYears * 365);
+  const tenorYearsForeign = tenorDays / getDayCountBasis(currency);
 
   const madRate = getRate('MAD', tenorYears, madOverrides);
   const fcyRate = getRate(currency, tenorYears, fcyOverrides);
 
   const { forwardRate, forwardPointsRaw, forwardPointsPips } = computeForward(
-    spot, madRate, fcyRate, tenorYears, markupBps,
+    spot, madRate, fcyRate, tenorYears, markupBps, tenorYearsForeign,
   );
 
   const netCostMAD = +(Math.abs(forwardPointsRaw) * notional).toFixed(2);
@@ -138,6 +159,20 @@ export interface ForwardCurvePoint {
   madRate: number;
   fcyRate: number;
   premDisc: 'PREMIUM' | 'DISCOUNT' | 'PAR';
+  isInterpolated: boolean; // true when tenor is not an exact knot in MAD or FCY base curve
+}
+
+// Set of tenor years that are exact knots in a given curve (tolerance 1e-9)
+function curveKnotYears(curveName: string): Set<number> {
+  const pts = DEFAULT_CURVES[curveName] ?? [];
+  const s = new Set<number>();
+  for (const p of pts) s.add(p.tenorYears);
+  return s;
+}
+
+function isKnot(tenorYears: number, knots: Set<number>): boolean {
+  for (const k of knots) if (Math.abs(k - tenorYears) < 1e-9) return true;
+  return false;
 }
 
 export function buildForwardCurve(
@@ -147,21 +182,27 @@ export function buildForwardCurve(
   madOverrides?: Record<string, number>,
   fcyOverrides?: Record<string, number>,
 ): ForwardCurvePoint[] {
+  const madKnots = curveKnotYears('MAD');
+  const fcyKnots = curveKnotYears(currency);
+
   return STANDARD_TENORS.map(tenor => {
     const tenorYears = tenorToYears(tenor);
     const tenorDays  = Math.round(tenorYears * 365);
+    const tenorYearsForeign = tenorDays / getDayCountBasis(currency);
     const madRate    = getRate('MAD', tenorYears, madOverrides);
     const fcyRate    = getRate(currency, tenorYears, fcyOverrides);
 
     const { forwardRate, forwardPointsPips } = computeForward(
-      spot, madRate, fcyRate, tenorYears, markupBps,
+      spot, madRate, fcyRate, tenorYears, markupBps, tenorYearsForeign,
     );
 
     const premDisc: 'PREMIUM' | 'DISCOUNT' | 'PAR' =
       forwardPointsPips > 0.5  ? 'PREMIUM'  :
       forwardPointsPips < -0.5 ? 'DISCOUNT' : 'PAR';
 
-    return { tenor, tenorDays, tenorYears, spot, forwardRate, forwardPointsPips, madRate, fcyRate, premDisc };
+    const isInterpolated = !isKnot(tenorYears, madKnots) || !isKnot(tenorYears, fcyKnots);
+
+    return { tenor, tenorDays, tenorYears, spot, forwardRate, forwardPointsPips, madRate, fcyRate, premDisc, isInterpolated };
   });
 }
 
@@ -179,11 +220,12 @@ function buildSwapLeg(
 ): SwapLeg {
   const tenorYears = tenorToYears(tenor);
   const tenorDays  = Math.round(tenorYears * 365);
+  const tenorYearsForeign = tenorDays / getDayCountBasis(currency);
   const madRate    = getRate('MAD', tenorYears, madOvr);
   const fcyRate    = getRate(currency, tenorYears, fcyOvr);
 
   const { forwardRate, forwardPointsPips } = computeForward(
-    spot, madRate, fcyRate, tenorYears, markupBps,
+    spot, madRate, fcyRate, tenorYears, markupBps, tenorYearsForeign,
   );
 
   return { label, tenorLabel: tenor, tenorDays, tenorYears, rate: forwardRate, forwardPointsPips, direction };

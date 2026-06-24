@@ -23,8 +23,10 @@ jobs:
 
       - name: Build
         env:
-          VITE_CORS_PROXY_URL: ${{ secrets.VITE_CORS_PROXY_URL }}
-          VITE_ADMIN_PASSCODE: ${{ secrets.VITE_ADMIN_PASSCODE }}
+          # Vite reads CORS_PROXY_URL and ADMIN_PASSCODE (see vite.config.ts define map)
+          # Also accepts VITE_ prefixed variants as fallback
+          CORS_PROXY_URL: ${{ secrets.CORS_PROXY_URL }}
+          ADMIN_PASSCODE: ${{ secrets.ADMIN_PASSCODE }}
         run: npm run build
 
       - name: Deploy to Cloudflare Pages
@@ -32,7 +34,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=jad2fx
+          command: pages deploy dist --project-name=jad2fx --commit-dirty=true
 
   # ── Deploy Cloudflare Worker (API proxy) ──────────────────────────────────────
   deploy-worker:
@@ -45,10 +47,14 @@ jobs:
         with:
           node-version: 20
 
-      - name: Deploy Worker
+      - name: Deploy Worker + set secrets
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: cloudflare
           command: deploy
+          secrets: |
+            TWELVE_DATA_KEY
+        env:
+          TWELVE_DATA_KEY: ${{ secrets.TWELVE_DATA_KEY }}

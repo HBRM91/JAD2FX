@@ -3,8 +3,11 @@ import { DashboardTab, LiveRate, BasketConfig, CurrencyInfo } from '../types';
 import FxChart from './FxChart';
 import { BKAM_CURRENCIES, BANKS, BANK_SPREAD_PREMIUM, DEFAULT_BASKET_CONFIG } from '../constants';
 import { fetchAllMadRates, generateIntradayData } from '../services/fxRates';
+import { isJumuahReducedLiquidity } from '../services/holidays';
 import { Download, RefreshCw, Search, ArrowUpDown, TrendingUp } from 'lucide-react';
 import { useI18n } from '../context/I18nContext';
+
+const SPREAD_TOOLTIP = "Marges simulées sur base des moyennes mondiales marchés émergents. Sources : Banque Mondiale (Remittance Prices 2024) / BIS (Triennial Survey 2022). Non contractuelles.";
 
 const currencyMeta = Object.fromEntries(BKAM_CURRENCIES.map(c => [c.code, c]));
 
@@ -112,16 +115,16 @@ const FxDashboard: React.FC = () => {
             </th>
             <th className="px-4 py-3 text-navy-900 font-serif text-xs uppercase tracking-wide text-right">
               {activeTab === 'BILLETS'
-                ? (locale === 'ar' ? 'شراء أوراق' : locale === 'en' ? 'Billet Buy' : 'Achat Billets')
-                : (locale === 'ar' ? 'شراء تحويل' : locale === 'en' ? 'Wire Buy' : 'Achat Virement')}
+                ? (locale === 'ar' ? 'مرجع شراء أوراق' : locale === 'en' ? 'Bid Ref. Banknotes' : 'Bid Réf. Billets')
+                : (locale === 'ar' ? 'مرجع شراء تحويل' : locale === 'en' ? 'Bid Ref. Wire'      : 'Bid Réf. Virement')}
             </th>
             <th className="px-4 py-3 text-navy-900 font-serif text-xs uppercase tracking-wide text-right">
               {activeTab === 'BILLETS'
-                ? (locale === 'ar' ? 'بيع أوراق' : locale === 'en' ? 'Billet Sell' : 'Vente Billets')
-                : (locale === 'ar' ? 'بيع تحويل' : locale === 'en' ? 'Wire Sell' : 'Vente Virement')}
+                ? (locale === 'ar' ? 'مرجع بيع أوراق' : locale === 'en' ? 'Ask Ref. Banknotes' : 'Ask Réf. Billets')
+                : (locale === 'ar' ? 'مرجع بيع تحويل' : locale === 'en' ? 'Ask Ref. Wire'      : 'Ask Réf. Virement')}
             </th>
-            <th className="px-4 py-3 text-navy-900 font-serif text-xs uppercase tracking-wide text-right">
-              {locale === 'ar' ? 'الفارق' : 'Spread'}
+            <th className="px-4 py-3 text-navy-900 font-serif text-xs uppercase tracking-wide text-right" title={SPREAD_TOOLTIP}>
+              {locale === 'ar' ? 'الهامش ℹ' : 'Spread ℹ'}
             </th>
           </tr>
         </thead>
@@ -142,7 +145,15 @@ const FxDashboard: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <span className="text-xl">{meta?.flag}</span>
                     <div>
-                      <p className="font-medium text-navy-900 text-sm">{rate.currency}</p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="font-medium text-navy-900 text-sm">{rate.currency}</p>
+                        {isJumuahReducedLiquidity(rate.currency) && (
+                          <span title="Vendredi — Liquidité réduite (Jumu'ah)" className="text-sm cursor-help">🕌</span>
+                        )}
+                        {rate.isCapped && (
+                          <span title="Taux plafonné — Safety Cage activée (écart > 5% vs BKAM)" className="text-[8px] bg-amber-100 text-amber-700 px-1 py-0.5 rounded font-bold cursor-help">CAGE</span>
+                        )}
+                      </div>
                       <p className="text-[10px] text-slate-400">{getCurrencyName(meta, locale)}</p>
                     </div>
                     {meta?.bkamUnit === 100 && (
@@ -153,8 +164,8 @@ const FxDashboard: React.FC = () => {
                 <td className="px-4 py-3 font-mono font-bold text-navy-900">{rate.mid.toFixed(4)}</td>
                 <td className="px-4 py-3 text-right font-mono text-green-700">{buy.toFixed(4)}</td>
                 <td className="px-4 py-3 text-right font-mono text-red-600">{sell.toFixed(4)}</td>
-                <td className="px-4 py-3 text-right">
-                  <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                <td className="px-4 py-3 text-right" title={SPREAD_TOOLTIP}>
+                  <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full cursor-help">
                     {spreadPct.toFixed(2)}%
                   </span>
                 </td>
@@ -179,10 +190,10 @@ const FxDashboard: React.FC = () => {
         <table className="w-full text-xs text-left">
           <thead className="bg-slate-50 border-b border-slate-100">
             <tr>
-              <th className="px-4 py-2 text-slate-600">Bank</th>
-              <th className="px-4 py-2 text-right text-slate-600">Buy</th>
-              <th className="px-4 py-2 text-right text-slate-600">Sell</th>
-              <th className="px-4 py-2 text-right text-slate-600">vs Fair Value</th>
+              <th className="px-4 py-2 text-slate-600">Établissement</th>
+              <th className="px-4 py-2 text-right text-slate-600">Bid Réf.</th>
+              <th className="px-4 py-2 text-right text-slate-600">Ask Réf.</th>
+              <th className="px-4 py-2 text-right text-slate-600">vs Benchmark</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-50">

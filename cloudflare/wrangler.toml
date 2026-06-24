@@ -3,25 +3,22 @@ main = "yahoo-proxy.js"
 compatibility_date = "2024-01-01"
 
 # ── KV namespace for market reports ──────────────────────────────────────────
-# Run:  wrangler kv:namespace create REPORTS_KV
-# Then replace the placeholder below with the id it returns.
 [[kv_namespaces]]
 binding = "REPORTS_KV"
 id = "c105b1084a094471be4516496000fa1d"
 
-# ── Scheduled crons ──────────────────────────────────────────────────────────
-# Morocco: UTC+1 year-round (except Ramadan → UTC+0 temporarily).
-#
-#  08:00 UTC = 09:00 Casablanca standard time → Market review (30 min into session)
-#  07:30 UTC = 08:30 Casablanca               → Market open notification
-#
-# Interbank FX session: 08h30–15h30 Casablanca (updated Jan 2018 reform).
+# ── Scheduled cron ───────────────────────────────────────────────────────────
+# Single trigger at 09:00 Casablanca (08:00 UTC) on weekdays.
+# Consolidated from 2 → 1 cron to stay within free-plan limit (5 total across account).
+# Morocco: UTC+1 year-round (UTC+0 during Ramadan).
 [triggers]
-crons = ["0 8 * * 1-5", "30 7 * * 1-5"]
+crons = ["0 8 * * 1-5"]
 
-# ── Required secrets (set via: wrangler secret put <NAME>) ───────────────────
-# BKAM_FX_KEY      — BKAM FX API subscription key (cours/Version1/api/)
-# BKAM_MONIA_KEY   — BKAM MONIA subscription key (mo/Version1/api/ — BDT yield curve)
-# TAVILY_KEY       — Tavily search API key (web searches for market reports)
-# ADMIN_PASSCODE   — Must match VITE_ADMIN_PASSCODE in .env
-# GROQ_API_KEY     — Groq API key for scheduled auto-report generation at 9h Casablanca
+# ── Required secrets (wrangler secret put <NAME>) ────────────────────────────
+# BKAM_FX_KEY      — BKAM FX API subscription key
+# BKAM_MONIA_KEY   — BKAM MONIA subscription key (BDT yield curve)
+# TAVILY_KEY       — Tavily search API key (market report web searches)
+# ADMIN_PASSCODE   — Admin panel password (must match ADMIN_PASSCODE build var)
+# GROQ_API_KEY     — Groq API key (LLM for reports + chat)
+# GEMINI_API_KEY   — Gemini 2.5 Flash API key (LLM fallback)
+# TWELVE_DATA_KEY  — Twelve Data API key (Yahoo Finance failover for 8 major pairs)

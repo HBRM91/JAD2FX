@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { ViewState, LiveRate } from './types';
 import { DEFAULT_BASKET_CONFIG, MARKET_NEWS, DISCLAIMER_TEXT, DISCLAIMER_SHORT } from './constants';
 import { fetchAllMadRates } from './services/fxRates';
@@ -17,30 +17,74 @@ import RegulationsPage    from './components/RegulationsPage';
 import FloatingChat       from './components/FloatingChat';
 import Jad2Logo           from './components/Jad2Logo';
 import MarketSessionsClock from './components/MarketSessionsClock';
+import DisclaimerModal    from './components/DisclaimerModal';
 import CurrencyHeatmap   from './components/CurrencyHeatmap';
 import FxCrossMatrix      from './components/FxCrossMatrix';
 import MarketRadar        from './components/MarketRadar';
 import { AdminProvider }  from './context/AdminContext';
 import { I18nProvider, useI18n, Locale } from './context/I18nContext';
 import {
-  Building2, FileText, LayoutDashboard, Menu, Shield,
+  Building2, FileText, LayoutDashboard, Menu,
   Globe, ChevronRight, TrendingUp, ArrowLeftRight, Activity,
   Lock, X, BarChart2, Banknote, PackageOpen, Newspaper, Scale,
+  ChevronDown, ExternalLink, Zap,
 } from 'lucide-react';
 
-// ─── Determines whether a view uses dark terminal bg ─────────────────────────
+// ─── Nav data ─────────────────────────────────────────────────────────────────
 
-const TERMINAL_VIEWS: ViewState[] = ['FORWARDS', 'SWAPS', 'LIVE', 'ADMIN'];
+interface NavItem {
+  label: string;
+  view: ViewState;
+  icon: React.ElementType;
+  desc: string;
+}
 
-// ─── Inner app (needs AdminProvider context) ──────────────────────────────────
+interface NavGroup {
+  id: string;
+  label: string;
+  items: NavItem[];
+}
+
+const NAV_GROUPS: NavGroup[] = [
+  {
+    id: 'market',
+    label: 'Données Marché',
+    items: [
+      { label: 'Tableau de Bord',    view: 'DASHBOARD',   icon: LayoutDashboard, desc: '20 devises MAD live' },
+      { label: 'Live Pricer',        view: 'LIVE',        icon: Activity,         desc: 'Séances & cotations' },
+      { label: 'Fixing BKAM',        view: 'FIXING',      icon: BarChart2,        desc: 'Cours officiels BAM' },
+      { label: 'Billets & Chèques',  view: 'BILLETS',     icon: Banknote,         desc: 'Taux billets OC' },
+      { label: 'Matières Premières', view: 'COMMODITIES', icon: PackageOpen,       desc: 'Pétrole & métaux' },
+    ],
+  },
+  {
+    id: 'tools',
+    label: 'Outils Trading',
+    items: [
+      { label: 'Forward Calculator', view: 'FORWARDS',  icon: TrendingUp,    desc: 'Couverture CIP terme' },
+      { label: 'FX Swap Simulator',  view: 'SWAPS',     icon: ArrowLeftRight, desc: 'Near / Far legs' },
+      { label: 'Analyse de Marché',  view: 'ANALYSIS',  icon: FileText,       desc: 'Indicateurs & drift' },
+    ],
+  },
+  {
+    id: 'research',
+    label: 'Recherche',
+    items: [
+      { label: 'Market Report IA',   view: 'REPORT',      icon: Newspaper, desc: 'Rapport hebdo Groq/Gemini' },
+      { label: 'Réglementation OC',  view: 'REGULATIONS', icon: Scale,     desc: 'Circulaires Office des Changes' },
+    ],
+  },
+];
+
+// ─── Inner app ─────────────────────────────────────────────────────────────────
 
 function AppInner() {
   const [view, setView]             = useState<ViewState>('HOME');
   const [tickerRates, setTickerRates] = useState<LiveRate[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [openGroup, setOpenGroup]   = useState<string | null>(null);
   const { t, locale, setLocale, isRTL } = useI18n();
-
-  const isDark = TERMINAL_VIEWS.includes(view);
+  const navDropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchAllMadRates(DEFAULT_BASKET_CONFIG)
@@ -48,25 +92,20 @@ function AppInner() {
       .catch(() => {});
   }, []);
 
-  const navTo = (v: ViewState) => { setView(v); setMobileOpen(false); };
+  // Close dropdown on outside click
+  useEffect(() => {
+    function onOutside(e: MouseEvent) {
+      if (navDropdownRef.current && !navDropdownRef.current.contains(e.target as Node)) {
+        setOpenGroup(null);
+      }
+    }
+    document.addEventListener('mousedown', onOutside);
+    return () => document.removeEventListener('mousedown', onOutside);
+  }, []);
 
-  // ── Nav items ─────────────────────────────────────────────────────────────
+  const navTo = (v: ViewState) => { setView(v); setMobileOpen(false); setOpenGroup(null); };
 
-  const NAV_ITEMS: { label: string; view: ViewState; icon: React.ElementType }[] = [
-    { label: t('nav.home'),        view: 'HOME',        icon: Globe },
-    { label: t('nav.dashboard'),   view: 'DASHBOARD',   icon: LayoutDashboard },
-    { label: t('nav.analysis'),    view: 'ANALYSIS',    icon: FileText },
-    { label: t('nav.fixing'),      view: 'FIXING',      icon: BarChart2 },
-    { label: t('nav.billets'),     view: 'BILLETS',     icon: Banknote },
-    { label: t('nav.commodities'), view: 'COMMODITIES', icon: PackageOpen },
-    { label: t('nav.forwards'),    view: 'FORWARDS',    icon: TrendingUp },
-    { label: t('nav.swaps'),       view: 'SWAPS',       icon: ArrowLeftRight },
-    { label: t('nav.live'),        view: 'LIVE',        icon: Activity },
-    { label: t('nav.admin'),       view: 'ADMIN',       icon: Lock },
-    { label: t('nav.report'),       view: 'REPORT',       icon: Newspaper },
-    { label: t('nav.regulations'),  view: 'REGULATIONS',  icon: Scale },
-    { label: t('nav.about'),        view: 'ABOUT',        icon: Building2 },
-  ];
+  const activeGroupId = NAV_GROUPS.find(g => g.items.some(i => i.view === view))?.id ?? null;
 
   const LOCALE_OPTIONS: { code: Locale; label: string }[] = [
     { code: 'fr', label: 'FR' },
@@ -74,49 +113,94 @@ function AppInner() {
     { code: 'ar', label: 'عر' },
   ];
 
+  // ── Page title chip ───────────────────────────────────────────────────────
+  const allItems = NAV_GROUPS.flatMap(g => g.items);
+  const activeItem = allItems.find(i => i.view === view);
+
   return (
     <div
-      className={`min-h-screen flex flex-col font-sans ${isDark ? 'bg-[#070F1A] text-slate-200' : 'bg-slate-50 text-slate-800'}`}
+      className="min-h-screen flex flex-col font-sans bg-navy-950 text-slate-300"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
+      <DisclaimerModal />
 
-      {/* ── Navbar ── */}
-      <nav className="bg-navy-900 sticky top-0 z-50 border-b border-navy-800 shadow-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      {/* ══ Navbar ══════════════════════════════════════════════════════════ */}
+      <nav ref={navDropdownRef} className="bg-navy-900 sticky top-0 z-50 border-b border-navy-800">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-14">
 
             {/* Logo */}
-            <div className="flex items-center gap-3 cursor-pointer flex-shrink-0" onClick={() => navTo('HOME')}>
-              <Jad2Logo width={80} showAdvisory={false} className="hidden sm:block" />
-              {/* Mobile: compact "J2" mark */}
-              <div className="sm:hidden w-9 h-9 bg-gradient-to-br from-gold-500 to-gold-700 rounded flex items-center justify-center shadow-lg">
-                <span className="font-serif font-bold text-navy-900 text-base">J2</span>
+            <button
+              className="flex items-center gap-3 flex-shrink-0"
+              onClick={() => navTo('HOME')}
+            >
+              <div className="w-8 h-8 bg-gradient-to-br from-gold-400 to-gold-700 rounded flex items-center justify-center shadow-lg shadow-gold-900/40">
+                <span className="font-serif font-bold text-navy-950 text-sm leading-none">J2</span>
               </div>
-              <div className="hidden sm:block border-l border-navy-700 pl-3">
-                <h1 className="font-bold text-white tracking-widest leading-none text-sm uppercase">JAD2FX</h1>
-                <p className="text-[10px] text-slate-500 tracking-wider">Outil de données de change</p>
+              <div className="hidden sm:block">
+                <span className="font-bold text-white tracking-[0.2em] text-sm uppercase">JAD2FX</span>
+                <span className="text-[9px] text-navy-400 tracking-wider ml-2 hidden md:inline">by JAD2 Advisory</span>
               </div>
-            </div>
+            </button>
 
-            {/* Desktop nav */}
-            <div className="hidden lg:flex items-center space-x-0 overflow-x-auto">
-              {NAV_ITEMS.map(item => (
-                <button
-                  key={item.view}
-                  onClick={() => navTo(item.view)}
-                  className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-colors whitespace-nowrap ${
-                    view === item.view
-                      ? 'text-gold-400 border-b-2 border-gold-500'
-                      : 'text-slate-300 hover:text-white'
-                  }`}
-                >
-                  <item.icon size={13} />
-                  {item.label}
-                </button>
+            {/* Desktop grouped nav */}
+            <div className="hidden lg:flex items-center h-full gap-0">
+              {NAV_GROUPS.map(group => (
+                <div key={group.id} className="relative h-full flex items-center">
+                  <button
+                    onMouseEnter={() => setOpenGroup(group.id)}
+                    onMouseLeave={() => setOpenGroup(null)}
+                    className={`flex items-center gap-1.5 px-4 h-full text-[11px] font-semibold tracking-wide uppercase transition-colors ${
+                      activeGroupId === group.id
+                        ? 'text-gold-400 border-b-2 border-gold-500'
+                        : 'text-navy-300 hover:text-white'
+                    }`}
+                  >
+                    {group.label}
+                    <ChevronDown size={10} className={`transition-transform duration-150 ${openGroup === group.id ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Dropdown panel */}
+                  {openGroup === group.id && (
+                    <div
+                      className="absolute top-full left-0 bg-navy-900 border border-navy-800 border-t-0 rounded-b-xl shadow-2xl min-w-[230px] py-1.5 z-50"
+                      onMouseEnter={() => setOpenGroup(group.id)}
+                      onMouseLeave={() => setOpenGroup(null)}
+                    >
+                      {group.items.map(item => (
+                        <button
+                          key={item.view}
+                          onClick={() => navTo(item.view)}
+                          className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors group ${
+                            view === item.view
+                              ? 'bg-gold-500/10 text-gold-400'
+                              : 'text-slate-300 hover:bg-navy-800 hover:text-white'
+                          }`}
+                        >
+                          <item.icon size={13} className={view === item.view ? 'text-gold-400' : 'text-navy-400 group-hover:text-slate-300'} />
+                          <div>
+                            <p className="text-[11px] font-semibold">{item.label}</p>
+                            <p className="text-[9px] text-navy-400 group-hover:text-slate-500">{item.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               ))}
+
+              {/* Standalone items */}
+              <button
+                onClick={() => navTo('ABOUT')}
+                className={`flex items-center gap-1.5 px-4 h-full text-[11px] font-semibold tracking-wide uppercase transition-colors ${
+                  view === 'ABOUT' ? 'text-gold-400 border-b-2 border-gold-500' : 'text-navy-300 hover:text-white'
+                }`}
+              >
+                À Propos
+              </button>
             </div>
 
-            {/* Right side */}
+            {/* Right side controls */}
             <div className="flex items-center gap-2">
               {/* Language switcher */}
               <div className="hidden sm:flex items-center rounded border border-navy-700 overflow-hidden">
@@ -124,10 +208,10 @@ function AppInner() {
                   <button
                     key={opt.code}
                     onClick={() => setLocale(opt.code)}
-                    className={`px-2.5 py-1 text-[10px] font-bold tracking-wider transition ${
+                    className={`px-2.5 py-1 text-[10px] font-bold tracking-wider transition-colors ${
                       locale === opt.code
-                        ? 'bg-gold-500 text-navy-900'
-                        : 'text-slate-400 hover:text-white hover:bg-navy-800'
+                        ? 'bg-gold-500 text-navy-950'
+                        : 'text-navy-300 hover:text-white hover:bg-navy-800'
                     }`}
                   >
                     {opt.label}
@@ -139,22 +223,29 @@ function AppInner() {
                 href="https://jad2advisory.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gold-500 text-navy-900 rounded hover:bg-gold-400 transition"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold bg-gold-500 text-navy-950 rounded hover:bg-gold-400 transition-colors shadow shadow-gold-900/30"
               >
-                {t('nav.advisory')}
+                <ExternalLink size={9} />
+                Advisory
               </a>
               <button
                 onClick={() => navTo('ADMIN')}
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-slate-400 border border-navy-700 rounded hover:text-white hover:border-navy-500 transition"
+                className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium border rounded transition-colors ${
+                  view === 'ADMIN'
+                    ? 'text-gold-400 border-gold-700/50 bg-gold-500/5'
+                    : 'text-navy-300 border-navy-700 hover:text-white hover:border-navy-600'
+                }`}
               >
-                <Lock size={11} />
-                {t('nav.admin')}
+                <Lock size={9} />
+                Admin
               </button>
+
+              {/* Mobile menu toggle */}
               <button
-                className="lg:hidden text-slate-300 hover:text-white p-1"
+                className="lg:hidden text-slate-300 hover:text-white p-1.5"
                 onClick={() => setMobileOpen(o => !o)}
               >
-                {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+                {mobileOpen ? <X size={18} /> : <Menu size={18} />}
               </button>
             </div>
           </div>
@@ -162,253 +253,371 @@ function AppInner() {
 
         {/* Mobile menu */}
         {mobileOpen && (
-          <div className="lg:hidden border-t border-navy-800 bg-navy-900">
-            {NAV_ITEMS.map(item => (
-              <button
-                key={item.view}
-                onClick={() => navTo(item.view)}
-                className={`w-full flex items-center gap-3 px-6 py-3 text-sm font-medium text-left transition-colors ${
-                  view === item.view
-                    ? 'text-gold-400 bg-navy-800'
-                    : 'text-slate-300 hover:text-white hover:bg-navy-800/50'
-                }`}
-              >
-                <item.icon size={15} />
-                {item.label}
-              </button>
+          <div className="lg:hidden border-t border-navy-800 bg-navy-900 max-h-[80vh] overflow-y-auto">
+            <button
+              onClick={() => navTo('HOME')}
+              className={`w-full flex items-center gap-3 px-5 py-3 text-sm font-semibold text-left border-b border-navy-800 ${
+                view === 'HOME' ? 'text-gold-400 bg-navy-800' : 'text-slate-300 hover:text-white hover:bg-navy-800/50'
+              }`}
+            >
+              <Globe size={14} /> Accueil
+            </button>
+            {NAV_GROUPS.map(group => (
+              <div key={group.id}>
+                <div className="px-5 pt-3 pb-1 text-[9px] font-bold uppercase tracking-[0.18em] text-navy-500">
+                  {group.label}
+                </div>
+                {group.items.map(item => (
+                  <button
+                    key={item.view}
+                    onClick={() => navTo(item.view)}
+                    className={`w-full flex items-center gap-3 px-5 py-2.5 text-[13px] font-medium text-left transition-colors ${
+                      view === item.view ? 'text-gold-400 bg-navy-800' : 'text-slate-300 hover:text-white hover:bg-navy-800/50'
+                    }`}
+                  >
+                    <item.icon size={14} />
+                    {item.label}
+                  </button>
+                ))}
+              </div>
             ))}
+            <div className="px-5 pt-3 pb-1 text-[9px] font-bold uppercase tracking-[0.18em] text-navy-500">Autre</div>
+            <button
+              onClick={() => navTo('ABOUT')}
+              className={`w-full flex items-center gap-3 px-5 py-2.5 text-[13px] font-medium text-left ${
+                view === 'ABOUT' ? 'text-gold-400 bg-navy-800' : 'text-slate-300 hover:text-white hover:bg-navy-800/50'
+              }`}
+            >
+              <Building2 size={14} /> À Propos
+            </button>
+            <button
+              onClick={() => navTo('ADMIN')}
+              className={`w-full flex items-center gap-3 px-5 py-2.5 text-[13px] font-medium text-left border-t border-navy-800 ${
+                view === 'ADMIN' ? 'text-gold-400 bg-navy-800' : 'text-slate-400 hover:text-white hover:bg-navy-800/50'
+              }`}
+            >
+              <Lock size={14} /> Admin
+            </button>
+            {/* Mobile language */}
+            <div className="flex items-center gap-0 px-5 py-3 border-t border-navy-800">
+              {LOCALE_OPTIONS.map(opt => (
+                <button
+                  key={opt.code}
+                  onClick={() => setLocale(opt.code)}
+                  className={`px-3 py-1.5 text-xs font-bold rounded transition-colors mr-1 ${
+                    locale === opt.code ? 'bg-gold-500 text-navy-950' : 'text-navy-300 border border-navy-700 hover:text-white'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
           </div>
         )}
       </nav>
 
-      {/* ── Compliance Banner ── */}
-      <div className="bg-navy-900/60 border-b border-navy-700/40 px-4 py-1 text-center">
-        <p className="text-[10px] text-slate-500 tracking-wide">
-          {DISCLAIMER_SHORT}
+      {/* ══ Compliance banner ════════════════════════════════════════════════ */}
+      <div className="bg-navy-950 border-b border-navy-900 px-4 py-0.5">
+        <p className="text-[9px] text-navy-600 tracking-wide text-center">{DISCLAIMER_SHORT}</p>
+      </div>
+
+      {/* ══ Mobile simulator-mode sticky banner (hidden on desktop) ══════════ */}
+      <div className="lg:hidden sticky top-14 z-40 bg-amber-900/95 border-b border-amber-700/50 backdrop-blur-sm px-4 py-1.5 text-center">
+        <p className="text-[9px] font-bold text-amber-300 uppercase tracking-widest">
+          Mode Simulateur — Taux Non-Exécutables · Indicatif Uniquement
         </p>
       </div>
 
-      {/* ── Ticker ── */}
+      {/* ══ Ticker ═══════════════════════════════════════════════════════════ */}
       <RatesTicker rates={tickerRates} />
 
-      {/* ── Main content ── */}
-      <main className={`flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 ${
-        isDark ? 'text-slate-200' : ''
-      }`}>
+      {/* ══ Page breadcrumb (non-home views) ═════════════════════════════════ */}
+      {view !== 'HOME' && activeItem && (
+        <div className="bg-navy-950 border-b border-navy-900 px-4 sm:px-6">
+          <div className="max-w-[1440px] mx-auto flex items-center gap-2 py-2">
+            <button onClick={() => navTo('HOME')} className="text-[10px] text-navy-500 hover:text-gold-500 transition-colors">Accueil</button>
+            <ChevronRight size={10} className="text-navy-700" />
+            <activeItem.icon size={11} className="text-gold-500" />
+            <span className="text-[10px] text-slate-400 font-medium">{activeItem.label}</span>
+          </div>
+        </div>
+      )}
+      {view === 'ADMIN' && (
+        <div className="bg-navy-950 border-b border-navy-900 px-4 sm:px-6">
+          <div className="max-w-[1440px] mx-auto flex items-center gap-2 py-2">
+            <button onClick={() => navTo('HOME')} className="text-[10px] text-navy-500 hover:text-gold-500 transition-colors">Accueil</button>
+            <ChevronRight size={10} className="text-navy-700" />
+            <Lock size={11} className="text-gold-500" />
+            <span className="text-[10px] text-slate-400 font-medium">Administration</span>
+          </div>
+        </div>
+      )}
 
-        {/* HOME */}
+      {/* ══ Main content ═════════════════════════════════════════════════════ */}
+      <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 view-enter">
+
+        {/* ─── HOME ──────────────────────────────────────────────────────── */}
         {view === 'HOME' && (
           <div className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-8">
-              {/* Hero */}
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="bg-navy-900 p-8 text-white relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-gold-500 opacity-5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
-                  <div className="relative z-10">
+
+            {/* Hero banner */}
+            <div className="relative rounded-xl overflow-hidden border border-navy-800 bg-gradient-to-br from-navy-800 via-navy-900 to-navy-950">
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_0%,rgba(212,175,55,0.07),transparent_55%)]" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_0%_100%,rgba(59,130,246,0.04),transparent_50%)]" />
+              <div className="relative px-6 sm:px-8 py-8">
+                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+                  <div>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {['Simulation Pédagogique', 'Données Indicatives', 'Réglementation OC'].map(t => (
-                        <span key={t} className="text-[10px] bg-gold-500/10 border border-gold-500/30 text-gold-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                          {t}
+                      {['Simulation Pédagogique', 'Données Indicatives', 'Réglementation OC'].map(tag => (
+                        <span key={tag} className="text-[9px] bg-gold-500/10 border border-gold-500/20 text-gold-500 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                          {tag}
                         </span>
                       ))}
                     </div>
-                    <h2 className="text-3xl font-bold mb-2 tracking-widest uppercase">JAD2FX</h2>
-                    <p className="text-gold-500 text-xs uppercase tracking-widest mb-4">Outil de Données de Change — by JAD2 Advisory</p>
-                    <p className="text-slate-300 mb-6 max-w-lg text-sm">
-                      Données indicatives sur 20 devises (14 cotées BKAM + 6 régionales), simulateur pédagogique de forwards/swaps et référentiel réglementaire Office des Changes.
+                    <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-[0.18em] uppercase mb-1 font-serif">JAD2FX</h2>
+                    <p className="text-gold-500 text-[10px] uppercase tracking-[0.22em] mb-4">Outil de Données de Change · by JAD2 Advisory</p>
+                    <p className="text-navy-300 text-sm max-w-lg leading-relaxed">
+                      Données indicatives sur 20 devises MAD (14 cotées BKAM + 6 régionales), simulateur pédagogique de forwards/swaps et référentiel réglementaire Office des Changes.
                     </p>
-                    <div className="text-[10px] text-slate-400 border border-navy-600/40 rounded px-3 py-1.5 mb-4 inline-block">
-                      Données indicatives à titre de référence — Pour conseil : <span className="text-gold-400">jad2advisory.com</span>
-                    </div>
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        onClick={() => navTo('LIVE')}
-                        className="flex items-center gap-2 bg-gold-500 text-navy-900 font-bold text-sm px-4 py-2 rounded hover:bg-gold-400 transition"
-                      >
-                        <Activity size={15} /> Live Pricer
-                      </button>
-                      <button
-                        onClick={() => navTo('FORWARDS')}
-                        className="flex items-center gap-2 text-gold-400 font-bold text-sm hover:text-white transition"
-                      >
-                        Forward Calculator <ChevronRight size={15} />
-                      </button>
-                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      onClick={() => navTo('LIVE')}
+                      className="flex items-center gap-2 bg-gold-500 text-navy-950 font-bold text-sm px-5 py-2.5 rounded hover:bg-gold-400 transition-colors shadow-lg shadow-gold-900/30"
+                    >
+                      <Activity size={14} /> Live Pricer
+                    </button>
+                    <button
+                      onClick={() => navTo('FORWARDS')}
+                      className="flex items-center gap-2 text-gold-400 border border-gold-500/30 font-bold text-sm px-5 py-2.5 rounded hover:border-gold-400 hover:text-gold-300 transition-colors"
+                    >
+                      <TrendingUp size={14} /> Forward Calc
+                    </button>
+                    <button
+                      onClick={() => navTo('DASHBOARD')}
+                      className="flex items-center gap-2 text-slate-300 border border-navy-700 font-medium text-sm px-5 py-2.5 rounded hover:border-navy-600 hover:text-white transition-colors"
+                    >
+                      <LayoutDashboard size={14} /> FX Tableau
+                    </button>
                   </div>
                 </div>
 
-                {/* Quick-access strip */}
-                <div className="grid grid-cols-3 divide-x divide-slate-100 border-t border-slate-100">
+                {/* Quick-access tool tiles */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-navy-800/70">
                   {[
-                    { label: 'FX Forwards', desc: 'CIP calculator', view: 'FORWARDS' as ViewState, icon: TrendingUp },
-                    { label: 'FX Swaps',    desc: 'Near/Far legs',  view: 'SWAPS'    as ViewState, icon: ArrowLeftRight },
-                    { label: 'FX Tableau',  desc: '20 devises',  view: 'DASHBOARD' as ViewState, icon: LayoutDashboard },
+                    { label: 'FX Forwards',    desc: 'CIP couverture terme',   view: 'FORWARDS'    as ViewState, icon: TrendingUp,    color: 'text-blue-400',   bg: 'bg-blue-500/8' },
+                    { label: 'FX Swaps',       desc: 'Near / Far legs',        view: 'SWAPS'       as ViewState, icon: ArrowLeftRight, color: 'text-purple-400', bg: 'bg-purple-500/8' },
+                    { label: 'Market Report',  desc: 'Analyse IA hebdo',       view: 'REPORT'      as ViewState, icon: Newspaper,      color: 'text-emerald-400', bg: 'bg-emerald-500/8' },
+                    { label: 'Réglementation', desc: 'Office des Changes',     view: 'REGULATIONS' as ViewState, icon: Scale,          color: 'text-amber-400',  bg: 'bg-amber-500/8' },
                   ].map(item => (
                     <button
                       key={item.view}
                       onClick={() => navTo(item.view)}
-                      className="flex items-center gap-3 p-4 hover:bg-slate-50 transition text-left group"
+                      className="flex items-center gap-3 p-3 rounded-lg border border-navy-800 hover:border-navy-700 hover:bg-navy-800/50 transition-colors text-left group"
                     >
-                      <item.icon size={18} className="text-gold-600 group-hover:scale-110 transition-transform flex-shrink-0" />
+                      <div className={`w-7 h-7 rounded ${item.bg} border border-navy-700 flex items-center justify-center flex-shrink-0`}>
+                        <item.icon size={14} className={item.color} />
+                      </div>
                       <div>
-                        <p className="text-sm font-bold text-navy-900">{item.label}</p>
-                        <p className="text-xs text-slate-500">{item.desc}</p>
+                        <p className="text-[11px] font-semibold text-white">{item.label}</p>
+                        <p className="text-[9px] text-navy-400">{item.desc}</p>
                       </div>
                     </button>
                   ))}
                 </div>
               </div>
+            </div>
 
-              {/* News Feed */}
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h3 className="text-lg font-serif font-bold text-navy-900 mb-6 flex items-center gap-2">
-                  <Globe size={18} className="text-gold-600" /> Latest Intelligence
-                </h3>
-                <div className="space-y-6">
+            {/* Market sessions clock — full width */}
+            <MarketSessionsClock />
+
+            {/* 2-col: news + sidebar */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+              {/* News feed */}
+              <div className="lg:col-span-2 bg-navy-900 border border-navy-800 rounded-xl overflow-hidden">
+                <div className="px-5 py-3 border-b border-navy-800 flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Globe size={13} className="text-gold-500" />
+                    <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.15em]">Intelligence de Marché</h3>
+                  </div>
+                  <span className="text-[8px] text-navy-500 uppercase tracking-wider font-bold px-2 py-0.5 border border-navy-700 rounded-full">Indicatif</span>
+                </div>
+                <div className="divide-y divide-navy-800/70">
                   {MARKET_NEWS.map(news => (
-                    <div key={news.id} className="group cursor-pointer border-b border-slate-100 pb-6 last:border-0 last:pb-0">
-                      <div className="flex items-center gap-3 mb-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-gold-600 bg-gold-50 px-2 py-0.5 rounded-full">
+                    <div key={news.id} className="px-5 py-4 hover:bg-navy-800/30 transition-colors cursor-default">
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className="text-[8px] font-bold uppercase tracking-wider text-gold-500 bg-gold-500/10 border border-gold-500/20 px-2 py-0.5 rounded-full">
                           {news.category}
                         </span>
-                        <span className="text-xs text-slate-400">{news.time}</span>
+                        <span className="text-[9px] text-navy-500">{news.time}</span>
                       </div>
-                      <h4 className="text-lg font-semibold text-navy-900 group-hover:text-gold-600 transition mb-1">
-                        {news.title}
-                      </h4>
-                      <p className="text-sm text-slate-600 line-clamp-2">{news.summary}</p>
+                      <h4 className="text-[13px] font-semibold text-slate-100 mb-1 leading-snug">{news.title}</h4>
+                      <p className="text-[11px] text-navy-400 line-clamp-2 leading-relaxed">{news.summary}</p>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
 
-            {/* Sidebar: JAD2 Advisory card */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-24 space-y-4">
-                {/* Brand card */}
-                <div className="bg-navy-900 rounded-xl p-6 flex flex-col items-center text-center gap-4 shadow-xl border border-navy-700">
-                  <Jad2Logo width={130} showAdvisory={true} />
+              {/* Sidebar */}
+              <div className="space-y-4">
+
+                {/* Advisory card */}
+                <div className="bg-navy-900 border border-navy-800 rounded-xl p-5 flex flex-col items-center text-center gap-4">
+                  <Jad2Logo width={120} showAdvisory={true} />
                   <div>
-                    <p className="text-xs font-bold text-white mb-1 uppercase tracking-wider">Cabinet de Conseil Stratégique</p>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Formation en gestion du risque de change · Conseil stratégique · Accompagnement réglementaire Office des Changes
+                    <p className="text-[10px] font-bold text-white mb-1 uppercase tracking-wider">Cabinet de Conseil Stratégique</p>
+                    <p className="text-[11px] text-navy-400 leading-relaxed">
+                      Formation risque de change · Conseil stratégique · Accompagnement réglementaire OC
                     </p>
                   </div>
                   <a
                     href="https://jad2advisory.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-full py-2.5 bg-gold-500 text-navy-900 text-xs font-bold rounded hover:bg-gold-400 transition"
+                    className="block w-full py-2.5 bg-gold-500 text-navy-950 text-[11px] font-bold rounded hover:bg-gold-400 transition-colors"
                   >
                     jad2advisory.com →
                   </a>
-                  <p className="text-[9px] text-slate-600 leading-relaxed">
-                    JAD2 Advisory est un cabinet de conseil et de formation, non un intermédiaire financier agréé par Bank Al-Maghrib.
+                  <p className="text-[9px] text-navy-600 leading-relaxed">
+                    Cabinet de conseil et formation — non intermédiaire financier agréé BAM.
                   </p>
                 </div>
 
-                {/* Chatbot hint */}
-                <div className="p-4 bg-white rounded-lg border border-slate-200 shadow-sm text-center">
-                  <p className="text-sm font-semibold text-navy-900 mb-1">Assistant Réglementaire</p>
-                  <p className="text-xs text-slate-500 mb-3">Posez vos questions OC & BKAM via le bouton flottant en bas à droite</p>
-                  <div className="flex items-center justify-center gap-2 text-xs text-gold-600 font-bold">
-                    <span>💬</span> Cliquez sur l'icône chat →
+                {/* AI assistant hint */}
+                <div className="bg-navy-900 border border-navy-800 rounded-xl p-4 flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-gold-500/10 border border-gold-500/20 flex items-center justify-center flex-shrink-0">
+                    <Zap size={14} className="text-gold-400" />
                   </div>
+                  <div>
+                    <p className="text-[11px] font-semibold text-white mb-1">Assistant IA Réglementaire</p>
+                    <p className="text-[10px] text-navy-400 leading-relaxed">
+                      Questions OC & BKAM via le bouton flottant ↘
+                    </p>
+                  </div>
+                </div>
+
+                {/* Quick stat cards */}
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: 'Devises Cotées', value: '14', sub: 'par BKAM', color: 'text-gold-400' },
+                    { label: 'Devises Totales', value: '20', sub: '+ 6 croisées', color: 'text-blue-400' },
+                    { label: 'Mise à Jour', value: 'Live', sub: 'en continu', color: 'text-emerald-400' },
+                    { label: 'Accès', value: 'Gratuit', sub: 'pédagogique', color: 'text-purple-400' },
+                  ].map(stat => (
+                    <div key={stat.label} className="bg-navy-900 border border-navy-800 rounded-lg p-3 text-center">
+                      <p className={`text-lg font-bold font-mono tabular-nums ${stat.color}`}>{stat.value}</p>
+                      <p className="text-[9px] text-white font-semibold">{stat.label}</p>
+                      <p className="text-[8px] text-navy-500">{stat.sub}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-          </div>
-          {/* Market Radar — full width below the hero grid */}
-          <MarketRadar tickerRates={tickerRates} />
+
+            {/* Market Radar — full width */}
+            <MarketRadar tickerRates={tickerRates} />
           </div>
         )}
 
-        {view === 'DASHBOARD'   && (
+        {/* ─── DASHBOARD ─────────────────────────────────────────────────── */}
+        {view === 'DASHBOARD' && (
           <div className="space-y-6">
             <FxDashboard />
             <CurrencyHeatmap rates={tickerRates} />
           </div>
         )}
+
+        {/* ─── Other views ───────────────────────────────────────────────── */}
         {view === 'ANALYSIS'    && <MarketAnalysis />}
         {view === 'FIXING'      && <BkamFixing />}
         {view === 'BILLETS'     && <BilletsPage />}
         {view === 'COMMODITIES' && <CommoditiesPage />}
-        {view === 'REPORT'       && <MarketReportPage />}
-        {view === 'REGULATIONS'  && <RegulationsPage />}
+        {view === 'REPORT'      && <MarketReportPage />}
+        {view === 'REGULATIONS' && <RegulationsPage />}
+        {view === 'FORWARDS'    && <ForwardCalculator />}
+        {view === 'SWAPS'       && <SwapSimulator />}
 
-        {/* Terminal views — dark panel wrapper */}
-        {TERMINAL_VIEWS.includes(view) && (
-          <div>
-            {view === 'FORWARDS' && <ForwardCalculator />}
-            {view === 'SWAPS'    && <SwapSimulator />}
-            {view === 'LIVE'     && (
-              <div className="space-y-6">
-                <MarketSessionsClock />
-                <LivePricer />
-                <CurrencyHeatmap rates={tickerRates} />
-                <FxCrossMatrix rates={tickerRates} />
-              </div>
-            )}
-            {view === 'ADMIN'    && <AdminDashboard />}
+        {view === 'LIVE' && (
+          <div className="space-y-6">
+            <MarketSessionsClock />
+            <LivePricer />
+            <CurrencyHeatmap rates={tickerRates} />
+            <FxCrossMatrix rates={tickerRates} />
           </div>
         )}
 
+        {view === 'ADMIN' && <AdminDashboard />}
+
+        {/* ─── ABOUT ─────────────────────────────────────────────────────── */}
         {view === 'ABOUT' && (
           <div className="max-w-3xl mx-auto space-y-5">
-            <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200">
-              <div className="flex items-center gap-4 mb-6">
+            <div className="bg-navy-900 border border-navy-800 rounded-xl p-8">
+              <div className="flex items-center gap-4 mb-6 pb-6 border-b border-navy-800">
                 <Jad2Logo width={110} showAdvisory={true} />
-                <div className="border-l border-slate-200 pl-4">
-                  <h2 className="text-2xl font-bold text-navy-900 tracking-widest uppercase">JAD2FX</h2>
-                  <p className="text-xs text-gold-600 tracking-wider">Outil de Données de Change — by JAD2 Advisory</p>
+                <div className="border-l border-navy-700 pl-4">
+                  <h2 className="text-2xl font-bold text-white tracking-[0.18em] uppercase font-serif">JAD2FX</h2>
+                  <p className="text-[10px] text-gold-500 tracking-wider mt-0.5">Outil de Données de Change — by JAD2 Advisory</p>
                 </div>
               </div>
 
-              <div className="space-y-4 text-slate-700 text-sm">
+              <div className="space-y-4 text-navy-300 text-[13px] leading-relaxed">
                 <p>
-                  <strong>JAD2FX</strong> est l'outil en ligne de données de change et de simulation pédagogique de <strong>JAD2 Advisory</strong>. Il est conçu pour permettre aux entreprises et professionnels marocains de comprendre les dynamiques du marché des changes MAD et la réglementation de l'Office des Changes.
+                  <strong className="text-slate-200">JAD2FX</strong> est l'outil en ligne de données de change et de simulation pédagogique
+                  de <strong className="text-slate-200">JAD2 Advisory</strong>. Il permet aux entreprises et professionnels marocains de
+                  comprendre les dynamiques du marché des changes MAD et la réglementation de l'Office des Changes.
                 </p>
                 <p>
-                  Cet outil ne constitue pas et ne doit pas être interprété comme un conseil en investissement, une recommandation d'achat ou de vente de devises, ni une offre de service de change. <strong>JAD2FX n'est pas agréé par l'AMMC ni par Bank Al-Maghrib</strong> pour la prestation de services d'investissement ou de change. Pour l'exécution de transactions de change, adressez-vous à un établissement de crédit agréé.
+                  Cet outil ne constitue pas un conseil en investissement.{' '}
+                  <strong className="text-slate-200">JAD2FX n'est pas agréé par l'AMMC ni par Bank Al-Maghrib</strong>.
+                  Pour l'exécution de transactions, adressez-vous à un établissement de crédit agréé.
                 </p>
 
-                <h3 className="text-base font-bold text-navy-900 mt-5">Fonctionnalités</h3>
-                <ul className="space-y-1.5">
+                <h3 className="text-[11px] font-bold text-white mt-6 mb-3 uppercase tracking-[0.15em] flex items-center gap-2">
+                  <span className="w-4 h-px bg-gold-500 inline-block" /> Fonctionnalités
+                </h3>
+                <ul className="space-y-2">
                   {[
-                    'Données indicatives sur 20 devises (14 cotées BKAM + 6 régionales calculées par taux croisés)',
+                    'Données indicatives sur 20 devises (14 cotées BKAM + 6 régionales par taux croisés)',
                     'Simulateur pédagogique de forwards (formule CIP) et de swaps de change',
-                    'Référentiel de la réglementation de l\'Office des Changes (circulaires, instructions)',
-                    'Courbes de taux interpolées à titre informatif et pédagogique uniquement',
-                    'Toutes les simulations sont illustratives et ne constituent pas des devis contraignants',
+                    'Référentiel réglementaire Office des Changes (circulaires, instructions, FAQs)',
+                    'Courbes de taux MONIA interpolées à titre informatif et pédagogique',
+                    'Market Report hebdomadaire généré par IA (Groq Llama 3.3 + Gemini 2.5)',
                   ].map(f => (
                     <li key={f} className="flex items-start gap-2">
-                      <span className="text-gold-600 mt-0.5 flex-shrink-0">▸</span>
+                      <span className="text-gold-500 mt-0.5 flex-shrink-0 text-xs">▸</span>
                       <span>{f}</span>
                     </li>
                   ))}
                 </ul>
 
-                <h3 className="text-base font-bold text-navy-900 mt-5">JAD2 Advisory — Cabinet de Conseil Stratégique & Formation</h3>
+                <h3 className="text-[11px] font-bold text-white mt-6 mb-3 uppercase tracking-[0.15em] flex items-center gap-2">
+                  <span className="w-4 h-px bg-gold-500 inline-block" /> JAD2 Advisory
+                </h3>
                 <p>
-                  JAD2 Advisory est un cabinet de conseil stratégique et de formation en gestion du risque de change, enregistré au Registre de Commerce de Casablanca. Nos services incluent la formation des équipes financières, le conseil en stratégie de couverture et l'accompagnement réglementaire Office des Changes.
+                  Cabinet de conseil stratégique et de formation en gestion du risque de change, enregistré au RC Casablanca.
+                  Services : formation équipes financières, conseil en stratégie de couverture, accompagnement réglementaire OC.
                 </p>
-                <p className="text-xs text-slate-500 bg-amber-50 border border-amber-100 rounded p-3">
-                  ⚠️ <strong>JAD2 Advisory n'est pas un intermédiaire financier agréé par Bank Al-Maghrib</strong> et n'exécute aucune transaction de change. Nos prestations sont exclusivement des services de conseil stratégique et de formation.
-                </p>
+
+                <div className="mt-4 p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
+                  <p className="text-[11px] text-amber-400/90">
+                    ⚠️ <strong className="text-amber-300">JAD2 Advisory n'est pas un intermédiaire financier agréé par Bank Al-Maghrib</strong>{' '}
+                    et n'exécute aucune transaction de change. Nos prestations sont exclusivement du conseil et de la formation.
+                  </p>
+                </div>
+
                 <a
                   href="https://jad2advisory.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-block px-5 py-2.5 bg-gold-500 text-navy-900 font-bold text-sm rounded hover:bg-gold-400 transition"
+                  className="inline-flex items-center gap-2 mt-4 px-5 py-2.5 bg-gold-500 text-navy-950 font-bold text-sm rounded hover:bg-gold-400 transition-colors"
                 >
-                  Visiter jad2advisory.com →
+                  <ExternalLink size={13} /> Visiter jad2advisory.com
                 </a>
 
-                <div className="mt-6 p-4 bg-slate-50 border border-slate-200 rounded-lg">
-                  <p className="text-[11px] font-semibold text-slate-500 mb-1 uppercase tracking-wider">Mentions Légales & Conformité</p>
-                  <p className="text-xs text-slate-500 leading-relaxed">{DISCLAIMER_TEXT}</p>
+                <div className="mt-6 p-4 bg-navy-950 border border-navy-800 rounded-lg">
+                  <p className="text-[9px] font-bold text-navy-500 mb-1.5 uppercase tracking-wider">Mentions Légales & Conformité</p>
+                  <p className="text-[10px] text-navy-500 leading-relaxed">{DISCLAIMER_TEXT}</p>
                 </div>
               </div>
             </div>
@@ -416,39 +625,50 @@ function AppInner() {
         )}
       </main>
 
-      {/* ── Floating chatbot widget (visible on all views) ── */}
+      {/* ══ Floating chatbot ═════════════════════════════════════════════════ */}
       <FloatingChat />
 
-      {/* ── Footer ── */}
-      <footer className="bg-navy-900 text-slate-400 border-t border-navy-800">
-        {/* Advisory CTA strip */}
-        <div className="bg-gold-500/10 border-b border-gold-600/20 py-4">
-          <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+      {/* ══ Footer ═══════════════════════════════════════════════════════════ */}
+      <footer className="bg-navy-900 text-navy-500 border-t border-navy-800 mt-auto">
+        {/* Advisory CTA */}
+        <div className="border-b border-navy-800 py-4">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-bold text-white">Formation & Conseil Stratégique en Gestion du Risque de Change</p>
-              <p className="text-xs text-slate-400">Cabinet de conseil stratégique · Formation · Accompagnement réglementaire OC — <em>Non intermédiaire financier</em></p>
+              <p className="text-sm font-bold text-white">Formation & Conseil en Gestion du Risque de Change</p>
+              <p className="text-[11px] text-navy-400">Cabinet de conseil · Formation · Accompagnement réglementaire OC · Non intermédiaire financier</p>
             </div>
             <a
               href="https://jad2advisory.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex-shrink-0 px-5 py-2 bg-gold-500 text-navy-900 text-sm font-bold rounded hover:bg-gold-400 transition"
+              className="flex-shrink-0 px-5 py-2 bg-gold-500 text-navy-950 text-sm font-bold rounded hover:bg-gold-400 transition-colors"
             >
               JAD2 Advisory →
             </a>
           </div>
         </div>
 
-        {/* Legal disclaimer */}
-        <div className="py-5">
-          <div className="max-w-7xl mx-auto px-4 text-center">
-            <p className="text-[10px] leading-relaxed max-w-3xl mx-auto text-slate-600">{DISCLAIMER_TEXT}</p>
-            <div className="flex flex-wrap justify-center gap-4 mt-3 text-[10px] text-slate-700">
-              <span>ECB/Frankfurter · Yahoo Finance</span>
-              <span>·</span>
-              <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400">jad2advisory.com</a>
+        {/* Legal */}
+        <div className="py-4">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 text-center">
+            <p className="text-[9px] leading-relaxed max-w-3xl mx-auto text-navy-700">{DISCLAIMER_TEXT}</p>
+            <div className="flex flex-wrap justify-center gap-3 mt-2 text-[9px] text-navy-700">
+              <span>ECB / Frankfurter</span>
+              <span className="text-navy-800">·</span>
+              <span>Yahoo Finance</span>
+              <span className="text-navy-800">·</span>
+              <span>Twelve Data</span>
+              <span className="text-navy-800">·</span>
+              <span>BKAM Fixing</span>
+              <span className="text-navy-800">·</span>
+              <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-700 hover:text-gold-500 transition-colors">
+                jad2advisory.com
+              </a>
             </div>
-            <p className="text-[10px] mt-4 text-slate-600">{t('footer.copyright')}</p>
+            <p className="text-[9px] mt-1.5 text-navy-700 italic">
+              Market data derived from Yahoo Finance / Twelve Data for educational demonstration purposes only. Not for commercial trading.
+            </p>
+            <p className="text-[9px] mt-1 text-navy-700">{t('footer.copyright')}</p>
           </div>
         </div>
       </footer>
@@ -456,7 +676,7 @@ function AppInner() {
   );
 }
 
-// ─── Root export ─────────────────────────────────────────────────────────────
+// ─── Root export ──────────────────────────────────────────────────────────────
 
 export default function App() {
   return (

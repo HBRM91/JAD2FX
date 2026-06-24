@@ -6,6 +6,7 @@
  *   /bkam/{path}?{qs}               → BKAM FX API   (BKAM_FX_KEY secret)
  *   /bkam-bdt/{path}?{qs}           → BKAM BDT API  (BKAM_MONIA_KEY secret)
  *   POST /api/tavily/search         → Tavily web search (TAVILY_KEY secret)
+ *   POST /api/llm/chat              → LLM proxy: Groq → Gemini fallback (no client-side keys)
  *   GET  /api/reports/published     → Current published report (public)
  *   GET  /api/reports               → List all reports (admin auth)
  *   POST /api/reports               → Save report draft (admin auth)
@@ -13,18 +14,17 @@
  *   DELETE /api/reports/:id         → Delete a report (admin auth)
  *
  * Required Worker secrets (wrangler secret put <NAME>):
- *   BKAM_FX_KEY, BKAM_MONIA_KEY, TAVILY_KEY, ADMIN_PASSCODE, GROQ_API_KEY
+ *   BKAM_FX_KEY, BKAM_MONIA_KEY, TAVILY_KEY, ADMIN_PASSCODE, GROQ_API_KEY, GEMINI_API_KEY
  *
  * Required KV binding:
  *   [[kv_namespaces]] binding = "REPORTS_KV" id = "..."
  */
 
-const ALLOWED_ORIGINS = [
-  'https://jad2fx.pages.dev',
-  'https://ce86f572.jad2fx.pages.dev',
-  'https://jad2fx.com',
-  'http://localhost:5173',
-  'http://localhost:4173',
+const ALLOWED_ORIGIN_PATTERNS = [
+  /^https:\/\/[a-z0-9-]+\.jad2fx\.pages\.dev$/,  // all Pages preview + prod URLs
+  /^https:\/\/jad2fx\.com$/,
+  /^https:\/\/jad2fx\.pages\.dev$/,
+  /^http:\/\/localhost:(5173|4173)$/,
 ];
 
 const CORS_HEADERS = {
@@ -36,8 +36,12 @@ const CORS_HEADERS = {
 const BKAM_BASE = 'https://api.centralbankofmorocco.ma';
 const MAX_BODY_BYTES = 102_400; // 100 KB
 
+function isAllowedOrigin(origin) {
+  return ALLOWED_ORIGIN_PATTERNS.some(p => p.test(origin));
+}
+
 function corsHeaders(origin) {
-  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const allowed = isAllowedOrigin(origin) ? origin : 'https://jad2fx.pages.dev';
   return { ...CORS_HEADERS, 'Access-Control-Allow-Origin': allowed };
 }
 
@@ -290,6 +294,179 @@ async function handleDeleteReport(reportId, request, env, origin) {
   return json({ ok: true }, 200, origin);
 }
 
+// ─── LLM chat proxy (Groq → Gemini fallback, keys never leave server) ────────
+
+const _llmRateLimit = new Map();
+function checkLlmRateLimit(ip) {
+  const now = Date.now();
+  const windowMs = 60_000;
+  const entry = _llmRateLimit.get(ip) ?? { count: 0, reset: now + windowMs };
+  if (now > entry.reset) { entry.count = 0; entry.reset = now + windowMs; }
+  entry.count++;
+  _llmRateLimit.set(ip, entry);
+  if (_llmRateLimit.size > 5000) {
+    for (const [k, v] of _llmRateLimit) { if (now > v.reset) _llmRateLimit.delete(k); }
+  }
+  return entry.count <= 20; // 20 LLM requests per minute per IP
+}
+
+async function handleLlmChat(request, env, origin) {
+  const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+  if (!checkLlmRateLimit(ip)) return json({ error: 'Rate limit exceeded — try again in a minute' }, 429, origin);
+
+  const rawBody = await readBodySafe(request);
+  if (!rawBody || typeof rawBody !== 'string') return json({ error: 'Empty body' }, 400, origin);
+
+  let body;
+  try { body = JSON.parse(rawBody); }
+  catch { return json({ error: 'Invalid JSON' }, 400, origin); }
+
+  const { messages, systemPrompt, maxTokens = 900, temperature = 0.3 } = body;
+
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return json({ error: 'messages array required' }, 400, origin);
+  }
+  if (messages.length > 30) return json({ error: 'Too many messages' }, 400, origin);
+  for (const m of messages) {
+    if (!m.role || !m.content || typeof m.content !== 'string' || m.content.length > 8000) {
+      return json({ error: 'Invalid message format' }, 400, origin);
+    }
+  }
+
+  // Try Groq first
+  if (env.GROQ_API_KEY) {
+    try {
+      const groqMessages = systemPrompt
+        ? [{ role: 'system', content: String(systemPrompt).slice(0, 4000) }, ...messages]
+        : messages;
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: groqMessages, max_tokens: maxTokens, temperature }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.choices?.[0]?.message?.content;
+        if (text) return json({ text, provider: 'groq', model: 'llama-3.3-70b-versatile' }, 200, origin);
+      }
+    } catch (err) {
+      console.warn('[LLM] Groq failed:', err);
+    }
+  }
+
+  // Gemini fallback
+  if (env.GEMINI_API_KEY) {
+    try {
+      const contents = messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
+      const geminiBody = {
+        contents,
+        generationConfig: { maxOutputTokens: maxTokens, temperature },
+        ...(systemPrompt ? { systemInstruction: { parts: [{ text: String(systemPrompt).slice(0, 4000) }] } } : {}),
+      };
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(geminiBody), signal: AbortSignal.timeout(20_000) }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) return json({ text, provider: 'gemini', model: 'gemini-2.5-flash' }, 200, origin);
+      }
+    } catch (err) {
+      console.warn('[LLM] Gemini failed:', err);
+    }
+  }
+
+  return json({ error: 'All LLM providers unavailable' }, 503, origin);
+}
+
+// ─── Twelve Data EUR cross-rates (Yahoo Finance failover) ─────────────────────
+// Called when Yahoo Finance is unavailable. Returns EUR-cross rates in the same
+// format as ECB Frankfurter: { rates: { USD: 1.085, GBP: 0.86, ... }, date: "..." }
+const TWELVE_DATA_PAIRS = 'EUR/USD,EUR/GBP,EUR/CHF,EUR/JPY,EUR/CAD,EUR/NOK,EUR/SEK,EUR/DKK,EUR/CNY';
+
+async function handleTwelveDataRates(env, origin) {
+  if (!env.TWELVE_DATA_KEY) return json({ error: 'TWELVE_DATA_KEY not configured' }, 503, origin);
+  try {
+    const res = await fetch(
+      `https://api.twelvedata.com/price?symbol=${encodeURIComponent(TWELVE_DATA_PAIRS)}&apikey=${env.TWELVE_DATA_KEY}`,
+      { signal: AbortSignal.timeout(10_000) }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    // Normalise to { currency: rate } — same shape as ECB Frankfurter response
+    const rates = {};
+    for (const [pair, val] of Object.entries(data)) {
+      const parts = pair.split('/');
+      if (parts.length === 2 && parts[0] === 'EUR') {
+        const price = parseFloat(val.price);
+        if (!isNaN(price)) rates[parts[1]] = price;
+      }
+    }
+    return json({ rates, date: new Date().toISOString().slice(0, 10), source: 'twelve_data' }, 200, origin);
+  } catch (err) {
+    return json({ error: 'Twelve Data fetch failed', detail: String(err) }, 502, origin);
+  }
+}
+
+// ─── Anonymous simulation telemetry (NO PII) ─────────────────────────────────
+// POST /api/telemetry/sim — fire-and-forget from client
+async function handleTelemetryPost(request, env, origin) {
+  if (!env.REPORTS_KV) return json({ ok: true }, 200, origin);
+
+  const rawBody = await readBodySafe(request);
+  if (!rawBody || typeof rawBody !== 'string') return json({ ok: true }, 200, origin);
+
+  let body;
+  try { body = JSON.parse(rawBody); }
+  catch { return json({ ok: true }, 200, origin); }
+
+  // Strict allow-list — no free-form strings that could embed PII
+  const pair = typeof body.pair === 'string' && /^[A-Z]{3}\/MAD$/.test(body.pair) ? body.pair : null;
+  const scenario = typeof body.scenario === 'string' ? body.scenario.slice(0, 32).replace(/[^A-Z_]/g, '') : null;
+  const gapDays  = typeof body.gapDays === 'number' && Number.isFinite(body.gapDays) ? Math.round(body.gapDays) : null;
+
+  const date = new Date().toISOString().slice(0, 10);
+  const key  = `telemetry:${date}`;
+  try {
+    const existing = await env.REPORTS_KV.get(key, { type: 'json' }) ?? { events: [] };
+    existing.events.push({ ts: new Date().toISOString(), pair, scenario, gapDays });
+    if (existing.events.length > 500) existing.events = existing.events.slice(-500);
+    await env.REPORTS_KV.put(key, JSON.stringify(existing), { expirationTtl: 60 * 60 * 24 * 30 });
+  } catch { /* telemetry is non-critical */ }
+
+  return json({ ok: true }, 200, origin);
+}
+
+// GET /api/telemetry/sim — admin: aggregate counts for last 7 days
+async function handleTelemetryGet(request, env, origin) {
+  const denied = adminGate(request, env, origin);
+  if (denied) return denied;
+  if (!env.REPORTS_KV) return json({ dates: [] }, 200, origin);
+
+  const result = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() - i);
+    const date = d.toISOString().slice(0, 10);
+    try {
+      const data = await env.REPORTS_KV.get(`telemetry:${date}`, { type: 'json' });
+      const events = data?.events ?? [];
+      result.push({
+        date,
+        count: events.length,
+        byPair: events.reduce((acc, e) => { if (e.pair) acc[e.pair] = (acc[e.pair] ?? 0) + 1; return acc; }, {}),
+        byScenario: events.reduce((acc, e) => { if (e.scenario) acc[e.scenario] = (acc[e.scenario] ?? 0) + 1; return acc; }, {}),
+      });
+    } catch {
+      result.push({ date, count: 0, byPair: {}, byScenario: {} });
+    }
+  }
+  return json(result, 200, origin);
+}
+
 // ─── BKAM rate fetch (used in scheduled handler) ──────────────────────────────
 async function fetchBkamRates(apiKey, dateStr) {
   if (!apiKey) return null;
@@ -314,6 +491,44 @@ async function fetchBkamRates(apiKey, dateStr) {
   } catch (err) {
     console.warn('[BKAM fetch]', dateStr ?? 'today', err);
     return null;
+  }
+}
+
+// ─── BKAM BDT yield curve (KV-cached, refreshed by cron) ─────────────────────
+
+// GET /api/bdt/curve — public; serves cached BDT data from KV
+async function handleBdtCurve(env, origin) {
+  if (!env.REPORTS_KV) return json({ points: [], stale: true, error: 'KV not configured' }, 503, origin);
+  try {
+    const raw = await env.REPORTS_KV.get('bdt:latest');
+    if (!raw) return json({ points: [], stale: true }, 200, origin);
+    return json(JSON.parse(raw), 200, origin);
+  } catch (err) {
+    return json({ points: [], stale: true, error: String(err) }, 500, origin);
+  }
+}
+
+// Called by cron to fetch BKAM BDT and store in KV
+async function fetchAndStoreBdt(env) {
+  if (!env.BKAM_MONIA_KEY || !env.REPORTS_KV) return;
+  try {
+    const res = await fetch(
+      `${BKAM_BASE}/mo/Version1/api/CourbeBDT`,
+      { headers: { Accept: 'application/json', 'Ocp-Apim-Subscription-Key': env.BKAM_MONIA_KEY }, signal: AbortSignal.timeout(12_000) },
+    );
+    if (!res.ok) { console.warn('[CRON] BDT HTTP', res.status); return; }
+    const raw = await res.json();
+    const arr = Array.isArray(raw) ? raw : (raw?.data ?? []);
+    if (arr.length > 0) {
+      await env.REPORTS_KV.put(
+        'bdt:latest',
+        JSON.stringify({ points: arr, fetchedAt: new Date().toISOString() }),
+        { expirationTtl: 60 * 60 * 25 }, // 25h — survives one missed cron
+      );
+      console.log(`[CRON] BDT stored: ${arr.length} points`);
+    }
+  } catch (err) {
+    console.warn('[CRON] BDT fetch failed:', err);
   }
 }
 
@@ -546,6 +761,9 @@ async function handleScheduled(env) {
   await env.REPORTS_KV.put('published', reportId);
 
   console.log(`[CRON] Report published: ${reportId} (${Date.now() - t0}ms)`);
+
+  // Also refresh BDT yield curve in KV for forward pricing
+  await fetchAndStoreBdt(env);
 }
 
 // ─── Main fetch handler ───────────────────────────────────────────────────────
@@ -579,6 +797,12 @@ export default {
       return handleTavilySearch(request, env, origin);
     }
 
+    // ── LLM chat proxy ────────────────────────────────────────────────────────
+    if (pathname === '/api/llm/chat') {
+      if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
+      return handleLlmChat(request, env, origin);
+    }
+
     // ── Report API ────────────────────────────────────────────────────────────
     if (pathname === '/api/reports/published') {
       if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
@@ -604,6 +828,25 @@ export default {
       if (request.method === 'GET') return handleListReports(request, env, origin);
       if (request.method === 'POST') return handleSaveReport(request, env, origin);
       return json({ error: 'Method not allowed' }, 405, origin);
+    }
+
+    // ── Twelve Data EUR cross-rates (Yahoo failover) ─────────────────────────
+    if (pathname === '/api/forex/rates') {
+      if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
+      return handleTwelveDataRates(env, origin);
+    }
+
+    // ── BKAM BDT yield curve (KV cache) ──────────────────────────────────────
+    if (pathname === '/api/bdt/curve') {
+      if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
+      return handleBdtCurve(env, origin);
+    }
+
+    // ── Anonymous sim telemetry ───────────────────────────────────────────────
+    if (pathname === '/api/telemetry/sim') {
+      if (request.method === 'POST') return handleTelemetryPost(request, env, origin);
+      if (request.method === 'GET')  return handleTelemetryGet(request, env, origin);
+      return json({ error: 'GET or POST only' }, 405, origin);
     }
 
     // ── Yahoo Finance proxy ───────────────────────────────────────────────────

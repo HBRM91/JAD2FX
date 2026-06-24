@@ -41,6 +41,11 @@ export const BKAM_CURRENCIES: CurrencyInfo[] = [
   { code: 'TND', name: 'Tunisian Dinar',    nameFr: 'Dinar tunisien',        nameAr: 'دينار تونسي',          flag: '🇹🇳', bkamUnit: 1   },
   { code: 'DZD', name: 'Algerian Dinar',    nameFr: 'Dinar algérien',        nameAr: 'دينار جزائري',         flag: '🇩🇿', bkamUnit: 100 },
   { code: 'LYD', name: 'Libyan Dinar',      nameFr: 'Dinar libyen',          nameAr: 'دينار ليبي',           flag: '🇱🇾', bkamUnit: 1   },
+  // ── EM majors (ECB Frankfurter cross-rates) ──────────────────────────────
+  { code: 'ZAR', name: 'South African Rand', nameFr: 'Rand sud-africain',    nameAr: 'راند جنوب أفريقي',     flag: '🇿🇦', bkamUnit: 1   },
+  { code: 'INR', name: 'Indian Rupee',       nameFr: 'Roupie indienne',       nameAr: 'روبية هندية',          flag: '🇮🇳', bkamUnit: 100 },
+  { code: 'BRL', name: 'Brazilian Real',     nameFr: 'Réal brésilien',        nameAr: 'ريال برازيلي',         flag: '🇧🇷', bkamUnit: 1   },
+  { code: 'TRY', name: 'Turkish Lira',       nameFr: 'Livre turque',          nameAr: 'ليرة تركية',           flag: '🇹🇷', bkamUnit: 1   },
 ];
 
 // USD equivalence for currencies not available from ECB/Frankfurter.
