@@ -21,3 +21,4 @@ crons = ["0 8 * * 1-5"]
 # ADMIN_PASSCODE   — Admin panel password (must match ADMIN_PASSCODE build var)
 # GROQ_API_KEY     — Groq API key (LLM for reports + chat)
 # GEMINI_API_KEY   — Gemini 2.5 Flash API key (LLM fallback)
+# TWELVE_DATA_KEY  — Twelve Data API key (Yahoo Finance failover for 8 major pairs)

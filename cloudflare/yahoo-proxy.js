@@ -381,6 +381,36 @@ async function handleLlmChat(request, env, origin) {
   return json({ error: 'All LLM providers unavailable' }, 503, origin);
 }
 
+// ─── Twelve Data EUR cross-rates (Yahoo Finance failover) ─────────────────────
+// Called when Yahoo Finance is unavailable. Returns EUR-cross rates in the same
+// format as ECB Frankfurter: { rates: { USD: 1.085, GBP: 0.86, ... }, date: "..." }
+const TWELVE_DATA_PAIRS = 'EUR/USD,EUR/GBP,EUR/CHF,EUR/JPY,EUR/CAD,EUR/NOK,EUR/SEK,EUR/DKK,EUR/CNY';
+
+async function handleTwelveDataRates(env, origin) {
+  if (!env.TWELVE_DATA_KEY) return json({ error: 'TWELVE_DATA_KEY not configured' }, 503, origin);
+  try {
+    const res = await fetch(
+      `https://api.twelvedata.com/price?symbol=${encodeURIComponent(TWELVE_DATA_PAIRS)}&apikey=${env.TWELVE_DATA_KEY}`,
+      { signal: AbortSignal.timeout(10_000) }
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+
+    // Normalise to { currency: rate } — same shape as ECB Frankfurter response
+    const rates = {};
+    for (const [pair, val] of Object.entries(data)) {
+      const parts = pair.split('/');
+      if (parts.length === 2 && parts[0] === 'EUR') {
+        const price = parseFloat(val.price);
+        if (!isNaN(price)) rates[parts[1]] = price;
+      }
+    }
+    return json({ rates, date: new Date().toISOString().slice(0, 10), source: 'twelve_data' }, 200, origin);
+  } catch (err) {
+    return json({ error: 'Twelve Data fetch failed', detail: String(err) }, 502, origin);
+  }
+}
+
 // ─── BKAM rate fetch (used in scheduled handler) ──────────────────────────────
 async function fetchBkamRates(apiKey, dateStr) {
   if (!apiKey) return null;
@@ -701,6 +731,12 @@ export default {
       if (request.method === 'GET') return handleListReports(request, env, origin);
       if (request.method === 'POST') return handleSaveReport(request, env, origin);
       return json({ error: 'Method not allowed' }, 405, origin);
+    }
+
+    // ── Twelve Data EUR cross-rates (Yahoo failover) ─────────────────────────
+    if (pathname === '/api/forex/rates') {
+      if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
+      return handleTwelveDataRates(env, origin);
     }
 
     // ── Yahoo Finance proxy ───────────────────────────────────────────────────

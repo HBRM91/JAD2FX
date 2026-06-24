@@ -6,6 +6,40 @@ const FRANKFURTER_BASE = 'https://api.frankfurter.app';
 const FRANKFURTER_URL = `${FRANKFURTER_BASE}/latest?from=EUR`;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
+// ─── Sanity filter: reject ticks that move > 2% in < 60 s ────────────────────
+interface RateSnap { rate: number; ts: number; }
+const _sanityCache: Record<string, RateSnap> = {};
+const SANITY_MAX_CHANGE = 0.02;
+const SANITY_WINDOW_MS  = 60_000;
+
+function sanityFilter(currency: string, newRate: number): number {
+  const prev = _sanityCache[currency];
+  const now  = Date.now();
+  if (prev && (now - prev.ts) < SANITY_WINDOW_MS) {
+    const delta = Math.abs(newRate - prev.rate) / prev.rate;
+    if (delta > SANITY_MAX_CHANGE) return prev.rate; // reject tick
+  }
+  _sanityCache[currency] = { rate: newRate, ts: now };
+  return newRate;
+}
+
+// ─── Safety cage: clamp ECB-derived rates to ±5% of last BKAM fixing ─────────
+// Per spec §4.4 — Safety Cage: [Official_Min × 1.02, Official_Max × 0.98]
+let _lastBkamMadRates: Record<string, number> = {}; // currency → madPerUnit (raw, bkamUnit=1)
+
+const CAGE_BAND  = 0.05; // ±5% allowed deviation from last BKAM fixing
+const CAGE_INNER = 0.02; // 2% buffer inset (98% rule)
+
+function applySafetyCage(currency: string, mid: number): { mid: number; isCapped: boolean } {
+  const ref = _lastBkamMadRates[currency];
+  if (!ref) return { mid, isCapped: false };
+  const upper = ref * (1 + CAGE_BAND) * (1 - CAGE_INNER);
+  const lower = ref * (1 - CAGE_BAND) * (1 + CAGE_INNER);
+  if (mid > upper) return { mid: upper, isCapped: true };
+  if (mid < lower) return { mid: lower, isCapped: true };
+  return { mid, isCapped: false };
+}
+
 interface EurRateCache {
   rates: Record<string, number>;
   timestamp: number;
@@ -58,34 +92,51 @@ const FALLBACK_EUR_RATES: Record<string, number> = {
   DKK: 7.460, NOK: 11.60, SEK: 11.40, CNY: 7.880,
 };
 
-async function fetchEurRates(): Promise<{ rates: Record<string, number>; date: string; fromCache: boolean }> {
+async function fetchEurRates(corsProxyUrl?: string): Promise<{ rates: Record<string, number>; date: string; fromCache: boolean }> {
   if (rateCache && Date.now() - rateCache.timestamp < CACHE_TTL_MS) {
     return { rates: rateCache.rates, date: rateCache.date, fromCache: true };
   }
 
+  // Primary: ECB Frankfurter
   try {
     const res = await fetch(FRANKFURTER_URL, { signal: AbortSignal.timeout(8000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-
     const eurUsd = data.rates['USD'] as number;
     const enriched: Record<string, number> = { ...data.rates };
-
-    // Enrich with Gulf currencies via USD peg cross
     for (const [code, usdValue] of Object.entries(GULF_USD_RATES)) {
       enriched[code] = eurUsd / usdValue;
     }
-
     rateCache = { rates: enriched, timestamp: Date.now(), date: data.date };
     return { rates: enriched, date: data.date, fromCache: false };
-  } catch {
-    const eurUsd = FALLBACK_EUR_RATES['USD'];
-    const fallback = { ...FALLBACK_EUR_RATES };
-    for (const [code, usdValue] of Object.entries(GULF_USD_RATES)) {
-      fallback[code] = eurUsd / usdValue;
-    }
-    return { rates: fallback, date: 'N/A', fromCache: false };
+  } catch { /* ECB failed — try Twelve Data */ }
+
+  // Secondary: Twelve Data via Worker proxy (Yahoo Finance failover)
+  if (corsProxyUrl) {
+    try {
+      const res = await fetch(`${corsProxyUrl}/api/forex/rates`, { signal: AbortSignal.timeout(8000) });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.rates?.['USD']) {
+          const eurUsd = data.rates['USD'] as number;
+          const enriched: Record<string, number> = { ...data.rates };
+          for (const [code, usdValue] of Object.entries(GULF_USD_RATES)) {
+            enriched[code] = eurUsd / usdValue;
+          }
+          rateCache = { rates: enriched, timestamp: Date.now(), date: data.date ?? new Date().toISOString().slice(0, 10) };
+          return { rates: enriched, date: rateCache.date, fromCache: false };
+        }
+      }
+    } catch { /* Twelve Data also failed */ }
   }
+
+  // Last resort: hardcoded fallback
+  const eurUsd = FALLBACK_EUR_RATES['USD'];
+  const fallback = { ...FALLBACK_EUR_RATES };
+  for (const [code, usdValue] of Object.entries(GULF_USD_RATES)) {
+    fallback[code] = eurUsd / usdValue;
+  }
+  return { rates: fallback, date: 'N/A', fromCache: false };
 }
 
 function isFallback(eurRates: Record<string, number>): boolean {
@@ -153,6 +204,9 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
   if (corsProxyUrl) {
     const [bkamMad, prevEurRates] = await Promise.all([tryFetchBkamMadRates(corsProxyUrl), prevEurRatesPromise]);
     if (bkamMad) {
+      // Persist for safety cage (raw madPerUnit, before bkamUnit scaling)
+      _lastBkamMadRates = { ...bkamMad };
+
       const usdMadMid = bkamMad['USD'];
       const eurMadMid = bkamMad['EUR'];
 
@@ -172,19 +226,21 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
         }
 
         const displayMid = rawMid * currency.bkamUnit;
+        const filteredMid = sanityFilter(currency.code, displayMid);
         const vS = config.virementSpreadPercent;
         const bS = config.billetSpreadPercent;
 
         rates.push({
           currency: currency.code,
           pair: `${currency.code}/MAD`,
-          mid: +displayMid.toFixed(4),
-          virementBuy:  +(displayMid * (1 - vS)).toFixed(4),
-          virementSell: +(displayMid * (1 + vS)).toFixed(4),
-          billetBuy:    +(displayMid * (1 - bS)).toFixed(4),
-          billetSell:   +(displayMid * (1 + bS)).toFixed(4),
-          change24h: computeChange24h(displayMid, prevEurRates, currency.code, currency.bkamUnit, config),
+          mid: +filteredMid.toFixed(4),
+          virementBuy:  +(filteredMid * (1 - vS)).toFixed(4),
+          virementSell: +(filteredMid * (1 + vS)).toFixed(4),
+          billetBuy:    +(filteredMid * (1 - bS)).toFixed(4),
+          billetSell:   +(filteredMid * (1 + bS)).toFixed(4),
+          change24h: computeChange24h(filteredMid, prevEurRates, currency.code, currency.bkamUnit, config),
           source: 'CALCULATED',
+          feedStatus: 'LIVE',
           timestamp: new Date().toISOString(),
         });
       }
@@ -195,10 +251,12 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
     }
   }
 
-  // ── Fallback: Frankfurter ECB cross rates ─────────────────────────────────
-  const [{ rates: eurRates, date: ratesDate }, prevEurRates] = await Promise.all([fetchEurRates(), prevEurRatesPromise]);
+  // ── Fallback: ECB Frankfurter → Twelve Data → hardcoded ──────────────────
+  const [{ rates: eurRates, date: ratesDate }, prevEurRates] = await Promise.all([fetchEurRates(corsProxyUrl), prevEurRatesPromise]);
   const eurUsd = eurRates['USD'];
-  const source = isFallback(eurRates) ? 'FALLBACK' : (rateCache ? 'CACHED' : 'CALCULATED');
+  const isFallbackData = isFallback(eurRates);
+  const source = isFallbackData ? 'FALLBACK' : (rateCache ? 'CACHED' : 'CALCULATED');
+  const feedStatus: LiveRate['feedStatus'] = isFallbackData ? 'FALLBACK' : 'DELAYED';
 
   const usdMadMid = config.referenceBasketValue / (config.eurWeight * eurUsd + config.usdWeight);
   const eurMadMid = usdMadMid * eurUsd;
@@ -218,19 +276,25 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
     }
 
     const displayMid = rawMid * currency.bkamUnit;
+    // Apply safety cage (clamps to ±5% of last known BKAM fixing)
+    const { mid: cagedMid, isCapped } = applySafetyCage(currency.code, displayMid);
+    // Apply sanity filter (rejects ticks > 2%/min)
+    const filteredMid = sanityFilter(currency.code, cagedMid);
     const vS = config.virementSpreadPercent;
     const bS = config.billetSpreadPercent;
 
     rates.push({
       currency: currency.code,
       pair: `${currency.code}/MAD`,
-      mid: +displayMid.toFixed(4),
-      virementBuy:  +(displayMid * (1 - vS)).toFixed(4),
-      virementSell: +(displayMid * (1 + vS)).toFixed(4),
-      billetBuy:    +(displayMid * (1 - bS)).toFixed(4),
-      billetSell:   +(displayMid * (1 + bS)).toFixed(4),
-      change24h: computeChange24h(displayMid, prevEurRates, currency.code, currency.bkamUnit, config),
+      mid: +filteredMid.toFixed(4),
+      virementBuy:  +(filteredMid * (1 - vS)).toFixed(4),
+      virementSell: +(filteredMid * (1 + vS)).toFixed(4),
+      billetBuy:    +(filteredMid * (1 - bS)).toFixed(4),
+      billetSell:   +(filteredMid * (1 + bS)).toFixed(4),
+      change24h: computeChange24h(filteredMid, prevEurRates, currency.code, currency.bkamUnit, config),
       source: source as LiveRate['source'],
+      feedStatus,
+      isCapped,
       timestamp: new Date().toISOString(),
     });
   }

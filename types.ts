@@ -29,6 +29,8 @@ export interface LiveRate {
   change24h: number;
   source: 'CALCULATED' | 'CACHED' | 'FALLBACK';
   timestamp: string;
+  isCapped?: boolean;                                   // true if safety cage clamped this rate
+  feedStatus?: 'LIVE' | 'DELAYED' | 'STALE' | 'FALLBACK';
 }
 
 export interface BankRate {

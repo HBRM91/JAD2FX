@@ -17,6 +17,7 @@ import RegulationsPage    from './components/RegulationsPage';
 import FloatingChat       from './components/FloatingChat';
 import Jad2Logo           from './components/Jad2Logo';
 import MarketSessionsClock from './components/MarketSessionsClock';
+import DisclaimerModal    from './components/DisclaimerModal';
 import CurrencyHeatmap   from './components/CurrencyHeatmap';
 import FxCrossMatrix      from './components/FxCrossMatrix';
 import MarketRadar        from './components/MarketRadar';
@@ -121,6 +122,7 @@ function AppInner() {
       className="min-h-screen flex flex-col font-sans bg-navy-950 text-slate-300"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
+      <DisclaimerModal />
 
       {/* ══ Navbar ══════════════════════════════════════════════════════════ */}
       <nav ref={navDropdownRef} className="bg-navy-900 sticky top-0 z-50 border-b border-navy-800">
@@ -317,6 +319,13 @@ function AppInner() {
       {/* ══ Compliance banner ════════════════════════════════════════════════ */}
       <div className="bg-navy-950 border-b border-navy-900 px-4 py-0.5">
         <p className="text-[9px] text-navy-600 tracking-wide text-center">{DISCLAIMER_SHORT}</p>
+      </div>
+
+      {/* ══ Mobile simulator-mode sticky banner (hidden on desktop) ══════════ */}
+      <div className="lg:hidden sticky top-14 z-40 bg-amber-900/95 border-b border-amber-700/50 backdrop-blur-sm px-4 py-1.5 text-center">
+        <p className="text-[9px] font-bold text-amber-300 uppercase tracking-widest">
+          Mode Simulateur — Taux Non-Exécutables · Indicatif Uniquement
+        </p>
       </div>
 
       {/* ══ Ticker ═══════════════════════════════════════════════════════════ */}
@@ -648,13 +657,18 @@ function AppInner() {
               <span className="text-navy-800">·</span>
               <span>Yahoo Finance</span>
               <span className="text-navy-800">·</span>
+              <span>Twelve Data</span>
+              <span className="text-navy-800">·</span>
               <span>BKAM Fixing</span>
               <span className="text-navy-800">·</span>
               <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-700 hover:text-gold-500 transition-colors">
                 jad2advisory.com
               </a>
             </div>
-            <p className="text-[9px] mt-2 text-navy-700">{t('footer.copyright')}</p>
+            <p className="text-[9px] mt-1.5 text-navy-700 italic">
+              Market data derived from Yahoo Finance / Twelve Data for educational demonstration purposes only. Not for commercial trading.
+            </p>
+            <p className="text-[9px] mt-1 text-navy-700">{t('footer.copyright')}</p>
           </div>
         </div>
       </footer>
