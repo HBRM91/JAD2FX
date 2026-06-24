@@ -21,8 +21,13 @@ function fmtBps(v: number) { return (v >= 0 ? '+' : '') + v.toFixed(1) + ' bps';
 function PriceRow({ entry }: { entry: LivePriceEntry }) {
   const up = entry.change > 0;
   const dn = entry.change < 0;
+  const { locale } = useI18n();
 
   const info = BKAM_CURRENCIES.find(c => c.code === entry.currency);
+  const displayName = !info ? ''
+    : locale === 'ar' ? info.nameAr
+    : locale === 'en' ? info.name
+    : info.nameFr;
 
   const changeColor = up ? 'text-emerald-400' : dn ? 'text-red-400' : 'text-slate-500';
   const bgFlash     = up ? 'group-hover:bg-emerald-950/20' : dn ? 'group-hover:bg-red-950/20' : 'group-hover:bg-navy-800/40';
@@ -34,7 +39,7 @@ function PriceRow({ entry }: { entry: LivePriceEntry }) {
           <span className="text-base">{info?.flag ?? '🌐'}</span>
           <div>
             <div className="text-sm font-bold text-white font-mono">{entry.pair}</div>
-            <div className="text-[10px] text-slate-500">{info?.name}</div>
+            <div className="text-[10px] text-slate-500">{displayName}</div>
           </div>
         </div>
       </td>
