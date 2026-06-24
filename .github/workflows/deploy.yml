@@ -1,0 +1,60 @@
+name: Deploy to Cloudflare
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  # ── Build & Deploy React SPA → Cloudflare Pages ───────────────────────────────
+  deploy-pages:
+    name: Deploy Frontend (Cloudflare Pages)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        env:
+          # Vite reads CORS_PROXY_URL and ADMIN_PASSCODE (see vite.config.ts define map)
+          # Also accepts VITE_ prefixed variants as fallback
+          CORS_PROXY_URL: ${{ secrets.CORS_PROXY_URL }}
+          ADMIN_PASSCODE: ${{ secrets.ADMIN_PASSCODE }}
+        run: npm run build
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy dist --project-name=jad2fx --commit-dirty=true
+
+  # ── Deploy Cloudflare Worker (API proxy) ──────────────────────────────────────
+  deploy-worker:
+    name: Deploy Worker (Cloudflare Worker)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Deploy Worker + set secrets
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: cloudflare
+          command: deploy
+          secrets: |
+            TWELVE_DATA_KEY
+        env:
+          TWELVE_DATA_KEY: ${{ secrets.TWELVE_DATA_KEY }}

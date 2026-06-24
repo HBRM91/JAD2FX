@@ -3,36 +3,64 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Khouya FX - Moroccan Financial Intelligence</title>
+    <title>JAD2FX — Données de Change MAD | JAD2 Advisory</title>
+    <meta name="description" content="JAD2FX: données de change indicatives pour toutes les devises cotées par Bank Al-Maghrib. Outil pédagogique de JAD2 Advisory. Taux indicatifs uniquement — pas de conseil en investissement." />
+    <meta name="robots" content="index, follow" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
               navy: {
-                800: '#0F2645',
-                900: '#0A1A30',
+                50:  '#EEF2F7',
+                100: '#D4DEE9',
+                200: '#A9BDD3',
+                300: '#7E9CBD',
+                400: '#537BA7',
+                500: '#3D6491',
+                600: '#2B4D78',
+                700: '#1C3558',
+                800: '#112238',
+                900: '#0A1628',
+                950: '#060D18',
               },
               gold: {
+                300: '#F2DC8A',
                 400: '#E5C158',
                 500: '#D4AF37',
                 600: '#B5952F',
+                700: '#8A7024',
+                800: '#5E4D18',
+                900: '#33290D',
               }
             },
             fontFamily: {
-              sans: ['Inter', 'sans-serif'],
+              sans: ['Inter', 'Cairo', 'sans-serif'],
               serif: ['Playfair Display', 'serif'],
+              arabic: ['Cairo', 'sans-serif'],
+              mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
             }
           }
         }
       }
     </script>
     <style>
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
       body {
-        background-color: #F8FAFC;
+        background-color: #060D18;
+        color: #CBD5E1;
       }
+      ::-webkit-scrollbar { width: 6px; height: 6px; }
+      ::-webkit-scrollbar-track { background: #0A1628; }
+      ::-webkit-scrollbar-thumb { background: #1C3558; border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: #2B4D78; }
+      .tabular-nums { font-variant-numeric: tabular-nums; }
+      /* Fade-in for page transitions */
+      .view-enter { animation: fadeIn 0.15s ease-out; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
     </style>
   <script type="importmap">
 {
@@ -49,5 +77,6 @@
 </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

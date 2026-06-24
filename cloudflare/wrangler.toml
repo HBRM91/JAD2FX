@@ -1,0 +1,24 @@
+name = "jad2fx-yahoo-proxy"
+main = "yahoo-proxy.js"
+compatibility_date = "2024-01-01"
+
+# ── KV namespace for market reports ──────────────────────────────────────────
+[[kv_namespaces]]
+binding = "REPORTS_KV"
+id = "c105b1084a094471be4516496000fa1d"
+
+# ── Scheduled cron ───────────────────────────────────────────────────────────
+# Single trigger at 09:00 Casablanca (08:00 UTC) on weekdays.
+# Consolidated from 2 → 1 cron to stay within free-plan limit (5 total across account).
+# Morocco: UTC+1 year-round (UTC+0 during Ramadan).
+[triggers]
+crons = ["0 8 * * 1-5"]
+
+# ── Required secrets (wrangler secret put <NAME>) ────────────────────────────
+# BKAM_FX_KEY      — BKAM FX API subscription key
+# BKAM_MONIA_KEY   — BKAM MONIA subscription key (BDT yield curve)
+# TAVILY_KEY       — Tavily search API key (market report web searches)
+# ADMIN_PASSCODE   — Admin panel password (must match ADMIN_PASSCODE build var)
+# GROQ_API_KEY     — Groq API key (LLM for reports + chat)
+# GEMINI_API_KEY   — Gemini 2.5 Flash API key (LLM fallback)
+# TWELVE_DATA_KEY  — Twelve Data API key (Yahoo Finance failover for 8 major pairs)
