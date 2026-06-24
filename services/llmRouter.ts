@@ -26,12 +26,12 @@ interface RouteConfig {
 // ─── Worker proxy call ────────────────────────────────────────────────────────
 
 function getProxyUrl(): string {
-  return (import.meta.env.VITE_CORS_PROXY_URL ?? '').replace(/\/$/, '');
+  return (process.env.CORS_PROXY_URL ?? '').replace(/\/$/, '');
 }
 
 export async function routeQuery(config: RouteConfig): Promise<LLMResponse> {
   const base = getProxyUrl();
-  if (!base) throw new Error('VITE_CORS_PROXY_URL not set — cannot reach LLM proxy');
+  if (!base) throw new Error('CORS_PROXY_URL not configured — cannot reach LLM proxy');
 
   const res = await fetch(`${base}/api/llm/chat`, {
     method: 'POST',
@@ -63,7 +63,7 @@ export async function routeQuery(config: RouteConfig): Promise<LLMResponse> {
 
 export function getAvailableProviders(): LLMProvider[] {
   // Providers are available if the proxy URL is configured (keys live in Worker)
-  return getProxyUrl() ? ['groq', 'gemini'] : [];
+  return getProxyUrl() ? (['groq', 'gemini'] as LLMProvider[]) : [];
 }
 
 export const PROVIDER_LABELS: Record<LLMProvider, string> = {

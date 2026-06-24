@@ -20,14 +20,11 @@
  *   [[kv_namespaces]] binding = "REPORTS_KV" id = "..."
  */
 
-const ALLOWED_ORIGINS = [
-  'https://jad2fx.pages.dev',
-  'https://ce86f572.jad2fx.pages.dev',
-  'https://cbe07ec4.jad2fx.pages.dev',
-  'https://claude-fx-engine-rag-chatbot.jad2fx.pages.dev',
-  'https://jad2fx.com',
-  'http://localhost:5173',
-  'http://localhost:4173',
+const ALLOWED_ORIGIN_PATTERNS = [
+  /^https:\/\/[a-z0-9-]+\.jad2fx\.pages\.dev$/,  // all Pages preview + prod URLs
+  /^https:\/\/jad2fx\.com$/,
+  /^https:\/\/jad2fx\.pages\.dev$/,
+  /^http:\/\/localhost:(5173|4173)$/,
 ];
 
 const CORS_HEADERS = {
@@ -39,8 +36,12 @@ const CORS_HEADERS = {
 const BKAM_BASE = 'https://api.centralbankofmorocco.ma';
 const MAX_BODY_BYTES = 102_400; // 100 KB
 
+function isAllowedOrigin(origin) {
+  return ALLOWED_ORIGIN_PATTERNS.some(p => p.test(origin));
+}
+
 function corsHeaders(origin) {
-  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  const allowed = isAllowedOrigin(origin) ? origin : 'https://jad2fx.pages.dev';
   return { ...CORS_HEADERS, 'Access-Control-Allow-Origin': allowed };
 }
 
