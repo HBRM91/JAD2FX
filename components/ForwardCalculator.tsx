@@ -242,7 +242,7 @@ export default function ForwardCalculator() {
   const { locale } = useI18n();
 
   const [activeTab, setActiveTab]     = useState<Tab>('PRICER');
-  const [currency, setCurrency]       = useState('EUR');
+  const [currency, setCurrency]       = useState('EUR'); // EUR first per G10 market convention
   const [tenor, setTenor]             = useState('3M');
   const [notional, setNotional]       = useState(1_000_000);
   const [direction, setDirection]     = useState<'BUY' | 'SELL'>('BUY');

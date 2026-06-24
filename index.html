@@ -14,17 +14,17 @@
           extend: {
             colors: {
               navy: {
-                50:  '#EEF2F7',
-                100: '#D4DEE9',
-                200: '#A9BDD3',
-                300: '#7E9CBD',
-                400: '#537BA7',
-                500: '#3D6491',
-                600: '#2B4D78',
-                700: '#1C3558',
-                800: '#112238',
-                900: '#0A1628',
-                950: '#060D18',
+                50:  'var(--navy-50)',
+                100: 'var(--navy-100)',
+                200: 'var(--navy-200)',
+                300: 'var(--navy-300)',
+                400: 'var(--navy-400)',
+                500: 'var(--navy-500)',
+                600: 'var(--navy-600)',
+                700: 'var(--navy-700)',
+                800: 'var(--navy-800)',
+                900: 'var(--navy-900)',
+                950: 'var(--navy-950)',
               },
               gold: {
                 300: '#F2DC8A',
@@ -47,18 +47,58 @@
       }
     </script>
     <style>
+      /* ── Dark theme (default) ─────────────────────────── */
+      :root {
+        --navy-50:  #EEF2F7;
+        --navy-100: #D4DEE9;
+        --navy-200: #A9BDD3;
+        --navy-300: #7E9CBD;
+        --navy-400: #537BA7;
+        --navy-500: #3D6491;
+        --navy-600: #2B4D78;
+        --navy-700: #1C3558;
+        --navy-800: #112238;
+        --navy-900: #0A1628;
+        --navy-950: #060D18;
+        color-scheme: dark;
+      }
+      /* ── Light theme override ─────────────────────────── */
+      :root.light {
+        --navy-50:  #1e3a5f;
+        --navy-100: #1e40af;
+        --navy-200: #1d4ed8;
+        --navy-300: #1e293b;
+        --navy-400: #334155;
+        --navy-500: #64748b;
+        --navy-600: #94a3b8;
+        --navy-700: #cbd5e1;
+        --navy-800: #e2e8f0;
+        --navy-900: #f1f5f9;
+        --navy-950: #f8fafc;
+        color-scheme: light;
+      }
+
       * { box-sizing: border-box; }
       html { scroll-behavior: smooth; }
       body {
-        background-color: #060D18;
-        color: #CBD5E1;
+        background-color: var(--navy-950);
+        color: var(--navy-300);
+        transition: background-color 0.2s ease, color 0.2s ease;
       }
+
       ::-webkit-scrollbar { width: 6px; height: 6px; }
-      ::-webkit-scrollbar-track { background: #0A1628; }
-      ::-webkit-scrollbar-thumb { background: #1C3558; border-radius: 3px; }
-      ::-webkit-scrollbar-thumb:hover { background: #2B4D78; }
+      ::-webkit-scrollbar-track { background: var(--navy-900); }
+      ::-webkit-scrollbar-thumb { background: var(--navy-700); border-radius: 3px; }
+      ::-webkit-scrollbar-thumb:hover { background: var(--navy-600); }
       .tabular-nums { font-variant-numeric: tabular-nums; }
-      /* Fade-in for page transitions */
+
+      /* Smooth theme transition */
+      *, *::before, *::after {
+        transition: background-color 0.2s ease, border-color 0.15s ease;
+      }
+      /* Exclude transitions that shouldn't animate (charts, etc.) */
+      svg *, canvas, .recharts-wrapper * { transition: none !important; }
+
       .view-enter { animation: fadeIn 0.15s ease-out; }
       @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
     </style>

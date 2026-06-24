@@ -14,12 +14,12 @@ export const DISCLAIMER_TEXT = `JAD2FX est une plateforme d'information fourniss
 export const DISCLAIMER_SHORT = "Données indicatives à titre pédagogique · JAD2 Advisory : conseil stratégique & formation — non intermédiaire financier";
 
 // ─── BKAM Currency List ───────────────────────────────────────────────────────
-// G10 (BKAM-quoted) → CNY → Gulf/Arabic → North African (cross-rates)
-// Note: OMR, BHD, JOD, TND, DZD, LYD are computed via USD cross; not direct BKAM quotes.
+// Standard G10 market order: EUR first (60% basket weight), USD second (40%),
+// then remaining G10 by global liquidity, CNY, Gulf by volume, regional, EM.
 export const BKAM_CURRENCIES: CurrencyInfo[] = [
-  // ── G10 (as quoted by BKAM) ─────────────────────────────────────────────
-  { code: 'USD', name: 'US Dollar',         nameFr: 'Dollar américain',      nameAr: 'الدولار الأمريكي',     flag: '🇺🇸', bkamUnit: 1   },
+  // ── G10 — Bloomberg/Reuters interbank convention ─────────────────────────
   { code: 'EUR', name: 'Euro',              nameFr: 'Euro',                  nameAr: 'اليورو',               flag: '🇪🇺', bkamUnit: 1   },
+  { code: 'USD', name: 'US Dollar',         nameFr: 'Dollar américain',      nameAr: 'الدولار الأمريكي',     flag: '🇺🇸', bkamUnit: 1   },
   { code: 'GBP', name: 'British Pound',     nameFr: 'Livre sterling',        nameAr: 'الجنيه الإسترليني',    flag: '🇬🇧', bkamUnit: 1   },
   { code: 'CHF', name: 'Swiss Franc',       nameFr: 'Franc suisse',          nameAr: 'الفرنك السويسري',      flag: '🇨🇭', bkamUnit: 1   },
   { code: 'JPY', name: 'Japanese Yen',      nameFr: 'Yen japonais',          nameAr: 'الين الياباني',        flag: '🇯🇵', bkamUnit: 100 },
@@ -29,9 +29,9 @@ export const BKAM_CURRENCIES: CurrencyInfo[] = [
   { code: 'DKK', name: 'Danish Krone',      nameFr: 'Couronne danoise',      nameAr: 'الكرون الدنماركي',     flag: '🇩🇰', bkamUnit: 1   },
   // ── CNY ─────────────────────────────────────────────────────────────────
   { code: 'CNY', name: 'Chinese Yuan',      nameFr: 'Yuan renminbi',         nameAr: 'اليوان الصيني',        flag: '🇨🇳', bkamUnit: 1   },
-  // ── Gulf / Arabic ────────────────────────────────────────────────────────
-  { code: 'AED', name: 'UAE Dirham',        nameFr: 'Dirham des Émirats',    nameAr: 'درهم إماراتي',         flag: '🇦🇪', bkamUnit: 1   },
+  // ── Gulf — SAR first (largest bilateral flow with Morocco) ───────────────
   { code: 'SAR', name: 'Saudi Riyal',       nameFr: 'Riyal saoudien',        nameAr: 'ريال سعودي',           flag: '🇸🇦', bkamUnit: 1   },
+  { code: 'AED', name: 'UAE Dirham',        nameFr: 'Dirham des Émirats',    nameAr: 'درهم إماراتي',         flag: '🇦🇪', bkamUnit: 1   },
   { code: 'QAR', name: 'Qatari Riyal',      nameFr: 'Riyal qatarien',        nameAr: 'ريال قطري',            flag: '🇶🇦', bkamUnit: 1   },
   { code: 'KWD', name: 'Kuwaiti Dinar',     nameFr: 'Dinar koweïtien',       nameAr: 'دينار كويتي',          flag: '🇰🇼', bkamUnit: 1   },
   { code: 'OMR', name: 'Omani Rial',        nameFr: 'Rial omanais',          nameAr: 'ريال عماني',           flag: '🇴🇲', bkamUnit: 1   },

@@ -23,11 +23,12 @@ import FxCrossMatrix      from './components/FxCrossMatrix';
 import MarketRadar        from './components/MarketRadar';
 import { AdminProvider, useAdmin } from './context/AdminContext';
 import { I18nProvider, useI18n, Locale } from './context/I18nContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import {
   Building2, FileText, LayoutDashboard, Menu,
   Globe, ChevronRight, TrendingUp, ArrowLeftRight, Activity,
   Lock, X, BarChart2, Banknote, PackageOpen, Newspaper, Scale,
-  ChevronDown, ExternalLink, Zap,
+  ChevronDown, ExternalLink, Zap, Sun, Moon,
 } from 'lucide-react';
 
 // ─── Nav data ─────────────────────────────────────────────────────────────────
@@ -80,6 +81,7 @@ const NAV_GROUPS: NavGroup[] = [
 
 function AppInner() {
   const { config, setLivePrices } = useAdmin();
+  const { theme, toggleTheme, isDark } = useTheme();
   const [view, setView]             = useState<ViewState>('HOME');
   const [tickerRates, setTickerRates] = useState<LiveRate[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -245,6 +247,15 @@ function AppInner() {
                 ))}
               </div>
 
+              {/* Theme toggle */}
+              <button
+                onClick={toggleTheme}
+                title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                className="flex items-center justify-center w-8 h-8 rounded border border-navy-700 text-navy-400 hover:text-white hover:border-navy-500 transition-colors"
+              >
+                {isDark ? <Sun size={13} /> : <Moon size={13} />}
+              </button>
+
               <a
                 href="https://jad2advisory.com"
                 target="_blank"
@@ -386,42 +397,50 @@ function AppInner() {
         {view === 'HOME' && (
           <div className="space-y-6">
 
-            {/* Hero banner */}
-            <div className="relative rounded-xl overflow-hidden border border-navy-800 bg-gradient-to-br from-navy-800 via-navy-900 to-navy-950">
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_0%,rgba(212,175,55,0.07),transparent_55%)]" />
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_0%_100%,rgba(59,130,246,0.04),transparent_50%)]" />
-              <div className="relative px-6 sm:px-8 py-8">
+            {/* Hero banner — AI-generated financial background */}
+            <div className="relative rounded-xl overflow-hidden border border-navy-800">
+              {/* AI-generated hero background */}
+              <div
+                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+                style={{ backgroundImage: 'url(/hero-bg.jpg)' }}
+              />
+              {/* Dark overlay for readability */}
+              <div className="absolute inset-0 bg-navy-950/75" />
+              <div className="absolute inset-0 bg-gradient-to-r from-navy-950/90 via-navy-950/60 to-transparent" />
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_0%,rgba(212,175,55,0.12),transparent_55%)]" />
+
+              <div className="relative px-6 sm:px-8 py-10">
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                   <div>
                     <div className="flex flex-wrap gap-2 mb-4">
-                      {['Simulation Pédagogique', 'Données Indicatives', 'Réglementation OC'].map(tag => (
-                        <span key={tag} className="text-[9px] bg-gold-500/10 border border-gold-500/20 text-gold-500 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                      {['Simulation Pédagogique', 'Données BKAM Live', 'Réglementation OC'].map(tag => (
+                        <span key={tag} className="text-[9px] bg-gold-500/15 border border-gold-500/30 text-gold-400 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider backdrop-blur-sm">
                           {tag}
                         </span>
                       ))}
                     </div>
-                    <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-[0.18em] uppercase mb-1 font-serif">JAD2FX</h2>
-                    <p className="text-gold-500 text-[10px] uppercase tracking-[0.22em] mb-4">Outil de Données de Change · by JAD2 Advisory</p>
-                    <p className="text-navy-300 text-sm max-w-lg leading-relaxed">
+                    <h2 className="text-4xl sm:text-5xl font-bold text-white tracking-[0.18em] uppercase mb-1 font-serif drop-shadow-lg">JAD2FX</h2>
+                    <p className="text-gold-400 text-[10px] uppercase tracking-[0.28em] mb-4">Outil de Données de Change · by JAD2 Advisory</p>
+                    <p className="text-slate-300 text-sm max-w-lg leading-relaxed drop-shadow">
                       Données indicatives sur {BKAM_CURRENCIES.length} devises MAD (14 cotées BKAM + {BKAM_CURRENCIES.length - 14} dérivées), simulateur pédagogique de forwards/swaps et référentiel réglementaire Office des Changes.
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
                     <button
                       onClick={() => navTo('LIVE')}
-                      className="flex items-center gap-2 bg-gold-500 text-navy-950 font-bold text-sm px-5 py-2.5 rounded hover:bg-gold-400 transition-colors shadow-lg shadow-gold-900/30"
+                      className="flex items-center gap-2 bg-gold-500 text-navy-950 font-bold text-sm px-5 py-2.5 rounded hover:bg-gold-400 transition-colors shadow-lg shadow-gold-900/50"
                     >
                       <Activity size={14} /> Live Pricer
                     </button>
                     <button
                       onClick={() => navTo('FORWARDS')}
-                      className="flex items-center gap-2 text-gold-400 border border-gold-500/30 font-bold text-sm px-5 py-2.5 rounded hover:border-gold-400 hover:text-gold-300 transition-colors"
+                      className="flex items-center gap-2 text-gold-300 border border-gold-500/40 font-bold text-sm px-5 py-2.5 rounded hover:border-gold-400 hover:text-gold-200 transition-colors backdrop-blur-sm bg-navy-950/30"
                     >
                       <TrendingUp size={14} /> Forward Calc
                     </button>
                     <button
                       onClick={() => navTo('DASHBOARD')}
-                      className="flex items-center gap-2 text-slate-300 border border-navy-700 font-medium text-sm px-5 py-2.5 rounded hover:border-navy-600 hover:text-white transition-colors"
+                      className="flex items-center gap-2 text-slate-200 border border-navy-600/60 font-medium text-sm px-5 py-2.5 rounded hover:border-navy-500 hover:text-white transition-colors backdrop-blur-sm bg-navy-950/30"
                     >
                       <LayoutDashboard size={14} /> FX Tableau
                     </button>
@@ -578,6 +597,14 @@ function AppInner() {
         {/* ─── ABOUT ─────────────────────────────────────────────────────── */}
         {view === 'ABOUT' && (
           <div className="max-w-3xl mx-auto space-y-5">
+            {/* Casablanca hero image */}
+            <div className="relative rounded-xl overflow-hidden h-40 border border-navy-800">
+              <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/casablanca-night.jpg)' }} />
+              <div className="absolute inset-0 bg-gradient-to-b from-navy-950/30 to-navy-950/80" />
+              <div className="absolute bottom-4 left-6">
+                <p className="text-[9px] text-navy-400 tracking-widest uppercase">Casablanca · Centre financier de référence du Maroc</p>
+              </div>
+            </div>
             <div className="bg-navy-900 border border-navy-800 rounded-xl p-8">
               <div className="flex items-center gap-4 mb-6 pb-6 border-b border-navy-800">
                 <Jad2Logo width={110} showAdvisory={true} />
@@ -706,10 +733,12 @@ function AppInner() {
 
 export default function App() {
   return (
-    <I18nProvider>
-      <AdminProvider>
-        <AppInner />
-      </AdminProvider>
-    </I18nProvider>
+    <ThemeProvider>
+      <I18nProvider>
+        <AdminProvider>
+          <AppInner />
+        </AdminProvider>
+      </I18nProvider>
+    </ThemeProvider>
   );
 }
