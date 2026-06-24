@@ -1,0 +1,35 @@
+name: Deploy Worker + Set Secrets
+
+on:
+  workflow_dispatch:
+    inputs:
+      twelve_data_key:
+        description: 'Twelve Data API key (will be set as Worker secret)'
+        required: true
+        type: string
+
+jobs:
+  deploy-worker:
+    name: Deploy Worker & Configure Secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: cloudflare
+          command: deploy
+
+      - name: Set TWELVE_DATA_KEY secret
+        working-directory: cloudflare
+        run: echo "${{ inputs.twelve_data_key }}" | npx wrangler secret put TWELVE_DATA_KEY
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
