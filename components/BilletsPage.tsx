@@ -273,7 +273,7 @@ const BilletsPage: React.FC = () => {
                 transport de fonds, assurance, stockage sécurisé, et manutention des espèces.
               </p>
               <p className="text-[10px] text-slate-400 border border-slate-200 rounded px-2 py-1">
-                Taux indicatifs — pour un devis : <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-500 font-medium">jad2advisory.com</a>
+                Taux indicatifs — pour un accompagnement professionnel en gestion du risque de change : <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-500 font-medium">jad2advisory.com</a>
               </p>
             </div>
           )}

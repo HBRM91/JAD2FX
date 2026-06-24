@@ -152,6 +152,33 @@ interface BkamRateCache {
 let bkamCache: BkamRateCache | null = null;
 const BKAM_CACHE_MS = 10 * 60 * 1000;
 
+// ─── LocalStorage persistence for true BKAM 24h change ─────────────────────
+const LS_KEY = 'bkam_prev_rates_v1';
+
+interface BkamStoredRates {
+  madPerUnit: Record<string, number>;
+  date: string; // YYYY-MM-DD — the business day these rates belong to
+}
+
+function saveBkamRatesToStorage(madPerUnit: Record<string, number>): void {
+  try {
+    const today = new Date().toISOString().slice(0, 10);
+    const payload: BkamStoredRates = { madPerUnit, date: today };
+    localStorage.setItem(LS_KEY, JSON.stringify(payload));
+  } catch { /* storage quota or privacy mode — ignore */ }
+}
+
+function loadBkamYesterdayRates(): Record<string, number> | null {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return null;
+    const { madPerUnit, date } = JSON.parse(raw) as BkamStoredRates;
+    const yesterday = prevBizDay();
+    if (date !== yesterday) return null; // stale or future — ignore
+    return madPerUnit;
+  } catch { return null; }
+}
+
 async function tryFetchBkamMadRates(corsProxyUrl: string): Promise<Record<string, number> | null> {
   if (bkamCache && Date.now() - bkamCache.timestamp < BKAM_CACHE_MS) {
     return bkamCache.madPerUnit;
@@ -162,13 +189,32 @@ async function tryFetchBkamMadRates(corsProxyUrl: string): Promise<Record<string
     const madPerUnit = virementToMadPerUnit(rates);
     if (!madPerUnit['USD'] || !madPerUnit['EUR']) return null;
     bkamCache = { madPerUnit, timestamp: Date.now() };
+    // Persist today's BKAM rates so they become "yesterday" tomorrow
+    saveBkamRatesToStorage(madPerUnit);
     return madPerUnit;
   } catch {
     return null;
   }
 }
 
-function computeChange24h(todayMid: number, prevEurRates: Record<string, number>, currencyCode: string, bkamUnit: number, config: BasketConfig): number {
+function computeChange24h(
+  todayMid: number,
+  prevEurRates: Record<string, number>,
+  currencyCode: string,
+  bkamUnit: number,
+  config: BasketConfig,
+  bkamYesterdayRates?: Record<string, number> | null,
+): number {
+  // Prefer actual BKAM yesterday rates when available (persisted from previous session)
+  if (bkamYesterdayRates) {
+    const prevRaw = bkamYesterdayRates[currencyCode];
+    if (prevRaw) {
+      const prevMid = prevRaw * bkamUnit;
+      if (prevMid) return +((todayMid - prevMid) / prevMid * 100).toFixed(4);
+    }
+  }
+
+  // Fallback: ECB-derived yesterday proxy
   if (!prevEurRates['USD']) return 0;
   const prevEurUsd = prevEurRates['USD'];
   const prevUsdMadMid = config.referenceBasketValue / (config.eurWeight * prevEurUsd + config.usdWeight);
@@ -197,8 +243,9 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
 }> {
   const rates: LiveRate[] = [];
 
-  // Fetch yesterday's ECB rates in parallel for 24h change
+  // Fetch yesterday's ECB rates and stored BKAM rates in parallel for 24h change
   const prevEurRatesPromise = fetchPrevEurRates();
+  const bkamYesterdayRates = loadBkamYesterdayRates();
 
   // ── Primary: BKAM CoursVirement ──────────────────────────────────────────
   if (corsProxyUrl) {
@@ -238,7 +285,7 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
           virementSell: +(filteredMid * (1 + vS)).toFixed(4),
           billetBuy:    +(filteredMid * (1 - bS)).toFixed(4),
           billetSell:   +(filteredMid * (1 + bS)).toFixed(4),
-          change24h: computeChange24h(filteredMid, prevEurRates, currency.code, currency.bkamUnit, config),
+          change24h: computeChange24h(filteredMid, prevEurRates, currency.code, currency.bkamUnit, config, bkamYesterdayRates),
           source: 'CALCULATED',
           feedStatus: 'LIVE',
           timestamp: new Date().toISOString(),
@@ -291,7 +338,7 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
       virementSell: +(filteredMid * (1 + vS)).toFixed(4),
       billetBuy:    +(filteredMid * (1 - bS)).toFixed(4),
       billetSell:   +(filteredMid * (1 + bS)).toFixed(4),
-      change24h: computeChange24h(filteredMid, prevEurRates, currency.code, currency.bkamUnit, config),
+      change24h: computeChange24h(filteredMid, prevEurRates, currency.code, currency.bkamUnit, config, bkamYesterdayRates),
       source: source as LiveRate['source'],
       feedStatus,
       isCapped,

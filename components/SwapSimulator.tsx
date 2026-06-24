@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { ArrowLeftRight, RotateCcw, RotateCw, ChevronDown, Trash2, TrendingDown } from 'lucide-react';
 import { BKAM_CURRENCIES } from '../constants';
-import { STANDARD_TENORS, buildFxSwap, buildRollEvent } from '../services/forwardEngine';
+import ComplianceBanner from './ComplianceBanner';
+import { STANDARD_TENORS, buildFxSwap, buildRollEvent, settlementDate } from '../services/forwardEngine';
 import { useAdmin } from '../context/AdminContext';
-import { RollEvent } from '../types';
+import { FxSwapQuote, RollEvent } from '../types';
 import { logSimTelemetry } from '../services/telemetry';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -12,6 +13,127 @@ function fmt4(v: number) { return v.toFixed(4); }
 function fmtPips(v: number) { return (v >= 0 ? '+' : '') + v.toFixed(2); }
 function fmtMAD(v: number) {
   return new Intl.NumberFormat('fr-MA', { maximumFractionDigits: 0 }).format(v);
+}
+
+// ─── Cash-Flow Timeline ────────────────────────────────────────────────────────
+
+function cfRow(receive: boolean, amount: number, ccy: string) {
+  return (
+    <div className={`flex items-center gap-2 px-2.5 py-1.5 rounded-md ${receive ? 'bg-emerald-950/30' : 'bg-red-950/30'}`}>
+      <span className={`text-sm font-bold leading-none select-none ${receive ? 'text-emerald-400' : 'text-red-400'}`}>
+        {receive ? '↑' : '↓'}
+      </span>
+      <div>
+        <p className="text-[9px] text-slate-500 uppercase">{receive ? 'Reçu' : 'Livré'}</p>
+        <p className={`font-mono font-bold text-xs ${receive ? 'text-emerald-400' : 'text-red-400'}`}>
+          {receive ? '+' : '−'}{fmtMAD(amount)} {ccy}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function CashFlowTimeline({ swap, notional, currency }: {
+  swap: FxSwapQuote;
+  notional: number;
+  currency: string;
+}) {
+  const nearDate = settlementDate(swap.nearLeg.tenorLabel);
+  const farDate  = settlementDate(swap.farLeg.tenorLabel);
+  const today    = new Date().toISOString().slice(0, 10);
+
+  const nearPct = Math.min(80, Math.max(20,
+    (swap.nearLeg.tenorDays / (swap.farLeg.tenorDays || 1)) * 100,
+  ));
+
+  const isNearBuy  = swap.nearLeg.direction === 'BUY';
+  const nearFcy    = notional;
+  const nearMad    = swap.nearLeg.rate * notional;
+  const farFcy     = notional;
+  const farMad     = swap.farLeg.rate * notional;
+  const netMad     = farMad - nearMad;
+
+  return (
+    <div className="border border-navy-700 bg-navy-800/40 rounded-xl p-4 space-y-4">
+      <h4 className="text-[10px] font-bold uppercase tracking-widest text-gold-500">
+        Chronologie des Flux · {currency}/MAD
+      </h4>
+
+      {/* Timeline rail */}
+      <div className="relative h-8">
+        {/* Rail line */}
+        <div className="absolute top-[13px] left-4 right-4 h-0.5 bg-navy-600" />
+
+        {/* TODAY */}
+        <div className="absolute left-4 top-[7px] flex flex-col items-center" style={{ transform: 'translateX(-50%)' }}>
+          <div className="w-3 h-3 rounded-full bg-slate-600 border-2 border-slate-500 z-10" />
+          <p className="text-[9px] text-slate-600 mt-1 whitespace-nowrap">{today}</p>
+        </div>
+
+        {/* NEAR */}
+        <div
+          className="absolute top-[6px] flex flex-col items-center"
+          style={{ left: `calc(1rem + (100% - 2rem) * ${nearPct / 100})`, transform: 'translateX(-50%)' }}
+        >
+          <div className="w-4 h-4 rounded-full bg-blue-600 border-2 border-blue-400 z-10" />
+          <p className="text-[9px] text-blue-400 font-bold mt-1 whitespace-nowrap">
+            {swap.nearLeg.tenorLabel} · {nearDate}
+          </p>
+        </div>
+
+        {/* FAR */}
+        <div className="absolute right-4 top-[6px] flex flex-col items-center" style={{ transform: 'translateX(50%)' }}>
+          <div className="w-4 h-4 rounded-full bg-purple-600 border-2 border-purple-400 z-10" />
+          <p className="text-[9px] text-purple-400 font-bold mt-1 whitespace-nowrap">
+            {swap.farLeg.tenorLabel} · {farDate}
+          </p>
+        </div>
+      </div>
+
+      {/* Cash flow grid */}
+      <div className="grid grid-cols-2 gap-3 pt-2">
+        {/* NEAR leg */}
+        <div className="border border-blue-800/40 bg-blue-950/10 rounded-lg p-3 space-y-2">
+          <p className="text-[9px] font-bold uppercase tracking-widest text-blue-400">
+            Jambe Near · {swap.nearLeg.tenorDays}j
+          </p>
+          {cfRow(isNearBuy, nearFcy, currency)}
+          {cfRow(!isNearBuy, nearMad, 'MAD')}
+          <p className="text-right text-[9px] text-slate-600 font-mono">@ {fmt4(swap.nearLeg.rate)}</p>
+        </div>
+
+        {/* FAR leg */}
+        <div className="border border-purple-800/40 bg-purple-950/10 rounded-lg p-3 space-y-2">
+          <p className="text-[9px] font-bold uppercase tracking-widest text-purple-400">
+            Jambe Far · {swap.farLeg.tenorDays}j
+          </p>
+          {cfRow(!isNearBuy, farFcy, currency)}
+          {cfRow(isNearBuy, farMad, 'MAD')}
+          <p className="text-right text-[9px] text-slate-600 font-mono">@ {fmt4(swap.farLeg.rate)}</p>
+        </div>
+      </div>
+
+      {/* Net summary bar */}
+      <div className="bg-navy-900 rounded-lg px-4 py-2.5 flex items-center justify-between gap-4">
+        <div className="text-[10px] text-slate-500">
+          Net MAD ={' '}
+          <span className="font-mono text-slate-400">{fmtMAD(farMad)}</span>
+          {' − '}
+          <span className="font-mono text-slate-400">{fmtMAD(nearMad)}</span>
+          {' = '}
+          <span className={`font-mono font-bold ${netMad >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+            {netMad >= 0 ? '+' : ''}{fmtMAD(netMad)} MAD
+          </span>
+        </div>
+        <div className="text-right flex-shrink-0">
+          <p className="text-[9px] text-slate-500 uppercase">Swap pts</p>
+          <p className={`font-mono font-bold text-xs ${swap.swapPointsPips >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+            {fmtPips(swap.swapPointsPips)} pips
+          </p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ─── Swap Leg Card ─────────────────────────────────────────────────────────────
@@ -183,6 +305,7 @@ export default function SwapSimulator() {
 
   return (
     <div className="space-y-5">
+      <ComplianceBanner toolName="FX Swap Simulator" />
 
       {/* ── Header ── */}
       <div>
@@ -205,7 +328,7 @@ export default function SwapSimulator() {
         </h3>
 
         {/* Currency + Notional + Near direction */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">Currency</label>
             <div className="relative">
@@ -254,7 +377,7 @@ export default function SwapSimulator() {
         </div>
 
         {/* Tenor selectors */}
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {(['NEAR', 'FAR'] as const).map(leg => {
             const val  = leg === 'NEAR' ? nearTenor : farTenor;
             const setV = leg === 'NEAR' ? setNearTenor : setFarTenor;
@@ -317,8 +440,11 @@ export default function SwapSimulator() {
               />
             </div>
 
+            {/* Cash-flow timeline */}
+            <CashFlowTimeline swap={swap} notional={notional} currency={currency} />
+
             {/* Swap summary strip */}
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { label: 'Swap Points', value: fmtPips(swap.swapPointsPips) + ' pips', color: swap.swapPointsPips >= 0 ? 'text-emerald-400' : 'text-red-400' },
                 { label: 'Swap Cost MAD', value: fmtMAD(Math.abs(swap.swapPointsRaw) * swap.notional), color: 'text-gold-400' },
@@ -345,7 +471,7 @@ export default function SwapSimulator() {
                   <p className="text-[10px] font-bold uppercase tracking-widest text-amber-400 flex items-center gap-1.5 mb-2.5">
                     <TrendingDown size={11} /> Analyse du Coût de Portage (Break-Even)
                   </p>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
                       { label: 'Écart (jours)', value: `${gapDays}j` },
                       { label: 'Coût carry (MAD)', value: fmtMAD(carryCostMAD), color: 'text-gold-400' },
@@ -381,7 +507,7 @@ export default function SwapSimulator() {
                 rel="noopener noreferrer"
                 className="py-2.5 bg-gold-500 hover:bg-gold-400 text-navy-900 text-sm font-bold rounded transition text-center"
               >
-                Devis Réel → JAD2 Advisory
+                Accompagnement → JAD2 Advisory
               </a>
             </div>
           </>
@@ -403,7 +529,7 @@ export default function SwapSimulator() {
           Roll Event Builder — Rollover / Roll-Under
         </h3>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Type */}
           <div>
             <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">Event Type</label>
@@ -458,7 +584,7 @@ export default function SwapSimulator() {
         {/* Roll result */}
         {computedRoll ? (
           <div className="space-y-3">
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { label: 'From Rate', value: fmt4(computedRoll.fromRate) },
                 { label: 'To Rate',   value: fmt4(computedRoll.toRate) },

@@ -21,8 +21,13 @@ function fmtBps(v: number) { return (v >= 0 ? '+' : '') + v.toFixed(1) + ' bps';
 function PriceRow({ entry }: { entry: LivePriceEntry }) {
   const up = entry.change > 0;
   const dn = entry.change < 0;
+  const { locale } = useI18n();
 
   const info = BKAM_CURRENCIES.find(c => c.code === entry.currency);
+  const displayName = !info ? ''
+    : locale === 'ar' ? info.nameAr
+    : locale === 'en' ? info.name
+    : info.nameFr;
 
   const changeColor = up ? 'text-emerald-400' : dn ? 'text-red-400' : 'text-slate-500';
   const bgFlash     = up ? 'group-hover:bg-emerald-950/20' : dn ? 'group-hover:bg-red-950/20' : 'group-hover:bg-navy-800/40';
@@ -34,7 +39,7 @@ function PriceRow({ entry }: { entry: LivePriceEntry }) {
           <span className="text-base">{info?.flag ?? '🌐'}</span>
           <div>
             <div className="text-sm font-bold text-white font-mono">{entry.pair}</div>
-            <div className="text-[10px] text-slate-500">{info?.name}</div>
+            <div className="text-[10px] text-slate-500">{displayName}</div>
           </div>
         </div>
       </td>
@@ -287,7 +292,7 @@ export default function LivePricer() {
             {locale === 'ar' ? `20 زوج BKAM · شراء / بيع / وسط · دورة ${intervalSecs}ث` : locale === 'en' ? `20 BKAM pairs · Bid / Ask / Mid · Cycle ${intervalSecs}s` : `20 paires BKAM · Bid / Ask / Mid · Cycle ${intervalSecs}s`}
           </p>
           <div className="mt-1 inline-flex items-center gap-1.5 text-[10px] border border-navy-600/30 text-slate-500 px-2 py-0.5 rounded tracking-wide">
-            {locale === 'ar' ? 'أسعار استرشادية · غير رسمية BKAM · للاستشارة: jad2advisory.com' : locale === 'en' ? 'Indicative rates · Not official BKAM · Advisory: jad2advisory.com' : 'Cours indicatifs · Non officiels BKAM · Pour conseil : jad2advisory.com'}
+            {locale === 'ar' ? 'أسعار استرشادية · غير رسمية BKAM · للتدريب والاستشارة الاستراتيجية: jad2advisory.com' : locale === 'en' ? 'Indicative rates · Not official BKAM · Strategic consulting & training: jad2advisory.com' : 'Cours indicatifs · Non officiels BKAM · Conseil stratégique & formation : jad2advisory.com'}
           </div>
         </div>
 
@@ -411,7 +416,7 @@ export default function LivePricer() {
           <span>{locale === 'ar' ? `المصدر: BCR/Frankfurter API — تحديث كل ${intervalSecs}ث` : locale === 'en' ? `Source: ECB/Frankfurter API — refreshed every ${intervalSecs}s` : `Source: ECB/Frankfurter API — rafraîchi toutes les ${intervalSecs}s`}</span>
         </div>
         <p className="text-[10px] text-slate-600 px-1">
-          Cours indicatifs dérivés des références ECB/Frankfurter. Pour opérations de change ou conseil professionnel :{' '}
+          Cours indicatifs dérivés des références ECB/Frankfurter. Pour formation en gestion du risque de change et accompagnement stratégique :{' '}
           <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400">jad2advisory.com</a>
         </p>
       </div>
