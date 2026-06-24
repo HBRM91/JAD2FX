@@ -8,12 +8,13 @@ import {
 import { routeQuery, LLMProvider, PROVIDER_LABELS, PROVIDER_COLORS } from '../services/llmRouter';
 import { fetchCommodityQuotes } from '../services/yahooFinance';
 import { useAdmin } from '../context/AdminContext';
+import { DEFAULT_BASKET_CONFIG } from '../constants';
 
 // ─── Module-level constants & helpers ────────────────────────────────────────
 
-const BASKET_K    = 10.49;
-const EUR_WEIGHT  = 0.60;
-const USD_WEIGHT  = 0.40;
+const BASKET_K    = DEFAULT_BASKET_CONFIG.referenceBasketValue;
+const EUR_WEIGHT  = DEFAULT_BASKET_CONFIG.eurWeight;
+const USD_WEIGHT  = DEFAULT_BASKET_CONFIG.usdWeight;
 
 const FALLBACK: Record<string, number> = {
   USD: 1.085, GBP: 0.860, CHF: 0.945, JPY: 162.5,

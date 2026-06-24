@@ -344,10 +344,13 @@ export default function ForwardCalculator() {
               )}
             </div>
           ) : (
-            <div className="text-[11px] text-slate-500">
-              {locale === 'ar' ? 'لا يوجد سعر — جلب البيانات أو تعيين في Admin'
-                : locale === 'en' ? 'No rate — fetch data or set override in Admin'
-                : 'Pas de taux — actualisez ou configurez Admin'}
+            <div className="flex items-center gap-2 bg-amber-950/20 border border-amber-800/30 rounded-lg px-3 py-2">
+              <RotateCw size={12} className="text-amber-400 animate-spin" />
+              <p className="text-[11px] text-amber-400/90">
+                {locale === 'ar' ? 'جارٍ جلب الأسعار…'
+                  : locale === 'en' ? 'Fetching rates…'
+                  : 'Chargement des taux…'}
+              </p>
             </div>
           )}
         </div>

@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { ViewState, LiveRate } from './types';
-import { DEFAULT_BASKET_CONFIG, MARKET_NEWS, DISCLAIMER_TEXT, DISCLAIMER_SHORT } from './constants';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+import { ViewState, LiveRate, LivePriceEntry } from './types';
+import { DEFAULT_BASKET_CONFIG, MARKET_NEWS, DISCLAIMER_TEXT, DISCLAIMER_SHORT, BKAM_CURRENCIES } from './constants';
 import { fetchAllMadRates } from './services/fxRates';
 import FxDashboard        from './components/FxDashboard';
 import MarketAnalysis     from './components/MarketAnalysis';
@@ -21,7 +21,7 @@ import DisclaimerModal    from './components/DisclaimerModal';
 import CurrencyHeatmap   from './components/CurrencyHeatmap';
 import FxCrossMatrix      from './components/FxCrossMatrix';
 import MarketRadar        from './components/MarketRadar';
-import { AdminProvider }  from './context/AdminContext';
+import { AdminProvider, useAdmin } from './context/AdminContext';
 import { I18nProvider, useI18n, Locale } from './context/I18nContext';
 import {
   Building2, FileText, LayoutDashboard, Menu,
@@ -79,6 +79,7 @@ const NAV_GROUPS: NavGroup[] = [
 // ─── Inner app ─────────────────────────────────────────────────────────────────
 
 function AppInner() {
+  const { config, setLivePrices } = useAdmin();
   const [view, setView]             = useState<ViewState>('HOME');
   const [tickerRates, setTickerRates] = useState<LiveRate[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -86,11 +87,36 @@ function AppInner() {
   const { t, locale, setLocale, isRTL } = useI18n();
   const navDropdownRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    fetchAllMadRates(DEFAULT_BASKET_CONFIG)
-      .then(({ rates }) => setTickerRates(rates))
+  const refreshRates = useCallback(() => {
+    fetchAllMadRates(DEFAULT_BASKET_CONFIG, config.corsProxyUrl)
+      .then(({ rates }) => {
+        setTickerRates(rates);
+        const entries: LivePriceEntry[] = rates.map(r => {
+          const changePercent = r.change24h ?? 0;
+          const prevMid = changePercent !== 0 ? r.mid / (1 + changePercent / 100) : r.mid;
+          return {
+            currency: r.currency,
+            pair: r.pair,
+            bid: r.virementBuy,
+            ask: r.virementSell,
+            mid: r.mid,
+            prevMid,
+            change: +(r.mid - prevMid).toFixed(4),
+            changePercent,
+            spreadPips: Math.round((r.virementSell - r.virementBuy) * 10000),
+            lastUpdated: r.timestamp,
+          };
+        });
+        setLivePrices(entries);
+      })
       .catch(() => {});
-  }, []);
+  }, [config.corsProxyUrl, setLivePrices]);
+
+  useEffect(() => {
+    refreshRates();
+    const iv = setInterval(refreshRates, config.refreshIntervalMs);
+    return () => clearInterval(iv);
+  }, [refreshRates, config.refreshIntervalMs]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -377,7 +403,7 @@ function AppInner() {
                     <h2 className="text-3xl sm:text-4xl font-bold text-white tracking-[0.18em] uppercase mb-1 font-serif">JAD2FX</h2>
                     <p className="text-gold-500 text-[10px] uppercase tracking-[0.22em] mb-4">Outil de Données de Change · by JAD2 Advisory</p>
                     <p className="text-navy-300 text-sm max-w-lg leading-relaxed">
-                      Données indicatives sur 20 devises MAD (14 cotées BKAM + 6 régionales), simulateur pédagogique de forwards/swaps et référentiel réglementaire Office des Changes.
+                      Données indicatives sur {BKAM_CURRENCIES.length} devises MAD (14 cotées BKAM + {BKAM_CURRENCIES.length - 14} dérivées), simulateur pédagogique de forwards/swaps et référentiel réglementaire Office des Changes.
                     </p>
                   </div>
                   <div className="flex flex-wrap items-center gap-3">
@@ -450,7 +476,7 @@ function AppInner() {
                         <span className="text-[8px] font-bold uppercase tracking-wider text-gold-500 bg-gold-500/10 border border-gold-500/20 px-2 py-0.5 rounded-full">
                           {news.category}
                         </span>
-                        <span className="text-[9px] text-navy-500">{news.time}</span>
+                        <span className="text-[9px] text-navy-500 italic">Éditorial</span>
                       </div>
                       <h4 className="text-[13px] font-semibold text-slate-100 mb-1 leading-snug">{news.title}</h4>
                       <p className="text-[11px] text-navy-400 line-clamp-2 leading-relaxed">{news.summary}</p>
@@ -501,7 +527,7 @@ function AppInner() {
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { label: 'Devises Cotées', value: '14', sub: 'par BKAM', color: 'text-gold-400' },
-                    { label: 'Devises Totales', value: '20', sub: '+ 6 croisées', color: 'text-blue-400' },
+                    { label: 'Devises Totales', value: String(BKAM_CURRENCIES.length), sub: `+ ${BKAM_CURRENCIES.length - 14} dérivées`, color: 'text-blue-400' },
                     { label: 'Mise à Jour', value: 'Live', sub: 'en continu', color: 'text-emerald-400' },
                     { label: 'Accès', value: 'Gratuit', sub: 'pédagogique', color: 'text-purple-400' },
                   ].map(stat => (
@@ -578,7 +604,7 @@ function AppInner() {
                 </h3>
                 <ul className="space-y-2">
                   {[
-                    'Données indicatives sur 20 devises (14 cotées BKAM + 6 régionales par taux croisés)',
+                    `Données indicatives sur ${BKAM_CURRENCIES.length} devises (14 cotées BKAM + ${BKAM_CURRENCIES.length - 14} dérivées par taux croisés)`,
                     'Simulateur pédagogique de forwards (formule CIP) et de swaps de change',
                     'Référentiel réglementaire Office des Changes (circulaires, instructions, FAQs)',
                     'Courbes de taux MONIA interpolées à titre informatif et pédagogique',
