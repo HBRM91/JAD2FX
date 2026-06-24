@@ -7,18 +7,13 @@ compatibility_date = "2024-01-01"
 binding = "REPORTS_KV"
 id = "c105b1084a094471be4516496000fa1d"
 
-# ── Scheduled crons (disabled — free plan cron limit reached) ────────────────
-# To enable auto market reports at 09h Casablanca:
-#  1. Free up cron slots in Cloudflare dashboard (account is at free-plan limit of 5)
-#  2. Uncomment the [triggers] block below and redeploy
-#  3. Or upgrade to Workers Paid ($5/mo) for more cron slots
-#
-# Morocco time: UTC+1 year-round (UTC+0 during Ramadan).
+# ── Scheduled crons ──────────────────────────────────────────────────────────
+# Morocco: UTC+1 year-round (UTC+0 during Ramadan).
 #   08:00 UTC = 09:00 Casablanca → Market review (30 min into session)
 #   07:30 UTC = 08:30 Casablanca → Market open notification
-#
-# [triggers]
-# crons = ["0 8 * * 1-5", "30 7 * * 1-5"]
+# Note: tasdir-pro crons cleared to free slots (free plan limit = 5 total)
+[triggers]
+crons = ["0 8 * * 1-5", "30 7 * * 1-5"]
 
 # ── Required secrets (wrangler secret put <NAME>) ────────────────────────────
 # BKAM_FX_KEY      — BKAM FX API subscription key
