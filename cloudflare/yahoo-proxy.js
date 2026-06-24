@@ -6,6 +6,7 @@
  *   /bkam/{path}?{qs}               → BKAM FX API   (BKAM_FX_KEY secret)
  *   /bkam-bdt/{path}?{qs}           → BKAM BDT API  (BKAM_MONIA_KEY secret)
  *   POST /api/tavily/search         → Tavily web search (TAVILY_KEY secret)
+ *   POST /api/llm/chat              → LLM proxy: Groq → Gemini fallback (no client-side keys)
  *   GET  /api/reports/published     → Current published report (public)
  *   GET  /api/reports               → List all reports (admin auth)
  *   POST /api/reports               → Save report draft (admin auth)
@@ -13,7 +14,7 @@
  *   DELETE /api/reports/:id         → Delete a report (admin auth)
  *
  * Required Worker secrets (wrangler secret put <NAME>):
- *   BKAM_FX_KEY, BKAM_MONIA_KEY, TAVILY_KEY, ADMIN_PASSCODE, GROQ_API_KEY
+ *   BKAM_FX_KEY, BKAM_MONIA_KEY, TAVILY_KEY, ADMIN_PASSCODE, GROQ_API_KEY, GEMINI_API_KEY
  *
  * Required KV binding:
  *   [[kv_namespaces]] binding = "REPORTS_KV" id = "..."
@@ -22,6 +23,8 @@
 const ALLOWED_ORIGINS = [
   'https://jad2fx.pages.dev',
   'https://ce86f572.jad2fx.pages.dev',
+  'https://cbe07ec4.jad2fx.pages.dev',
+  'https://claude-fx-engine-rag-chatbot.jad2fx.pages.dev',
   'https://jad2fx.com',
   'http://localhost:5173',
   'http://localhost:4173',
@@ -288,6 +291,93 @@ async function handleDeleteReport(reportId, request, env, origin) {
   if (pubId === reportId) await env.REPORTS_KV.delete('published');
 
   return json({ ok: true }, 200, origin);
+}
+
+// ─── LLM chat proxy (Groq → Gemini fallback, keys never leave server) ────────
+
+const _llmRateLimit = new Map();
+function checkLlmRateLimit(ip) {
+  const now = Date.now();
+  const windowMs = 60_000;
+  const entry = _llmRateLimit.get(ip) ?? { count: 0, reset: now + windowMs };
+  if (now > entry.reset) { entry.count = 0; entry.reset = now + windowMs; }
+  entry.count++;
+  _llmRateLimit.set(ip, entry);
+  if (_llmRateLimit.size > 5000) {
+    for (const [k, v] of _llmRateLimit) { if (now > v.reset) _llmRateLimit.delete(k); }
+  }
+  return entry.count <= 20; // 20 LLM requests per minute per IP
+}
+
+async function handleLlmChat(request, env, origin) {
+  const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+  if (!checkLlmRateLimit(ip)) return json({ error: 'Rate limit exceeded — try again in a minute' }, 429, origin);
+
+  const rawBody = await readBodySafe(request);
+  if (!rawBody || typeof rawBody !== 'string') return json({ error: 'Empty body' }, 400, origin);
+
+  let body;
+  try { body = JSON.parse(rawBody); }
+  catch { return json({ error: 'Invalid JSON' }, 400, origin); }
+
+  const { messages, systemPrompt, maxTokens = 900, temperature = 0.3 } = body;
+
+  if (!Array.isArray(messages) || messages.length === 0) {
+    return json({ error: 'messages array required' }, 400, origin);
+  }
+  if (messages.length > 30) return json({ error: 'Too many messages' }, 400, origin);
+  for (const m of messages) {
+    if (!m.role || !m.content || typeof m.content !== 'string' || m.content.length > 8000) {
+      return json({ error: 'Invalid message format' }, 400, origin);
+    }
+  }
+
+  // Try Groq first
+  if (env.GROQ_API_KEY) {
+    try {
+      const groqMessages = systemPrompt
+        ? [{ role: 'system', content: String(systemPrompt).slice(0, 4000) }, ...messages]
+        : messages;
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'llama-3.3-70b-versatile', messages: groqMessages, max_tokens: maxTokens, temperature }),
+        signal: AbortSignal.timeout(15_000),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.choices?.[0]?.message?.content;
+        if (text) return json({ text, provider: 'groq', model: 'llama-3.3-70b-versatile' }, 200, origin);
+      }
+    } catch (err) {
+      console.warn('[LLM] Groq failed:', err);
+    }
+  }
+
+  // Gemini fallback
+  if (env.GEMINI_API_KEY) {
+    try {
+      const contents = messages.map(m => ({ role: m.role === 'assistant' ? 'model' : 'user', parts: [{ text: m.content }] }));
+      const geminiBody = {
+        contents,
+        generationConfig: { maxOutputTokens: maxTokens, temperature },
+        ...(systemPrompt ? { systemInstruction: { parts: [{ text: String(systemPrompt).slice(0, 4000) }] } } : {}),
+      };
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`,
+        { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(geminiBody), signal: AbortSignal.timeout(20_000) }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (text) return json({ text, provider: 'gemini', model: 'gemini-2.5-flash' }, 200, origin);
+      }
+    } catch (err) {
+      console.warn('[LLM] Gemini failed:', err);
+    }
+  }
+
+  return json({ error: 'All LLM providers unavailable' }, 503, origin);
 }
 
 // ─── BKAM rate fetch (used in scheduled handler) ──────────────────────────────
@@ -577,6 +667,12 @@ export default {
     if (pathname === '/api/tavily/search') {
       if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
       return handleTavilySearch(request, env, origin);
+    }
+
+    // ── LLM chat proxy ────────────────────────────────────────────────────────
+    if (pathname === '/api/llm/chat') {
+      if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
+      return handleLlmChat(request, env, origin);
     }
 
     // ── Report API ────────────────────────────────────────────────────────────
