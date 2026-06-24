@@ -9,11 +9,15 @@ compatibility_date = "2024-01-01"
 binding = "REPORTS_KV"
 id = "c105b1084a094471be4516496000fa1d"
 
-# ── Scheduled cron — 9h00 Casablanca (UTC+1), weekdays only ─────────────────
-# Morocco uses UTC+1 year-round (except DST in summer → UTC+2).
-# Cron at 08:00 UTC = 09:00 Morocco standard time.
+# ── Scheduled crons ──────────────────────────────────────────────────────────
+# Morocco: UTC+1 year-round (except Ramadan → UTC+0 temporarily).
+#
+#  08:00 UTC = 09:00 Casablanca standard time → Market review (30 min into session)
+#  07:30 UTC = 08:30 Casablanca               → Market open notification
+#
+# Interbank FX session: 08h30–15h30 Casablanca (updated Jan 2018 reform).
 [triggers]
-crons = ["0 8 * * 1-5"]
+crons = ["0 8 * * 1-5", "30 7 * * 1-5"]
 
 # ── Required secrets (set via: wrangler secret put <NAME>) ───────────────────
 # BKAM_FX_KEY      — BKAM FX API subscription key (cours/Version1/api/)
