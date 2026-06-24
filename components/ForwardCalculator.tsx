@@ -5,9 +5,10 @@ import {
 } from 'recharts';
 import {
   Calculator, TrendingUp, Clock, ChevronDown, RotateCw,
-  DollarSign, AlertTriangle, BookOpen,
+  AlertTriangle, BookOpen, Printer,
 } from 'lucide-react';
 import { BKAM_CURRENCIES } from '../constants';
+import { ForwardQuote } from '../types';
 import ComplianceBanner from './ComplianceBanner';
 import {
   STANDARD_TENORS,
@@ -60,6 +61,197 @@ function TabButton({ active, onClick, children }: {
     >
       {children}
     </button>
+  );
+}
+
+// ─── Printable Quote Sheet ────────────────────────────────────────────────────
+
+function PrintQuoteModal({ quote, currency, tenor, notional, direction, settlement, locale, onClose }: {
+  quote: ForwardQuote;
+  currency: string;
+  tenor: string;
+  notional: number;
+  direction: 'BUY' | 'SELL';
+  settlement: string;
+  locale: 'fr' | 'en' | 'ar';
+  onClose: () => void;
+}) {
+  const refNum = useMemo(() => Math.random().toString(36).slice(2, 10).toUpperCase(), []);
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+  const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+  const spotCost = quote.spot * notional;
+  const fwdCost = quote.forwardRate * notional;
+  const hedgeCost = fwdCost - spotCost;
+
+  return (
+    <>
+      <style>{`
+        @media print {
+          body { visibility: hidden; }
+          #fwd-quote-print, #fwd-quote-print * { visibility: visible; }
+          #fwd-quote-print { position: fixed; top: 0; left: 0; right: 0; width: 100%; background: white; border-radius: 0; max-width: 100%; }
+          .fwd-print-hidden { display: none !important; }
+        }
+      `}</style>
+
+      {/* Backdrop */}
+      <div
+        className="fwd-print-hidden fixed inset-0 z-50 flex items-start justify-center bg-black/80 overflow-y-auto py-8 px-4"
+        onClick={onClose}
+      >
+        <div
+          id="fwd-quote-print"
+          className="bg-white w-full max-w-xl rounded-xl overflow-hidden shadow-2xl"
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="bg-navy-950 text-white px-6 py-4 flex items-start justify-between">
+            <div>
+              <p className="text-gold-400 font-bold text-sm tracking-widest uppercase">JAD2 Advisory</p>
+              <p className="text-slate-400 text-[11px]">Conseil Stratégique & Formation · Risque de Change</p>
+              <p className="text-slate-500 text-[10px]">jad2advisory.com</p>
+            </div>
+            <div className="text-right text-[10px] text-slate-400">
+              <p>{dateStr}</p>
+              <p>{timeStr}</p>
+              <p className="font-mono mt-1 text-slate-500">Réf. FWD-{refNum}</p>
+            </div>
+          </div>
+
+          {/* Title bar */}
+          <div className="bg-gold-500 text-navy-950 text-center py-2">
+            <p className="text-xs font-bold uppercase tracking-widest">
+              {locale === 'ar'
+                ? 'ورقة محاكاة عقد آجل'
+                : locale === 'en'
+                ? 'Forward FX Simulation Sheet'
+                : 'Fiche de Simulation Forward FX'}
+            </p>
+          </div>
+
+          {/* Body */}
+          <div className="p-6 bg-white space-y-4">
+            {/* Transaction params */}
+            <div className="border border-slate-200 rounded-lg overflow-hidden">
+              <div className="bg-slate-50 px-4 py-2 border-b border-slate-200">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                  {locale === 'en' ? 'Transaction Parameters' : 'Paramètres de Transaction'}
+                </p>
+              </div>
+              <div className="divide-y divide-slate-100">
+                {([
+                  [locale === 'en' ? 'Pair' : 'Paire', `${currency}/MAD`],
+                  [
+                    locale === 'en' ? 'Direction' : 'Sens',
+                    direction === 'BUY'
+                      ? (locale === 'en' ? 'BUY FCY / SELL MAD' : 'ACHAT FCY / VENTE MAD')
+                      : (locale === 'en' ? 'SELL FCY / BUY MAD' : 'VENTE FCY / ACHAT MAD'),
+                  ],
+                  [locale === 'en' ? 'Notional' : 'Notionnel', `${notional.toLocaleString('fr-FR')} ${currency}`],
+                  [locale === 'en' ? 'Tenor' : 'Échéance', `${quote.tenorLabel} (${quote.tenorDays} j)`],
+                  [locale === 'en' ? 'Settlement Date' : 'Date de Valeur', settlement],
+                ] as [string, string][]).map(([k, v]) => (
+                  <div key={k} className="flex items-center justify-between px-4 py-2">
+                    <span className="text-[11px] text-slate-500">{k}</span>
+                    <span className="text-[11px] font-mono font-bold text-slate-900">{v}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Pricing */}
+            <div className="border border-slate-200 rounded-lg overflow-hidden">
+              <div className="bg-slate-50 px-4 py-2 border-b border-slate-200">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
+                  {locale === 'en' ? 'Pricing' : 'Tarification'}
+                </p>
+              </div>
+              <div className="divide-y divide-slate-100">
+                {([
+                  [locale === 'en' ? 'Spot Rate' : 'Cours Spot', fmt4(quote.spot), 'MAD'],
+                  ['Taux MAD', fmtPct(quote.madRate), ''],
+                  [`Taux ${currency}`, fmtPct(quote.fcyRate), ''],
+                  [
+                    locale === 'en' ? 'Forward Points' : 'Points Forward',
+                    `${fmtPips(quote.forwardPointsPips)} pips`,
+                    quote.forwardPointsPips >= 0.5 ? 'PREMIUM' : quote.forwardPointsPips <= -0.5 ? 'DISCOUNT' : 'PAR',
+                  ],
+                ] as [string, string, string][]).map(([k, v, u]) => (
+                  <div key={k} className="flex items-center justify-between px-4 py-2">
+                    <span className="text-[11px] text-slate-500">{k}</span>
+                    <span className="text-[11px] font-mono font-bold text-slate-900">
+                      {v}
+                      {u && <span className="text-[10px] text-slate-400 ml-1.5">{u}</span>}
+                    </span>
+                  </div>
+                ))}
+                <div className="flex items-center justify-between px-4 py-3 bg-amber-50">
+                  <span className="text-sm font-bold text-slate-800">
+                    {locale === 'en' ? 'Forward Rate' : 'Cours Forward'}
+                  </span>
+                  <span className="text-2xl font-mono font-bold text-amber-700">{fmt4(quote.forwardRate)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Net cost */}
+            <div className="border border-amber-200 bg-amber-50 rounded-lg p-4">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-2">
+                {locale === 'en' ? 'Indicative Net Cost' : 'Coût Net Indicatif'}
+              </p>
+              <div className="flex items-end gap-3 mb-2">
+                <p className="text-2xl font-mono font-bold text-slate-900">{fmtMAD(fwdCost)}</p>
+                <p className="text-sm text-slate-500 mb-0.5">MAD</p>
+              </div>
+              <div className="text-[10px] text-slate-500 space-y-0.5">
+                <p>
+                  {locale === 'en' ? 'vs Spot:' : 'vs Spot:'}{' '}
+                  <span className="font-mono">{fmtMAD(spotCost)} MAD</span>
+                </p>
+                <p>
+                  {locale === 'en' ? 'Hedging premium:' : 'Prime de couverture:'}{' '}
+                  <span className={`font-mono font-bold ${hedgeCost >= 0 ? 'text-amber-700' : 'text-emerald-700'}`}>
+                    {hedgeCost >= 0 ? '+' : ''}{fmtMAD(hedgeCost)} MAD
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            {/* Disclaimer */}
+            <div className="border border-orange-200 bg-orange-50 rounded-lg p-4">
+              <p className="text-[10px] text-orange-800 leading-relaxed">
+                <strong>
+                  ⚠️{' '}
+                  {locale === 'en' ? 'INDICATIVE SIMULATION ONLY' : 'SIMULATION INDICATIVE UNIQUEMENT'}
+                </strong>
+                {' — '}
+                {locale === 'en'
+                  ? 'This document is produced for educational purposes by JAD2 Advisory (strategic consulting & FX risk management training). JAD2 Advisory is not a financial intermediary approved by Bank Al-Maghrib, nor an investment advisor approved by AMMC. Data is indicative and non-executable. For actual transactions, contact your authorized banking institution.'
+                  : "Ce document est produit à titre pédagogique par JAD2 Advisory (conseil stratégique & formation en gestion du risque de change). JAD2 Advisory n'est pas un intermédiaire financier agréé par Bank Al-Maghrib, ni un conseiller en investissement agréé AMMC. Les données sont indicatives et non-exécutables. Pour l'exécution de transactions, adressez-vous à votre établissement bancaire habilité."}
+              </p>
+            </div>
+          </div>
+
+          {/* Footer actions */}
+          <div className="fwd-print-hidden bg-slate-100 px-6 py-3 border-t border-slate-200 flex items-center justify-between gap-3">
+            <button
+              onClick={onClose}
+              className="text-xs text-slate-500 hover:text-slate-800 transition px-3 py-1.5 rounded border border-slate-300 hover:border-slate-400"
+            >
+              ← {locale === 'en' ? 'Close' : 'Fermer'}
+            </button>
+            <button
+              onClick={() => window.print()}
+              className="flex items-center gap-2 px-4 py-2 bg-navy-950 hover:bg-navy-800 text-white text-xs font-bold rounded transition"
+            >
+              <Printer size={13} />
+              {locale === 'en' ? 'Print / Save as PDF' : 'Imprimer / Enregistrer PDF'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
 
@@ -249,6 +441,7 @@ export default function ForwardCalculator() {
   const [direction, setDirection]     = useState<'BUY' | 'SELL'>('BUY');
   const [customDate, setCustomDate]   = useState('');
   const [saved, setSaved]             = useState(false);
+  const [showPrint, setShowPrint]     = useState(false);
 
   const spotEntry = livePrices.find(p => p.currency === currency);
   const spot      = config.spotOverrides[currency] ?? spotEntry?.mid ?? 0;
@@ -542,11 +735,19 @@ export default function ForwardCalculator() {
                       }`}>
                       {saved
                         ? (locale === 'ar' ? '✓ تم الحفظ' : locale === 'en' ? '✓ Saved' : '✓ Enregistré')
-                        : (locale === 'ar' ? 'حفظ في الدفتر' : locale === 'en' ? 'Save to Blotter' : 'Enregistrer la Simulation')}
+                        : (locale === 'ar' ? 'حفظ في الدفتر' : locale === 'en' ? 'Save to Blotter' : 'Enregistrer')}
+                    </button>
+                    <button
+                      onClick={() => setShowPrint(true)}
+                      className="px-3 py-2.5 text-xs font-bold rounded border border-navy-600 bg-navy-800 hover:bg-navy-700 text-slate-300 transition flex items-center gap-1.5"
+                      title={locale === 'en' ? 'Print / Export quote sheet' : 'Imprimer / Exporter la fiche'}
+                    >
+                      <Printer size={12} />
+                      {locale === 'ar' ? 'فيشة' : locale === 'en' ? 'Sheet' : 'Fiche'}
                     </button>
                     <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer"
                        className="flex-1 py-2.5 text-center text-xs font-bold bg-gold-500 hover:bg-gold-400 text-navy-900 rounded transition">
-                      {locale === 'ar' ? 'عرض حقيقي ← JAD2' : locale === 'en' ? 'Live Quote → JAD2' : 'Devis Réel → JAD2 Advisory'}
+                      {locale === 'ar' ? 'عرض حقيقي ← JAD2' : locale === 'en' ? 'Live Quote → JAD2' : 'JAD2 Advisory →'}
                     </a>
                   </div>
 
@@ -680,6 +881,20 @@ export default function ForwardCalculator() {
         )}
       </div>
       </div>
+
+      {/* Print quote sheet modal */}
+      {showPrint && quote && (
+        <PrintQuoteModal
+          quote={quote}
+          currency={currency}
+          tenor={tenor}
+          notional={notional}
+          direction={direction}
+          settlement={settlement}
+          locale={locale as 'fr' | 'en' | 'ar'}
+          onClose={() => setShowPrint(false)}
+        />
+      )}
     </div>
   );
 }
