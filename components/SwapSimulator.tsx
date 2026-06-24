@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { ArrowLeftRight, RotateCcw, RotateCw, ChevronDown, Trash2 } from 'lucide-react';
+import { ArrowLeftRight, RotateCcw, RotateCw, ChevronDown, Trash2, TrendingDown } from 'lucide-react';
 import { BKAM_CURRENCIES } from '../constants';
 import { STANDARD_TENORS, buildFxSwap, buildRollEvent } from '../services/forwardEngine';
 import { useAdmin } from '../context/AdminContext';
 import { RollEvent } from '../types';
+import { logSimTelemetry } from '../services/telemetry';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -159,7 +160,8 @@ export default function SwapSimulator() {
       notional: swap.notional,
       details: `FX Swap ${nearDir} near @ ${fmt4(swap.nearLeg.rate)} / sell far @ ${fmt4(swap.farLeg.rate)} · ${fmtPips(swap.swapPointsPips)} pips`,
     });
-  }, [swap, nearTenor, farTenor, nearDir, addBlotterEntry]);
+    logSimTelemetry(config.corsProxyUrl, swap.pair, 'SWAP_SAVE', swap.farLeg.tenorDays - swap.nearLeg.tenorDays);
+  }, [swap, nearTenor, farTenor, nearDir, addBlotterEntry, config.corsProxyUrl]);
 
   const handleBookRoll = useCallback(() => {
     if (!computedRoll) return;
@@ -172,8 +174,9 @@ export default function SwapSimulator() {
       notional: computedRoll.notional,
       details: `${computedRoll.type} ${computedRoll.fromTenor}→${computedRoll.toTenor} · ${fmtPips(computedRoll.rollCostPips)} pips · ${fmtMAD(computedRoll.rollCostMAD)} MAD`,
     });
+    logSimTelemetry(config.corsProxyUrl, computedRoll.pair, 'ROLL_SAVE');
     setRollLog(prev => [computedRoll, ...prev].slice(0, 20));
-  }, [computedRoll, addBlotterEntry]);
+  }, [computedRoll, addBlotterEntry, config.corsProxyUrl]);
 
   const curInfo = BKAM_CURRENCIES.find(c => c.code === currency);
   const tenorOptions = STANDARD_TENORS as unknown as string[];
@@ -328,6 +331,39 @@ export default function SwapSimulator() {
                 </div>
               ))}
             </div>
+
+            {/* Break-even carry cost panel */}
+            {(() => {
+              const gapDays = swap.farLeg.tenorDays - swap.nearLeg.tenorDays;
+              const carryCostMAD = Math.abs(swap.swapPointsRaw) * swap.notional;
+              const annualizedPct = (spot > 0 && gapDays > 0)
+                ? (Math.abs(swap.swapPointsRaw) / spot) * (365 / gapDays) * 100
+                : 0;
+              const beMove = Math.abs(swap.swapPointsPips);
+              return (
+                <div className="bg-navy-800/50 border border-amber-800/30 rounded-lg p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-amber-400 flex items-center gap-1.5 mb-2.5">
+                    <TrendingDown size={11} /> Analyse du Coût de Portage (Break-Even)
+                  </p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { label: 'Écart (jours)', value: `${gapDays}j` },
+                      { label: 'Coût carry (MAD)', value: fmtMAD(carryCostMAD), color: 'text-gold-400' },
+                      { label: 'Carry ann. %', value: annualizedPct > 0 ? `${annualizedPct.toFixed(3)}%` : 'N/A', color: 'text-amber-400' },
+                      { label: 'Break-even (pips)', value: fmtPips(swap.swapPointsPips >= 0 ? beMove : -beMove), color: swap.swapPointsPips >= 0 ? 'text-emerald-400' : 'text-red-400' },
+                    ].map(item => (
+                      <div key={item.label} className="bg-navy-900/60 rounded p-2 text-center">
+                        <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-0.5">{item.label}</p>
+                        <p className={`text-xs font-mono font-bold ${item.color ?? 'text-white'}`}>{item.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-[9px] text-slate-600 mt-2">
+                    Carry annualisé = |pts fwd| / spot × 365 / écart jours · Break-even = mouvement spot min. pour couvrir le coût du swap
+                  </p>
+                </div>
+              );
+            })()}
 
             <div className="text-[10px] text-amber-400/80 text-center">
               ⚠️ Simulation indicative uniquement — pas un devis contraignant

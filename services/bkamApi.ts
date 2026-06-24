@@ -118,6 +118,61 @@ export async function fetchBkamBdt(corsProxy: string, dateCourbe?: string): Prom
   );
 }
 
+// ─── Live BDT curve from Worker KV cache (refreshed by cron at 09h00) ────────
+
+export interface LiveBdtCurve {
+  points: BkamBdtPoint[];
+  fetchedAt: string;
+  stale?: boolean;
+}
+
+let _liveBdtCache: { data: LiveBdtCurve; ts: number } | null = null;
+const LIVE_BDT_CACHE_MS = 30 * 60 * 1000; // 30 min client-side cache
+
+export async function fetchLiveBdtCurve(corsProxy: string): Promise<LiveBdtCurve | null> {
+  if (_liveBdtCache && Date.now() - _liveBdtCache.ts < LIVE_BDT_CACHE_MS) {
+    return _liveBdtCache.data;
+  }
+  try {
+    const res = await fetch(`${corsProxy}/api/bdt/curve`, { signal: AbortSignal.timeout(8000) });
+    if (!res.ok) return null;
+    const data = await res.json() as LiveBdtCurve;
+    if (!data.points?.length) return null;
+    _liveBdtCache = { data, ts: Date.now() };
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+// Maps BKAM BDT maturite labels → tenor labels used in interestRates.ts
+const BDT_MATURITE_MAP: Record<string, string> = {
+  '13 semaines': '3M',
+  '26 semaines': '6M',
+  '52 semaines': '1Y',
+  '2 ans': '2Y',
+  '5 ans':  '5Y',
+  '10 ans': '10Y',
+  '15 ans': '15Y',
+  '20 ans': '20Y',
+  '30 ans': '30Y',
+};
+
+/**
+ * Convert live BDT points to a curveOverrides-compatible map.
+ * Returns { '3M': 0.0325, '6M': 0.0335, ... } with rates as decimals.
+ */
+export function bdtToYieldCurveOverrides(points: BkamBdtPoint[]): Record<string, number> {
+  const overrides: Record<string, number> = {};
+  for (const pt of points) {
+    const tenor = BDT_MATURITE_MAP[pt.maturite?.toLowerCase()?.trim() ?? ''];
+    if (tenor && pt.tauxMoyen > 0) {
+      overrides[tenor] = pt.tauxMoyen / 100; // % → decimal
+    }
+  }
+  return overrides;
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 /**

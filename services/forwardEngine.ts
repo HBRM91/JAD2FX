@@ -14,7 +14,7 @@
  */
 
 import { ForwardQuote, FxSwapQuote, RollEvent, SwapLeg } from '../types';
-import { getRate, TENOR_YEARS } from './interestRates';
+import { getRate, TENOR_YEARS, DEFAULT_CURVES } from './interestRates';
 import { settlementDateWithHolidays } from './holidays';
 
 // ─── Day-count conventions (per §4.6 spec) ───────────────────────────────────
@@ -159,6 +159,20 @@ export interface ForwardCurvePoint {
   madRate: number;
   fcyRate: number;
   premDisc: 'PREMIUM' | 'DISCOUNT' | 'PAR';
+  isInterpolated: boolean; // true when tenor is not an exact knot in MAD or FCY base curve
+}
+
+// Set of tenor years that are exact knots in a given curve (tolerance 1e-9)
+function curveKnotYears(curveName: string): Set<number> {
+  const pts = DEFAULT_CURVES[curveName] ?? [];
+  const s = new Set<number>();
+  for (const p of pts) s.add(p.tenorYears);
+  return s;
+}
+
+function isKnot(tenorYears: number, knots: Set<number>): boolean {
+  for (const k of knots) if (Math.abs(k - tenorYears) < 1e-9) return true;
+  return false;
 }
 
 export function buildForwardCurve(
@@ -168,6 +182,9 @@ export function buildForwardCurve(
   madOverrides?: Record<string, number>,
   fcyOverrides?: Record<string, number>,
 ): ForwardCurvePoint[] {
+  const madKnots = curveKnotYears('MAD');
+  const fcyKnots = curveKnotYears(currency);
+
   return STANDARD_TENORS.map(tenor => {
     const tenorYears = tenorToYears(tenor);
     const tenorDays  = Math.round(tenorYears * 365);
@@ -183,7 +200,9 @@ export function buildForwardCurve(
       forwardPointsPips > 0.5  ? 'PREMIUM'  :
       forwardPointsPips < -0.5 ? 'DISCOUNT' : 'PAR';
 
-    return { tenor, tenorDays, tenorYears, spot, forwardRate, forwardPointsPips, madRate, fcyRate, premDisc };
+    const isInterpolated = !isKnot(tenorYears, madKnots) || !isKnot(tenorYears, fcyKnots);
+
+    return { tenor, tenorDays, tenorYears, spot, forwardRate, forwardPointsPips, madRate, fcyRate, premDisc, isInterpolated };
   });
 }
 

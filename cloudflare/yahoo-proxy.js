@@ -411,6 +411,62 @@ async function handleTwelveDataRates(env, origin) {
   }
 }
 
+// ─── Anonymous simulation telemetry (NO PII) ─────────────────────────────────
+// POST /api/telemetry/sim — fire-and-forget from client
+async function handleTelemetryPost(request, env, origin) {
+  if (!env.REPORTS_KV) return json({ ok: true }, 200, origin);
+
+  const rawBody = await readBodySafe(request);
+  if (!rawBody || typeof rawBody !== 'string') return json({ ok: true }, 200, origin);
+
+  let body;
+  try { body = JSON.parse(rawBody); }
+  catch { return json({ ok: true }, 200, origin); }
+
+  // Strict allow-list — no free-form strings that could embed PII
+  const pair = typeof body.pair === 'string' && /^[A-Z]{3}\/MAD$/.test(body.pair) ? body.pair : null;
+  const scenario = typeof body.scenario === 'string' ? body.scenario.slice(0, 32).replace(/[^A-Z_]/g, '') : null;
+  const gapDays  = typeof body.gapDays === 'number' && Number.isFinite(body.gapDays) ? Math.round(body.gapDays) : null;
+
+  const date = new Date().toISOString().slice(0, 10);
+  const key  = `telemetry:${date}`;
+  try {
+    const existing = await env.REPORTS_KV.get(key, { type: 'json' }) ?? { events: [] };
+    existing.events.push({ ts: new Date().toISOString(), pair, scenario, gapDays });
+    if (existing.events.length > 500) existing.events = existing.events.slice(-500);
+    await env.REPORTS_KV.put(key, JSON.stringify(existing), { expirationTtl: 60 * 60 * 24 * 30 });
+  } catch { /* telemetry is non-critical */ }
+
+  return json({ ok: true }, 200, origin);
+}
+
+// GET /api/telemetry/sim — admin: aggregate counts for last 7 days
+async function handleTelemetryGet(request, env, origin) {
+  const denied = adminGate(request, env, origin);
+  if (denied) return denied;
+  if (!env.REPORTS_KV) return json({ dates: [] }, 200, origin);
+
+  const result = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() - i);
+    const date = d.toISOString().slice(0, 10);
+    try {
+      const data = await env.REPORTS_KV.get(`telemetry:${date}`, { type: 'json' });
+      const events = data?.events ?? [];
+      result.push({
+        date,
+        count: events.length,
+        byPair: events.reduce((acc, e) => { if (e.pair) acc[e.pair] = (acc[e.pair] ?? 0) + 1; return acc; }, {}),
+        byScenario: events.reduce((acc, e) => { if (e.scenario) acc[e.scenario] = (acc[e.scenario] ?? 0) + 1; return acc; }, {}),
+      });
+    } catch {
+      result.push({ date, count: 0, byPair: {}, byScenario: {} });
+    }
+  }
+  return json(result, 200, origin);
+}
+
 // ─── BKAM rate fetch (used in scheduled handler) ──────────────────────────────
 async function fetchBkamRates(apiKey, dateStr) {
   if (!apiKey) return null;
@@ -435,6 +491,44 @@ async function fetchBkamRates(apiKey, dateStr) {
   } catch (err) {
     console.warn('[BKAM fetch]', dateStr ?? 'today', err);
     return null;
+  }
+}
+
+// ─── BKAM BDT yield curve (KV-cached, refreshed by cron) ─────────────────────
+
+// GET /api/bdt/curve — public; serves cached BDT data from KV
+async function handleBdtCurve(env, origin) {
+  if (!env.REPORTS_KV) return json({ points: [], stale: true, error: 'KV not configured' }, 503, origin);
+  try {
+    const raw = await env.REPORTS_KV.get('bdt:latest');
+    if (!raw) return json({ points: [], stale: true }, 200, origin);
+    return json(JSON.parse(raw), 200, origin);
+  } catch (err) {
+    return json({ points: [], stale: true, error: String(err) }, 500, origin);
+  }
+}
+
+// Called by cron to fetch BKAM BDT and store in KV
+async function fetchAndStoreBdt(env) {
+  if (!env.BKAM_MONIA_KEY || !env.REPORTS_KV) return;
+  try {
+    const res = await fetch(
+      `${BKAM_BASE}/mo/Version1/api/CourbeBDT`,
+      { headers: { Accept: 'application/json', 'Ocp-Apim-Subscription-Key': env.BKAM_MONIA_KEY }, signal: AbortSignal.timeout(12_000) },
+    );
+    if (!res.ok) { console.warn('[CRON] BDT HTTP', res.status); return; }
+    const raw = await res.json();
+    const arr = Array.isArray(raw) ? raw : (raw?.data ?? []);
+    if (arr.length > 0) {
+      await env.REPORTS_KV.put(
+        'bdt:latest',
+        JSON.stringify({ points: arr, fetchedAt: new Date().toISOString() }),
+        { expirationTtl: 60 * 60 * 25 }, // 25h — survives one missed cron
+      );
+      console.log(`[CRON] BDT stored: ${arr.length} points`);
+    }
+  } catch (err) {
+    console.warn('[CRON] BDT fetch failed:', err);
   }
 }
 
@@ -667,6 +761,9 @@ async function handleScheduled(env) {
   await env.REPORTS_KV.put('published', reportId);
 
   console.log(`[CRON] Report published: ${reportId} (${Date.now() - t0}ms)`);
+
+  // Also refresh BDT yield curve in KV for forward pricing
+  await fetchAndStoreBdt(env);
 }
 
 // ─── Main fetch handler ───────────────────────────────────────────────────────
@@ -737,6 +834,19 @@ export default {
     if (pathname === '/api/forex/rates') {
       if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
       return handleTwelveDataRates(env, origin);
+    }
+
+    // ── BKAM BDT yield curve (KV cache) ──────────────────────────────────────
+    if (pathname === '/api/bdt/curve') {
+      if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
+      return handleBdtCurve(env, origin);
+    }
+
+    // ── Anonymous sim telemetry ───────────────────────────────────────────────
+    if (pathname === '/api/telemetry/sim') {
+      if (request.method === 'POST') return handleTelemetryPost(request, env, origin);
+      if (request.method === 'GET')  return handleTelemetryGet(request, env, origin);
+      return json({ error: 'GET or POST only' }, 405, origin);
     }
 
     // ── Yahoo Finance proxy ───────────────────────────────────────────────────

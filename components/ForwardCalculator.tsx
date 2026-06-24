@@ -18,6 +18,7 @@ import {
 import { getDefaultCurve, FORWARD_TENORS } from '../services/interestRates';
 import { useAdmin } from '../context/AdminContext';
 import { useI18n } from '../context/I18nContext';
+import { logSimTelemetry } from '../services/telemetry';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -296,9 +297,10 @@ export default function ForwardCalculator() {
       notional: quote.notional,
       details: `[SIM] ${direction} ${fmtMAD(notional)} ${currency} @ ${fmt4(quote.forwardRate)} (${fmtPips(quote.forwardPointsPips)} pips) — INDICATIF`,
     });
+    logSimTelemetry(config.corsProxyUrl, quote.pair, 'FORWARD_SAVE', quote.tenorDays);
     setSaved(true);
     setTimeout(() => setSaved(false), 2000);
-  }, [quote, direction, notional, currency, addBlotterEntry]);
+  }, [quote, direction, notional, currency, addBlotterEntry, config.corsProxyUrl]);
 
   // Labels
   const tabPricer = locale === 'ar' ? 'التسعير' : locale === 'en' ? 'Pricer' : 'Pricer';
@@ -617,7 +619,17 @@ export default function ForwardCalculator() {
                     <tbody>
                       {curvePoints.map(row => (
                         <tr key={row.tenor} className={`border-b border-navy-800 hover:bg-navy-800/40 transition-colors ${row.tenor === tenor ? 'bg-navy-800/60' : ''}`}>
-                          <td className={`py-2 pr-3 font-bold ${row.tenor === tenor ? 'text-gold-400' : 'text-white'}`}>{row.tenor}</td>
+                          <td className={`py-2 pr-3 font-bold ${row.tenor === tenor ? 'text-gold-400' : 'text-white'}`}>
+                            {row.isInterpolated ? (
+                              <span className="italic text-slate-400" title={
+                                locale === 'ar' ? 'معدل محسوب بالاستيفاء (ليس نقطة ارتكاز مباشرة)'
+                                : locale === 'en' ? 'Interpolated — not a direct curve knot'
+                                : 'Interpolé — pas de nœud direct sur la courbe'
+                              }>
+                                {row.tenor}<sup className="text-[8px] text-amber-400 ml-0.5">*</sup>
+                              </span>
+                            ) : row.tenor}
+                          </td>
                           <td className="text-right text-slate-400 pr-3">{row.tenorDays}</td>
                           <td className="text-right text-slate-300 pr-3">{fmtPct(row.madRate)}</td>
                           <td className="text-right text-slate-300 pr-3">{fmtPct(row.fcyRate)}</td>
@@ -636,6 +648,16 @@ export default function ForwardCalculator() {
                       ))}
                     </tbody>
                   </table>
+                  {curvePoints.some(r => r.isInterpolated) && (
+                    <p className="text-[10px] text-amber-400/60 mt-2 italic">
+                      <sup>*</sup>{' '}
+                      {locale === 'ar'
+                        ? 'يُحسب هذا الأجل بالاستيفاء التكعيبي الطبيعي — ليست نقطة ارتكاز مباشرة في منحنى MAD أو العملة الأجنبية'
+                        : locale === 'en'
+                        ? 'Rate computed by natural cubic spline interpolation — not a direct knot in MAD or FCY base curve'
+                        : 'Taux calculé par interpolation spline cubique — aucun nœud direct dans la courbe MAD ou FCY'}
+                    </p>
+                  )}
                 </div>
               </>
             ) : (
