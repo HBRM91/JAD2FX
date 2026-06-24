@@ -37,7 +37,7 @@ const RatesTicker: React.FC<Props> = ({ rates }) => {
   return (
     <div className="bg-navy-900 border-b border-navy-800 overflow-hidden py-1.5">
       <div className="flex items-center">
-        <div className="flex-shrink-0 bg-gold-500 text-navy-900 text-[10px] font-black uppercase tracking-widest px-3 py-1 mr-3 z-10">
+        <div className="flex-shrink-0 bg-gold-500 text-navy-950 text-[11px] font-black uppercase tracking-widest px-3 py-1 mr-3 z-10">
           BKAM LIVE
         </div>
         <div className="overflow-hidden flex-1 relative">
@@ -59,7 +59,7 @@ const RatesTicker: React.FC<Props> = ({ rates }) => {
                       {arrow}{Math.abs(chg).toFixed(2)}%
                     </span>
                   )}
-                  <span className="text-navy-700">·</span>
+                  <span className="text-slate-600">·</span>
                 </span>
               );
             })}

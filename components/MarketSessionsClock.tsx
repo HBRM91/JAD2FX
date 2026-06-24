@@ -120,19 +120,19 @@ export default function MarketSessionsClock() {
               key={session.city}
               className={`p-4 text-center ${open ? session.bgColor : 'bg-transparent'} transition-colors`}
             >
-              <div className={`text-[10px] font-bold uppercase tracking-wider mb-1 ${open ? session.color : 'text-slate-600'}`}>
+              <div className={`text-[11px] font-bold uppercase tracking-wider mb-1 ${open ? session.color : 'text-slate-500'}`}>
                 {cityName}
               </div>
-              <div className={`text-xl font-mono font-bold tabular-nums ${open ? session.color : 'text-slate-700'}`}>
+              <div className={`text-xl font-mono font-bold tabular-nums ${open ? session.color : 'text-slate-500'}`}>
                 {formatTime(session.tz, locale)}
               </div>
-              <div className={`text-[9px] mt-1 font-mono ${open ? 'text-emerald-400' : 'text-slate-700'}`}>
+              <div className={`text-[10px] mt-1 font-mono ${open ? 'text-emerald-400' : 'text-slate-500'}`}>
                 {open ? openLabel : closedLabel}
                 {open && (
                   <span className="ml-1 inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse align-middle" />
                 )}
               </div>
-              <div className="text-[9px] text-slate-600 mt-0.5 font-mono">
+              <div className="text-[10px] text-slate-500 mt-0.5 font-mono">
                 {`${String(session.open).padStart(2,'0')}:${String(session.openMin ?? 0).padStart(2,'0')}–${String(session.close).padStart(2,'0')}:${String(session.closeMin ?? 0).padStart(2,'0')}`}
               </div>
             </div>

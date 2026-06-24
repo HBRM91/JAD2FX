@@ -30,7 +30,7 @@ import {
   Building2, FileText, LayoutDashboard, Menu,
   Globe, ChevronRight, TrendingUp, ArrowLeftRight, Activity,
   Lock, X, BarChart2, Banknote, PackageOpen, Newspaper, Scale,
-  ChevronDown, ExternalLink, Zap, Sun, Moon,
+  ChevronDown, ExternalLink, Zap,
 } from 'lucide-react';
 
 // ─── Nav data ─────────────────────────────────────────────────────────────────
@@ -85,7 +85,7 @@ const NAV_GROUPS: NavGroup[] = [
 
 function AppInner() {
   const { config, setLivePrices } = useAdmin();
-  const { theme, toggleTheme, isDark } = useTheme();
+  useTheme(); // keeps ThemeProvider active (dark-only)
   const [view, setView]             = useState<ViewState>('HOME');
   const [tickerRates, setTickerRates] = useState<LiveRate[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -251,22 +251,13 @@ function AppInner() {
                 ))}
               </div>
 
-              {/* Theme toggle */}
-              <button
-                onClick={toggleTheme}
-                title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
-                className="flex items-center justify-center w-8 h-8 rounded border border-navy-700 text-navy-400 hover:text-white hover:border-navy-500 transition-colors"
-              >
-                {isDark ? <Sun size={13} /> : <Moon size={13} />}
-              </button>
-
               <a
                 href="https://jad2advisory.com"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-bold bg-gold-500 text-navy-950 rounded hover:bg-gold-400 transition-colors shadow shadow-gold-900/30"
+                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gold-500 text-navy-950 rounded hover:bg-gold-400 transition-colors shadow shadow-gold-900/30"
               >
-                <ExternalLink size={9} />
+                <ExternalLink size={11} />
                 Advisory
               </a>
               <button
@@ -305,7 +296,7 @@ function AppInner() {
             </button>
             {NAV_GROUPS.map(group => (
               <div key={group.id}>
-                <div className="px-5 pt-3 pb-1 text-[9px] font-bold uppercase tracking-[0.18em] text-navy-500">
+                <div className="px-5 pt-3 pb-1 text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500">
                   {group.label}
                 </div>
                 {group.items.map(item => (
@@ -322,7 +313,7 @@ function AppInner() {
                 ))}
               </div>
             ))}
-            <div className="px-5 pt-3 pb-1 text-[9px] font-bold uppercase tracking-[0.18em] text-navy-500">Autre</div>
+            <div className="px-5 pt-3 pb-1 text-[11px] font-bold uppercase tracking-[0.15em] text-slate-500">Autre</div>
             <button
               onClick={() => navTo('ABOUT')}
               className={`w-full flex items-center gap-3 px-5 py-2.5 text-[13px] font-medium text-left ${
@@ -358,8 +349,8 @@ function AppInner() {
       </nav>
 
       {/* ══ Compliance banner ════════════════════════════════════════════════ */}
-      <div className="bg-navy-950 border-b border-navy-900 px-4 py-0.5">
-        <p className="text-[9px] text-navy-600 tracking-wide text-center">{DISCLAIMER_SHORT}</p>
+      <div className="bg-navy-950 border-b border-navy-800 px-4 py-1">
+        <p className="text-[11px] text-slate-500 tracking-wide text-center">{DISCLAIMER_SHORT}</p>
       </div>
 
       {/* ══ Mobile simulator-mode sticky banner (hidden on desktop) ══════════ */}
@@ -376,10 +367,10 @@ function AppInner() {
       {view !== 'HOME' && activeItem && (
         <div className="bg-navy-950 border-b border-navy-900 px-4 sm:px-6">
           <div className="max-w-[1440px] mx-auto flex items-center gap-2 py-2">
-            <button onClick={() => navTo('HOME')} className="text-[10px] text-navy-500 hover:text-gold-500 transition-colors">Accueil</button>
-            <ChevronRight size={10} className="text-navy-700" />
-            <activeItem.icon size={11} className="text-gold-500" />
-            <span className="text-[10px] text-slate-400 font-medium">{activeItem.label}</span>
+            <button onClick={() => navTo('HOME')} className="text-xs text-slate-400 hover:text-gold-400 transition-colors">Accueil</button>
+            <ChevronRight size={11} className="text-slate-600" />
+            <activeItem.icon size={12} className="text-gold-500" />
+            <span className="text-xs text-slate-200 font-medium">{activeItem.label}</span>
           </div>
         </div>
       )}
@@ -401,76 +392,82 @@ function AppInner() {
         {view === 'HOME' && (
           <div className="space-y-6">
 
-            {/* Hero banner — AI-generated financial background */}
-            <div className="relative rounded-xl overflow-hidden border border-navy-800">
-              {/* AI-generated hero background */}
+            {/* ── Hero banner ─────────────────────────────────────────────── */}
+            <div className="relative rounded-2xl overflow-hidden border border-navy-700 min-h-[280px] sm:min-h-[340px]">
+              {/* Background image — actually visible */}
               <div
                 className="absolute inset-0 bg-cover bg-center bg-no-repeat"
                 style={{ backgroundImage: 'url(/hero-bg.jpg)' }}
               />
-              {/* Dark overlay for readability */}
-              <div className="absolute inset-0 bg-navy-950/75" />
-              <div className="absolute inset-0 bg-gradient-to-r from-navy-950/90 via-navy-950/60 to-transparent" />
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_70%_0%,rgba(212,175,55,0.12),transparent_55%)]" />
+              {/* Single left-to-right gradient: content is left, image shows right */}
+              <div className="absolute inset-0 bg-gradient-to-r from-navy-950/95 via-navy-950/65 to-navy-950/25" />
+              {/* Subtle gold halo top-right */}
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(212,175,55,0.09),transparent_55%)]" />
 
-              <div className="relative px-6 sm:px-8 py-10">
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                  <div>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {['Simulation Pédagogique', 'Données BKAM Live', 'Réglementation OC'].map(tag => (
-                        <span key={tag} className="text-[9px] bg-gold-500/15 border border-gold-500/30 text-gold-400 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider backdrop-blur-sm">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                    <h2 className="text-4xl sm:text-5xl font-bold text-white tracking-[0.18em] uppercase mb-1 font-serif drop-shadow-lg">JAD2FX</h2>
-                    <p className="text-gold-400 text-[10px] uppercase tracking-[0.28em] mb-4">Outil de Données de Change · by JAD2 Advisory</p>
-                    <p className="text-slate-300 text-sm max-w-lg leading-relaxed drop-shadow">
-                      Données indicatives sur {BKAM_CURRENCIES.length} devises MAD (14 cotées BKAM + {BKAM_CURRENCIES.length - 14} dérivées), simulateur pédagogique de forwards/swaps et référentiel réglementaire Office des Changes.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-3">
-                    <button
-                      onClick={() => navTo('LIVE')}
-                      className="flex items-center gap-2 bg-gold-500 text-navy-950 font-bold text-sm px-5 py-2.5 rounded hover:bg-gold-400 transition-colors shadow-lg shadow-gold-900/50"
-                    >
-                      <Activity size={14} /> Live Pricer
-                    </button>
-                    <button
-                      onClick={() => navTo('FORWARDS')}
-                      className="flex items-center gap-2 text-gold-300 border border-gold-500/40 font-bold text-sm px-5 py-2.5 rounded hover:border-gold-400 hover:text-gold-200 transition-colors backdrop-blur-sm bg-navy-950/30"
-                    >
-                      <TrendingUp size={14} /> Forward Calc
-                    </button>
-                    <button
-                      onClick={() => navTo('DASHBOARD')}
-                      className="flex items-center gap-2 text-slate-200 border border-navy-600/60 font-medium text-sm px-5 py-2.5 rounded hover:border-navy-500 hover:text-white transition-colors backdrop-blur-sm bg-navy-950/30"
-                    >
-                      <LayoutDashboard size={14} /> FX Tableau
-                    </button>
-                  </div>
+              {/* Content */}
+              <div className="relative px-7 sm:px-12 py-10 sm:py-14 max-w-xl">
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mb-5">
+                  {['Simulation Pédagogique', 'Données BKAM Live', 'Réglementation OC'].map(tag => (
+                    <span key={tag} className="text-[11px] bg-gold-500/15 border border-gold-500/35 text-gold-400 px-3 py-0.5 rounded-full font-semibold uppercase tracking-wide">
+                      {tag}
+                    </span>
+                  ))}
                 </div>
 
-                {/* Quick-access tool tiles */}
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mt-6 pt-5 border-t border-navy-800/70">
+                {/* Title */}
+                <h1 className="text-5xl sm:text-6xl font-bold text-white tracking-[0.15em] uppercase mb-2 font-serif drop-shadow-xl">JAD2FX</h1>
+                <p className="text-gold-400 text-[11px] uppercase tracking-[0.25em] mb-5 font-medium">
+                  Outil de Données de Change · by JAD2 Advisory
+                </p>
+
+                {/* Subtitle */}
+                <p className="text-slate-300 text-sm leading-relaxed mb-8">
+                  Données indicatives sur {BKAM_CURRENCIES.length} devises MAD — 14 cotées BKAM + {BKAM_CURRENCIES.length - 14} dérivées. Simulateur pédagogique de forwards & swaps. Référentiel réglementaire Office des Changes.
+                </p>
+
+                {/* CTA buttons */}
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    onClick={() => navTo('LIVE')}
+                    className="flex items-center gap-2 bg-gold-500 text-navy-950 font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-gold-400 transition-colors shadow-lg shadow-gold-900/40"
+                  >
+                    <Activity size={15} /> Live Pricer
+                  </button>
+                  <button
+                    onClick={() => navTo('FORWARDS')}
+                    className="flex items-center gap-2 text-gold-300 border border-gold-500/50 font-semibold text-sm px-5 py-2.5 rounded-lg hover:border-gold-400 hover:text-gold-200 hover:bg-gold-500/5 transition-colors"
+                  >
+                    <TrendingUp size={15} /> Forward Calc
+                  </button>
+                  <button
+                    onClick={() => navTo('DASHBOARD')}
+                    className="flex items-center gap-2 text-slate-200 border border-navy-600 font-medium text-sm px-5 py-2.5 rounded-lg hover:border-navy-500 hover:text-white hover:bg-navy-800/50 transition-colors"
+                  >
+                    <LayoutDashboard size={15} /> Tableau de Bord
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick-access tool tiles — bottom strip inside hero */}
+              <div className="relative px-7 sm:px-12 pb-7">
+                <div className="border-t border-navy-700/50 pt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
                   {[
-                    { label: 'FX Forwards',    desc: 'CIP couverture terme',   view: 'FORWARDS'    as ViewState, icon: TrendingUp,    color: 'text-blue-400',   bg: 'bg-blue-500/8' },
-                    { label: 'FX Swaps',       desc: 'Near / Far legs',        view: 'SWAPS'       as ViewState, icon: ArrowLeftRight, color: 'text-purple-400', bg: 'bg-purple-500/8' },
-                    { label: 'Bandes BKAM',    desc: 'Cage ±5% & oiseau',     view: 'BANDS'       as ViewState, icon: BarChart2,      color: 'text-gold-400',   bg: 'bg-gold-500/8' },
-                    { label: 'Market Report',  desc: 'Analyse IA hebdo',       view: 'REPORT'      as ViewState, icon: Newspaper,      color: 'text-emerald-400', bg: 'bg-emerald-500/8' },
-                    { label: 'Réglementation', desc: 'Office des Changes',     view: 'REGULATIONS' as ViewState, icon: Scale,          color: 'text-amber-400',  bg: 'bg-amber-500/8' },
+                    { label: 'FX Forwards',    desc: 'CIP terme',         view: 'FORWARDS'    as ViewState, icon: TrendingUp,    color: 'text-blue-400',    border: 'border-blue-700/50',    bg: 'bg-blue-900/30' },
+                    { label: 'FX Swaps',       desc: 'Near / Far legs',   view: 'SWAPS'       as ViewState, icon: ArrowLeftRight, color: 'text-purple-400',  border: 'border-purple-700/50',  bg: 'bg-purple-900/30' },
+                    { label: 'Bandes BKAM',    desc: 'Cage ±5%',         view: 'BANDS'       as ViewState, icon: BarChart2,      color: 'text-gold-400',    border: 'border-gold-700/50',    bg: 'bg-yellow-900/20' },
+                    { label: 'Market Report',  desc: 'Analyse IA',        view: 'REPORT'      as ViewState, icon: Newspaper,      color: 'text-emerald-400', border: 'border-emerald-700/50', bg: 'bg-emerald-900/30' },
+                    { label: 'Réglementation', desc: 'Office des Changes', view: 'REGULATIONS' as ViewState, icon: Scale,          color: 'text-amber-400',   border: 'border-amber-700/50',   bg: 'bg-amber-900/25' },
                   ].map(item => (
                     <button
                       key={item.view}
                       onClick={() => navTo(item.view)}
-                      className="flex items-center gap-3 p-3 rounded-lg border border-navy-800 hover:border-navy-700 hover:bg-navy-800/50 transition-colors text-left group"
+                      className={`flex items-center gap-2.5 p-3 rounded-xl border ${item.border} ${item.bg} hover:brightness-125 transition-all text-left backdrop-blur-sm`}
                     >
-                      <div className={`w-7 h-7 rounded ${item.bg} border border-navy-700 flex items-center justify-center flex-shrink-0`}>
-                        <item.icon size={14} className={item.color} />
-                      </div>
+                      <item.icon size={16} className={`${item.color} flex-shrink-0`} />
                       <div>
-                        <p className="text-[11px] font-semibold text-white">{item.label}</p>
-                        <p className="text-[9px] text-navy-400">{item.desc}</p>
+                        <p className="text-[12px] font-semibold text-white leading-tight">{item.label}</p>
+                        <p className="text-[10px] text-slate-400 leading-tight">{item.desc}</p>
                       </div>
                     </button>
                   ))}
@@ -478,32 +475,31 @@ function AppInner() {
               </div>
             </div>
 
-            {/* Market sessions clock — full width */}
+            {/* ── Market sessions clock ────────────────────────────────────── */}
             <MarketSessionsClock />
 
-            {/* 2-col: news + sidebar */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* ── 2-col: news + sidebar ───────────────────────────────────── */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
               {/* News feed */}
-              <div className="lg:col-span-2 bg-navy-900 border border-navy-800 rounded-xl overflow-hidden">
-                <div className="px-5 py-3 border-b border-navy-800 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Globe size={13} className="text-gold-500" />
-                    <h3 className="text-[10px] font-bold text-white uppercase tracking-[0.15em]">Intelligence de Marché</h3>
+              <div className="lg:col-span-2 bg-navy-900 border border-navy-700 rounded-2xl overflow-hidden">
+                <div className="px-5 py-3.5 border-b border-navy-700 flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <Globe size={14} className="text-gold-500" />
+                    <h3 className="text-xs font-bold text-white uppercase tracking-widest">Intelligence de Marché</h3>
                   </div>
-                  <span className="text-[8px] text-navy-500 uppercase tracking-wider font-bold px-2 py-0.5 border border-navy-700 rounded-full">Indicatif</span>
+                  <span className="text-[11px] text-slate-500 font-semibold px-2.5 py-0.5 border border-navy-600 rounded-full">Éditorial</span>
                 </div>
-                <div className="divide-y divide-navy-800/70">
+                <div className="divide-y divide-navy-700/60">
                   {MARKET_NEWS.map(news => (
-                    <div key={news.id} className="px-5 py-4 hover:bg-navy-800/30 transition-colors cursor-default">
-                      <div className="flex items-center gap-2 mb-1.5">
-                        <span className="text-[8px] font-bold uppercase tracking-wider text-gold-500 bg-gold-500/10 border border-gold-500/20 px-2 py-0.5 rounded-full">
+                    <div key={news.id} className="px-5 py-4 hover:bg-navy-800/40 transition-colors cursor-default">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-[10px] font-bold uppercase tracking-wide text-gold-500 bg-gold-500/10 border border-gold-500/25 px-2.5 py-0.5 rounded-full">
                           {news.category}
                         </span>
-                        <span className="text-[9px] text-navy-500 italic">Éditorial</span>
                       </div>
-                      <h4 className="text-[13px] font-semibold text-slate-100 mb-1 leading-snug">{news.title}</h4>
-                      <p className="text-[11px] text-navy-400 line-clamp-3 leading-relaxed">{news.summary}</p>
+                      <h4 className="text-[14px] font-semibold text-slate-100 mb-1.5 leading-snug">{news.title}</h4>
+                      <p className="text-[12px] text-slate-400 line-clamp-3 leading-relaxed">{news.summary}</p>
                     </div>
                   ))}
                 </div>
@@ -513,11 +509,11 @@ function AppInner() {
               <div className="space-y-4">
 
                 {/* Advisory card */}
-                <div className="bg-navy-900 border border-navy-800 rounded-xl p-5 flex flex-col items-center text-center gap-4">
+                <div className="bg-navy-900 border border-navy-700 rounded-2xl p-5 flex flex-col items-center text-center gap-4">
                   <Jad2Logo width={120} showAdvisory={true} />
                   <div>
-                    <p className="text-[10px] font-bold text-white mb-1 uppercase tracking-wider">Cabinet de Conseil Stratégique</p>
-                    <p className="text-[11px] text-navy-400 leading-relaxed">
+                    <p className="text-xs font-bold text-white mb-1.5 uppercase tracking-wider">Cabinet de Conseil Stratégique</p>
+                    <p className="text-xs text-slate-400 leading-relaxed">
                       Formation risque de change · Conseil stratégique · Accompagnement réglementaire OC
                     </p>
                   </div>
@@ -525,23 +521,23 @@ function AppInner() {
                     href="https://jad2advisory.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block w-full py-2.5 bg-gold-500 text-navy-950 text-[11px] font-bold rounded hover:bg-gold-400 transition-colors"
+                    className="block w-full py-2.5 bg-gold-500 text-navy-950 text-sm font-bold rounded-lg hover:bg-gold-400 transition-colors"
                   >
                     jad2advisory.com →
                   </a>
-                  <p className="text-[9px] text-navy-600 leading-relaxed">
-                    Cabinet de conseil et formation — non intermédiaire financier agréé BAM.
+                  <p className="text-[11px] text-slate-500 leading-relaxed">
+                    Conseil et formation · non intermédiaire financier agréé BAM.
                   </p>
                 </div>
 
                 {/* AI assistant hint */}
-                <div className="bg-navy-900 border border-navy-800 rounded-xl p-4 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-gold-500/10 border border-gold-500/20 flex items-center justify-center flex-shrink-0">
-                    <Zap size={14} className="text-gold-400" />
+                <div className="bg-navy-900 border border-navy-700 rounded-2xl p-4 flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-gold-500/10 border border-gold-500/25 flex items-center justify-center flex-shrink-0">
+                    <Zap size={16} className="text-gold-400" />
                   </div>
                   <div>
-                    <p className="text-[11px] font-semibold text-white mb-1">Assistant IA Réglementaire</p>
-                    <p className="text-[10px] text-navy-400 leading-relaxed">
+                    <p className="text-sm font-semibold text-white mb-1">Assistant IA Réglementaire</p>
+                    <p className="text-xs text-slate-400 leading-relaxed">
                       Questions OC & BKAM via le bouton flottant ↘
                     </p>
                   </div>
@@ -551,14 +547,14 @@ function AppInner() {
                 <div className="grid grid-cols-2 gap-3">
                   {[
                     { label: 'Devises Cotées', value: '14', sub: 'par BKAM', color: 'text-gold-400' },
-                    { label: 'Devises Totales', value: String(BKAM_CURRENCIES.length), sub: `+ ${BKAM_CURRENCIES.length - 14} dérivées`, color: 'text-blue-400' },
+                    { label: 'Devises Totales', value: String(BKAM_CURRENCIES.length), sub: `+${BKAM_CURRENCIES.length - 14} dérivées`, color: 'text-blue-400' },
                     { label: 'Mise à Jour', value: 'Live', sub: 'en continu', color: 'text-emerald-400' },
                     { label: 'Accès', value: 'Gratuit', sub: 'pédagogique', color: 'text-purple-400' },
                   ].map(stat => (
-                    <div key={stat.label} className="bg-navy-900 border border-navy-800 rounded-lg p-3 text-center">
-                      <p className={`text-lg font-bold font-mono tabular-nums ${stat.color}`}>{stat.value}</p>
-                      <p className="text-[9px] text-white font-semibold">{stat.label}</p>
-                      <p className="text-[8px] text-navy-500">{stat.sub}</p>
+                    <div key={stat.label} className="bg-navy-900 border border-navy-700 rounded-xl p-3.5 text-center">
+                      <p className={`text-xl font-bold font-mono tabular-nums ${stat.color}`}>{stat.value}</p>
+                      <p className="text-[11px] text-slate-300 font-semibold mt-0.5">{stat.label}</p>
+                      <p className="text-[10px] text-slate-500 mt-0.5">{stat.sub}</p>
                     </div>
                   ))}
                 </div>
@@ -675,9 +671,9 @@ function AppInner() {
                   <ExternalLink size={13} /> Visiter jad2advisory.com
                 </a>
 
-                <div className="mt-6 p-4 bg-navy-950 border border-navy-800 rounded-lg">
-                  <p className="text-[9px] font-bold text-navy-500 mb-1.5 uppercase tracking-wider">Mentions Légales & Conformité</p>
-                  <p className="text-[10px] text-navy-500 leading-relaxed">{DISCLAIMER_TEXT}</p>
+                <div className="mt-6 p-4 bg-navy-950 border border-navy-700 rounded-lg">
+                  <p className="text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Mentions Légales & Conformité</p>
+                  <p className="text-xs text-slate-500 leading-relaxed">{DISCLAIMER_TEXT}</p>
                 </div>
               </div>
             </div>
@@ -689,13 +685,13 @@ function AppInner() {
       <FloatingChat />
 
       {/* ══ Footer ═══════════════════════════════════════════════════════════ */}
-      <footer className="bg-navy-900 text-navy-500 border-t border-navy-800 mt-auto">
+      <footer className="bg-navy-900 text-slate-400 border-t border-navy-700 mt-auto">
         {/* Advisory CTA */}
         <div className="border-b border-navy-800 py-4">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div>
               <p className="text-sm font-bold text-white">Formation & Conseil en Gestion du Risque de Change</p>
-              <p className="text-[11px] text-navy-400">Cabinet de conseil · Formation · Accompagnement réglementaire OC · Non intermédiaire financier</p>
+              <p className="text-xs text-slate-400">Cabinet de conseil · Formation · Accompagnement réglementaire OC · Non intermédiaire financier</p>
             </div>
             <a
               href="https://jad2advisory.com"
@@ -709,26 +705,26 @@ function AppInner() {
         </div>
 
         {/* Legal */}
-        <div className="py-4">
+        <div className="py-5">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 text-center">
-            <p className="text-[9px] leading-relaxed max-w-3xl mx-auto text-navy-700">{DISCLAIMER_TEXT}</p>
-            <div className="flex flex-wrap justify-center gap-3 mt-2 text-[9px] text-navy-700">
+            <p className="text-xs leading-relaxed max-w-3xl mx-auto text-slate-500">{DISCLAIMER_TEXT}</p>
+            <div className="flex flex-wrap justify-center gap-3 mt-3 text-xs text-slate-500">
               <span>ECB / Frankfurter</span>
-              <span className="text-navy-800">·</span>
+              <span className="text-slate-700">·</span>
               <span>Yahoo Finance</span>
-              <span className="text-navy-800">·</span>
+              <span className="text-slate-700">·</span>
               <span>Twelve Data</span>
-              <span className="text-navy-800">·</span>
+              <span className="text-slate-700">·</span>
               <span>BKAM Fixing</span>
-              <span className="text-navy-800">·</span>
-              <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-700 hover:text-gold-500 transition-colors">
+              <span className="text-slate-700">·</span>
+              <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400 transition-colors">
                 jad2advisory.com
               </a>
             </div>
-            <p className="text-[9px] mt-1.5 text-navy-700 italic">
-              Market data derived from Yahoo Finance / Twelve Data for educational demonstration purposes only. Not for commercial trading.
+            <p className="text-xs mt-2 text-slate-600 italic">
+              Market data from Yahoo Finance / Twelve Data for educational purposes only. Not for commercial trading.
             </p>
-            <p className="text-[9px] mt-1 text-navy-700">{t('footer.copyright')}</p>
+            <p className="text-xs mt-1.5 text-slate-600">{t('footer.copyright')}</p>
           </div>
         </div>
       </footer>
