@@ -7,13 +7,12 @@ compatibility_date = "2024-01-01"
 binding = "REPORTS_KV"
 id = "c105b1084a094471be4516496000fa1d"
 
-# ── Scheduled crons ──────────────────────────────────────────────────────────
+# ── Scheduled cron ───────────────────────────────────────────────────────────
+# Single trigger at 09:00 Casablanca (08:00 UTC) on weekdays.
+# Consolidated from 2 → 1 cron to stay within free-plan limit (5 total across account).
 # Morocco: UTC+1 year-round (UTC+0 during Ramadan).
-#   08:00 UTC = 09:00 Casablanca → Market review (30 min into session)
-#   07:30 UTC = 08:30 Casablanca → Market open notification
-# Note: tasdir-pro crons cleared to free slots (free plan limit = 5 total)
 [triggers]
-crons = ["0 8 * * 1-5", "30 7 * * 1-5"]
+crons = ["0 8 * * 1-5"]
 
 # ── Required secrets (wrangler secret put <NAME>) ────────────────────────────
 # BKAM_FX_KEY      — BKAM FX API subscription key
