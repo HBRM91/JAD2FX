@@ -158,7 +158,7 @@ function BandGauge({ data, pair, flag }: { data: BandState; pair: string; flag: 
       </div>
 
       {/* Metrics row */}
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {[
           { label: 'Utilisation', value: `${(Math.abs(data.utilPct - 50) * 2).toFixed(1)}%`, sub: 'de la bande', color: birdColor },
           { label: 'Dist. Plafond', value: `${data.distToCeilingBps} pb`, sub: `${data.distToCeilingPct}%`, color: data.utilPct > 70 ? '#f59e0b' : '#94a3b8' },
@@ -248,7 +248,7 @@ function DriftChart({ drift, loading }: { drift: DriftRegression | null; loading
       </div>
 
       {/* Key stats */}
-      <div className="grid grid-cols-4 gap-2 text-center">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
         {[
           { label: 'Dérive actuelle', value: `${drift.latestDriftBps >= 0 ? '+' : ''}${drift.latestDriftBps.toFixed(0)} pb`, color: drift.latestDriftBps > 20 ? '#f59e0b' : drift.latestDriftBps < -20 ? '#10b981' : '#94a3b8' },
           { label: 'Pente OLS', value: `${drift.beta >= 0 ? '+' : ''}${drift.beta.toFixed(1)} pb/j`, color: trendColor },
@@ -378,7 +378,7 @@ export default function BkamBandsVisualizer({ compact = false }: { compact?: boo
             {/* Basket parity breakdown */}
             <div>
               <p className="text-[10px] font-bold text-white uppercase tracking-wider mb-3">Parité Théorique du Panier</p>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
                   { label: 'EUR/USD implicite', value: eurUsd.toFixed(4), sub: 'EUR/MAD ÷ USD/MAD', color: 'text-blue-400' },
                   { label: 'USD/MAD central', value: usdCentral.toFixed(4), sub: `K÷(0.6×${eurUsd.toFixed(3)}+0.4)`, color: 'text-gold-400' },

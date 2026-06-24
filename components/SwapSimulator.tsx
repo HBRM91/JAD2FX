@@ -328,7 +328,7 @@ export default function SwapSimulator() {
         </h3>
 
         {/* Currency + Notional + Near direction */}
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
             <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">Currency</label>
             <div className="relative">
@@ -377,7 +377,7 @@ export default function SwapSimulator() {
         </div>
 
         {/* Tenor selectors */}
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
           {(['NEAR', 'FAR'] as const).map(leg => {
             const val  = leg === 'NEAR' ? nearTenor : farTenor;
             const setV = leg === 'NEAR' ? setNearTenor : setFarTenor;
@@ -444,7 +444,7 @@ export default function SwapSimulator() {
             <CashFlowTimeline swap={swap} notional={notional} currency={currency} />
 
             {/* Swap summary strip */}
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { label: 'Swap Points', value: fmtPips(swap.swapPointsPips) + ' pips', color: swap.swapPointsPips >= 0 ? 'text-emerald-400' : 'text-red-400' },
                 { label: 'Swap Cost MAD', value: fmtMAD(Math.abs(swap.swapPointsRaw) * swap.notional), color: 'text-gold-400' },
@@ -471,7 +471,7 @@ export default function SwapSimulator() {
                   <p className="text-[10px] font-bold uppercase tracking-widest text-amber-400 flex items-center gap-1.5 mb-2.5">
                     <TrendingDown size={11} /> Analyse du Coût de Portage (Break-Even)
                   </p>
-                  <div className="grid grid-cols-4 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {[
                       { label: 'Écart (jours)', value: `${gapDays}j` },
                       { label: 'Coût carry (MAD)', value: fmtMAD(carryCostMAD), color: 'text-gold-400' },
@@ -529,7 +529,7 @@ export default function SwapSimulator() {
           Roll Event Builder — Rollover / Roll-Under
         </h3>
 
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Type */}
           <div>
             <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">Event Type</label>
@@ -584,7 +584,7 @@ export default function SwapSimulator() {
         {/* Roll result */}
         {computedRoll ? (
           <div className="space-y-3">
-            <div className="grid grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {[
                 { label: 'From Rate', value: fmt4(computedRoll.fromRate) },
                 { label: 'To Rate',   value: fmt4(computedRoll.toRate) },
