@@ -3,9 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Khouya FX - Moroccan Financial Intelligence</title>
+    <title>JAD2FX — Données de Change MAD | JAD2 Advisory</title>
+    <meta name="description" content="JAD2FX: données de change indicatives pour toutes les devises cotées par Bank Al-Maghrib. Outil pédagogique de JAD2 Advisory. Taux indicatifs uniquement — pas de conseil en investissement." />
+    <meta name="robots" content="index, follow" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
       tailwind.config = {
         theme: {
@@ -22,8 +24,9 @@
               }
             },
             fontFamily: {
-              sans: ['Inter', 'sans-serif'],
+              sans: ['Inter', 'Cairo', 'sans-serif'],
               serif: ['Playfair Display', 'serif'],
+              arabic: ['Cairo', 'sans-serif'],
             }
           }
         }
@@ -49,5 +52,6 @@
 </head>
   <body>
     <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
   </body>
 </html>
