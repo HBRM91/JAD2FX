@@ -4,10 +4,11 @@ import {
   CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   ReferenceLine,
 } from 'recharts';
-import { FixingDayRow, ClientTier } from '../types';
+import { FixingDayRow, ClientTier, CurrencyInfo } from '../types';
 import { BKAM_CURRENCIES } from '../constants';
 import { fetchFixingHistory } from '../services/bkamFixing';
 import { useAdmin, DEFAULT_TIER_COMMISSIONS } from '../context/AdminContext';
+import { useI18n } from '../context/I18nContext';
 import {
   RefreshCw, AlertTriangle, Info, TrendingUp, TrendingDown,
   Minus, Database, Users,
@@ -105,8 +106,15 @@ const TIER_ACCENT: Record<ClientTier, string> = {
   INDIVIDUAL:'text-slate-700 bg-slate-50 border-slate-200',
 };
 
+function getCurrencyName(c: CurrencyInfo, locale: string): string {
+  if (locale === 'ar') return c.nameAr;
+  if (locale === 'en') return c.name;
+  return c.nameFr;
+}
+
 export default function BkamFixing() {
   const { config } = useAdmin();
+  const { locale, isRTL } = useI18n();
   const [rows,    setRows]    = useState<FixingDayRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState<string | null>(null);
@@ -499,10 +507,10 @@ export default function BkamFixing() {
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
             <div className="px-5 py-4 border-b border-slate-100">
               <h3 className="text-sm font-bold text-navy-900 uppercase tracking-wider">
-                Les 14 Devises BKAM — {latest.dateLabel}
+                {locale === 'ar' ? `20 عملة BKAM — ${latest.dateLabel}` : locale === 'en' ? `20 BKAM Currencies — ${latest.dateLabel}` : `Les 20 Devises BKAM — ${latest.dateLabel}`}
               </h3>
               <p className="text-[10px] text-slate-400 mt-0.5">
-                Cours MAD indicatifs par devise · Calculés via taux ECB de référence + parité panier · Unités BKAM appliquées
+                {locale === 'ar' ? 'أسعار MAD الاسترشادية · محسوبة عبر أسعار BCR المرجعية + تعادل السلة · وحدات BKAM مطبقة' : locale === 'en' ? 'Indicative MAD rates per currency · Computed via ECB reference rates + basket parity · BKAM units applied' : 'Cours MAD indicatifs par devise · Calculés via taux ECB de référence + parité panier · Unités BKAM appliquées'}
               </p>
             </div>
             <div className="overflow-x-auto">
@@ -510,7 +518,7 @@ export default function BkamFixing() {
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-100 text-[10px] uppercase tracking-wider text-slate-500">
                     <th className="text-left px-5 py-2.5 font-semibold">Devise</th>
-                    <th className="text-left px-4 py-2.5 font-semibold">Nom</th>
+                    <th className="text-left px-4 py-2.5 font-semibold">{locale === 'ar' ? 'الاسم' : locale === 'en' ? 'Name' : 'Nom'}</th>
                     <th className="text-right px-4 py-2.5 font-semibold">Unité</th>
                     <th className="text-right px-5 py-2.5 font-semibold">Cours MAD (indicatif)</th>
                   </tr>
@@ -528,7 +536,7 @@ export default function BkamFixing() {
                               <span className="font-mono font-bold text-navy-900">{c.code}</span>
                             </div>
                           </td>
-                          <td className="px-4 py-2.5 text-slate-600">{c.nameFr}</td>
+                          <td className="px-4 py-2.5 text-slate-600">{getCurrencyName(c, locale)}</td>
                           <td className="text-right px-4 py-2.5 font-mono text-slate-400 text-xs">
                             {c.bkamUnit === 100 ? '100 ' + c.code : '1 ' + c.code}
                           </td>

@@ -414,8 +414,13 @@ Cours distincts pour les opérations en espèces (billets de banque étrangers).
 Disponibles sur: https://www.bkam.ma/en/Markets/Key-indicators/Foreign-exchange-market/Foreign-exchange-rates/Foreign-banknotes-exchange-rate
 Les cours billets sont généralement moins favorables que les cours virements en raison du coût de manipulation physique des espèces.
 
-5. DEVISES OFFICIELLEMENT COTÉES PAR BKAM (14 devises):
+5. DEVISES OFFICIELLEMENT COTÉES PAR BKAM (14 devises directes):
 EUR, USD, GBP, CHF, CAD, JPY (cotation au cent), SAR, AED, KWD, QAR, DKK, NOK, SEK, CNY.
+
+6. DEVISES ADDITIONNELLES (6 devises — taux croisés via USD, non cotées officiellement par BKAM):
+OMR (Rial omanais), BHD (Dinar bahreïni), JOD (Dinar jordanien), TND (Dinar tunisien), DZD (Dinar algérien, cotation pour 100 DZD), LYD (Dinar libyen).
+Ces taux sont calculés par croisement avec le cours USD/MAD officiel et les taux de change USD publiés par les banques centrales concernées ou les marchés. Ils sont fournis à titre purement indicatif et ne constituent pas des cours officiels BKAM.
+Total sur la plateforme KhouyaFX: 20 devises (14 officiellesBAKM + 6 indicatives cross-USD).
 
 6. MARCHÉ INTERBANCAIRE DES CHANGES (MIC):
 - Seules les banques agréées par BKAM peuvent participer directement au MIC.
@@ -483,15 +488,15 @@ En cas de litige sur les commissions appliquées, le client peut saisir:
   },
   {
     id: 'bkam-fixing-fixingrates',
-    title: "BKAM — Taux de Référence Officiels et Grille de Cotation des 14 Devises",
+    title: "BKAM — Taux de Référence Officiels et Grille de Cotation des 20 Devises",
     type: 'NOTE',
     date: '2024-06-01',
-    summary: "Description des taux de change officiels publiés par Bank Al-Maghrib pour les 14 devises cotées contre le dirham marocain, avec unités de cotation BKAM.",
-    keywords: ['taux référence', 'cours change', '14 devises', 'eur mad', 'usd mad', 'gbp mad', 'jpy mad', 'cotation bkam', 'unité cotation', 'cours officiel bkam', 'dirham', 'fixing officiel', 'cours acheteur vendeur'],
+    summary: "Description des taux de change officiels publiés par Bank Al-Maghrib pour les 14 devises cotées directement, plus 6 devises régionales calculées par taux croisés via USD.",
+    keywords: ['taux référence', 'cours change', '14 devises', '20 devises', 'eur mad', 'usd mad', 'gbp mad', 'jpy mad', 'cotation bkam', 'unité cotation', 'cours officiel bkam', 'dirham', 'fixing officiel', 'cours acheteur vendeur', 'omr', 'bhd', 'jod', 'tnd', 'dzd', 'lyd', 'golfe', 'maghreb'],
     content: `
-BKAM — Taux de Référence Officiels des 14 Devises:
+BKAM — Taux de Référence Officiels des 20 Devises:
 
-DEVISES COTÉES ET UNITÉS:
+DEVISES OFFICIELLEMENT COTÉES PAR BKAM (14 devises):
 Bank Al-Maghrib cote officiellement les 14 devises suivantes contre le Dirham marocain (MAD):
 1. EUR — Euro (unité: 1 EUR)
 2. USD — Dollar américain (unité: 1 USD)
@@ -507,6 +512,16 @@ Bank Al-Maghrib cote officiellement les 14 devises suivantes contre le Dirham ma
 12. NOK — Couronne norvégienne (unité: 1 NOK)
 13. SEK — Couronne suédoise (unité: 1 SEK)
 14. CNY — Yuan chinois (unité: 1 CNY)
+
+DEVISES RÉGIONALES — TAUX CROISÉS (6 devises indicatives):
+Calculées via USD/MAD officiel BKAM × parité USD:
+15. OMR — Rial omanais (1 USD = 0,3845 OMR — peg officiel)
+16. BHD — Dinar bahreïni (1 USD = 0,376 BHD — peg officiel)
+17. JOD — Dinar jordanien (1 USD = 0,709 JOD — peg officiel)
+18. TND — Dinar tunisien (~1 USD ≈ 3,10 TND — flottant géré, indicatif)
+19. DZD — Dinar algérien (unité: 100 DZD, ~1 USD ≈ 134,6 DZD — indicatif)
+20. LYD — Dinar libyen (~1 USD ≈ 4,80 LYD — indicatif)
+Ces 6 devises sont fournies à titre purement indicatif et ne constituent pas des cours officiels BKAM.
 
 DEUX TYPES DE COURS OFFICIELS BKAM:
 1. Cours de change virement (Transfer exchange rate):
@@ -526,6 +541,48 @@ LECTURE DES COURS:
 
 FRÉQUENCE DE PUBLICATION:
 Chaque jour ouvré. En cas de fermeture des marchés (fêtes nationales, week-end), le dernier cours publié reste en vigueur.
+    `
+  },
+  {
+    id: 'gulf-maghreb-currencies',
+    title: "Devises du Golfe et du Maghreb — Taux Croisés et Réglementation OC",
+    type: 'NOTE',
+    date: '2024-09-01',
+    summary: "Réglementation OC applicable aux opérations en devises des pays du Golfe (OMR, BHD, JOD) et du Maghreb (TND, DZD, LYD), et méthode de calcul des taux croisés via USD.",
+    keywords: ['golfe', 'maghreb', 'oman', 'omr', 'bahreïn', 'bhd', 'jordanie', 'jod', 'tunisie', 'tnd', 'algérie', 'dzd', 'libye', 'lyd', 'taux croisé', 'cross rate', 'devises arabes', 'réglementation golfe', 'opérations golfe', 'transfert golfe', 'virement golfe'],
+    content: `
+Devises du Golfe et du Maghreb — Cadre Réglementaire et Taux Indicatifs:
+
+1. STATUT RÉGLEMENTAIRE DES DEVISES DU GOLFE ET DU MAGHREB:
+Les devises du Golfe (OMR, BHD, JOD) et du Maghreb (TND, DZD, LYD) ne font pas l'objet d'une cotation officielle directe par Bank Al-Maghrib (BKAM). Les taux applicables sont calculés par croisement avec le cours USD/MAD officiel.
+
+2. OPÉRATIONS EN DEVISES DU GOLFE (OMR, BHD, JOD, AED, SAR, QAR, KWD):
+- Virements vers les pays du Golfe: libres pour les importations de biens et services régulièrement domiciliées. Mêmes conditions que les autres devises (domiciliation si > 50.000 MAD).
+- Parités officielles USD (pegs):
+  • OMR: 1 USD = 0,3845 OMR (Banque centrale d'Oman — peg officiel)
+  • BHD: 1 USD = 0,376 BHD (Banque centrale de Bahreïn — peg officiel)
+  • JOD: 1 USD = 0,709 JOD (Banque centrale de Jordanie — peg officiel)
+  • AED: 1 USD = 3,6725 AED (Banque centrale des EAU — peg officiel)
+  • SAR: 1 USD = 3,75 SAR (Banque centrale d'Arabie Saoudite — peg officiel)
+  • QAR: 1 USD = 3,64 QAR (Banque centrale du Qatar — peg officiel)
+  • KWD: 1 USD ≈ 0,307 KWD (flottant géré — taux approximatif)
+- Méthode de cotation MAD: Devise/MAD = (1/parity USD) × USD/MAD officiel BKAM.
+- Pour les Marocains travaillant dans les pays du Golfe: les transferts de salaires vers le Maroc sont libres (résidents MRE ou non-résidents en visite).
+
+3. OPÉRATIONS EN DEVISES DU MAGHREB (TND, DZD, LYD):
+- Le dinar tunisien (TND), le dinar algérien (DZD) et le dinar libyen (LYD) sont des devises partiellement convertibles.
+- Les virements entre le Maroc et ces pays sont réglementés par des accords bilatéraux.
+- Accords maroco-tunisiens: les opérations courantes (commerce, services) sont libres via les banques agréées des deux pays.
+- Accords maroco-algériens: les échanges sont largement réglementés; les virements doivent passer par les banques officielles habilitées.
+- Taux indicatifs (TND, DZD, LYD non cotés officiellement par BKAM):
+  • TND: environ 1 USD = 3,10 TND (taux flottant géré par la BCT)
+  • DZD: environ 1 USD = 134,6 DZD (taux administré par la Banque d'Algérie) — affiché pour 100 DZD
+  • LYD: environ 1 USD = 4,80 LYD (taux officiel CBL — marché parallèle peut différer significativement)
+
+4. RECOMMANDATIONS PRATIQUES:
+- Pour les transactions commerciales avec les pays du Golfe: utiliser l'USD ou l'EUR comme devise de transaction pour éviter les incertitudes de change.
+- Pour les transactions avec le Maghreb (Tunisie, Algérie, Libye): consulter préalablement votre banque agréée sur les délais et conditions spécifiques.
+- Les taux indiqués sur KhouyaFX sont purement indicatifs; les cours effectivement appliqués par votre banque peuvent différer.
     `
   },
 ];

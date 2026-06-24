@@ -1,13 +1,28 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { DashboardTab, LiveRate, BasketConfig } from '../types';
+import { DashboardTab, LiveRate, BasketConfig, CurrencyInfo } from '../types';
 import FxChart from './FxChart';
 import { BKAM_CURRENCIES, BANKS, BANK_SPREAD_PREMIUM, DEFAULT_BASKET_CONFIG } from '../constants';
 import { fetchAllMadRates, generateIntradayData } from '../services/fxRates';
 import { Download, RefreshCw, Search, ArrowUpDown, TrendingUp } from 'lucide-react';
+import { useI18n } from '../context/I18nContext';
 
 const currencyMeta = Object.fromEntries(BKAM_CURRENCIES.map(c => [c.code, c]));
 
+function getCurrencyName(meta: CurrencyInfo | undefined, locale: string): string {
+  if (!meta) return '';
+  if (locale === 'ar') return meta.nameAr;
+  if (locale === 'en') return meta.name;
+  return meta.nameFr;
+}
+
+const TAB_LABELS: Record<DashboardTab, Record<string, string>> = {
+  VIREMENTS: { fr: 'Virements', en: 'Wire Transfers', ar: 'تحويلات' },
+  BILLETS:   { fr: 'Billets',   en: 'Banknotes',      ar: 'أوراق نقدية' },
+  GLOBAL_FX: { fr: 'Global FX', en: 'Global FX',      ar: 'صرف عالمي' },
+};
+
 const FxDashboard: React.FC = () => {
+  const { locale, t, isRTL } = useI18n();
   const [activeTab, setActiveTab] = useState<DashboardTab>('VIREMENTS');
   const [rates, setRates] = useState<LiveRate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,10 +60,12 @@ const FxDashboard: React.FC = () => {
   const filteredRates = rates
     .filter(r => {
       const meta = currencyMeta[r.currency];
+      const q = search.toLowerCase();
       return (
-        r.currency.toLowerCase().includes(search.toLowerCase()) ||
-        meta?.name.toLowerCase().includes(search.toLowerCase()) ||
-        meta?.nameFr.toLowerCase().includes(search.toLowerCase())
+        r.currency.toLowerCase().includes(q) ||
+        meta?.name.toLowerCase().includes(q) ||
+        meta?.nameFr.toLowerCase().includes(q) ||
+        meta?.nameAr.includes(search)
       );
     })
     .sort((a, b) => {
@@ -82,22 +99,30 @@ const FxDashboard: React.FC = () => {
       <table className="w-full text-sm text-left">
         <thead className="bg-slate-50 border-b border-slate-200">
           <tr>
-            <th className="px-4 py-3 text-navy-900 font-serif text-xs uppercase tracking-wide">Currency</th>
+            <th className="px-4 py-3 text-navy-900 font-serif text-xs uppercase tracking-wide">
+              {locale === 'ar' ? 'العملة' : locale === 'en' ? 'Currency' : 'Devise'}
+            </th>
             <th
               className="px-4 py-3 text-navy-900 font-serif text-xs uppercase tracking-wide cursor-pointer hover:text-gold-600 transition"
               onClick={() => setSortAsc(v => !v)}
             >
               <span className="flex items-center gap-1">
-                Mid Rate <ArrowUpDown size={12} />
+                {locale === 'ar' ? 'سعر الوسط' : locale === 'en' ? 'Mid Rate' : 'Cours Moyen'} <ArrowUpDown size={12} />
               </span>
             </th>
             <th className="px-4 py-3 text-navy-900 font-serif text-xs uppercase tracking-wide text-right">
-              {activeTab === 'BILLETS' ? 'Billet Buy' : 'Virement Buy'}
+              {activeTab === 'BILLETS'
+                ? (locale === 'ar' ? 'شراء أوراق' : locale === 'en' ? 'Billet Buy' : 'Achat Billets')
+                : (locale === 'ar' ? 'شراء تحويل' : locale === 'en' ? 'Wire Buy' : 'Achat Virement')}
             </th>
             <th className="px-4 py-3 text-navy-900 font-serif text-xs uppercase tracking-wide text-right">
-              {activeTab === 'BILLETS' ? 'Billet Sell' : 'Virement Sell'}
+              {activeTab === 'BILLETS'
+                ? (locale === 'ar' ? 'بيع أوراق' : locale === 'en' ? 'Billet Sell' : 'Vente Billets')
+                : (locale === 'ar' ? 'بيع تحويل' : locale === 'en' ? 'Wire Sell' : 'Vente Virement')}
             </th>
-            <th className="px-4 py-3 text-navy-900 font-serif text-xs uppercase tracking-wide text-right">Spread</th>
+            <th className="px-4 py-3 text-navy-900 font-serif text-xs uppercase tracking-wide text-right">
+              {locale === 'ar' ? 'الفارق' : 'Spread'}
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
@@ -118,7 +143,7 @@ const FxDashboard: React.FC = () => {
                     <span className="text-xl">{meta?.flag}</span>
                     <div>
                       <p className="font-medium text-navy-900 text-sm">{rate.currency}</p>
-                      <p className="text-[10px] text-slate-400">{meta?.nameFr}</p>
+                      <p className="text-[10px] text-slate-400">{getCurrencyName(meta, locale)}</p>
                     </div>
                     {meta?.bkamUnit === 100 && (
                       <span className="text-[9px] bg-slate-100 text-slate-500 px-1 rounded">per 100</span>
@@ -193,9 +218,22 @@ const FxDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Indicative notice */}
-      <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5 text-xs text-amber-800">
-        <span className="font-bold flex-shrink-0">⚠️ COURS INDICATIFS</span>
-        <span>Ces taux sont calculés à titre indicatif sur base de la méthode du panier BKAM (60% EUR / 40% USD). Ils ne constituent pas des cours officiels Bank Al-Maghrib et ne sont pas contraignants. Données ECB via Frankfurter API. Pour des cours officiels, consultez <a href="https://www.bkam.ma" target="_blank" rel="noopener noreferrer" className="underline">bkam.ma</a> ou un <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="underline">intermédiaire agréé</a>.</span>
+      <div className={`flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-4 py-2.5 text-xs text-amber-800 ${isRTL ? 'flex-row-reverse text-right' : ''}`}>
+        <span className="font-bold flex-shrink-0">
+          {locale === 'ar' ? '⚠️ أسعار استرشادية' : locale === 'en' ? '⚠️ INDICATIVE RATES' : '⚠️ COURS INDICATIFS'}
+        </span>
+        <span>
+          {locale === 'ar'
+            ? 'تُحسب هذه الأسعار بشكل استرشادي بناءً على منهجية سلة بنك المغرب (60% يورو / 40% دولار). لا تُمثّل أسعاراً رسمية لبنك المغرب. بيانات البنك المركزي الأوروبي عبر Frankfurter API. للاطلاع على الأسعار الرسمية، تفضل بزيارة '
+            : locale === 'en'
+            ? 'These rates are calculated on an indicative basis using the BKAM basket method (60% EUR / 40% USD). They are not official Bank Al-Maghrib rates. ECB data via Frankfurter API. For official rates, see '
+            : 'Ces taux sont calculés à titre indicatif sur base de la méthode du panier BKAM (60% EUR / 40% USD). Ils ne constituent pas des cours officiels Bank Al-Maghrib. Données ECB via Frankfurter API. Pour des cours officiels, consultez '}
+          <a href="https://www.bkam.ma" target="_blank" rel="noopener noreferrer" className="underline">bkam.ma</a>
+          {locale === 'ar' ? ' أو ' : locale === 'en' ? ' or an ' : ' ou un '}
+          <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="underline">
+            {locale === 'ar' ? 'وسيط معتمد' : locale === 'en' ? 'authorised intermediary' : 'intermédiaire agréé'}
+          </a>.
+        </span>
       </div>
 
       {/* Controls Bar */}
@@ -211,7 +249,7 @@ const FxDashboard: React.FC = () => {
                   : 'text-slate-500 hover:text-navy-900 hover:bg-slate-200'
               }`}
             >
-              {tab.replace('_', ' ')}
+              {TAB_LABELS[tab][locale] ?? TAB_LABELS[tab].fr}
             </button>
           ))}
         </div>
@@ -233,13 +271,15 @@ const FxDashboard: React.FC = () => {
             disabled={isLoading}
             className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-600 text-xs font-medium rounded-lg hover:bg-slate-50 disabled:opacity-50 transition"
           >
-            <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} /> Refresh
+            <RefreshCw size={12} className={isLoading ? 'animate-spin' : ''} />
+            {locale === 'ar' ? 'تحديث' : locale === 'en' ? 'Refresh' : 'Actualiser'}
           </button>
           <button
             onClick={exportCSV}
             className="flex items-center gap-1.5 px-3 py-2 bg-white border border-slate-200 text-slate-600 text-xs font-medium rounded-lg hover:bg-slate-50 transition"
           >
-            <Download size={12} /> Export CSV
+            <Download size={12} />
+            {locale === 'ar' ? 'تصدير CSV' : 'Export CSV'}
           </button>
           <div className="text-[10px] text-slate-400">
             {ratesDate && <span>ECB {ratesDate}</span>}
@@ -254,7 +294,9 @@ const FxDashboard: React.FC = () => {
       {isLoading && rates.length === 0 && (
         <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
           <RefreshCw size={24} className="animate-spin text-gold-500 mx-auto mb-3" />
-          <p className="text-sm text-slate-500">Fetching live rates from ECB / BKAM basket...</p>
+          <p className="text-sm text-slate-500">
+            {locale === 'ar' ? 'جاري تحميل الأسعار من البنك المركزي الأوروبي / سلة بنك المغرب...' : locale === 'en' ? 'Fetching live rates from ECB / BKAM basket...' : 'Chargement des taux ECB / panier BKAM...'}
+          </p>
         </div>
       )}
 
@@ -265,10 +307,14 @@ const FxDashboard: React.FC = () => {
             <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
               <div>
                 <h3 className="font-serif text-base font-bold text-navy-900">
-                  {activeTab === 'VIREMENTS' ? 'Taux VIREMENTS — Toutes Devises BKAM' : 'Taux BILLETS — Toutes Devises BKAM'}
+                  {activeTab === 'VIREMENTS'
+                    ? (locale === 'ar' ? 'تحويلات — جميع عملات بنك المغرب' : locale === 'en' ? 'WIRE TRANSFERS — All BKAM Currencies' : 'Taux VIREMENTS — Toutes Devises BKAM')
+                    : (locale === 'ar' ? 'أوراق نقدية — جميع عملات بنك المغرب' : locale === 'en' ? 'BANKNOTES — All BKAM Currencies' : 'Taux BILLETS — Toutes Devises BKAM')}
                 </h3>
                 <p className="text-[10px] text-slate-400 mt-0.5">
-                  {activeTab === 'VIREMENTS' ? 'Spread ±0.8% (spread bancaire indicatif)' : 'Spread ±1.8% (billets de banque)'}
+                  {activeTab === 'VIREMENTS'
+                    ? (locale === 'ar' ? 'هامش ±0.8% (استرشادي)' : locale === 'en' ? 'Spread ±0.8% (indicative bank spread)' : 'Spread ±0.8% (spread bancaire indicatif)')
+                    : (locale === 'ar' ? 'هامش ±1.8% (أوراق نقدية)' : locale === 'en' ? 'Spread ±1.8% (banknotes)' : 'Spread ±1.8% (billets de banque)')}
                 </p>
               </div>
               {lastUpdate && (
@@ -319,19 +365,31 @@ const FxDashboard: React.FC = () => {
               </p>
             </div>
 
-            {/* Gulf Currencies Card */}
+            {/* Gulf + North African Currencies Card */}
             <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
-              <h4 className="text-xs font-bold text-navy-900 mb-3">Gulf Currencies (USD Pegs)</h4>
-              <div className="space-y-2">
-                {['SAR', 'AED', 'KWD', 'QAR'].map(code => {
+              <h4 className="text-xs font-bold text-navy-900 mb-1">
+                {locale === 'ar' ? 'الخليج وشمال أفريقيا' : locale === 'en' ? 'Gulf & North Africa' : 'Golfe & Maghreb'}
+              </h4>
+              <p className="text-[9px] text-slate-400 mb-3">
+                {locale === 'ar' ? 'أسعار تقاطع عبر الدولار' : locale === 'en' ? 'USD cross-rates' : 'Taux croisés via USD'}
+              </p>
+              <div className="space-y-1.5">
+                {['AED', 'SAR', 'QAR', 'KWD', 'OMR', 'BHD', 'JOD', 'TND', 'DZD', 'LYD'].map(code => {
                   const r = rates.find(x => x.currency === code);
                   const meta = currencyMeta[code];
                   if (!r) return null;
                   return (
-                    <div key={code} className="flex items-center justify-between text-sm">
-                      <span className="flex items-center gap-2">
-                        <span>{meta?.flag}</span>
-                        <span className="text-slate-600 text-xs">{code}/MAD</span>
+                    <div
+                      key={code}
+                      onClick={() => { setSelectedCurrency(code); setActiveTab('GLOBAL_FX'); }}
+                      className="flex items-center justify-between text-sm cursor-pointer hover:bg-slate-50 rounded px-1 py-0.5 transition"
+                    >
+                      <span className="flex items-center gap-1.5">
+                        <span className="text-base">{meta?.flag}</span>
+                        <div>
+                          <span className="text-slate-700 text-xs font-medium">{code}</span>
+                          {meta?.bkamUnit === 100 && <span className="text-[9px] text-slate-400 ml-1">×100</span>}
+                        </div>
                       </span>
                       <span className="font-mono font-bold text-navy-900 text-xs">{r.mid.toFixed(4)}</span>
                     </div>
@@ -384,7 +442,7 @@ const FxDashboard: React.FC = () => {
                     <span className="text-2xl">{currencyMeta[selectedCurrency]?.flag}</span>
                     <div>
                       <h3 className="font-serif text-lg font-bold text-navy-900">{selectedRate.pair}</h3>
-                      <p className="text-xs text-slate-400">{currencyMeta[selectedCurrency]?.nameFr}</p>
+                      <p className="text-xs text-slate-400">{getCurrencyName(currencyMeta[selectedCurrency], locale)}</p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -402,7 +460,9 @@ const FxDashboard: React.FC = () => {
           {/* Side panel for GLOBAL_FX */}
           <div className="lg:col-span-1 space-y-4">
             <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
-              <h4 className="font-serif font-bold text-navy-900 mb-4 text-sm">All BKAM Rates</h4>
+              <h4 className="font-serif font-bold text-navy-900 mb-4 text-sm">
+                {locale === 'ar' ? 'جميع أسعار بنك المغرب' : locale === 'en' ? 'All BKAM Rates' : 'Toutes les devises BKAM'}
+              </h4>
               <div className="space-y-3">
                 {rates.map(r => {
                   const meta = currencyMeta[r.currency];
@@ -418,7 +478,7 @@ const FxDashboard: React.FC = () => {
                         <span>{meta?.flag}</span>
                         <div>
                           <p className="text-xs font-bold text-navy-900">{r.currency}</p>
-                          <p className="text-[10px] text-slate-400">{meta?.nameFr}</p>
+                          <p className="text-[10px] text-slate-400">{getCurrencyName(meta, locale)}</p>
                         </div>
                       </div>
                       <span className="font-mono text-xs font-bold text-navy-900">{r.mid.toFixed(4)}</span>

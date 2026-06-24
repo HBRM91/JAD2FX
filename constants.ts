@@ -18,29 +18,29 @@ export const DISCLAIMER_SHORT = "Données indicatives à titre pédagogique · J
 // Note: OMR, BHD, JOD, TND, DZD, LYD are computed via USD cross; not direct BKAM quotes.
 export const BKAM_CURRENCIES: CurrencyInfo[] = [
   // ── G10 (as quoted by BKAM) ─────────────────────────────────────────────
-  { code: 'USD', name: 'US Dollar',         nameFr: 'Dollar américain',      flag: '🇺🇸', bkamUnit: 1   },
-  { code: 'EUR', name: 'Euro',              nameFr: 'Euro',                  flag: '🇪🇺', bkamUnit: 1   },
-  { code: 'GBP', name: 'British Pound',     nameFr: 'Livre sterling',        flag: '🇬🇧', bkamUnit: 1   },
-  { code: 'CHF', name: 'Swiss Franc',       nameFr: 'Franc suisse',          flag: '🇨🇭', bkamUnit: 1   },
-  { code: 'JPY', name: 'Japanese Yen',      nameFr: 'Yen japonais',          flag: '🇯🇵', bkamUnit: 100 },
-  { code: 'CAD', name: 'Canadian Dollar',   nameFr: 'Dollar canadien',       flag: '🇨🇦', bkamUnit: 1   },
-  { code: 'NOK', name: 'Norwegian Krone',   nameFr: 'Couronne norvégienne',  flag: '🇳🇴', bkamUnit: 1   },
-  { code: 'SEK', name: 'Swedish Krona',     nameFr: 'Couronne suédoise',     flag: '🇸🇪', bkamUnit: 1   },
-  { code: 'DKK', name: 'Danish Krone',      nameFr: 'Couronne danoise',      flag: '🇩🇰', bkamUnit: 1   },
+  { code: 'USD', name: 'US Dollar',         nameFr: 'Dollar américain',      nameAr: 'الدولار الأمريكي',     flag: '🇺🇸', bkamUnit: 1   },
+  { code: 'EUR', name: 'Euro',              nameFr: 'Euro',                  nameAr: 'اليورو',               flag: '🇪🇺', bkamUnit: 1   },
+  { code: 'GBP', name: 'British Pound',     nameFr: 'Livre sterling',        nameAr: 'الجنيه الإسترليني',    flag: '🇬🇧', bkamUnit: 1   },
+  { code: 'CHF', name: 'Swiss Franc',       nameFr: 'Franc suisse',          nameAr: 'الفرنك السويسري',      flag: '🇨🇭', bkamUnit: 1   },
+  { code: 'JPY', name: 'Japanese Yen',      nameFr: 'Yen japonais',          nameAr: 'الين الياباني',        flag: '🇯🇵', bkamUnit: 100 },
+  { code: 'CAD', name: 'Canadian Dollar',   nameFr: 'Dollar canadien',       nameAr: 'الدولار الكندي',       flag: '🇨🇦', bkamUnit: 1   },
+  { code: 'NOK', name: 'Norwegian Krone',   nameFr: 'Couronne norvégienne',  nameAr: 'الكرون النرويجي',      flag: '🇳🇴', bkamUnit: 1   },
+  { code: 'SEK', name: 'Swedish Krona',     nameFr: 'Couronne suédoise',     nameAr: 'الكرون السويدي',       flag: '🇸🇪', bkamUnit: 1   },
+  { code: 'DKK', name: 'Danish Krone',      nameFr: 'Couronne danoise',      nameAr: 'الكرون الدنماركي',     flag: '🇩🇰', bkamUnit: 1   },
   // ── CNY ─────────────────────────────────────────────────────────────────
-  { code: 'CNY', name: 'Chinese Yuan',      nameFr: 'Yuan renminbi',         flag: '🇨🇳', bkamUnit: 1   },
+  { code: 'CNY', name: 'Chinese Yuan',      nameFr: 'Yuan renminbi',         nameAr: 'اليوان الصيني',        flag: '🇨🇳', bkamUnit: 1   },
   // ── Gulf / Arabic ────────────────────────────────────────────────────────
-  { code: 'AED', name: 'UAE Dirham',        nameFr: 'Dirham des Émirats',    flag: '🇦🇪', bkamUnit: 1   },
-  { code: 'SAR', name: 'Saudi Riyal',       nameFr: 'Riyal saoudien',        flag: '🇸🇦', bkamUnit: 1   },
-  { code: 'QAR', name: 'Qatari Riyal',      nameFr: 'Riyal qatarien',        flag: '🇶🇦', bkamUnit: 1   },
-  { code: 'KWD', name: 'Kuwaiti Dinar',     nameFr: 'Dinar koweïtien',       flag: '🇰🇼', bkamUnit: 1   },
-  { code: 'OMR', name: 'Omani Rial',        nameFr: 'Rial omanais',          flag: '🇴🇲', bkamUnit: 1   },
-  { code: 'BHD', name: 'Bahraini Dinar',    nameFr: 'Dinar bahreïni',        flag: '🇧🇭', bkamUnit: 1   },
-  { code: 'JOD', name: 'Jordanian Dinar',   nameFr: 'Dinar jordanien',       flag: '🇯🇴', bkamUnit: 1   },
+  { code: 'AED', name: 'UAE Dirham',        nameFr: 'Dirham des Émirats',    nameAr: 'درهم إماراتي',         flag: '🇦🇪', bkamUnit: 1   },
+  { code: 'SAR', name: 'Saudi Riyal',       nameFr: 'Riyal saoudien',        nameAr: 'ريال سعودي',           flag: '🇸🇦', bkamUnit: 1   },
+  { code: 'QAR', name: 'Qatari Riyal',      nameFr: 'Riyal qatarien',        nameAr: 'ريال قطري',            flag: '🇶🇦', bkamUnit: 1   },
+  { code: 'KWD', name: 'Kuwaiti Dinar',     nameFr: 'Dinar koweïtien',       nameAr: 'دينار كويتي',          flag: '🇰🇼', bkamUnit: 1   },
+  { code: 'OMR', name: 'Omani Rial',        nameFr: 'Rial omanais',          nameAr: 'ريال عماني',           flag: '🇴🇲', bkamUnit: 1   },
+  { code: 'BHD', name: 'Bahraini Dinar',    nameFr: 'Dinar bahreïni',        nameAr: 'دينار بحريني',         flag: '🇧🇭', bkamUnit: 1   },
+  { code: 'JOD', name: 'Jordanian Dinar',   nameFr: 'Dinar jordanien',       nameAr: 'دينار أردني',          flag: '🇯🇴', bkamUnit: 1   },
   // ── North African (indicative cross-rates) ───────────────────────────────
-  { code: 'TND', name: 'Tunisian Dinar',    nameFr: 'Dinar tunisien',        flag: '🇹🇳', bkamUnit: 1   },
-  { code: 'DZD', name: 'Algerian Dinar',    nameFr: 'Dinar algérien',        flag: '🇩🇿', bkamUnit: 100 },
-  { code: 'LYD', name: 'Libyan Dinar',      nameFr: 'Dinar libyen',          flag: '🇱🇾', bkamUnit: 1   },
+  { code: 'TND', name: 'Tunisian Dinar',    nameFr: 'Dinar tunisien',        nameAr: 'دينار تونسي',          flag: '🇹🇳', bkamUnit: 1   },
+  { code: 'DZD', name: 'Algerian Dinar',    nameFr: 'Dinar algérien',        nameAr: 'دينار جزائري',         flag: '🇩🇿', bkamUnit: 100 },
+  { code: 'LYD', name: 'Libyan Dinar',      nameFr: 'Dinar libyen',          nameAr: 'دينار ليبي',           flag: '🇱🇾', bkamUnit: 1   },
 ];
 
 // USD equivalence for currencies not available from ECB/Frankfurter.

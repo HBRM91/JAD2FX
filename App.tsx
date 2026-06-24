@@ -15,6 +15,9 @@ import CommoditiesPage    from './components/CommoditiesPage';
 import MarketReportPage   from './components/MarketReport';
 import FloatingChat       from './components/FloatingChat';
 import Jad2Logo           from './components/Jad2Logo';
+import MarketSessionsClock from './components/MarketSessionsClock';
+import CurrencyHeatmap   from './components/CurrencyHeatmap';
+import FxCrossMatrix      from './components/FxCrossMatrix';
 import { AdminProvider }  from './context/AdminContext';
 import { I18nProvider, useI18n, Locale } from './context/I18nContext';
 import {
@@ -315,7 +318,12 @@ function AppInner() {
           </div>
         )}
 
-        {view === 'DASHBOARD'   && <FxDashboard />}
+        {view === 'DASHBOARD'   && (
+          <div className="space-y-6">
+            <FxDashboard />
+            <CurrencyHeatmap rates={tickerRates} />
+          </div>
+        )}
         {view === 'ANALYSIS'    && <MarketAnalysis />}
         {view === 'FIXING'      && <BkamFixing />}
         {view === 'BILLETS'     && <BilletsPage />}
@@ -327,7 +335,14 @@ function AppInner() {
           <div>
             {view === 'FORWARDS' && <ForwardCalculator />}
             {view === 'SWAPS'    && <SwapSimulator />}
-            {view === 'LIVE'     && <LivePricer />}
+            {view === 'LIVE'     && (
+              <div className="space-y-6">
+                <MarketSessionsClock />
+                <LivePricer />
+                <CurrencyHeatmap rates={tickerRates} />
+                <FxCrossMatrix rates={tickerRates} />
+              </div>
+            )}
             {view === 'ADMIN'    && <AdminDashboard />}
           </div>
         )}

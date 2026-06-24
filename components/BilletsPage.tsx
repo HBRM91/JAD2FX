@@ -43,7 +43,9 @@ const OC_BILLET_RANGE: Record<ClientTier, { min: number; max: number }> = {
 interface BilletRow {
   code: string;
   flag: string;
+  name: string;
   nameFr: string;
+  nameAr: string;
   bkamUnit: number;
   bkamBilletBuy: number;
   bkamBilletSell: number;
@@ -54,6 +56,12 @@ interface BilletRow {
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
+
+function getCurrencyName(row: { name: string; nameFr: string; nameAr: string }, locale: string): string {
+  if (locale === 'ar') return row.nameAr;
+  if (locale === 'en') return row.name;
+  return row.nameFr;
+}
 
 const BilletsPage: React.FC = () => {
   const { config } = useAdmin();
@@ -109,7 +117,9 @@ const BilletsPage: React.FC = () => {
         return {
           code: cur.code,
           flag: cur.flag,
+          name: cur.name,
           nameFr: cur.nameFr,
+          nameAr: cur.nameAr,
           bkamUnit: cur.bkamUnit,
           bkamBilletBuy:  bBuy  * cur.bkamUnit,
           bkamBilletSell: bSell * cur.bkamUnit,
@@ -213,7 +223,7 @@ const BilletsPage: React.FC = () => {
                   <span className={`text-xs font-bold ${active ? TIER_LABEL[tier] : 'text-slate-600'}`}>
                     {t(`tier.${tier}`)}
                   </span>
-                  {active && <span className="text-[10px] text-gold-600 font-bold">✓ actif</span>}
+                  {active && <span className="text-[10px] text-gold-600 font-bold">✓ {locale === 'ar' ? 'نشط' : locale === 'en' ? 'active' : 'actif'}</span>}
                 </div>
                 <div className="text-[10px] text-slate-400 mt-0.5">
                   {t('billets.ocCommission')}: {FMT_BPS(tc.billetCommBps)}
@@ -238,11 +248,15 @@ const BilletsPage: React.FC = () => {
 
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-slate-50 rounded-lg p-3">
-              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Commission billet (admin)</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
+                {locale === 'ar' ? 'عمولة الأوراق النقدية' : locale === 'en' ? 'Banknote commission' : 'Commission billet (admin)'}
+              </p>
               <p className="text-2xl font-mono font-bold text-navy-900">{tierConfig.billetCommBps}<span className="text-sm text-slate-500 ml-1">bps</span></p>
             </div>
             <div className="bg-slate-50 rounded-lg p-3">
-              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Plage OC autorisée</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
+                {locale === 'ar' ? 'النطاق المرخص OC' : locale === 'en' ? 'OC authorised range' : 'Plage OC autorisée'}
+              </p>
               <p className="text-2xl font-mono font-bold text-navy-900">
                 {OC_BILLET_RANGE[selectedTier].min}–{OC_BILLET_RANGE[selectedTier].max}
                 <span className="text-sm text-slate-500 ml-1">bps</span>
@@ -271,7 +285,7 @@ const BilletsPage: React.FC = () => {
         <div className="p-4 border-b border-slate-100 flex items-center justify-between">
           <h2 className="text-sm font-bold text-navy-900 uppercase tracking-wider flex items-center gap-2">
             <Banknote size={14} className="text-gold-600" />
-            Cours Billets — 20 devises
+            {locale === 'ar' ? 'أسعار الأوراق النقدية — 20 عملة' : locale === 'en' ? 'Banknote Rates — 20 currencies' : 'Cours Billets — 20 devises'}
           </h2>
           {rows.some(r => r.bbeSource === 'BKAM_OFFICIAL') && (
             <span className="text-[9px] font-mono px-2 py-0.5 rounded border border-emerald-300 bg-emerald-50 text-emerald-700">
@@ -307,8 +321,8 @@ const BilletsPage: React.FC = () => {
                   <th className="py-1 px-3 text-center">{t('common.sell')}</th>
                   <th className="py-1 px-3 text-center font-medium text-gold-500">{t('common.buy')}</th>
                   <th className="py-1 px-3 text-center font-medium text-gold-500">{t('common.sell')}</th>
-                  <th className="py-1 px-3 text-center">Achat</th>
-                  <th className="py-1 px-3 text-center">Vente</th>
+                  <th className="py-1 px-3 text-center">{locale === 'ar' ? 'شراء' : locale === 'en' ? 'Buy' : 'Achat'}</th>
+                  <th className="py-1 px-3 text-center">{locale === 'ar' ? 'بيع' : locale === 'en' ? 'Sell' : 'Vente'}</th>
                 </tr>
               </thead>
               <tbody>
@@ -319,7 +333,7 @@ const BilletsPage: React.FC = () => {
                         <span className="text-base">{row.flag}</span>
                         <div>
                           <p className="font-bold text-navy-900">{row.code}/MAD</p>
-                          <p className="text-[10px] text-slate-400">{row.nameFr}</p>
+                          <p className="text-[10px] text-slate-400">{getCurrencyName(row, locale)}</p>
                         </div>
                         {row.bkamUnit !== 1 && (
                           <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">×{row.bkamUnit}</span>

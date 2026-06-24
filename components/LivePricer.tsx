@@ -6,6 +6,7 @@ import {
 import { BKAM_CURRENCIES, DEFAULT_BASKET_CONFIG } from '../constants';
 import { usePriceStream } from '../hooks/usePriceStream';
 import { useAdmin } from '../context/AdminContext';
+import { useI18n } from '../context/I18nContext';
 import { LivePriceEntry } from '../types';
 import { computeDriftModel, DriftRegression } from '../services/driftModel';
 
@@ -262,6 +263,7 @@ function DriftPanel({ corsProxyUrl }: { corsProxyUrl?: string }) {
 
 export default function LivePricer() {
   const { config, setLivePrices } = useAdmin();
+  const { locale } = useI18n();
   const stream = usePriceStream(config);
 
   useEffect(() => {
@@ -279,13 +281,13 @@ export default function LivePricer() {
         <div>
           <h2 className="text-2xl font-bold text-white flex items-center gap-3 tracking-widest uppercase">
             <Activity size={22} className="text-gold-500" />
-            Tableau de Bord — Cours Indicatifs
+            {locale === 'ar' ? 'لوحة التداول — أسعار استرشادية' : locale === 'en' ? 'Trading Board — Indicative Rates' : 'Tableau de Bord — Cours Indicatifs'}
           </h2>
           <p className="text-slate-400 text-sm mt-0.5">
-            14 paires BKAM · Bid / Ask / Mid · Cycle {intervalSecs}s
+            {locale === 'ar' ? `20 زوج BKAM · شراء / بيع / وسط · دورة ${intervalSecs}ث` : locale === 'en' ? `20 BKAM pairs · Bid / Ask / Mid · Cycle ${intervalSecs}s` : `20 paires BKAM · Bid / Ask / Mid · Cycle ${intervalSecs}s`}
           </p>
           <div className="mt-1 inline-flex items-center gap-1.5 text-[10px] border border-navy-600/30 text-slate-500 px-2 py-0.5 rounded tracking-wide">
-            Cours indicatifs · Non officiels BKAM · Pour conseil : jad2advisory.com
+            {locale === 'ar' ? 'أسعار استرشادية · غير رسمية BKAM · للاستشارة: jad2advisory.com' : locale === 'en' ? 'Indicative rates · Not official BKAM · Advisory: jad2advisory.com' : 'Cours indicatifs · Non officiels BKAM · Pour conseil : jad2advisory.com'}
           </div>
         </div>
 
@@ -387,7 +389,7 @@ export default function LivePricer() {
                 : '—',
             },
             { label: 'Tick Count', value: String(stream.tickCount) },
-            { label: 'Pairs Live', value: `${sorted.length} / 14` },
+            { label: locale === 'ar' ? 'أزواج نشطة' : locale === 'en' ? 'Pairs Live' : 'Paires actives', value: `${sorted.length} / 20` },
             { label: 'Refresh Interval', value: `${intervalSecs}s` },
           ].map(item => (
             <div key={item.label} className="bg-navy-900 border border-navy-700 rounded p-3 text-center">
@@ -404,9 +406,9 @@ export default function LivePricer() {
       {/* ── Legal footer ── */}
       <div className="space-y-1.5">
         <div className="flex flex-wrap items-center gap-4 text-[10px] text-slate-500 font-mono px-1">
-          <span><span className="text-red-400 font-bold">BID</span> — cours acheteur indicatif</span>
-          <span><span className="text-emerald-400 font-bold">ASK</span> — cours vendeur indicatif</span>
-          <span>Source: ECB/Frankfurter API — rafraîchi toutes les {intervalSecs}s</span>
+          <span><span className="text-red-400 font-bold">BID</span> — {locale === 'ar' ? 'سعر الشراء الاسترشادي' : locale === 'en' ? 'indicative buy rate' : 'cours acheteur indicatif'}</span>
+          <span><span className="text-emerald-400 font-bold">ASK</span> — {locale === 'ar' ? 'سعر البيع الاسترشادي' : locale === 'en' ? 'indicative sell rate' : 'cours vendeur indicatif'}</span>
+          <span>{locale === 'ar' ? `المصدر: BCR/Frankfurter API — تحديث كل ${intervalSecs}ث` : locale === 'en' ? `Source: ECB/Frankfurter API — refreshed every ${intervalSecs}s` : `Source: ECB/Frankfurter API — rafraîchi toutes les ${intervalSecs}s`}</span>
         </div>
         <p className="text-[10px] text-slate-600 px-1">
           Cours indicatifs dérivés des références ECB/Frankfurter. Pour opérations de change ou conseil professionnel :{' '}
