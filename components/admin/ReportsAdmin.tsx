@@ -4,6 +4,12 @@ import {
   ChevronDown, ChevronUp, Eye, Loader, Search, Zap, AlertTriangle,
   BookOpen,
 } from 'lucide-react';
+import CurrencyFlag from '../CurrencyFlag';
+
+const RADAR_CC: Record<string, string> = {
+  EUR:'eu', USD:'us', GBP:'gb', CHF:'ch', JPY:'jp', CAD:'ca',
+  SAR:'sa', AED:'ae', QAR:'qa', KWD:'kw',
+};
 import { useAdmin } from '../../context/AdminContext';
 import { generateReport, GeneratorProgress } from '../../services/reportGenerator';
 import { listReports, saveReport, publishReport, deleteReport, ReportMeta } from '../../services/reportStorage';
@@ -98,7 +104,7 @@ function ReportPreview({ report, onSave, onClose, isSaving }: {
           {report.radarData.map(r => (
             <div key={r.currency} className={`rounded border p-2 text-xs ${SENTIMENT_COLOR[r.sentiment]}`}>
               <div className="flex items-center justify-between mb-1">
-                <span className="font-mono font-bold">{r.flag} {r.currency}/MAD</span>
+                <span className="font-mono font-bold inline-flex items-center gap-1">{RADAR_CC[r.currency] && <CurrencyFlag countryCode={RADAR_CC[r.currency]} size="xs" />} {r.currency}/MAD</span>
                 <span className={`text-[10px] px-1 rounded font-bold border ${SENTIMENT_COLOR[r.sentiment]}`}>
                   {r.sentiment}
                 </span>

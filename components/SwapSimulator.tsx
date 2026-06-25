@@ -338,7 +338,7 @@ export default function SwapSimulator() {
                 className="w-full appearance-none bg-navy-800 border border-navy-600 text-white text-sm rounded px-3 py-2 pr-7 focus:outline-none focus:border-gold-500"
               >
                 {BKAM_CURRENCIES.map(c => (
-                  <option key={c.code} value={c.code}>{c.flag} {c.code}/MAD</option>
+                  <option key={c.code} value={c.code}>{c.code}/MAD</option>
                 ))}
               </select>
               <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />

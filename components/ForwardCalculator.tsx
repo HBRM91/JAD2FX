@@ -3,6 +3,7 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine,
 } from 'recharts';
+import CurrencyFlag from './CurrencyFlag';
 import {
   Calculator, TrendingUp, Clock, ChevronDown, RotateCw,
   AlertTriangle, BookOpen, Printer,
@@ -530,7 +531,7 @@ export default function ForwardCalculator() {
           {spot ? (
             <div className="bg-navy-800 border border-navy-600 rounded-lg px-4 py-2 text-right">
               <p className="text-[9px] text-slate-500 uppercase tracking-wider">
-                {curInfo?.flag} {currency}/MAD {locale === 'ar' ? 'فوري' : 'Spot'}
+                <span className="inline-flex items-center gap-1">{curInfo && <CurrencyFlag countryCode={curInfo.countryCode} size="xs" />} {currency}/MAD {locale === 'ar' ? 'فوري' : 'Spot'}</span>
               </p>
               <p className="text-xl font-mono font-bold text-gold-400">{fmt4(spot)}</p>
               {spotEntry?.changePercent !== undefined && spotEntry.changePercent !== 0 && (
@@ -581,7 +582,7 @@ export default function ForwardCalculator() {
                       className="w-full appearance-none bg-navy-800 border border-navy-600 text-white text-sm rounded px-3 py-2 pr-8 focus:outline-none focus:border-gold-500"
                     >
                       {BKAM_CURRENCIES.map(c => (
-                        <option key={c.code} value={c.code}>{c.flag} {c.code}/MAD</option>
+                        <option key={c.code} value={c.code}>{c.code}/MAD</option>
                       ))}
                     </select>
                     <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
@@ -678,7 +679,7 @@ export default function ForwardCalculator() {
                   <div className="bg-navy-900 border border-navy-700 rounded-xl p-5 flex-1">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-[10px] font-bold uppercase tracking-widest text-gold-500">
-                        {curInfo?.flag} {currency}/MAD — {locale === 'ar' ? 'عرض سعر آجل' : locale === 'en' ? 'Forward Quote' : 'Cotation Forward'}
+                        <span className="inline-flex items-center gap-1.5">{curInfo && <CurrencyFlag countryCode={curInfo.countryCode} size="xs" />} {currency}/MAD — {locale === 'ar' ? 'عرض سعر آجل' : locale === 'en' ? 'Forward Quote' : 'Cotation Forward'}</span>
                       </h3>
                       <span className="text-[9px] font-mono text-slate-500">{settlement}</span>
                     </div>
