@@ -137,21 +137,25 @@ const MarketAnalysis: React.FC = () => {
       const aedMad = 0.272294 * freshUsdMad;
 
       const result = await routeQuery({
-        strategy: 'cost-first',
-        systemPrompt: 'You are a senior FX strategist at a tier-1 investment bank, specialising in Moroccan and MENA markets. Write precise institutional market commentary. Never give investment advice or price targets.',
-        userMessage: `Generate a concise institutional market brief (3 paragraphs, max 230 words) from this live snapshot:
+        strategy: 'quality-first',
+        systemPrompt: `You are the chief FX strategist at a Tier-1 MENA investment bank. Write terse, data-dense institutional commentary. Strict rules:
+— Anchor EVERY claim to the live numbers provided. Do not state generic facts (e.g. "the band is ±5%" or "EUR has 60% weight") — those are known to the reader.
+— Quantify every observation: use basis-point moves, percentage changes, level vs prior range.
+— Do NOT give investment advice, price targets, or "you should hedge."
+— Write in the same language as the user message (French unless specified).`,
+        userMessage: `Rédige un brief institutionnel (3 paragraphes, max 260 mots) à partir de ce snapshot temps réel:
 
 G10 FX: EUR/USD ${freshEu.toFixed(4)} | GBP/USD ${gbpUsd.toFixed(4)} | USD/JPY ${usdJpy.toFixed(2)} | USD/CHF ${usdChf.toFixed(4)} | USD/CAD ${usdCad.toFixed(4)} | USD/TRY ${usdTry.toFixed(2)}
 MAD: USD/MAD ${freshUsdMad.toFixed(4)} | EUR/MAD ${freshEurMad.toFixed(4)} | SAR/MAD ${sarMad.toFixed(4)} | AED/MAD ${aedMad.toFixed(4)}
-BASKET: 60% EUR + 40% USD · BKAM K=${BASKET_K} · ±5% intervention band
+PANIER: K=${BASKET_K} · EUR/MAD_central théorique ≈ ${(BASKET_K * freshEu).toFixed(4)} vs actuel ${freshEurMad.toFixed(4)}
 
-Para 1 — G10 MACRO: EUR/USD level and mechanical basket impact on MAD. Key G10 divergence points.
-Para 2 — MOROCCO FX DRIVERS: Energy import bill, phosphate/OCP export revenues, tourism seasonality (Ramadan, summer), remittance flows from Moroccan diaspora in Europe and Gulf.
-Para 3 — CORPORATE TREASURY WATCHPOINTS: 2-3 actionable themes for Moroccan importers/exporters managing EUR/USD/MAD exposures, forward cover timing, Gulf interoperability (SAR/AED invoice currency choice).
+§1 — DRIVERS G10 ACTUELS: Quels mouvements G10 spécifiques expliquent la configuration EUR/USD aujourd'hui ? Divergences de politique monétaire BCE/Fed quantifiées. Impact mécanique calculé sur la parité USD/MAD.
+§2 — MARCHÉ MAD: Position du dirham dans la bande (utilisation calculée). Flux structurels dominants cette semaine (MRE saisonnalité, recettes OCP, facture pétrolière) et leur sens sur la pression de change.
+§3 — POINTS DE VIGILANCE CORPORATE: 2-3 thèmes concrets pour les trésoriers marocains sur la base des niveaux actuels — calendrier de couverture, asymétrie de risque EUR vs USD, opportunités de refacturation Gulf (AED/SAR).
 
-Close strictly with: "⚠️ Informational only — not investment advice (Loi n° 44-12 / AMMC). Advisory: jad2advisory.com"`,
-        maxTokens: 600,
-        temperature: 0.35,
+Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de conseil en investissement (Loi 44-12/AMMC). Conseil: jad2advisory.com"`,
+        maxTokens: 800,
+        temperature: 0.25,
       });
       setAiBrief(result.text);
       setBriefProv(result.provider);

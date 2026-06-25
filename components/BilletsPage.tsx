@@ -30,12 +30,12 @@ const TIER_LABEL: Record<ClientTier, string> = {
   INDIVIDUAL:'text-slate-500',
 };
 
-// BKAM OC authorized commission range for banknotes (per OC Circ. 01/2024)
+// OC-indicative commission bands for banknote operations (basis points, illustrative)
 const OC_BILLET_RANGE: Record<ClientTier, { min: number; max: number }> = {
-  CORPORATE:  { min: 4, max: 8 },
-  SME:        { min: 8, max: 15 },
-  TPE:        { min: 12, max: 20 },
-  INDIVIDUAL: { min: 15, max: 30 },
+  CORPORATE:  { min: 40,  max: 80  },
+  SME:        { min: 80,  max: 150 },
+  TPE:        { min: 120, max: 200 },
+  INDIVIDUAL: { min: 150, max: 300 },
 };
 
 // ─── Rate row ─────────────────────────────────────────────────────────────────

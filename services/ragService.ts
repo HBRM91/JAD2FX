@@ -488,13 +488,13 @@ En cas de litige sur les commissions appliquées, le client peut saisir:
   },
   {
     id: 'bkam-fixing-fixingrates',
-    title: "BKAM — Taux de Référence Officiels et Grille de Cotation des 20 Devises",
+    title: "BKAM — Taux de Référence Officiels et Grille de Cotation des 24 Devises",
     type: 'NOTE',
     date: '2024-06-01',
-    summary: "Description des taux de change officiels publiés par Bank Al-Maghrib pour les 14 devises cotées directement, plus 6 devises régionales calculées par taux croisés via USD.",
-    keywords: ['taux référence', 'cours change', '14 devises', '20 devises', 'eur mad', 'usd mad', 'gbp mad', 'jpy mad', 'cotation bkam', 'unité cotation', 'cours officiel bkam', 'dirham', 'fixing officiel', 'cours acheteur vendeur', 'omr', 'bhd', 'jod', 'tnd', 'dzd', 'lyd', 'golfe', 'maghreb'],
+    summary: "Description des taux de change officiels publiés par Bank Al-Maghrib pour les 14 devises cotées directement, plus 10 devises régionales calculées par taux croisés via USD.",
+    keywords: ['taux référence', 'cours change', '14 devises', '24 devises', 'eur mad', 'usd mad', 'gbp mad', 'jpy mad', 'cotation bkam', 'unité cotation', 'cours officiel bkam', 'dirham', 'fixing officiel', 'cours acheteur vendeur', 'omr', 'bhd', 'jod', 'tnd', 'dzd', 'lyd', 'golfe', 'maghreb'],
     content: `
-BKAM — Taux de Référence Officiels des 20 Devises:
+BKAM — Taux de Référence Officiels des 24 Devises:
 
 DEVISES OFFICIELLEMENT COTÉES PAR BKAM (14 devises):
 Bank Al-Maghrib cote officiellement les 14 devises suivantes contre le Dirham marocain (MAD):
@@ -513,7 +513,7 @@ Bank Al-Maghrib cote officiellement les 14 devises suivantes contre le Dirham ma
 13. SEK — Couronne suédoise (unité: 1 SEK)
 14. CNY — Yuan chinois (unité: 1 CNY)
 
-DEVISES RÉGIONALES — TAUX CROISÉS (6 devises indicatives):
+DEVISES RÉGIONALES — TAUX CROISÉS (10 devises indicatives):
 Calculées via USD/MAD officiel BKAM × parité USD:
 15. OMR — Rial omanais (1 USD = 0,3845 OMR — peg officiel)
 16. BHD — Dinar bahreïni (1 USD = 0,376 BHD — peg officiel)
@@ -521,7 +521,11 @@ Calculées via USD/MAD officiel BKAM × parité USD:
 18. TND — Dinar tunisien (~1 USD ≈ 3,10 TND — flottant géré, indicatif)
 19. DZD — Dinar algérien (unité: 100 DZD, ~1 USD ≈ 134,6 DZD — indicatif)
 20. LYD — Dinar libyen (~1 USD ≈ 4,80 LYD — indicatif)
-Ces 6 devises sont fournies à titre purement indicatif et ne constituent pas des cours officiels BKAM.
+21. ZAR — Rand sud-africain (flottant, indicatif)
+22. INR — Roupie indienne (unité: 100 INR, indicatif)
+23. BRL — Réal brésilien (flottant, indicatif)
+24. TRY — Livre turque (flottant, indicatif)
+Ces 10 devises sont fournies à titre purement indicatif et ne constituent pas des cours officiels BKAM.
 
 DEUX TYPES DE COURS OFFICIELS BKAM:
 1. Cours de change virement (Transfer exchange rate):
