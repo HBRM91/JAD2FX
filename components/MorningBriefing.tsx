@@ -8,7 +8,7 @@ import {
   Activity, Calendar, TrendingUp, TrendingDown, Minus,
   AlertTriangle, ChevronRight, RefreshCw, Globe, Clock,
   Shield, BarChart2, Zap, Download, FileText, Building2,
-  ArrowUp, ArrowDown, Target, Info,
+  ArrowUp, ArrowDown, Target, Info, Mail, CheckCircle, Send,
 } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
 import { useI18n } from '../context/I18nContext';
@@ -20,6 +20,7 @@ import CurrencyFlag from './CurrencyFlag';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type BriefingTab = 'OVERVIEW' | 'CALENDAR' | 'ANALYSIS';
+type NlStatus = 'idle' | 'loading' | 'success' | 'error';
 
 interface CalendarEvent {
   date: string;          // ISO YYYY-MM-DD
@@ -288,6 +289,268 @@ function BandGauge({ data, locale }: { data: BandData; locale: string }) {
   );
 }
 
+// ─── Newsletter subscription form ────────────────────────────────────────────
+
+function NewsletterSignup({ proxyUrl }: { proxyUrl: string }) {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<NlStatus>('idle');
+  const [errMsg, setErrMsg] = useState('');
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!email.trim() || !proxyUrl) return;
+    setStatus('loading');
+    try {
+      const res = await fetch(`${proxyUrl.replace(/\/$/, '')}/api/newsletter/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        signal: AbortSignal.timeout(12_000),
+      });
+      const data = await res.json() as { ok?: boolean; error?: string; already?: boolean };
+      if (!res.ok || !data.ok) throw new Error(data.error ?? `Erreur ${res.status}`);
+      setStatus('success');
+    } catch (err) {
+      setErrMsg(err instanceof Error ? err.message : 'Erreur réseau');
+      setStatus('error');
+    }
+  }
+
+  if (status === 'success') return (
+    <div className="flex items-center gap-3 py-3 px-4 bg-emerald-900/20 border border-emerald-700/40 rounded-xl">
+      <CheckCircle size={18} className="text-emerald-400 flex-shrink-0" />
+      <div>
+        <p className="text-sm font-bold text-emerald-300">Inscription confirmée</p>
+        <p className="text-xs text-emerald-400/80">Vous recevrez le briefing chaque matin à 09h00 Casablanca.</p>
+      </div>
+    </div>
+  );
+
+  return (
+    <form onSubmit={submit} className="flex flex-col sm:flex-row gap-2">
+      <input
+        type="email"
+        required
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        placeholder="votre@email.ma"
+        className="flex-1 bg-navy-950 border border-navy-700 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/30 transition-colors"
+      />
+      <button
+        type="submit"
+        disabled={status === 'loading' || !email}
+        className="flex items-center gap-2 bg-gold-500 text-navy-950 font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-gold-400 disabled:opacity-50 transition-colors flex-shrink-0"
+      >
+        <Send size={13} />
+        {status === 'loading' ? 'Inscription...' : 'S\'inscrire'}
+      </button>
+      {status === 'error' && <p className="text-xs text-red-400 mt-1">{errMsg}</p>}
+    </form>
+  );
+}
+
+// ─── Funnel CTA ───────────────────────────────────────────────────────────────
+
+function FunnelCTA({ variant = 'default' }: { variant?: 'default' | 'compact' | 'calendar' }) {
+  if (variant === 'compact') return (
+    <div className="flex items-center justify-between gap-4 px-5 py-3 bg-navy-950/50 border border-navy-800 rounded-lg">
+      <p className="text-[11px] text-slate-400 leading-snug">
+        <span className="font-semibold text-white">Formation & Accompagnement</span> en gestion des flux de change
+        pour vos équipes financières.
+      </p>
+      <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer"
+        className="flex-shrink-0 text-[11px] font-bold text-gold-400 hover:text-gold-300 transition-colors whitespace-nowrap">
+        jad2advisory.com →
+      </a>
+    </div>
+  );
+
+  if (variant === 'calendar') return (
+    <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl">
+      <p className="text-xs font-semibold text-amber-300 mb-1">Un événement macro vous interpelle ?</p>
+      <p className="text-[11px] text-amber-400/80 leading-relaxed mb-2">
+        JAD2 Advisory aide les équipes financières à comprendre l'impact des décisions de politique monétaire
+        sur les flux de change MAD et la réglementation Office des Changes.
+      </p>
+      <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer"
+        className="text-[11px] font-bold text-amber-300 hover:text-amber-200 transition-colors">
+        Discuter avec un expert → jad2advisory.com
+      </a>
+    </div>
+  );
+
+  return (
+    <div className="bg-navy-900 border border-navy-700 rounded-2xl p-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+        <div>
+          <p className="text-base font-bold text-white mb-1">Formation en marchés des changes</p>
+          <p className="text-sm text-slate-400 leading-relaxed max-w-md">
+            JAD2 Advisory accompagne les directeurs financiers et trésoriers dans la compréhension
+            des dynamiques de change MAD, la réglementation OC, et la lecture des données BKAM.
+          </p>
+        </div>
+        <div className="flex gap-2 flex-shrink-0">
+          <a href="https://jad2advisory.com/contact" target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-1.5 bg-gold-500 text-navy-950 font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-gold-400 transition-colors">
+            Parler à un expert
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Print-only document layout ───────────────────────────────────────────────
+
+function PrintLayout({
+  casaDate, livePrices, bandData, sentiment, report, upcoming,
+}: {
+  casaDate: string;
+  livePrices: import('../types').LivePriceEntry[];
+  bandData: BandData[];
+  sentiment: SentimentResult;
+  report: import('../types').MarketReport | null;
+  upcoming: CalendarEvent[];
+}) {
+  const eurBand = bandData.find(b => b.currency === 'EUR');
+  const usdBand = bandData.find(b => b.currency === 'USD');
+
+  return (
+    <div className="briefing-print-doc" style={{ display: 'none' }}>
+      {/* Header */}
+      <div className="briefing-print-header">
+        <div>
+          <div className="briefing-print-logo">JAD2FX — MORNING BRIEFING</div>
+          <div className="briefing-print-sub">by JAD2 Advisory · Casablanca, Maroc</div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div className="briefing-print-date">{casaDate}</div>
+          <div className="briefing-print-sub">09:00 Casablanca · CONFIDENTIEL</div>
+        </div>
+      </div>
+      <div className="briefing-print-divider" />
+
+      {/* Title from AI report */}
+      {report && (
+        <div className="briefing-print-section">
+          <div className="briefing-print-section-title">{report.titleFr}</div>
+          <p className="briefing-print-excerpt">{report.excerptFr}</p>
+        </div>
+      )}
+
+      {/* Rates table */}
+      <div className="briefing-print-section">
+        <div className="briefing-print-label">Taux de Change Indicatifs</div>
+        <table className="briefing-print-table">
+          <thead>
+            <tr><th>Paire</th><th>Bid</th><th>Ask</th><th>Mid</th><th>Var. 24h</th></tr>
+          </thead>
+          <tbody>
+            {livePrices.slice(0, 8).map(p => (
+              <tr key={p.currency}>
+                <td><strong>{p.pair}</strong></td>
+                <td>{p.bid.toFixed(4)}</td>
+                <td>{p.ask.toFixed(4)}</td>
+                <td><strong>{p.mid.toFixed(4)}</strong></td>
+                <td>{p.changePercent >= 0 ? '+' : ''}{p.changePercent.toFixed(3)}%</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p className="briefing-print-note">Taux indicatifs dérivés BKAM/ECB · Non exécutables · À titre pédagogique uniquement</p>
+      </div>
+
+      {/* Band utilization */}
+      {(eurBand || usdBand) && (
+        <div className="briefing-print-section">
+          <div className="briefing-print-label">Position dans les Bandes BKAM ±5%</div>
+          {[eurBand, usdBand].filter(Boolean).map(b => b && (
+            <div key={b.currency} className="briefing-print-band-row">
+              <strong>{b.pairLabel}</strong>:&nbsp;
+              Cours {b.current.toFixed(4)} · Parité {b.central.toFixed(4)} ·
+              Position {b.utilPct.toFixed(0)}% de la bande ·
+              Dérive {b.driftBps > 0 ? '+' : ''}{b.driftBps} bps
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Sentiment */}
+      <div className="briefing-print-section">
+        <div className="briefing-print-label">Sentiment Composite MAD</div>
+        <p className="briefing-print-sentiment">
+          {sentiment.label} (score {sentiment.score}/100) ·{' '}
+          {sentiment.drivers.length > 0 ? sentiment.drivers.join(' · ') : 'Stabilité relative'}
+        </p>
+      </div>
+
+      {/* Upcoming events */}
+      {upcoming.length > 0 && (
+        <div className="briefing-print-section">
+          <div className="briefing-print-label">Prochains Événements Macro (60 jours)</div>
+          <table className="briefing-print-table">
+            <thead>
+              <tr><th>Date</th><th>Événement</th><th>Impact MAD</th><th>J-</th></tr>
+            </thead>
+            <tbody>
+              {upcoming.slice(0, 6).map(ev => (
+                <tr key={ev.date + ev.type}>
+                  <td>{new Date(ev.date).toLocaleDateString('fr-MA', { day: '2-digit', month: 'short' })}</td>
+                  <td>{ev.titleFr}</td>
+                  <td>{ev.impact}</td>
+                  <td>{daysUntil(ev.date)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* AI content */}
+      {report?.contentFr && (
+        <div className="briefing-print-section briefing-print-pagebreak">
+          <div className="briefing-print-label">Analyse des Marchés</div>
+          <div className="briefing-print-analysis">{report.contentFr}</div>
+        </div>
+      )}
+
+      {/* Radar */}
+      {report?.radarData && report.radarData.length > 0 && (
+        <div className="briefing-print-section">
+          <div className="briefing-print-label">Radar Devises</div>
+          <table className="briefing-print-table">
+            <thead>
+              <tr><th>Devise/MAD</th><th>Cours</th><th>Var. 7j (bps)</th><th>Tendance</th><th>Perspective</th></tr>
+            </thead>
+            <tbody>
+              {report.radarData.map(r => (
+                <tr key={r.currency}>
+                  <td><strong>{r.currency}/MAD</strong></td>
+                  <td>{r.currentRate.toFixed(4)}</td>
+                  <td>{r.weeklyChangeBps > 0 ? '+' : ''}{r.weeklyChangeBps}</td>
+                  <td>{r.sentiment}</td>
+                  <td>{r.expectation}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* Footer */}
+      <div className="briefing-print-footer">
+        <p>
+          Données indicatives à titre éducatif uniquement · Non contractuelles · Non exécutables ·
+          JAD2 Advisory n'est pas un prestataire de services d'investissement ·
+          Pour toute opération de change, adressez-vous à un établissement de crédit agréé par Bank Al-Maghrib ·
+          jad2advisory.com
+        </p>
+        <p>© JAD2 Advisory · Casablanca, Maroc · {new Date().getFullYear()}</p>
+      </div>
+    </div>
+  );
+}
+
 // ─── Markdown renderer (minimal) ─────────────────────────────────────────────
 
 function MarkdownSection({ content }: { content: string }) {
@@ -366,6 +629,19 @@ export default function MorningBriefing() {
 
   return (
     <div className="space-y-5">
+
+      {/* ══ Print-only document (hidden in browser, appears in PDF) ════════════ */}
+      <PrintLayout
+        casaDate={casaDate}
+        livePrices={livePrices}
+        bandData={bandData}
+        sentiment={sentiment}
+        report={report}
+        upcoming={upcoming}
+      />
+
+      {/* ══ Screen content (hidden when printing) ══════════════════════════════ */}
+      <div className="briefing-screen">
 
       {/* ══ Briefing Header ════════════════════════════════════════════════════ */}
       <div className="bg-navy-900 border border-navy-700 rounded-xl overflow-hidden">
@@ -670,36 +946,36 @@ export default function MorningBriefing() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
                 {
-                  priority: eurBand && eurBand.utilPct > 60 ? 'HAUTE' : eurBand && eurBand.utilPct < 40 ? 'FAIBLE' : 'MODÉRÉE',
+                  priority: eurBand && eurBand.utilPct > 60 ? 'ÉLEVÉE' : eurBand && eurBand.utilPct < 40 ? 'FAIBLE' : 'MODÉRÉE',
                   priorityColor: eurBand && eurBand.utilPct > 60 ? 'text-red-400' : eurBand && eurBand.utilPct < 40 ? 'text-emerald-400' : 'text-amber-400',
                   icon: Shield,
-                  title: 'Couverture Importateurs EUR',
+                  title: 'Contexte EUR — Flux Import/Export',
                   body: eurBand
                     ? eurBand.utilPct > 60
-                      ? `EUR/MAD à ${eurBand.utilPct.toFixed(0)}% de la bande — fenêtre favorable pour sécuriser. Risque de dépréciation MAD si dépassement 80%.`
+                      ? `EUR/MAD à ${eurBand.utilPct.toFixed(0)}% de la bande BKAM — dynamique d'appréciation EUR visible. Contexte à surveiller pour les entreprises ayant des flux en EUR. Consultez votre banque domiciliataire.`
                       : eurBand.utilPct < 40
-                      ? `EUR/MAD en zone basse (${eurBand.utilPct.toFixed(0)}%). MAD relativement fort — considérer couvrir les dépenses EUR à 3–6 mois à ces niveaux.`
-                      : `EUR/MAD en zone neutre (${eurBand.utilPct.toFixed(0)}%). Politique de couverture régulière recommandée. Éviter sur-couverture.`
+                      ? `EUR/MAD en zone basse (${eurBand.utilPct.toFixed(0)}%) — MAD en position relative favorable par rapport à l'EUR. Éclairage pédagogique : comprendre ce contexte aide à anticiper vos flux. Votre banque agréée peut vous accompagner.`
+                      : `EUR/MAD en zone neutre (${eurBand.utilPct.toFixed(0)}%) — stabilité relative du panier. Contexte propice pour comprendre et planifier vos flux de change EUR. Adressez-vous à votre banque pour toute opération.`
                     : 'Données de bande non disponibles.',
                 },
                 {
-                  priority: sentiment.bias === 'BEARISH' ? 'HAUTE' : sentiment.bias === 'BULLISH' ? 'OPPORTUNITÉ' : 'MODÉRÉE',
+                  priority: sentiment.bias === 'BEARISH' ? 'ÉLEVÉE' : sentiment.bias === 'BULLISH' ? 'FAVORABLE' : 'MODÉRÉE',
                   priorityColor: sentiment.bias === 'BEARISH' ? 'text-red-400' : sentiment.bias === 'BULLISH' ? 'text-emerald-400' : 'text-amber-400',
                   icon: TrendingUp,
-                  title: 'Budget Taux de Change',
-                  body: `Score de sentiment ${sentiment.score}/100 (${sentiment.label.toLowerCase()}). ${
+                  title: 'Dynamique MAD — Éclairage Pédagogique',
+                  body: `Sentiment composite ${sentiment.score}/100 — ${sentiment.label.toLowerCase()}. ${
                     sentiment.bias === 'BEARISH'
-                      ? 'Revoir les hypothèses de budget MAD à la hausse. Sensibiliser les équipes achats à l\'impact devise.'
+                      ? 'La pression sur le panier MAD mérite d\'être intégrée dans votre lecture des flux EUR/USD. À contextualiser avec votre banque domiciliataire.'
                       : sentiment.bias === 'BULLISH'
-                      ? 'MAD en position favorable. Opportunité de fixer le taux budgétaire à des niveaux avantageux pour H2.'
-                      : 'Maintenir le taux budgétaire actuel. Pas de pression directionnelle nette.'
+                      ? 'Le MAD affiche une dynamique positive par rapport au panier. Contexte favorable à la compréhension de vos flux de change. Pour toute opération, consultez votre banque agréée BAM.'
+                      : 'Pas de pression directionnelle nette sur le MAD. Contexte de stabilité relative. Votre banque peut vous accompagner dans l\'anticipation de vos flux.'
                   }`,
                 },
                 {
-                  priority: nextEvent?.impact === 'DIRECT' ? 'BKAM' : nextEvent?.impact === 'HIGH' ? 'HAUTE' : 'MODÉRÉE',
+                  priority: nextEvent?.impact === 'DIRECT' ? 'BKAM' : nextEvent?.impact === 'HIGH' ? 'ÉLEVÉE' : 'MODÉRÉE',
                   priorityColor: nextEvent?.impact === 'DIRECT' ? 'text-gold-400' : nextEvent?.impact === 'HIGH' ? 'text-red-400' : 'text-amber-400',
                   icon: Calendar,
-                  title: 'Prochain Événement Macro',
+                  title: 'Prochain Événement Macro à Surveiller',
                   body: nextEvent
                     ? `${nextEvent.titleFr} — J-${daysUntil(nextEvent.date)} (${new Date(nextEvent.date).toLocaleDateString('fr-MA', { day: 'numeric', month: 'long' })}). ${nextEvent.noteFr}`
                     : 'Aucun événement majeur dans les 60 prochains jours.',
@@ -716,6 +992,9 @@ export default function MorningBriefing() {
               ))}
             </div>
           </div>
+
+          {/* ── Funnel CTA ───────────────────────────────────────────────── */}
+          <FunnelCTA variant="compact" />
 
           {/* ── Upcoming events preview ───────────────────────────────────── */}
           <div className="bg-navy-900 border border-navy-700 rounded-xl overflow-hidden">
@@ -758,6 +1037,24 @@ export default function MorningBriefing() {
               ))}
             </div>
           </div>
+
+          {/* ── Newsletter signup strip ──────────────────────────────────── */}
+          {config.corsProxyUrl && (
+            <div className="bg-navy-900 border border-navy-700 rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-3">
+                <Mail size={14} className="text-gold-500" />
+                <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Recevoir ce briefing chaque matin</h3>
+              </div>
+              <p className="text-xs text-slate-400 mb-3 leading-relaxed">
+                Inscrivez-vous pour recevoir le Morning Briefing FX quotidien à 09h00 Casablanca.
+                Données indicatives uniquement · Contenu éducatif · Non contractuel.
+              </p>
+              <NewsletterSignup proxyUrl={config.corsProxyUrl} />
+            </div>
+          )}
+
+          {/* ── Full advisory CTA ─────────────────────────────────────────── */}
+          <FunnelCTA />
         </div>
       )}
 
@@ -826,6 +1123,9 @@ export default function MorningBriefing() {
               Calendrier indicatif 2026 — Dates susceptibles d'être révisées. Source: FRB/Fed, BCE, BKAM. Les dates NFP peuvent être décalées en cas de jours fériés américains. Pour les dates définitives, consultez federalreserve.gov, ecb.europa.eu, bkam.ma.
             </p>
           </div>
+
+          <FunnelCTA variant="calendar" />
+          <FunnelCTA />
         </div>
       )}
 
@@ -908,6 +1208,19 @@ export default function MorningBriefing() {
                 Analyse générée par IA (Groq / Gemini) à partir des données BKAM, ECB et sources web Tavily.
                 À titre informatif uniquement — non contractuel — JAD2 Advisory.
               </div>
+
+              {/* Analysis tab funnel */}
+              {config.corsProxyUrl && (
+                <div className="bg-navy-900 border border-navy-700 rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Mail size={14} className="text-gold-500" />
+                    <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Recevoir ce briefing quotidiennement</h3>
+                  </div>
+                  <p className="text-xs text-slate-400 mb-3">Inscription gratuite · Données éducatives · 09h00 Casablanca</p>
+                  <NewsletterSignup proxyUrl={config.corsProxyUrl} />
+                </div>
+              )}
+              <FunnelCTA />
             </>
           )}
         </div>
@@ -916,11 +1229,14 @@ export default function MorningBriefing() {
       {/* ══ Footer ════════════════════════════════════════════════════════════ */}
       <div className="bg-navy-950/50 border border-navy-800 rounded-lg p-4">
         <p className="text-[10px] text-slate-600 text-center leading-relaxed">
-          Morning Briefing JAD2FX — Données indicatives à titre pédagogique · Cours BKAM / ECB Frankfurter · Non exécutables ·
-          Pour toute opération de change, adressez-vous à un établissement de crédit agréé par Bank Al-Maghrib ·{' '}
+          Morning Briefing JAD2FX — Données indicatives à titre éducatif uniquement · Cours BKAM / ECB Frankfurter · Non exécutables ·
+          Ce contenu ne constitue pas un conseil en investissement ni une recommandation de transaction de change ·
+          Pour toute opération, adressez-vous à un établissement de crédit agréé par Bank Al-Maghrib ·{' '}
           <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400">jad2advisory.com</a>
         </p>
       </div>
+
+      </div>{/* end briefing-screen */}
     </div>
   );
 }

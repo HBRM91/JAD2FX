@@ -555,6 +555,281 @@ function escHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
+// ─── Newsletter — subscribe / unsubscribe / admin list ───────────────────────
+
+const _nlRateLimit = new Map();
+function checkNlRateLimit(ip) {
+  const now = Date.now();
+  const entry = _nlRateLimit.get(ip) ?? { count: 0, reset: now + 3_600_000 };
+  if (now > entry.reset) { entry.count = 0; entry.reset = now + 3_600_000; }
+  entry.count++;
+  _nlRateLimit.set(ip, entry);
+  return entry.count <= 3; // 3 subscribe attempts per IP per hour
+}
+
+function nlToken(email) {
+  // Simple non-secret token: base64url of email (sufficient for educational newsletter)
+  return btoa(email).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+// Build the subscriber index (array of emails)
+async function getNlIndex(kv) {
+  try { const r = await kv.get('newsletter:index'); return r ? JSON.parse(r) : []; }
+  catch { return []; }
+}
+async function setNlIndex(kv, list) {
+  await kv.put('newsletter:index', JSON.stringify(list));
+}
+
+async function sendWelcomeEmail(email, env, siteUrl) {
+  if (!env.RESEND_API_KEY) return;
+  const unsubUrl = `${siteUrl}/api/newsletter/unsubscribe?email=${encodeURIComponent(email)}&token=${nlToken(email)}`;
+  const html = buildNewsletterHtml({
+    subject: 'Bienvenue au Morning Briefing JAD2FX',
+    preheader: 'Vous recevrez désormais le briefing FX quotidien chaque matin à 09h00 Casablanca.',
+    title: 'Inscription confirmée — Morning Briefing FX',
+    bodyHtml: `
+      <p style="font-size:14px;color:#334155;margin:0 0 16px">Bonjour,</p>
+      <p style="font-size:14px;color:#334155;margin:0 0 16px">
+        Vous êtes maintenant inscrit(e) au <strong>Morning Briefing FX quotidien de JAD2FX</strong>.<br/>
+        Chaque matin ouvrable à 09h00 heure de Casablanca, vous recevrez une analyse contextuelle
+        des marchés des changes MAD : données BKAM, dynamiques EUR et USD, et faits macro du jour.
+      </p>
+      <p style="font-size:13px;color:#64748b;margin:0 0 16px">
+        <strong>Ce briefing est strictement informatif et éducatif.</strong><br/>
+        Il ne constitue pas un conseil en investissement ni une recommandation de transaction de change.
+        Pour toute opération, adressez-vous à votre établissement bancaire agréé par Bank Al-Maghrib.
+      </p>
+      <div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:16px;margin:16px 0">
+        <p style="font-size:12px;color:#92400e;margin:0 0 6px;font-weight:600">
+          Vous souhaitez approfondir votre compréhension des marchés de change ?
+        </p>
+        <p style="font-size:12px;color:#b45309;margin:0">
+          JAD2 Advisory accompagne les entreprises marocaines dans la formation et la compréhension
+          des dynamiques de change et de la réglementation Office des Changes.
+          <a href="https://jad2advisory.com" style="color:#b45309;font-weight:700">→ jad2advisory.com</a>
+        </p>
+      </div>`,
+    unsubUrl,
+    siteUrl,
+  });
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from: 'JAD2FX Morning Briefing <briefing@jad2advisory.com>',
+      to: email,
+      subject: '✅ Inscription confirmée — Morning Briefing FX quotidien',
+      html,
+    }),
+    signal: AbortSignal.timeout(10_000),
+  }).catch(e => console.warn('[NL] Welcome email failed:', e));
+}
+
+function buildNewsletterHtml({ subject, preheader, title, bodyHtml, ratesTable = '', excerptFr = '', siteUrl, unsubUrl, date = '' }) {
+  const year = new Date().getFullYear();
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>${escHtml(subject)}</title>
+</head>
+<body style="margin:0;padding:20px;background:#f1f5f9;font-family:'Helvetica Neue',Arial,sans-serif">
+<div style="max-width:600px;margin:0 auto">
+  <!-- Header -->
+  <div style="background:#040C1C;border-radius:10px 10px 0 0;padding:24px 28px">
+    <p style="margin:0 0 4px;font-size:22px;font-weight:700;letter-spacing:0.15em;color:#D4AF37">JAD2FX</p>
+    <p style="margin:0;font-size:11px;letter-spacing:0.1em;color:#5090C0;text-transform:uppercase">Morning Briefing · by JAD2 Advisory</p>
+  </div>
+  ${date ? `<div style="background:#081628;padding:8px 28px"><p style="margin:0;font-size:11px;color:#4E7EAC;letter-spacing:0.05em">${escHtml(date)} · Casablanca · Données indicatives</p></div>` : ''}
+  <!-- Body -->
+  <div style="background:#ffffff;padding:28px">
+    ${title ? `<h1 style="margin:0 0 16px;font-size:18px;color:#0f172a;font-weight:700;line-height:1.3">${escHtml(title)}</h1>` : ''}
+    ${excerptFr ? `<p style="margin:0 0 20px;font-size:14px;color:#334155;line-height:1.6;font-style:italic;border-left:3px solid #D4AF37;padding-left:12px">${escHtml(excerptFr)}</p>` : ''}
+    ${bodyHtml}
+    ${ratesTable}
+    <div style="text-align:center;margin:24px 0">
+      <a href="${siteUrl}" style="display:inline-block;background:#D4AF37;color:#040C1C;padding:12px 28px;border-radius:6px;font-weight:700;font-size:13px;text-decoration:none;letter-spacing:0.05em">
+        Lire l'analyse complète →
+      </a>
+    </div>
+    <!-- Advisory soft CTA -->
+    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:16px;margin-top:20px">
+      <p style="margin:0 0 6px;font-size:12px;color:#92400e;font-weight:600">Formation & Accompagnement en marchés des changes</p>
+      <p style="margin:0 0 8px;font-size:12px;color:#b45309;line-height:1.5">
+        JAD2 Advisory accompagne les équipes financières des entreprises marocaines dans la
+        compréhension des dynamiques de change et de la réglementation Office des Changes.
+      </p>
+      <a href="https://jad2advisory.com" style="font-size:12px;color:#92400e;font-weight:700;text-decoration:none">jad2advisory.com →</a>
+    </div>
+  </div>
+  <!-- Footer -->
+  <div style="background:#f8fafc;border-radius:0 0 10px 10px;padding:16px 28px;border-top:1px solid #e2e8f0">
+    <p style="margin:0 0 6px;font-size:10px;color:#94a3b8;line-height:1.5">
+      Données indicatives à titre éducatif uniquement · Non contractuelles · JAD2 Advisory ne fournit pas de conseil en investissement.
+      Pour toute opération de change, adressez-vous à un établissement de crédit agréé par Bank Al-Maghrib.
+    </p>
+    <p style="margin:0;font-size:10px;color:#94a3b8">
+      © ${year} JAD2 Advisory, Casablanca ·
+      <a href="https://jad2advisory.com" style="color:#94a3b8">jad2advisory.com</a>
+      ${unsubUrl ? ` · <a href="${escHtml(unsubUrl)}" style="color:#94a3b8">Se désinscrire</a>` : ''}
+    </p>
+  </div>
+</div>
+</body>
+</html>`;
+}
+
+async function handleNewsletterSubscribe(request, env, origin) {
+  const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+  if (!checkNlRateLimit(ip)) return json({ error: 'Trop de tentatives — réessayez plus tard' }, 429, origin);
+  if (!env.REPORTS_KV) return json({ error: 'Service indisponible' }, 503, origin);
+
+  const rawBody = await readBodySafe(request);
+  let body;
+  try { body = JSON.parse(rawBody); } catch { return json({ error: 'JSON invalide' }, 400, origin); }
+
+  const email = (typeof body.email === 'string' ? body.email.trim().toLowerCase() : '');
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 200) {
+    return json({ error: 'Email invalide' }, 400, origin);
+  }
+
+  // Idempotent: return ok=true if already subscribed
+  const existing = await env.REPORTS_KV.get(`newsletter:sub:${email}`);
+  if (existing) {
+    const sub = JSON.parse(existing);
+    if (sub.active) return json({ ok: true, already: true }, 200, origin);
+    // Re-activate
+    sub.active = true;
+    sub.resubscribedAt = new Date().toISOString();
+    await env.REPORTS_KV.put(`newsletter:sub:${email}`, JSON.stringify(sub));
+  } else {
+    await env.REPORTS_KV.put(`newsletter:sub:${email}`, JSON.stringify({
+      email, subscribedAt: new Date().toISOString(), active: true,
+    }), { expirationTtl: 60 * 60 * 24 * 365 * 3 }); // 3 years
+  }
+
+  // Add to index (deduped)
+  const index = await getNlIndex(env.REPORTS_KV);
+  if (!index.includes(email)) {
+    index.push(email);
+    await setNlIndex(env.REPORTS_KV, index.slice(0, 5000));
+  }
+
+  // Send welcome email
+  const siteUrl = env.SITE_URL ?? 'https://jad2fx.pages.dev';
+  await sendWelcomeEmail(email, env, siteUrl);
+
+  return json({ ok: true }, 200, origin);
+}
+
+async function handleNewsletterUnsubscribe(request, env, origin) {
+  if (!env.REPORTS_KV) return json({ ok: true }, 200, origin);
+  const url = new URL(request.url);
+  const email = (url.searchParams.get('email') ?? '').toLowerCase();
+  const token = url.searchParams.get('token') ?? '';
+  if (!email || token !== nlToken(email)) return new Response('Lien invalide.', { status: 400 });
+
+  const raw = await env.REPORTS_KV.get(`newsletter:sub:${email}`);
+  if (raw) {
+    const sub = JSON.parse(raw);
+    sub.active = false;
+    sub.unsubscribedAt = new Date().toISOString();
+    await env.REPORTS_KV.put(`newsletter:sub:${email}`, JSON.stringify(sub));
+  }
+  const index = await getNlIndex(env.REPORTS_KV);
+  await setNlIndex(env.REPORTS_KV, index.filter(e => e !== email));
+
+  return new Response('Désinscription confirmée. Vous ne recevrez plus le Morning Briefing JAD2FX.', {
+    status: 200, headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+  });
+}
+
+async function handleNewsletterAdmin(request, env, origin) {
+  const denied = adminGate(request, env, origin);
+  if (denied) return denied;
+  if (!env.REPORTS_KV) return json({ count: 0, emails: [] }, 200, origin);
+  const index = await getNlIndex(env.REPORTS_KV);
+  return json({ count: index.length, emails: index }, 200, origin);
+}
+
+// Send daily briefing to all newsletter subscribers
+async function sendDailyNewsletter(report, todayRates, env) {
+  if (!env.RESEND_API_KEY || !env.REPORTS_KV) return;
+  const index = await getNlIndex(env.REPORTS_KV);
+  if (!index.length) { console.log('[CRON][NL] No subscribers'); return; }
+
+  const siteUrl = env.SITE_URL ?? 'https://jad2fx.pages.dev';
+  const dateStr = new Date().toLocaleDateString('fr-MA', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Casablanca',
+  });
+
+  // Build rates table rows
+  const KEY_PAIRS = ['EUR', 'USD', 'GBP', 'SAR', 'AED'];
+  const rateRows = KEY_PAIRS
+    .filter(c => todayRates?.[c])
+    .map(c => {
+      const rate = todayRates[c].toFixed(4);
+      return `<tr>
+        <td style="padding:8px 12px;font-weight:700;color:#1e293b;border-bottom:1px solid #e2e8f0">${c}/MAD</td>
+        <td style="padding:8px 12px;font-family:monospace;font-weight:700;color:#0f172a;border-bottom:1px solid #e2e8f0">${rate}</td>
+      </tr>`;
+    }).join('');
+
+  const ratesTable = rateRows ? `
+    <div style="margin:20px 0">
+      <p style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 8px">Taux indicatifs du jour (BKAM/ECB)</p>
+      <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden">
+        <thead><tr style="background:#f8fafc">
+          <th style="padding:8px 12px;font-size:11px;color:#64748b;text-align:left;text-transform:uppercase;letter-spacing:0.08em">Paire</th>
+          <th style="padding:8px 12px;font-size:11px;color:#64748b;text-align:left;text-transform:uppercase;letter-spacing:0.08em">Cours indicatif</th>
+        </tr></thead>
+        <tbody>${rateRows}</tbody>
+      </table>
+      <p style="font-size:10px;color:#94a3b8;margin:6px 0 0">Taux indicatifs à titre éducatif uniquement · Non contractuels · Source: BKAM / ECB Frankfurter</p>
+    </div>` : '';
+
+  const html = buildNewsletterHtml({
+    subject: report.titleFr,
+    preheader: report.excerptFr,
+    title: report.titleFr,
+    excerptFr: report.excerptFr,
+    bodyHtml: `<p style="font-size:13px;color:#64748b;margin:0 0 4px">Briefing quotidien · Données indicatives</p>`,
+    ratesTable,
+    siteUrl,
+    date: dateStr,
+    // unsubUrl per recipient — added in loop below
+  });
+
+  const subject = `JAD2FX · ${report.titleFr} · ${new Date().toLocaleDateString('fr-MA', { day: 'numeric', month: 'short', timeZone: 'Africa/Casablanca' })}`;
+
+  // Send in small batches to respect Resend rate limits
+  let sent = 0;
+  for (const email of index.slice(0, 200)) {
+    const sub = await env.REPORTS_KV.get(`newsletter:sub:${email}`);
+    if (sub && !JSON.parse(sub).active) continue; // skip unsubscribed
+
+    const unsubUrl = `${siteUrl}/api/newsletter/unsubscribe?email=${encodeURIComponent(email)}&token=${nlToken(email)}`;
+    // Inject per-recipient unsubscribe link
+    const personalHtml = html.replace('</body>', `
+      <div style="max-width:600px;margin:4px auto;text-align:center">
+        <p style="font-size:10px;color:#94a3b8">
+          <a href="${escHtml(unsubUrl)}" style="color:#94a3b8">Se désinscrire</a>
+        </p>
+      </div></body>`);
+
+    try {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: 'JAD2FX Morning Briefing <briefing@jad2advisory.com>', to: email, subject, html: personalHtml }),
+        signal: AbortSignal.timeout(8_000),
+      });
+      sent++;
+    } catch (e) { console.warn('[CRON][NL] Send failed:', email, e); }
+  }
+  console.log(`[CRON][NL] Sent ${sent}/${index.length} emails`);
+}
+
 // ─── BKAM rate fetch (used in scheduled handler) ──────────────────────────────
 async function fetchBkamRates(apiKey, dateStr) {
   if (!apiKey) return null;
@@ -713,12 +988,22 @@ async function handleScheduled(env) {
   });
 
   const systemPrompt = [
-    'Tu es un analyste FX senior spécialisé dans le marché des changes marocain (MAD).',
-    'Tu rédiges des rapports hebdomadaires pour des PME et TPE marocaines (import/export).',
-    'Ton ton est informatif, pédagogique et prudent. Les informations sont strictement indicatives.',
+    'Tu es un expert en marchés des changes marocains qui rédige un briefing quotidien ÉDUCATIF et INFORMATIF.',
+    'Public : directeurs financiers, trésoriers et responsables import/export de PME/ETI marocaines.',
+    'Objectif : contextualiser les dynamiques du marché MAD pour COMPRENDRE, pas pour conseiller.',
     '',
-    'Consignes éditoriales FR : Rapport factuel, accessible aux non-spécialistes. Contexte MAD en priorité.',
-    'Consignes éditoriales AR : تقرير واقعي وسهل الفهم للمؤسسات المغربية.',
+    '⚠️ CONTRAINTES ABSOLUES — Ne jamais violer :',
+    '- INTERDIT : "conseil", "recommandation", "couvrir", "hedger", "acheter", "vendre", "contrat de change", "position"',
+    '- INTERDIT : tout impératif directionnel ("vous devez", "il faut", "profitez de")',
+    '- AUTORISÉ : "contexte de marché", "dynamique", "à surveiller", "élément pédagogique", "données indicatives"',
+    '- Pour les opérations : toujours rediriger vers "votre établissement bancaire agréé par Bank Al-Maghrib"',
+    '',
+    'Ton éditorial : Factuel, dense, institutionnel. Référence au panier 60% EUR / 40% USD. Fixing BKAM 11h30 Casablanca.',
+    'Sections FR : ## Contexte Macro, ## Paires MAD du Jour, ## À Surveiller, ## Éclairage Pédagogique',
+    'Sections AR : نفس الأقسام بالعربية',
+    '',
+    '⚠️ BRIEFING QUOTIDIEN (pas hebdomadaire) — Axé sur la séance du jour, les données macro overnight,',
+    '   la position du MAD dans sa bande ±5%, et les événements des prochaines 48h.',
     '',
     'Réponds UNIQUEMENT avec un objet JSON valide respectant exactement cette structure :',
     '{',
@@ -746,9 +1031,10 @@ async function handleScheduled(env) {
     '## Veille web',
     searchCtx,
     '',
-    'Notes : Rapport automatique hebdomadaire — généré à 09h00 heure Casablanca.',
+    'Notes : Briefing quotidien automatique — généré à 09h00 heure de Casablanca · Données indicatives uniquement.',
+    'Évite tout langage transactionnel. Focalise sur le CONTEXTE éducatif et la COMPRÉHENSION des dynamiques.',
     '',
-    'Génère maintenant le rapport JSON complet. Les weeklyChangeBps dans radarData doivent refléter les chiffres réels fournis ci-dessus.',
+    'Génère le briefing JSON. Les weeklyChangeBps dans radarData reflètent les chiffres réels ci-dessus.',
   ].join('\n');
 
   // ── 7. Groq API call ──────────────────────────────────────────────────────
@@ -850,7 +1136,10 @@ async function handleScheduled(env) {
 
   console.log(`[CRON] Report published: ${reportId} (${Date.now() - t0}ms)`);
 
-  // Also refresh BDT yield curve in KV for forward pricing
+  // Send daily newsletter to subscribers
+  await sendDailyNewsletter(report, todayRates, env);
+
+  // Refresh BDT yield curve in KV for forward pricing
   await fetchAndStoreBdt(env);
 }
 
@@ -928,6 +1217,20 @@ export default {
     if (pathname === '/api/bdt/curve') {
       if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
       return handleBdtCurve(env, origin);
+    }
+
+    // ── Newsletter ────────────────────────────────────────────────────────────
+    if (pathname === '/api/newsletter/subscribe') {
+      if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
+      return handleNewsletterSubscribe(request, env, origin);
+    }
+    if (pathname === '/api/newsletter/unsubscribe') {
+      if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
+      return handleNewsletterUnsubscribe(request, env, origin);
+    }
+    if (pathname === '/api/newsletter/subscribers') {
+      if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
+      return handleNewsletterAdmin(request, env, origin);
     }
 
     // ── Contact form → Resend ─────────────────────────────────────────────────

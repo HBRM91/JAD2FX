@@ -138,16 +138,70 @@
         to   { opacity: 1; transform: translateY(0); }
       }
 
-      /* ── Print / Save as PDF ──────────────────────────────── */
+      /* ── Print / Save as PDF — Professional A4 Briefing ─── */
       @media print {
-        nav, footer, .rates-ticker, [data-no-print] { display: none !important; }
-        body { background: #fff !important; color: #000 !important; }
+        @page { size: A4; margin: 18mm 20mm; }
+
+        /* Hide all screen chrome */
+        nav, footer, .rates-ticker, [data-no-print],
+        .briefing-screen { display: none !important; }
+
+        /* Show print document */
+        .briefing-print-doc { display: block !important; }
+
+        body { background: #fff !important; color: #1a1a2e !important;
+               font-family: 'Helvetica Neue', Arial, sans-serif !important; font-size: 10pt; }
         main { max-width: 100% !important; padding: 0 !important; }
-        .bg-navy-900, .bg-navy-800, .bg-navy-950 { background: #fff !important; border-color: #e2e8f0 !important; }
-        .text-white, .text-slate-100, .text-slate-200, .text-slate-300 { color: #1e293b !important; }
-        .text-slate-400, .text-slate-500, .text-navy-400, .text-navy-500 { color: #64748b !important; }
-        .text-gold-400, .text-gold-500 { color: #b45309 !important; }
-        a { color: #2563eb !important; }
+
+        /* Print document styles */
+        .briefing-print-doc { font-size: 10pt; color: #1a1a2e; }
+        .briefing-print-header {
+          display: flex; justify-content: space-between; align-items: flex-end;
+          padding-bottom: 10px; border-bottom: 2px solid #0E2336;
+        }
+        .briefing-print-logo {
+          font-size: 18pt; font-weight: 700; color: #0E2336;
+          letter-spacing: 0.12em; text-transform: uppercase;
+        }
+        .briefing-print-sub { font-size: 8pt; color: #64748b; margin-top: 2px; }
+        .briefing-print-date { font-size: 10pt; font-weight: 600; color: #1a1a2e; text-align: right; }
+        .briefing-print-divider { border-top: 1px solid #e2e8f0; margin: 10px 0; }
+
+        .briefing-print-section { margin: 14px 0; }
+        .briefing-print-label {
+          font-size: 8pt; font-weight: 700; color: #64748b;
+          text-transform: uppercase; letter-spacing: 0.1em;
+          margin-bottom: 6px; border-left: 3px solid #D4AF37;
+          padding-left: 8px;
+        }
+        .briefing-print-section-title { font-size: 13pt; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
+        .briefing-print-excerpt { font-size: 10pt; color: #334155; font-style: italic; line-height: 1.5; }
+
+        .briefing-print-table { width: 100%; border-collapse: collapse; font-size: 9pt; margin: 6px 0; }
+        .briefing-print-table th {
+          background: #f8fafc; color: #475569; font-weight: 700;
+          padding: 5px 8px; text-align: left; border: 1px solid #e2e8f0;
+          font-size: 8pt; text-transform: uppercase; letter-spacing: 0.06em;
+        }
+        .briefing-print-table td { padding: 5px 8px; border: 1px solid #e2e8f0; color: #1e293b; }
+        .briefing-print-table tr:nth-child(even) td { background: #f8fafc; }
+
+        .briefing-print-note { font-size: 7.5pt; color: #94a3b8; margin-top: 4px; font-style: italic; }
+        .briefing-print-band-row { font-size: 9.5pt; color: #334155; margin: 4px 0; line-height: 1.5; }
+        .briefing-print-sentiment { font-size: 10pt; color: #334155; line-height: 1.5; }
+        .briefing-print-analysis {
+          font-size: 9.5pt; color: #334155; line-height: 1.6;
+          white-space: pre-wrap; word-break: break-word;
+        }
+        .briefing-print-pagebreak { page-break-before: always; }
+        .briefing-print-footer {
+          margin-top: 20px; padding-top: 8px;
+          border-top: 1px solid #e2e8f0;
+          font-size: 7.5pt; color: #94a3b8; line-height: 1.5;
+        }
+      }
+      @media screen {
+        .briefing-print-doc { display: none !important; }
       }
     </style>
   <!-- Plausible Analytics — cookieless, no consent banner needed.
