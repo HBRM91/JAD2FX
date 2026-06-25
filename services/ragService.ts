@@ -349,7 +349,7 @@ Recours:
 - En cas de désaccord persistant, recours devant le Comité de Recours de l'OC (formulaire disponible sur oc.gov.ma).
 - Délai de recours: 60 jours à compter de la notification de la décision de l'OC.
 
-Cas complexes (montants > 5M MAD ou implications pénales): Consultation d'un avocat spécialisé en droit des changes recommandée. Khouya FX peut mettre en relation avec des experts agréés.
+Cas complexes (montants > 5M MAD ou implications pénales): Consultation d'un avocat spécialisé en droit des changes recommandée. JAD2 Advisory peut vous orienter vers des experts agréés.
     `
   },
   {
@@ -420,7 +420,7 @@ EUR, USD, GBP, CHF, CAD, JPY (cotation au cent), SAR, AED, KWD, QAR, DKK, NOK, S
 6. DEVISES ADDITIONNELLES (6 devises — taux croisés via USD, non cotées officiellement par BKAM):
 OMR (Rial omanais), BHD (Dinar bahreïni), JOD (Dinar jordanien), TND (Dinar tunisien), DZD (Dinar algérien, cotation pour 100 DZD), LYD (Dinar libyen).
 Ces taux sont calculés par croisement avec le cours USD/MAD officiel et les taux de change USD publiés par les banques centrales concernées ou les marchés. Ils sont fournis à titre purement indicatif et ne constituent pas des cours officiels BKAM.
-Total sur la plateforme KhouyaFX: 24 devises (14 officielles BKAM + 10 indicatives cross-USD).
+Total sur la plateforme JAD2FX: 24 devises (14 officielles BKAM + 10 indicatives cross-USD).
 
 6. MARCHÉ INTERBANCAIRE DES CHANGES (MIC):
 - Seules les banques agréées par BKAM peuvent participer directement au MIC.
@@ -586,7 +586,7 @@ Les devises du Golfe (OMR, BHD, JOD) et du Maghreb (TND, DZD, LYD) ne font pas l
 4. RECOMMANDATIONS PRATIQUES:
 - Pour les transactions commerciales avec les pays du Golfe: utiliser l'USD ou l'EUR comme devise de transaction pour éviter les incertitudes de change.
 - Pour les transactions avec le Maghreb (Tunisie, Algérie, Libye): consulter préalablement votre banque agréée sur les délais et conditions spécifiques.
-- Les taux indiqués sur KhouyaFX sont purement indicatifs; les cours effectivement appliqués par votre banque peuvent différer.
+- Les taux indiqués sur JAD2FX sont purement indicatifs; les cours effectivement appliqués par votre banque peuvent différer.
     `
   },
 ];

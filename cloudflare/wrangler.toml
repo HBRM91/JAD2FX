@@ -22,3 +22,5 @@ crons = ["0 8 * * 1-5"]
 # GROQ_API_KEY     — Groq API key (LLM for reports + chat)
 # GEMINI_API_KEY   — Gemini 2.5 Flash API key (LLM fallback)
 # TWELVE_DATA_KEY  — Twelve Data API key (Yahoo Finance failover for 8 major pairs)
+# RESEND_API_KEY   — Resend API key (contact form + report notification emails)
+# CONTACT_EMAIL    — Lead destination email (e.g. contact@jad2advisory.com)

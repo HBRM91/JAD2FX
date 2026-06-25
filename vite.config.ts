@@ -13,6 +13,7 @@ export default defineConfig(({ mode }) => {
       define: {
         'process.env.ADMIN_PASSCODE':     JSON.stringify(env.ADMIN_PASSCODE     ?? env.VITE_ADMIN_PASSCODE),
         'process.env.CORS_PROXY_URL':     JSON.stringify(env.CORS_PROXY_URL     ?? env.VITE_CORS_PROXY_URL),
+        'process.env.WHATSAPP_NUMBER':    JSON.stringify(env.WHATSAPP_NUMBER    ?? ''),
         // Legacy keys kept for any remaining direct LLM usage
         'process.env.API_KEY':            JSON.stringify(env.GEMINI_API_KEY),
         'process.env.GEMINI_API_KEY':     JSON.stringify(env.GEMINI_API_KEY),

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import {
   Newspaper, Globe, RefreshCw, TrendingUp, TrendingDown, Minus,
   ExternalLink, AlertTriangle, Clock, ChevronDown, ChevronUp,
-  Building2, Users, FileText, BarChart2, Shield,
+  Building2, Users, FileText, BarChart2, Shield, Download,
 } from 'lucide-react';
 import { MarketReport as MarketReportType, RadarEntry } from '../types';
 import { getPublishedReport } from '../services/reportStorage';
@@ -444,6 +444,15 @@ export default function MarketReport() {
               >
                 <RefreshCw size={11} className={refreshing ? 'animate-spin' : ''} />
                 {isRtl ? 'تحديث' : 'Taux live'}
+              </button>
+              {/* Print / Save as PDF */}
+              <button
+                onClick={() => window.print()}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] border border-navy-700 bg-navy-800 rounded-lg text-slate-300 hover:border-gold-500 hover:text-gold-400 transition-colors"
+                title="Sauvegarder en PDF via l'impression"
+              >
+                <Download size={11} />
+                {isRtl ? 'تحميل PDF' : 'Télécharger PDF'}
               </button>
             </div>
           </div>

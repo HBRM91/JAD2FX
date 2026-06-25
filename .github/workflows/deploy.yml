@@ -25,8 +25,9 @@ jobs:
         env:
           # Vite reads CORS_PROXY_URL and ADMIN_PASSCODE (see vite.config.ts define map)
           # Also accepts VITE_ prefixed variants as fallback
-          CORS_PROXY_URL: ${{ secrets.CORS_PROXY_URL }}
-          ADMIN_PASSCODE: ${{ secrets.ADMIN_PASSCODE }}
+          CORS_PROXY_URL:    ${{ secrets.CORS_PROXY_URL }}
+          ADMIN_PASSCODE:    ${{ secrets.ADMIN_PASSCODE }}
+          WHATSAPP_NUMBER:   ${{ secrets.WHATSAPP_NUMBER }}
         run: npm run build
 
       - name: Deploy to Cloudflare Pages
@@ -34,6 +35,8 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          # SITE_URL for the prerender middleware is set in the Cloudflare Pages dashboard:
+          # Pages → jad2fx → Settings → Environment variables → SITE_URL = https://jad2fx.jad2advisory.com
           command: pages deploy dist --project-name=jad2fx --commit-dirty=true
 
   # ── Deploy Cloudflare Worker (API proxy) ──────────────────────────────────────
@@ -56,5 +59,9 @@ jobs:
           command: deploy
           secrets: |
             TWELVE_DATA_KEY
+            RESEND_API_KEY
+            CONTACT_EMAIL
         env:
           TWELVE_DATA_KEY: ${{ secrets.TWELVE_DATA_KEY }}
+          RESEND_API_KEY:  ${{ secrets.RESEND_API_KEY }}
+          CONTACT_EMAIL:   ${{ secrets.CONTACT_EMAIL }}

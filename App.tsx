@@ -21,6 +21,7 @@ import DisclaimerModal    from './components/DisclaimerModal';
 import CurrencyHeatmap   from './components/CurrencyHeatmap';
 import BkamBandsVisualizer from './components/BkamBandsVisualizer';
 import ResourcesPage from './components/ResourcesPage';
+import ContactForm        from './components/ContactForm';
 import FxCrossMatrix      from './components/FxCrossMatrix';
 import MarketRadar        from './components/MarketRadar';
 import { AdminProvider, useAdmin } from './context/AdminContext';
@@ -30,7 +31,7 @@ import {
   Building2, FileText, LayoutDashboard, Menu,
   Globe, ChevronRight, TrendingUp, ArrowLeftRight, Activity,
   Lock, X, BarChart2, Banknote, PackageOpen, Newspaper, Scale,
-  ChevronDown, ExternalLink, Zap,
+  ChevronDown, ExternalLink, Zap, MessageSquare,
 } from 'lucide-react';
 
 // ─── Nav data ─────────────────────────────────────────────────────────────────
@@ -230,6 +231,14 @@ function AppInner() {
               >
                 À Propos
               </button>
+              <button
+                onClick={() => navTo('CONTACT')}
+                className={`flex items-center gap-1.5 px-4 h-full text-[11px] font-semibold tracking-wide uppercase transition-colors ${
+                  view === 'CONTACT' ? 'text-gold-400 border-b-2 border-gold-500' : 'text-navy-300 hover:text-white'
+                }`}
+              >
+                Contact
+              </button>
             </div>
 
             {/* Right side controls */}
@@ -321,6 +330,14 @@ function AppInner() {
               }`}
             >
               <Building2 size={14} /> À Propos
+            </button>
+            <button
+              onClick={() => navTo('CONTACT')}
+              className={`w-full flex items-center gap-3 px-5 py-2.5 text-[13px] font-medium text-left ${
+                view === 'CONTACT' ? 'text-gold-400 bg-navy-800' : 'text-slate-300 hover:text-white hover:bg-navy-800/50'
+              }`}
+            >
+              <MessageSquare size={14} /> Contact
             </button>
             <button
               onClick={() => navTo('ADMIN')}
@@ -558,6 +575,34 @@ function AppInner() {
 
             {/* Market Radar — full width */}
             <MarketRadar tickerRates={tickerRates} />
+
+            {/* ── Advisory CTA strip ───────────────────────────────────── */}
+            <div className="bg-navy-900 border border-navy-700 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <p className="text-base font-bold text-white mb-1">Formation & Conseil en Gestion du Risque de Change</p>
+                <p className="text-sm text-slate-400">
+                  Auditez votre exposition FX · Optimisez votre stratégie de couverture · Maîtrisez la réglementation OC
+                </p>
+              </div>
+              <div className="flex gap-3 flex-shrink-0">
+                <button
+                  onClick={() => navTo('CONTACT')}
+                  className="flex items-center gap-2 bg-gold-500 text-navy-950 font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-gold-400 transition-colors shadow-lg shadow-gold-900/30"
+                >
+                  <MessageSquare size={14} />
+                  Nous contacter
+                </button>
+                <a
+                  href="https://jad2advisory.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-sm font-semibold text-gold-400 border border-gold-500/50 px-4 py-2.5 rounded-lg hover:border-gold-400 hover:bg-gold-500/5 transition-colors"
+                >
+                  <ExternalLink size={13} />
+                  jad2advisory.com
+                </a>
+              </div>
+            </div>
           </div>
         )}
 
@@ -590,7 +635,19 @@ function AppInner() {
           </div>
         )}
 
-        {view === 'ADMIN' && <AdminDashboard />}
+        {view === 'ADMIN'   && <AdminDashboard />}
+
+        {view === 'CONTACT' && (
+          <div className="space-y-6">
+            <div className="border-b border-navy-800 pb-4">
+              <h1 className="text-2xl font-bold text-white">Contactez JAD2 Advisory</h1>
+              <p className="text-sm text-slate-400 mt-1">
+                Cabinet de conseil stratégique & formation en gestion du risque de change · Casablanca
+              </p>
+            </div>
+            <ContactForm />
+          </div>
+        )}
 
         {/* ─── ABOUT ─────────────────────────────────────────────────────── */}
         {view === 'ABOUT' && (

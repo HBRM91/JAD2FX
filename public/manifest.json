@@ -1,0 +1,11 @@
+{
+  "name": "JAD2FX — Taux de Change MAD",
+  "short_name": "JAD2FX",
+  "description": "Terminal de taux de change indicatifs du dirham marocain — JAD2 Advisory, Casablanca",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#040C1C",
+  "theme_color": "#D4AF37",
+  "lang": "fr",
+  "icons": []
+}

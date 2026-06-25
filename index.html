@@ -6,6 +6,53 @@
     <title>JAD2FX — Données de Change MAD | JAD2 Advisory</title>
     <meta name="description" content="JAD2FX: données de change indicatives pour toutes les devises cotées par Bank Al-Maghrib. Outil pédagogique de JAD2 Advisory. Taux indicatifs uniquement — pas de conseil en investissement." />
     <meta name="robots" content="index, follow" />
+    <meta name="author" content="JAD2 Advisory" />
+    <meta name="theme-color" content="#D4AF37" />
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="JAD2FX — Taux de Change MAD | Bank Al-Maghrib" />
+    <meta property="og:description" content="Données de change indicatives du dirham marocain (MAD) — 24 devises · Bank Al-Maghrib · JAD2 Advisory, Casablanca" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://jad2fx.pages.dev" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content="JAD2FX" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="JAD2FX — Taux de Change MAD" />
+    <meta name="twitter:description" content="Taux de change indicatifs MAD — 24 devises — Bank Al-Maghrib — JAD2 Advisory" />
+
+    <!-- PWA manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="canonical" href="https://jad2fx.pages.dev" />
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://api.frankfurter.app" />
+    <link rel="dns-prefetch" href="https://api.centralbankofmorocco.ma" />
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "JAD2FX",
+      "url": "https://jad2fx.pages.dev",
+      "description": "Terminal de taux de change indicatifs du dirham marocain (MAD) — données Bank Al-Maghrib. Outil pédagogique de JAD2 Advisory.",
+      "publisher": {
+        "@type": "Organization",
+        "name": "JAD2 Advisory",
+        "url": "https://jad2advisory.com",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Casablanca",
+          "addressCountry": "MA"
+        }
+      }
+    }
+    </script>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script>
@@ -89,7 +136,23 @@
         from { opacity: 0; transform: translateY(5px); }
         to   { opacity: 1; transform: translateY(0); }
       }
+
+      /* ── Print / Save as PDF ──────────────────────────────── */
+      @media print {
+        nav, footer, .rates-ticker, [data-no-print] { display: none !important; }
+        body { background: #fff !important; color: #000 !important; }
+        main { max-width: 100% !important; padding: 0 !important; }
+        .bg-navy-900, .bg-navy-800, .bg-navy-950 { background: #fff !important; border-color: #e2e8f0 !important; }
+        .text-white, .text-slate-100, .text-slate-200, .text-slate-300 { color: #1e293b !important; }
+        .text-slate-400, .text-slate-500, .text-navy-400, .text-navy-500 { color: #64748b !important; }
+        .text-gold-400, .text-gold-500 { color: #b45309 !important; }
+        a { color: #2563eb !important; }
+      }
     </style>
+  <!-- Plausible Analytics — cookieless, no consent banner needed.
+       Update data-domain to match your Plausible account domain once registered. -->
+  <script defer data-domain="jad2fx.pages.dev" src="https://plausible.io/js/script.js"></script>
+
   <script type="importmap">
 {
   "imports": {

@@ -24,7 +24,7 @@ const ALLOWED_ORIGIN_PATTERNS = [
   /^https:\/\/[a-z0-9-]+\.jad2fx\.pages\.dev$/,  // all Pages preview + prod URLs
   /^https:\/\/jad2fx\.com$/,
   /^https:\/\/jad2fx\.pages\.dev$/,
-  /^http:\/\/localhost:(5173|4173)$/,
+  /^http:\/\/localhost:(3000|5173|4173)$/,
 ];
 
 const CORS_HEADERS = {
@@ -467,6 +467,94 @@ async function handleTelemetryGet(request, env, origin) {
   return json(result, 200, origin);
 }
 
+// ─── Contact form → Resend email ─────────────────────────────────────────────
+// POST /api/contact  — public (rate-limited by IP)
+
+const _contactRateLimit = new Map();
+function checkContactRateLimit(ip) {
+  const now = Date.now();
+  const entry = _contactRateLimit.get(ip) ?? { count: 0, reset: now + 60_000 };
+  if (now > entry.reset) { entry.count = 0; entry.reset = now + 60_000; }
+  entry.count++;
+  _contactRateLimit.set(ip, entry);
+  if (_contactRateLimit.size > 2000) {
+    for (const [k, v] of _contactRateLimit) { if (now > v.reset) _contactRateLimit.delete(k); }
+  }
+  return entry.count <= 5; // 5 contact submissions per minute per IP
+}
+
+// Allowed service types — no investment advice language
+const ALLOWED_SERVICES = new Set([
+  'Formation', 'Conseil marché', 'Analyse', 'Accompagnement réglementaire',
+  'Automatisation', 'Autre',
+]);
+
+async function handleContact(request, env, origin) {
+  const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+  if (!checkContactRateLimit(ip)) return json({ error: 'Trop de requêtes — réessayez dans une minute' }, 429, origin);
+
+  const rawBody = await readBodySafe(request);
+  if (!rawBody || rawBody.error) return json({ error: rawBody?.error ?? 'Corps vide' }, 400, origin);
+
+  let body;
+  try { body = JSON.parse(rawBody); }
+  catch { return json({ error: 'JSON invalide' }, 400, origin); }
+
+  const name    = typeof body.name    === 'string' ? body.name.slice(0, 100).trim()    : '';
+  const email   = typeof body.email   === 'string' ? body.email.slice(0, 200).trim()   : '';
+  const company = typeof body.company === 'string' ? body.company.slice(0, 100).trim() : '';
+  const service = typeof body.service === 'string' ? body.service.slice(0, 60).trim()  : '';
+  const message = typeof body.message === 'string' ? body.message.slice(0, 2000).trim(): '';
+
+  if (!name || name.length < 2)   return json({ error: 'Nom requis (2 caractères minimum)' }, 400, origin);
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'Email invalide' }, 400, origin);
+  if (!ALLOWED_SERVICES.has(service)) return json({ error: 'Type de service invalide' }, 400, origin);
+
+  if (!env.RESEND_API_KEY) return json({ error: 'Service email non configuré' }, 503, origin);
+
+  const to = env.CONTACT_EMAIL ?? 'contact@jad2advisory.com';
+  const subject = `[JAD2FX] Nouveau contact — ${service} — ${name}`;
+  const html = `
+<h2>Nouveau message JAD2FX</h2>
+<table cellpadding="8" style="border-collapse:collapse;font-family:sans-serif;font-size:14px">
+  <tr><td style="font-weight:600;color:#555">Nom</td><td>${escHtml(name)}</td></tr>
+  <tr><td style="font-weight:600;color:#555">Email</td><td><a href="mailto:${escHtml(email)}">${escHtml(email)}</a></td></tr>
+  ${company ? `<tr><td style="font-weight:600;color:#555">Entreprise</td><td>${escHtml(company)}</td></tr>` : ''}
+  <tr><td style="font-weight:600;color:#555">Service</td><td>${escHtml(service)}</td></tr>
+  ${message ? `<tr><td style="font-weight:600;color:#555;vertical-align:top">Message</td><td>${escHtml(message).replace(/\n/g, '<br/>')}</td></tr>` : ''}
+</table>
+<hr/>
+<p style="font-size:12px;color:#888">Envoyé depuis JAD2FX · jad2fx.pages.dev</p>
+`;
+
+  try {
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: 'JAD2FX <noreply@jad2advisory.com>', to, subject, html }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      console.error('[Contact] Resend error:', res.status, err);
+      return json({ error: 'Erreur envoi email — réessayez plus tard' }, 502, origin);
+    }
+  } catch (err) {
+    console.error('[Contact] fetch failed:', err);
+    return json({ error: 'Erreur réseau — réessayez plus tard' }, 502, origin);
+  }
+
+  return json({ ok: true }, 200, origin);
+}
+
+function escHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 // ─── BKAM rate fetch (used in scheduled handler) ──────────────────────────────
 async function fetchBkamRates(apiKey, dateStr) {
   if (!apiKey) return null;
@@ -840,6 +928,12 @@ export default {
     if (pathname === '/api/bdt/curve') {
       if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
       return handleBdtCurve(env, origin);
+    }
+
+    // ── Contact form → Resend ─────────────────────────────────────────────────
+    if (pathname === '/api/contact') {
+      if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
+      return handleContact(request, env, origin);
     }
 
     // ── Anonymous sim telemetry ───────────────────────────────────────────────
