@@ -236,7 +236,24 @@ function computeChange24h(
   return +((todayMid - prevMid) / prevMid * 100).toFixed(4);
 }
 
-export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: string): Promise<{
+function applySmartSpread(mid: number, code: string, config: BasketConfig, dealerSpreads?: Record<string, number>) {
+  // Smart BPS: per-currency pips from dealer matrix, fallback to global config
+  const vPips = dealerSpreads?.[code] ?? (config.virementSpreadPercent * 10000);
+  const bPips = vPips * (config.billetSpreadPercent / config.virementSpreadPercent); // maintain billets ratio
+  const vSpread = mid * (vPips / 10000);
+  const bSpread = mid * (bPips / 10000);
+  // Asymmetric: ask side 52%, bid side 48% (market convention — sell side slightly wider)
+  return {
+    virementBuy:  +(mid - vSpread * 0.48).toFixed(4),
+    virementSell: +(mid + vSpread * 0.52).toFixed(4),
+    billetBuy:    +(mid - bSpread * 0.48).toFixed(4),
+    billetSell:   +(mid + bSpread * 0.52).toFixed(4),
+    spreadPct:    +(vPips / 100).toFixed(3),
+    vPips,
+  };
+}
+
+export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: string, dealerSpreads?: Record<string, number>): Promise<{
   rates: LiveRate[];
   ratesDate: string;
   lastFetch: string;
@@ -274,17 +291,16 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
 
         const displayMid = rawMid * currency.bkamUnit;
         const filteredMid = sanityFilter(currency.code, displayMid);
-        const vS = config.virementSpreadPercent;
-        const bS = config.billetSpreadPercent;
+        const spread = applySmartSpread(filteredMid, currency.code, config, dealerSpreads);
 
         rates.push({
           currency: currency.code,
           pair: `${currency.code}/MAD`,
           mid: +filteredMid.toFixed(4),
-          virementBuy:  +(filteredMid * (1 - vS)).toFixed(4),
-          virementSell: +(filteredMid * (1 + vS)).toFixed(4),
-          billetBuy:    +(filteredMid * (1 - bS)).toFixed(4),
-          billetSell:   +(filteredMid * (1 + bS)).toFixed(4),
+          virementBuy:  spread.virementBuy,
+          virementSell: spread.virementSell,
+          billetBuy:    spread.billetBuy,
+          billetSell:   spread.billetSell,
           change24h: computeChange24h(filteredMid, prevEurRates, currency.code, currency.bkamUnit, config, bkamYesterdayRates),
           source: 'CALCULATED',
           feedStatus: 'LIVE',
@@ -327,17 +343,16 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
     const { mid: cagedMid, isCapped } = applySafetyCage(currency.code, displayMid);
     // Apply sanity filter (rejects ticks > 2%/min)
     const filteredMid = sanityFilter(currency.code, cagedMid);
-    const vS = config.virementSpreadPercent;
-    const bS = config.billetSpreadPercent;
+    const spread = applySmartSpread(filteredMid, currency.code, config, dealerSpreads);
 
     rates.push({
       currency: currency.code,
       pair: `${currency.code}/MAD`,
       mid: +filteredMid.toFixed(4),
-      virementBuy:  +(filteredMid * (1 - vS)).toFixed(4),
-      virementSell: +(filteredMid * (1 + vS)).toFixed(4),
-      billetBuy:    +(filteredMid * (1 - bS)).toFixed(4),
-      billetSell:   +(filteredMid * (1 + bS)).toFixed(4),
+      virementBuy:  spread.virementBuy,
+      virementSell: spread.virementSell,
+      billetBuy:    spread.billetBuy,
+      billetSell:   spread.billetSell,
       change24h: computeChange24h(filteredMid, prevEurRates, currency.code, currency.bkamUnit, config, bkamYesterdayRates),
       source: source as LiveRate['source'],
       feedStatus,

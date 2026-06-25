@@ -5,6 +5,7 @@ import { BKAM_CURRENCIES, BANKS, BANK_SPREAD_PREMIUM, DEFAULT_BASKET_CONFIG } fr
 import { fetchAllMadRates, generateIntradayData } from '../services/fxRates';
 import { isJumuahReducedLiquidity } from '../services/holidays';
 import { Download, RefreshCw, Search, ArrowUpDown, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import CurrencyFlag from './CurrencyFlag';
 import { useI18n } from '../context/I18nContext';
 
 const SPREAD_TOOLTIP = "Marges simulées sur base des moyennes mondiales marchés émergents. Sources : Banque Mondiale (Remittance Prices 2024) / BIS (Triennial Survey 2022). Non contractuelles.";
@@ -146,15 +147,12 @@ const FxDashboard: React.FC = () => {
                 {/* Currency */}
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2.5">
-                    <span className="text-lg flex-shrink-0">{meta?.flag}</span>
+                    {meta && <CurrencyFlag countryCode={meta.countryCode} size="md" />}
                     <div>
                       <div className="flex items-center gap-1.5">
                         <span className="font-bold text-white text-[13px]">{rate.currency}</span>
                         {isJumuahReducedLiquidity(rate.currency) && (
                           <span title="Vendredi — Liquidité réduite" className="text-[11px]">🕌</span>
-                        )}
-                        {rate.isCapped && (
-                          <span title="Safety Cage activée" className="text-[8px] bg-amber-500/15 text-amber-400 border border-amber-500/30 px-1 py-0.5 rounded font-bold">CAGE</span>
                         )}
                         {meta?.bkamUnit === 100 && (
                           <span className="text-[8px] bg-navy-800 text-navy-400 border border-navy-700 px-1 rounded">×100</span>

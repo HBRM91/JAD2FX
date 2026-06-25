@@ -15,6 +15,7 @@ export interface CurrencyInfo {
   nameFr: string;
   nameAr: string;
   flag: string;
+  countryCode: string;
   bkamUnit: number;
 }
 

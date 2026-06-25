@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useI18n } from '../context/I18nContext';
 import { TrendingUp, TrendingDown, Minus, RefreshCw, Zap } from 'lucide-react';
 import { LiveRate } from '../types';
+import CurrencyFlag from './CurrencyFlag';
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -16,6 +17,7 @@ interface RadarQuote {
   unit: string;
   category: 'FX' | 'ENERGY' | 'METALS' | 'AGRICULTURE';
   flag?: string;
+  countryCode?: string;
 }
 
 // ─── Yahoo Finance fetcher via Worker proxy ───────────────────────────────────
@@ -39,17 +41,17 @@ async function fetchYahooPrice(symbol: string, corsProxy: string): Promise<{ pri
 
 const RADAR_ITEMS: Array<{
   symbol: string; label: string; labelFr: string; labelAr: string;
-  unit: string; category: RadarQuote['category']; flag?: string;
+  unit: string; category: RadarQuote['category']; flag?: string; countryCode?: string;
   divisor?: number; fallback: number;
 }> = [
   // FX — derived from Frankfurter (filled in at runtime from tickerRates)
-  { symbol: 'EUR/USD', label: 'EUR/USD', labelFr: 'EUR/USD', labelAr: 'يورو/دولار', unit: '', category: 'FX', flag: '🇪🇺', fallback: 1.085 },
-  { symbol: 'GBP/USD', label: 'GBP/USD', labelFr: 'GBP/USD', labelAr: 'جنيه/دولار', unit: '', category: 'FX', flag: '🇬🇧', fallback: 1.270 },
-  { symbol: 'USD/CHF', label: 'USD/CHF', labelFr: 'USD/CHF', labelAr: 'دولار/فرنك', unit: '', category: 'FX', flag: '🇨🇭', fallback: 0.905 },
-  { symbol: 'USD/JPY', label: 'USD/JPY', labelFr: 'USD/JPY', labelAr: 'دولار/ين',   unit: '', category: 'FX', flag: '🇯🇵', fallback: 155.0 },
-  { symbol: 'USD/SEK', label: 'USD/SEK', labelFr: 'USD/SEK', labelAr: 'دولار/كرون', unit: '', category: 'FX', flag: '🇸🇪', fallback: 10.60 },
-  { symbol: 'USD/DKK', label: 'USD/DKK', labelFr: 'USD/DKK', labelAr: 'دولار/كرون.د', unit: '', category: 'FX', flag: '🇩🇰', fallback: 6.88 },
-  { symbol: 'USD/NOK', label: 'USD/NOK', labelFr: 'USD/NOK', labelAr: 'دولار/كرون.ن', unit: '', category: 'FX', flag: '🇳🇴', fallback: 10.50 },
+  { symbol: 'EUR/USD', label: 'EUR/USD', labelFr: 'EUR/USD', labelAr: 'يورو/دولار', unit: '', category: 'FX', countryCode: 'eu', fallback: 1.085 },
+  { symbol: 'GBP/USD', label: 'GBP/USD', labelFr: 'GBP/USD', labelAr: 'جنيه/دولار', unit: '', category: 'FX', countryCode: 'gb', fallback: 1.270 },
+  { symbol: 'USD/CHF', label: 'USD/CHF', labelFr: 'USD/CHF', labelAr: 'دولار/فرنك', unit: '', category: 'FX', countryCode: 'ch', fallback: 0.905 },
+  { symbol: 'USD/JPY', label: 'USD/JPY', labelFr: 'USD/JPY', labelAr: 'دولار/ين',   unit: '', category: 'FX', countryCode: 'jp', fallback: 155.0 },
+  { symbol: 'USD/SEK', label: 'USD/SEK', labelFr: 'USD/SEK', labelAr: 'دولار/كرون', unit: '', category: 'FX', countryCode: 'se', fallback: 10.60 },
+  { symbol: 'USD/DKK', label: 'USD/DKK', labelFr: 'USD/DKK', labelAr: 'دولار/كرون.د', unit: '', category: 'FX', countryCode: 'dk', fallback: 6.88 },
+  { symbol: 'USD/NOK', label: 'USD/NOK', labelFr: 'USD/NOK', labelAr: 'دولار/كرون.ن', unit: '', category: 'FX', countryCode: 'no', fallback: 10.50 },
   // Commodities (Yahoo Finance symbols)
   { symbol: 'BZ=F',  label: 'Brent Oil',  labelFr: 'Brent',       labelAr: 'نفط برنت', unit: '$/bbl', category: 'ENERGY',      flag: '🛢️',  fallback: 82.0, divisor: 1 },
   { symbol: 'ZW=F',  label: 'Wheat',      labelFr: 'Blé',         labelAr: 'قمح',       unit: '¢/bu',  category: 'AGRICULTURE',  flag: '🌾',  fallback: 585, divisor: 1 },
@@ -125,7 +127,9 @@ function QuoteCard({ q, locale }: { q: RadarQuote; locale: string; key?: React.K
   return (
     <div className={`border rounded-lg px-3 py-2.5 flex items-center justify-between gap-2 transition-all ${bg}`}>
       <div className="flex items-center gap-2 min-w-0">
-        {q.flag && <span className="text-base flex-shrink-0">{q.flag}</span>}
+        {q.countryCode
+          ? <CurrencyFlag countryCode={q.countryCode} size="sm" />
+          : q.flag && <span className="text-base flex-shrink-0">{q.flag}</span>}
         <div className="min-w-0">
           <p className="text-[11px] font-bold text-white truncate">{label}</p>
           {q.unit && <p className="text-[9px] text-slate-600 font-mono">{q.unit}</p>}
@@ -180,7 +184,7 @@ export default function MarketRadar({ tickerRates }: Props) {
             symbol: def.symbol, label: def.label, labelFr: def.labelFr, labelAr: def.labelAr,
             price: r?.price ?? def.fallback,
             change: 0, changePercent: r?.pct ?? 0,
-            unit: def.unit, category: def.category, flag: def.flag,
+            unit: def.unit, category: def.category, flag: def.flag, countryCode: def.countryCode,
           };
         } else {
           const idx = commoditySymbols.findIndex(c => c.symbol === def.symbol);
@@ -190,7 +194,7 @@ export default function MarketRadar({ tickerRates }: Props) {
             price: live?.price ?? def.fallback,
             change: live?.change ?? 0,
             changePercent: live?.pct ?? 0,
-            unit: def.unit, category: def.category, flag: def.flag,
+            unit: def.unit, category: def.category, flag: def.flag, countryCode: def.countryCode,
           };
         }
       });
@@ -249,7 +253,7 @@ export default function MarketRadar({ tickerRates }: Props) {
               ? RADAR_ITEMS.filter(r => FX_SYMBOLS.has(r.symbol)).map(r => ({
                   symbol: r.symbol, label: r.label, labelFr: r.labelFr, labelAr: r.labelAr,
                   price: r.fallback, change: 0, changePercent: 0,
-                  unit: r.unit, category: r.category as RadarQuote['category'], flag: r.flag,
+                  unit: r.unit, category: r.category as RadarQuote['category'], flag: r.flag, countryCode: r.countryCode,
                 } as RadarQuote))
               : fxQuotes
             ).map((q: RadarQuote) => <QuoteCard key={q.symbol} q={q} locale={locale} />)}
@@ -264,7 +268,7 @@ export default function MarketRadar({ tickerRates }: Props) {
               ? RADAR_ITEMS.filter(r => !FX_SYMBOLS.has(r.symbol)).map(r => ({
                   symbol: r.symbol, label: r.label, labelFr: r.labelFr, labelAr: r.labelAr,
                   price: r.fallback, change: 0, changePercent: 0,
-                  unit: r.unit, category: r.category as RadarQuote['category'], flag: r.flag,
+                  unit: r.unit, category: r.category as RadarQuote['category'], flag: r.flag, countryCode: r.countryCode,
                 } as RadarQuote))
               : commQuotes
             ).map((q: RadarQuote) => <QuoteCard key={q.symbol} q={q} locale={locale} />)}

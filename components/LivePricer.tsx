@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import {
   Activity, RefreshCw, TrendingUp, TrendingDown, Minus, Wifi, WifiOff,
-  BarChart2, AlertCircle,
+  BarChart2, AlertCircle, Settings2,
 } from 'lucide-react';
-import { BKAM_CURRENCIES, DEFAULT_BASKET_CONFIG } from '../constants';
+import { BKAM_CURRENCIES, DEFAULT_BASKET_CONFIG, CURRENCY_ORDER } from '../constants';
+import CurrencyFlag from './CurrencyFlag';
 import { usePriceStream } from '../hooks/usePriceStream';
 import { useAdmin } from '../context/AdminContext';
 import { useI18n } from '../context/I18nContext';
@@ -36,7 +37,7 @@ function PriceRow({ entry }: { entry: LivePriceEntry }) {
     <tr className={`group border-b border-navy-800/60 transition-colors ${bgFlash}`}>
       <td className="py-2.5 pl-4 pr-3">
         <div className="flex items-center gap-2">
-          <span className="text-base">{info?.flag ?? '🌐'}</span>
+          {info ? <CurrencyFlag countryCode={info.countryCode} size="md" /> : <span className="text-base">🌐</span>}
           <div>
             <div className="text-sm font-bold text-white font-mono">{entry.pair}</div>
             <div className="text-[10px] text-slate-500">{displayName}</div>
@@ -276,7 +277,30 @@ export default function LivePricer() {
   }, [stream.prices, setLivePrices]);
 
   const intervalSecs = Math.max(30_000, config.refreshIntervalMs) / 1000;
-  const sorted = [...stream.prices].sort((a, b) => a.currency.localeCompare(b.currency));
+
+  const [filterOpen, setFilterOpen] = useState(false);
+  const [visibleCodes, setVisibleCodes] = useState<Set<string>>(() => {
+    try {
+      const s = localStorage.getItem('jad2fx_live_ccy');
+      return s ? new Set(JSON.parse(s)) : new Set(BKAM_CURRENCIES.map(c => c.code));
+    } catch { return new Set(BKAM_CURRENCIES.map(c => c.code)); }
+  });
+
+  function toggleCode(code: string) {
+    setVisibleCodes(prev => {
+      const next = new Set(prev);
+      if (next.has(code)) {
+        if (next.size <= 1) return prev;
+        next.delete(code);
+      } else { next.add(code); }
+      localStorage.setItem('jad2fx_live_ccy', JSON.stringify([...next]));
+      return next;
+    });
+  }
+
+  const sorted = [...stream.prices]
+    .filter(p => visibleCodes.has(p.currency))
+    .sort((a, b) => (CURRENCY_ORDER[a.currency] ?? 99) - (CURRENCY_ORDER[b.currency] ?? 99));
 
   return (
     <div className="space-y-4">
@@ -324,6 +348,13 @@ export default function LivePricer() {
           )}
 
           <button
+            onClick={() => setFilterOpen(o => !o)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 border rounded text-xs font-medium transition ${filterOpen ? 'border-gold-600 text-gold-400 bg-gold-500/5' : 'bg-navy-800 border-navy-600 hover:border-gold-600 text-slate-300 hover:text-white'}`}
+          >
+            <Settings2 size={12} />
+            {visibleCodes.size < BKAM_CURRENCIES.length ? `${visibleCodes.size}/${BKAM_CURRENCIES.length}` : 'Filter'}
+          </button>
+          <button
             onClick={stream.refresh}
             disabled={stream.isRefreshing}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-navy-800 border border-navy-600 hover:border-gold-600 text-slate-300 hover:text-white rounded text-xs font-medium transition disabled:opacity-50"
@@ -333,6 +364,32 @@ export default function LivePricer() {
           </button>
         </div>
       </div>
+
+      {/* ── Currency filter panel ── */}
+      {filterOpen && (
+        <div className="bg-navy-900 border border-navy-700 rounded-lg p-4">
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-xs font-bold text-white uppercase tracking-wider">Devises visibles</p>
+            <div className="flex gap-2">
+              <button onClick={() => { const all = new Set(BKAM_CURRENCIES.map(c => c.code)); setVisibleCodes(all); localStorage.setItem('jad2fx_live_ccy', JSON.stringify([...all])); }} className="text-[10px] text-gold-400 hover:text-gold-300">Tout sélectionner</button>
+              <span className="text-navy-600">·</span>
+              <button onClick={() => { const g10 = new Set(['EUR','USD','GBP','CHF','JPY','CAD','NOK','SEK','DKK','CNY']); setVisibleCodes(g10); localStorage.setItem('jad2fx_live_ccy', JSON.stringify([...g10])); }} className="text-[10px] text-navy-400 hover:text-slate-300">G10 seulement</button>
+            </div>
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {BKAM_CURRENCIES.map(c => (
+              <button
+                key={c.code}
+                onClick={() => toggleCode(c.code)}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all ${visibleCodes.has(c.code) ? 'bg-gold-500/15 border-gold-600/50 text-gold-300' : 'bg-navy-800 border-navy-700 text-slate-500 hover:border-navy-600'}`}
+              >
+                <CurrencyFlag countryCode={c.countryCode} size="xs" />
+                {c.code}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Price table ── */}
       <div className="bg-navy-900 border border-navy-700 rounded-lg overflow-hidden">

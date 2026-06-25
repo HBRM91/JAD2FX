@@ -58,7 +58,7 @@ export function usePriceStream(adminConfig: AdminConfig): StreamState {
   const doFetch = useCallback(async () => {
     setIsRefreshing(true);
     try {
-      const { rates } = await fetchAllMadRates(buildBasketConfig(), adminConfig.corsProxyUrl || undefined);
+      const { rates } = await fetchAllMadRates(buildBasketConfig(), adminConfig.corsProxyUrl || undefined, adminConfig.dealerSpreadPips);
 
       const entries: LivePriceEntry[] = rates.map(rate => {
         const adminMid = adminConfig.spotOverrides[rate.currency];

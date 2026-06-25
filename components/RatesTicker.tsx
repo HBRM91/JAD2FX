@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { LiveRate } from '../types';
 import { BKAM_CURRENCIES } from '../constants';
+import CurrencyFlag from './CurrencyFlag';
 
 interface Props {
   rates: LiveRate[];
@@ -51,7 +52,7 @@ const RatesTicker: React.FC<Props> = ({ rates }) => {
               const arrow = isUp ? '▲' : isDn ? '▼' : '—';
               return (
                 <span key={rate.currency} className="flex items-center gap-1.5 text-xs">
-                  <span className="text-sm">{meta?.flag}</span>
+                  {meta && <CurrencyFlag countryCode={meta.countryCode} size="sm" />}
                   <span className="text-slate-400 font-medium">{rate.pair}</span>
                   <span className="text-white font-mono font-bold">{rate.mid.toFixed(4)}</span>
                   {chg !== 0 && (

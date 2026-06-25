@@ -95,7 +95,7 @@ function AppInner() {
   const navDropdownRef = useRef<HTMLDivElement>(null);
 
   const refreshRates = useCallback(() => {
-    fetchAllMadRates(DEFAULT_BASKET_CONFIG, config.corsProxyUrl)
+    fetchAllMadRates(DEFAULT_BASKET_CONFIG, config.corsProxyUrl, config.dealerSpreadPips)
       .then(({ rates }) => {
         setTickerRates(rates);
         const entries: LivePriceEntry[] = rates.map(r => {
