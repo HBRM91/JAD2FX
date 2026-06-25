@@ -85,6 +85,8 @@ const jsonLd = {
   },
 };
 
+import FloatingChat from '@/app/sections/FloatingChat';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className="dark">
@@ -107,6 +109,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={`${inter.variable} font-sans antialiased`} style={{ backgroundColor: '#0A0F1E' }}>
         {children}
+        <FloatingChat />
       </body>
     </html>
   );
