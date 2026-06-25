@@ -13,6 +13,7 @@ import BkamFixing         from './components/BkamFixing';
 import BilletsPage        from './components/BilletsPage';
 import CommoditiesPage    from './components/CommoditiesPage';
 import MarketReportPage   from './components/MarketReport';
+import MorningBriefing   from './components/MorningBriefing';
 import RegulationsPage    from './components/RegulationsPage';
 import FloatingChat       from './components/FloatingChat';
 import Jad2Logo           from './components/Jad2Logo';
@@ -75,7 +76,7 @@ const NAV_GROUPS: NavGroup[] = [
     id: 'research',
     label: 'Recherche',
     items: [
-      { label: 'Market Report IA',   view: 'REPORT',      icon: Newspaper,    desc: 'Rapport hebdo Groq/Gemini' },
+      { label: 'Morning Briefing',    view: 'REPORT',      icon: Newspaper,    desc: 'Briefing 9h · Stratégiste en chef' },
       { label: 'Réglementation OC',  view: 'REGULATIONS', icon: Scale,        desc: 'Circulaires Office des Changes' },
       { label: 'Ressources',         view: 'RESOURCES',   icon: ExternalLink, desc: 'Liens institutionnels & data' },
     ],
@@ -619,7 +620,7 @@ function AppInner() {
         {view === 'FIXING'      && <BkamFixing />}
         {view === 'BILLETS'     && <BilletsPage />}
         {view === 'COMMODITIES' && <CommoditiesPage />}
-        {view === 'REPORT'      && <MarketReportPage />}
+        {view === 'REPORT'      && <MorningBriefing />}
         {view === 'REGULATIONS' && <RegulationsPage />}
         {view === 'FORWARDS'    && <ForwardCalculator />}
         {view === 'SWAPS'       && <SwapSimulator />}
