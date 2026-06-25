@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare
+name: Deploy JAD2FX
 
 on:
   push:
@@ -6,10 +6,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  # ── Build & Deploy React SPA → Cloudflare Pages ───────────────────────────────
-  deploy-pages:
-    name: Deploy Frontend (Cloudflare Pages)
+  # ── Build & Deploy Next.js → Vercel ──────────────────────────────────────────
+  deploy-vercel:
+    name: Deploy Frontend (Vercel)
     runs-on: ubuntu-latest
+    # Only runs if VERCEL_TOKEN secret is present
+    if: vars.DEPLOY_TARGET == 'vercel' || vars.DEPLOY_TARGET == ''
     steps:
       - uses: actions/checkout@v4
 
@@ -21,22 +23,16 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build
-        env:
-          # Vite reads CORS_PROXY_URL and ADMIN_PASSCODE (see vite.config.ts define map)
-          # Also accepts VITE_ prefixed variants as fallback
-          CORS_PROXY_URL: ${{ secrets.CORS_PROXY_URL }}
-          ADMIN_PASSCODE: ${{ secrets.ADMIN_PASSCODE }}
-        run: npm run build
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
         with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=jad2fx --commit-dirty=true
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod'
+          working-directory: ./
 
-  # ── Deploy Cloudflare Worker (API proxy) ──────────────────────────────────────
+  # ── Deploy Cloudflare Worker (API proxy for LLM/BKAM) ────────────────────────
   deploy-worker:
     name: Deploy Worker (Cloudflare Worker)
     runs-on: ubuntu-latest
@@ -47,7 +43,7 @@ jobs:
         with:
           node-version: 20
 
-      - name: Deploy Worker + set secrets
+      - name: Deploy Worker
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -55,6 +51,16 @@ jobs:
           workingDirectory: cloudflare
           command: deploy
           secrets: |
-            TWELVE_DATA_KEY
+            BKAM_FX_KEY
+            BKAM_MONIA_KEY
+            GROQ_API_KEY
+            GEMINI_API_KEY
+            TAVILY_KEY
+            ADMIN_PASSCODE
         env:
-          TWELVE_DATA_KEY: ${{ secrets.TWELVE_DATA_KEY }}
+          BKAM_FX_KEY: ${{ secrets.BKAM_FX_KEY }}
+          BKAM_MONIA_KEY: ${{ secrets.BKAM_MONIA_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TAVILY_KEY: ${{ secrets.TAVILY_KEY }}
+          ADMIN_PASSCODE: ${{ secrets.ADMIN_PASSCODE }}

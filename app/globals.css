@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-primary:  #0A0F1E;
+  --bg-surface:  #111827;
+  --bg-elevated: #1E293B;
+  --border-default: rgba(255,255,255,0.08);
+  --border-hover:   rgba(255,255,255,0.15);
+  --text-primary:   #F1F5F9;
+  --text-secondary: #94A3B8;
+  --text-muted:     #64748B;
+  --accent-teal: #00C896;
+  --accent-gold: #D4A017;
+  --accent-blue: #3B82F6;
+  --positive:    #22C55E;
+  --negative:    #EF4444;
+}
+
+html {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  scroll-behavior: smooth;
+}
+
+/* Monospace numbers for all rate displays */
+.rate-number {
+  font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* Flash animations */
+@keyframes flash-green {
+  0%   { background-color: rgba(34,197,94,0.25); }
+  100% { background-color: transparent; }
+}
+@keyframes flash-red {
+  0%   { background-color: rgba(239,68,68,0.25); }
+  100% { background-color: transparent; }
+}
+.animate-flash-green { animation: flash-green 800ms ease-out forwards; }
+.animate-flash-red   { animation: flash-red   800ms ease-out forwards; }
+
+/* Shimmer skeleton */
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--bg-surface);
+  border-radius: 4px;
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255,255,255,0.04),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--bg-elevated); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: #2D3F56; }
+
+/* Focus ring */
+*:focus-visible {
+  outline: 2px solid var(--accent-teal);
+  outline-offset: 2px;
+}
+
+/* Table horizontal scroll on mobile */
+.table-scroll-container {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
