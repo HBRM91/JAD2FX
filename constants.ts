@@ -142,7 +142,7 @@ export const MARKET_NEWS = [
     title: "Phase III du régime de change : signaux et préconditions BKAM",
     category: "Politique Monétaire",
     time: "Éditorial",
-    summary: "Les discussions BKAM–FMI (Ligne de Précaution et de Liquidité) réaffirment l'objectif d'élargissement progressif des bandes d'intervention au-delà du ±5% actuel. Le Gouverneur Jouahri a conditionné cette transition à trois indicateurs : réserves officielles > 5 mois d'importations, inflation ancrée près de 2%, et consolidation du compte courant. À horizon 2027, un passage à ±7,5% est plausible — les directions financières devraient stress-tester leurs expositions MAD à cette nouvelle amplitude potentielle."
+    summary: "Les discussions BKAM–FMI (Ligne de Précaution et de Liquidité) réaffirment l'objectif d'élargissement progressif des bandes d'intervention au-delà du ±5% actuel. Le Gouverneur Jouahri a conditionné cette transition à trois indicateurs : réserves officielles > 5 mois d'importations, inflation ancrée près de 2%, et consolidation du compte courant. À horizon 2027, un passage à ±7,5% est envisageable — un scénario à intégrer dans l'analyse de sensibilité des expositions MAD. Pour toute décision de couverture, consultez votre banque ou un intermédiaire agréé BAM."
   }
 ];
 

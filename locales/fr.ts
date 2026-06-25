@@ -45,7 +45,7 @@ const fr: Record<string, string> = {
 
   // Billets page
   'billets.title': 'Bureau de Change — Cours Billets de Banque',
-  'billets.subtitle': 'Taux de change billets pour les 20 devises · Achat / Vente indicatifs',
+  'billets.subtitle': 'Taux de change billets pour les 24 devises · Achat / Vente indicatifs',
   'billets.officialLink': 'Cours officiels billets BKAM ↗',
   'billets.vsBillet': 'vs Virement',
   'billets.cashNote': 'Les cours billets sont moins favorables que les cours virements (coûts logistiques espèces + OC commission).',

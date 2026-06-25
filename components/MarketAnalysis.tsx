@@ -232,7 +232,7 @@ Close strictly with: "⚠️ Informational only — not investment advice (Loi n
       icon: <Building2 size={13} className="text-purple-400 shrink-0 mt-0.5" />,
       title: 'PME Gulf (AED/SAR)',
       sub: 'Prestataires & sous-traitants',
-      body: `AED/MAD ${(0.272294 * usdMad).toFixed(4)} — SAR/MAD ${(0.266667 * usdMad).toFixed(4)}. Facturation Gulf en AED ou SAR requiert couverture contre variation USD/MAD (pégs stables mais MAD peut varier).`,
+      body: `AED/MAD ${(0.272294 * usdMad).toFixed(4)} — SAR/MAD ${(0.266667 * usdMad).toFixed(4)}. Facturation Gulf en AED ou SAR expose à la variation USD/MAD (pégs stables mais MAD peut varier). Instruments de couverture disponibles via intermédiaires agréés BAM.`,
     },
     {
       icon: <ShieldAlert size={13} className="text-rose-400 shrink-0 mt-0.5" />,

@@ -689,7 +689,7 @@ export default function ForwardCalculator() {
                         {locale === 'ar' ? 'السعر الآجل' : locale === 'en' ? 'Forward Rate' : 'Cours Forward'}
                       </p>
                       <p className="text-4xl font-mono font-bold text-gold-400">{fmt4(quote.forwardRate)}</p>
-                      <p className="text-sm font-mono font-bold mt-1 {quote.forwardPointsPips >= 0 ? 'text-emerald-400' : 'text-red-400'}">
+                      <p className={`text-sm font-mono font-bold mt-1 ${quote.forwardPointsPips >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                         <span className={quote.forwardPointsPips >= 0 ? 'text-emerald-400' : 'text-red-400'}>
                           {fmtPips(quote.forwardPointsPips)} pips
                         </span>

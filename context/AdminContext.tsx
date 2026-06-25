@@ -61,7 +61,7 @@ export const DEFAULT_ADMIN_CONFIG: AdminConfig = {
   corsProxyUrl: process.env.CORS_PROXY_URL ?? '',
 };
 
-const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE ?? 'JAD2ADMIN';
+const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE ?? '';
 const STORAGE_KEY    = 'jad2fx_admin_config';
 const ADMIN_KEY      = 'jad2fx_admin_unlocked';
 

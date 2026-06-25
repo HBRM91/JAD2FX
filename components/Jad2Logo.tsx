@@ -15,7 +15,7 @@ interface Jad2LogoProps {
 export default function Jad2Logo({ width = 120, showAdvisory = true, className = '' }: Jad2LogoProps) {
   const h = showAdvisory ? width * 0.58 : width * 0.38;
   const gold  = '#C9A020';
-  const navy  = '#1A2E4A';
+  const navy  = '#E2E8F0'; // slate-200 — legible on dark navy backgrounds
 
   return (
     <svg

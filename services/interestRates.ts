@@ -63,144 +63,144 @@ const MAD: YieldCurvePoint[] = [
   { tenor: '20Y', tenorYears: 20.0,     rate: 0.0475 },
 ];
 
-// EUR: ECB €STR (ON) + Euribor (short) + EUR swap curve (long)
+// EUR: ECB deposit rate 2.25% (June 2026, 9 cuts from 4.00% peak) — €STR ≈ 2.15%
 const EUR: YieldCurvePoint[] = [
-  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0390 },
-  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0375 },
-  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0360 },
-  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0340 },
-  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0310 },
-  { tenor: '2Y',  tenorYears: 2.0,      rate: 0.0285 },
-  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0270 },
-  { tenor: '10Y', tenorYears: 10.0,     rate: 0.0280 },
-];
-
-// USD: SOFR (ON) + US Treasury bills/notes
-const USD: YieldCurvePoint[] = [
-  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0533 },
-  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0525 },
-  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0510 },
-  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0490 },
-  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0465 },
-  { tenor: '2Y',  tenorYears: 2.0,      rate: 0.0450 },
-  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0430 },
-  { tenor: '10Y', tenorYears: 10.0,     rate: 0.0425 },
-];
-
-// GBP: SONIA (ON) + UK Gilts
-const GBP: YieldCurvePoint[] = [
-  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0520 },
-  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0510 },
-  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0495 },
-  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0475 },
-  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0450 },
-  { tenor: '2Y',  tenorYears: 2.0,      rate: 0.0425 },
-  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0415 },
-  { tenor: '10Y', tenorYears: 10.0,     rate: 0.0420 },
-];
-
-// CHF: SARON (ON) + Swiss Confederation bonds
-const CHF: YieldCurvePoint[] = [
-  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0150 },
-  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0145 },
-  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0135 },
-  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0120 },
-  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0105 },
-  { tenor: '2Y',  tenorYears: 2.0,      rate: 0.0090 },
-  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0085 },
-  { tenor: '10Y', tenorYears: 10.0,     rate: 0.0090 },
-];
-
-// JPY: TONA (ON) + JGBs (Bank of Japan yield curve control)
-const JPY: YieldCurvePoint[] = [
-  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0010 },
-  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0010 },
-  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0012 },
-  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0015 },
-  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0020 },
-  { tenor: '2Y',  tenorYears: 2.0,      rate: 0.0030 },
-  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0050 },
-  { tenor: '10Y', tenorYears: 10.0,     rate: 0.0075 },
-];
-
-// CAD: CORRA (ON) + Canada Government bonds
-const CAD: YieldCurvePoint[] = [
-  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0475 },
-  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0470 },
-  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0460 },
-  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0440 },
-  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0420 },
-  { tenor: '2Y',  tenorYears: 2.0,      rate: 0.0400 },
-  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0380 },
-  { tenor: '10Y', tenorYears: 10.0,     rate: 0.0375 },
-];
-
-// SAR: SAIBOR — USD-pegged, tracks Fed funds closely
-const SAR: YieldCurvePoint[] = [
-  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0550 },
-  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0540 },
-  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0530 },
-  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0510 },
-  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0490 },
-];
-
-// AED: EIBOR — USD-pegged
-const AED: YieldCurvePoint[] = [
-  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0540 },
-  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0535 },
-  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0525 },
-  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0500 },
-  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0480 },
-];
-
-// KWD: KIBOR — managed float vs USD basket
-const KWD: YieldCurvePoint[] = [
-  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0525 },
-  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0520 },
-  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0510 },
-  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0490 },
-  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0470 },
-];
-
-// QAR: QIBOR — USD-pegged
-const QAR: YieldCurvePoint[] = [
-  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0545 },
-  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0535 },
-  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0525 },
-  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0505 },
-  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0485 },
-];
-
-// DKK: closely tracks ECB (fixed peg ERM II)
-const DKK: YieldCurvePoint[] = [
-  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0385 },
-  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0370 },
-  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0355 },
-  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0335 },
-  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0305 },
-  { tenor: '2Y',  tenorYears: 2.0,      rate: 0.0280 },
-  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0265 },
+  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0215 },
+  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0218 },
+  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0222 },
+  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0220 },
+  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0215 },
+  { tenor: '2Y',  tenorYears: 2.0,      rate: 0.0225 },
+  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0250 },
   { tenor: '10Y', tenorYears: 10.0,     rate: 0.0275 },
 ];
 
-// NOK: Norges Bank policy rate + Nornorge bonds
-const NOK: YieldCurvePoint[] = [
-  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0450 },
-  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0445 },
-  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0435 },
+// USD: SOFR ≈ 4.33% (Fed funds 4.25-4.50%, June 2026 — 3 cuts from 5.33% peak)
+const USD: YieldCurvePoint[] = [
+  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0433 },
+  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0430 },
+  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0425 },
   { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0415 },
-  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0395 },
-  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0360 },
+  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0400 },
+  { tenor: '2Y',  tenorYears: 2.0,      rate: 0.0405 },
+  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0425 },
+  { tenor: '10Y', tenorYears: 10.0,     rate: 0.0440 },
 ];
 
-// SEK: Riksbank policy rate
+// GBP: SONIA ≈ 4.20% (BOE base rate 4.25%, June 2026 — 5 cuts from 5.25% peak)
+const GBP: YieldCurvePoint[] = [
+  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0420 },
+  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0418 },
+  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0412 },
+  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0400 },
+  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0385 },
+  { tenor: '2Y',  tenorYears: 2.0,      rate: 0.0375 },
+  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0370 },
+  { tenor: '10Y', tenorYears: 10.0,     rate: 0.0380 },
+];
+
+// CHF: SARON ≈ 0.25% (SNB cut 4 times to 0.25%, June 2026 — from 1.75% peak)
+const CHF: YieldCurvePoint[] = [
+  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0025 },
+  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0022 },
+  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0020 },
+  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0022 },
+  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0028 },
+  { tenor: '2Y',  tenorYears: 2.0,      rate: 0.0040 },
+  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0058 },
+  { tenor: '10Y', tenorYears: 10.0,     rate: 0.0068 },
+];
+
+// JPY: TONA ≈ 0.50% (BOJ hiked to 0.50% in Jan 2025, held since — YCC abandoned)
+const JPY: YieldCurvePoint[] = [
+  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0050 },
+  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0050 },
+  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0055 },
+  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0060 },
+  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0070 },
+  { tenor: '2Y',  tenorYears: 2.0,      rate: 0.0085 },
+  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0110 },
+  { tenor: '10Y', tenorYears: 10.0,     rate: 0.0145 },
+];
+
+// CAD: CORRA ≈ 2.75% (BOC cut 7 times to 2.75%, June 2026 — from 5.00% peak)
+const CAD: YieldCurvePoint[] = [
+  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0275 },
+  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0272 },
+  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0268 },
+  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0265 },
+  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0265 },
+  { tenor: '2Y',  tenorYears: 2.0,      rate: 0.0278 },
+  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0300 },
+  { tenor: '10Y', tenorYears: 10.0,     rate: 0.0320 },
+];
+
+// SAR: SAIBOR — USD-pegged, tracks Fed funds (ON ≈ 4.40% after Fed cuts)
+const SAR: YieldCurvePoint[] = [
+  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0440 },
+  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0438 },
+  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0432 },
+  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0420 },
+  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0405 },
+];
+
+// AED: EIBOR — USD-pegged (ON ≈ 4.35%)
+const AED: YieldCurvePoint[] = [
+  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0435 },
+  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0432 },
+  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0428 },
+  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0415 },
+  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0400 },
+];
+
+// KWD: KIBOR — managed float vs USD basket (ON ≈ 4.25%)
+const KWD: YieldCurvePoint[] = [
+  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0425 },
+  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0422 },
+  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0415 },
+  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0405 },
+  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0390 },
+];
+
+// QAR: QIBOR — USD-pegged (ON ≈ 4.38%)
+const QAR: YieldCurvePoint[] = [
+  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0438 },
+  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0435 },
+  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0428 },
+  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0415 },
+  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0402 },
+];
+
+// DKK: closely tracks ECB ERM II peg (ON ≈ 2.10%, ECB deposit 2.25%)
+const DKK: YieldCurvePoint[] = [
+  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0210 },
+  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0212 },
+  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0215 },
+  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0215 },
+  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0210 },
+  { tenor: '2Y',  tenorYears: 2.0,      rate: 0.0220 },
+  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0245 },
+  { tenor: '10Y', tenorYears: 10.0,     rate: 0.0268 },
+];
+
+// NOK: Norges Bank cut to 3.50% (June 2026 — from 4.50% peak)
+const NOK: YieldCurvePoint[] = [
+  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0350 },
+  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0348 },
+  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0342 },
+  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0335 },
+  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0325 },
+  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0310 },
+];
+
+// SEK: Riksbank cut to 2.25% (June 2026 — from 4.00% peak)
 const SEK: YieldCurvePoint[] = [
-  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0380 },
-  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0365 },
-  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0350 },
-  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0325 },
-  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0295 },
-  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0255 },
+  { tenor: 'ON',  tenorYears: 1 / 365,  rate: 0.0225 },
+  { tenor: '1M',  tenorYears: 30 / 365, rate: 0.0222 },
+  { tenor: '3M',  tenorYears: 91 / 365, rate: 0.0220 },
+  { tenor: '6M',  tenorYears: 182 / 365,rate: 0.0220 },
+  { tenor: '1Y',  tenorYears: 1.0,      rate: 0.0220 },
+  { tenor: '5Y',  tenorYears: 5.0,      rate: 0.0240 },
 ];
 
 // CNY: SHIBOR (ON) + CGB (Chinese Government Bonds)

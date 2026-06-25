@@ -8,9 +8,11 @@ const RADAR_CURRENCIES = [
   { code: 'EUR', flag: '🇪🇺', nameFr: 'Euro'                },
   { code: 'USD', flag: '🇺🇸', nameFr: 'Dollar américain'    },
   { code: 'GBP', flag: '🇬🇧', nameFr: 'Livre sterling'      },
+  { code: 'CHF', flag: '🇨🇭', nameFr: 'Franc suisse'        },
+  { code: 'JPY', flag: '🇯🇵', nameFr: 'Yen japonais'        },
+  { code: 'CAD', flag: '🇨🇦', nameFr: 'Dollar canadien'     },
   { code: 'SAR', flag: '🇸🇦', nameFr: 'Riyal saoudien'      },
   { code: 'AED', flag: '🇦🇪', nameFr: 'Dirham des Émirats'  },
-  { code: 'QAR', flag: '🇶🇦', nameFr: 'Riyal qatarien'      },
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -114,7 +116,7 @@ export async function generateReport(
     '3. ANALYSE DU PANIER MAD — positionnement EUR/MAD et USD/MAD dans la bande ±5%, dérive vs parité théorique (K=10.49, 60% EUR/40% USD), signaux d\'intervention BKAM',
     '4. NIVEAUX TECHNIQUES — supports/résistances clés, moyenne mobile, bandes Bollinger si pertinent, terminologie Bloomberg',
     '5. TROIS SCÉNARIOS DE RISQUE — Haussier MAD (probabilité %) / Scenario de base / Baissier MAD — chacun avec déclencheur et impact sur taux forward 3M',
-    '6. IMPLICATIONS STRATÉGIQUES — couverture : quand couvrir, quel instrument (forward / option / swap), durée recommandée selon profil importateur vs exportateur',
+    '6. IMPLICATIONS STRATÉGIQUES — présenter comme considérations pédagogiques uniquement : types d\'instruments de couverture disponibles (forward / option / swap), facteurs contextuels (horizon, profil importateur vs exportateur). Ne jamais formuler de recommandation directe d\'achat, vente ou couverture — orienter vers un établissement de crédit agréé BAM pour toute décision.',
     '7. DISCLAIMER RÉGLEMENTAIRE — rappel informatif, référence OC',
     '',
     'STYLE : Termes techniques en anglais avec traduction entre parenthèses (ex. "carry trade (portage de taux)"). Chiffres en bps pour les écarts. Toujours citer la source (BKAM, BCE, Fed, OCP, IMF).',
@@ -134,9 +136,11 @@ export async function generateReport(
     '    { "currency":"EUR","flag":"🇪🇺","currentRate":0,"weeklyChangeBps":0,"headline":"Analyse courte EUR/MAD (fr)","headlineAr":"تحليل اليورو/درهم","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"Perspective 1-2 sem (fr)","expectationAr":"توقعات" },',
     '    { "currency":"USD","flag":"🇺🇸","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"NEUTRAL","expectation":"...","expectationAr":"..." },',
     '    { "currency":"GBP","flag":"🇬🇧","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"NEUTRAL","expectation":"...","expectationAr":"..." },',
+    '    { "currency":"CHF","flag":"🇨🇭","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"NEUTRAL","expectation":"...","expectationAr":"..." },',
+    '    { "currency":"JPY","flag":"🇯🇵","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"NEUTRAL","expectation":"...","expectationAr":"..." },',
+    '    { "currency":"CAD","flag":"🇨🇦","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"NEUTRAL","expectation":"...","expectationAr":"..." },',
     '    { "currency":"SAR","flag":"🇸🇦","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"NEUTRAL","expectation":"...","expectationAr":"..." },',
-    '    { "currency":"AED","flag":"🇦🇪","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"NEUTRAL","expectation":"...","expectationAr":"..." },',
-    '    { "currency":"QAR","flag":"🇶🇦","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"NEUTRAL","expectation":"...","expectationAr":"..." }',
+    '    { "currency":"AED","flag":"🇦🇪","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"NEUTRAL","expectation":"...","expectationAr":"..." }',
     '  ]',
     '}',
   ].join('\n');

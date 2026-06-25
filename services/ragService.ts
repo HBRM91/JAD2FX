@@ -420,7 +420,7 @@ EUR, USD, GBP, CHF, CAD, JPY (cotation au cent), SAR, AED, KWD, QAR, DKK, NOK, S
 6. DEVISES ADDITIONNELLES (6 devises — taux croisés via USD, non cotées officiellement par BKAM):
 OMR (Rial omanais), BHD (Dinar bahreïni), JOD (Dinar jordanien), TND (Dinar tunisien), DZD (Dinar algérien, cotation pour 100 DZD), LYD (Dinar libyen).
 Ces taux sont calculés par croisement avec le cours USD/MAD officiel et les taux de change USD publiés par les banques centrales concernées ou les marchés. Ils sont fournis à titre purement indicatif et ne constituent pas des cours officiels BKAM.
-Total sur la plateforme KhouyaFX: 20 devises (14 officiellesBAKM + 6 indicatives cross-USD).
+Total sur la plateforme KhouyaFX: 24 devises (14 officielles BKAM + 10 indicatives cross-USD).
 
 6. MARCHÉ INTERBANCAIRE DES CHANGES (MIC):
 - Seules les banques agréées par BKAM peuvent participer directement au MIC.

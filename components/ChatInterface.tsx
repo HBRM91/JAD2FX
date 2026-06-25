@@ -139,7 +139,7 @@ const ChatInterface: React.FC = () => {
 
   return (
     <div
-      className={`flex flex-col h-[640px] bg-white rounded-none border border-slate-200 shadow-xl font-sans ${isRTL ? 'text-right' : ''}`}
+      className={`flex flex-col h-[640px] bg-navy-900 rounded-none border border-navy-700 shadow-xl font-sans ${isRTL ? 'text-right' : ''}`}
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       {/* Header */}
@@ -168,14 +168,14 @@ const ChatInterface: React.FC = () => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-5 bg-slate-50">
+      <div className="flex-1 overflow-y-auto p-4 space-y-5 bg-navy-950">
         {messages.map(msg => (
           <div key={msg.id} className={`flex ${msg.role === 'user' ? (isRTL ? 'justify-start' : 'justify-end') : (isRTL ? 'justify-end' : 'justify-start')}`}>
             <div className={`max-w-[88%] flex flex-col ${msg.role === 'user' ? (isRTL ? 'items-start' : 'items-end') : (isRTL ? 'items-end' : 'items-start')}`}>
               <div className={`p-3.5 text-sm leading-relaxed shadow-sm ${
                 msg.role === 'user'
-                  ? 'bg-navy-800 text-white rounded-l-xl rounded-tr-xl'
-                  : 'bg-white border border-slate-200 text-slate-800 rounded-r-xl rounded-tl-xl'
+                  ? 'bg-navy-700 text-white rounded-l-xl rounded-tr-xl'
+                  : 'bg-navy-800 border border-navy-700 text-slate-300 rounded-r-xl rounded-tl-xl'
               }`}>
                 {msg.text.split('\n').map((line, i) => (
                   <p key={i} className={`${i > 0 ? 'mt-1' : ''} last:mb-0`}>{line}</p>
@@ -183,17 +183,17 @@ const ChatInterface: React.FC = () => {
               </div>
 
               {msg.isUpsell && (
-                <div className="mt-2 bg-gold-50 border border-gold-200 p-3 rounded-lg flex items-center gap-3 w-full">
-                  <Briefcase className="text-navy-900 flex-shrink-0" size={16} />
+                <div className="mt-2 bg-gold-900/20 border border-gold-700/40 p-3 rounded-lg flex items-center gap-3 w-full">
+                  <Briefcase className="text-gold-400 flex-shrink-0" size={16} />
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-bold text-navy-900">
+                    <p className="text-xs font-bold text-gold-400">
                       {locale === 'ar'
                         ? 'تدريب ومشورة استراتيجية — JAD2 Advisory'
                         : locale === 'en'
                         ? 'Training & Strategic Advisory — JAD2 Advisory'
                         : 'Formation & Conseil Stratégique — JAD2 Advisory'}
                     </p>
-                    <p className="text-[10px] text-navy-700">
+                    <p className="text-[10px] text-slate-400">
                       {locale === 'ar'
                         ? 'JAD2 Advisory تقدم تدريبات ومشورة استراتيجية في إدارة مخاطر الصرف للشركات المغربية.'
                         : locale === 'en'
@@ -242,7 +242,7 @@ const ChatInterface: React.FC = () => {
               <button
                 key={i}
                 onClick={() => setInput(q)}
-                className="block w-full text-left text-xs px-3 py-2 bg-white border border-slate-200 rounded-lg hover:border-navy-900 hover:text-navy-900 text-slate-600 transition"
+                className="block w-full text-left text-xs px-3 py-2 bg-navy-800 border border-navy-700 rounded-lg hover:border-gold-500 hover:text-gold-400 text-slate-400 transition"
               >
                 {q}
               </button>
@@ -251,12 +251,12 @@ const ChatInterface: React.FC = () => {
         )}
 
         {!hasAnyKey && (
-          <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg text-[10px] text-amber-700">
+          <div className="p-3 bg-amber-950/20 border border-amber-800/40 rounded-lg text-[10px] text-amber-400">
             {locale === 'ar'
-              ? <>⚠️ لم يتم تكوين مفتاح API. أضف <code className="font-mono bg-amber-100 px-1">GROQ_API_KEY</code> في ملف <code className="font-mono bg-amber-100 px-1">.env</code> لتفعيل المساعد (مجاني).</>
+              ? <>⚠️ لم يتم تكوين مفتاح API. أضف <code className="font-mono bg-amber-900/40 px-1">GROQ_API_KEY</code> في ملف <code className="font-mono bg-amber-900/40 px-1">.env</code> لتفعيل المساعد (مجاني).</>
               : locale === 'en'
-              ? <>⚠️ No API key configured. Add <code className="font-mono bg-amber-100 px-1">GROQ_API_KEY</code> to your <code className="font-mono bg-amber-100 px-1">.env</code> file to enable the chatbot (free).</>
-              : <>⚠️ Aucune clé API configurée. Ajoutez <code className="font-mono bg-amber-100 px-1">GROQ_API_KEY</code> dans votre fichier <code className="font-mono bg-amber-100 px-1">.env</code> pour activer le chatbot (gratuit).</>}
+              ? <>⚠️ No API key configured. Add <code className="font-mono bg-amber-900/40 px-1">GROQ_API_KEY</code> to your <code className="font-mono bg-amber-900/40 px-1">.env</code> file to enable the chatbot (free).</>
+              : <>⚠️ Aucune clé API configurée. Ajoutez <code className="font-mono bg-amber-900/40 px-1">GROQ_API_KEY</code> dans votre fichier <code className="font-mono bg-amber-900/40 px-1">.env</code> pour activer le chatbot (gratuit).</>}
           </div>
         )}
 
@@ -264,7 +264,7 @@ const ChatInterface: React.FC = () => {
       </div>
 
       {/* Legal note */}
-      <div className="border-t border-slate-100 px-4 py-2.5 flex items-center justify-between gap-4">
+      <div className="border-t border-navy-700 px-4 py-2.5 flex items-center justify-between gap-4">
         <p className="text-[10px] text-slate-400 leading-tight">
           {locale === 'ar'
             ? <>معلومات تنظيمية فقط · لا يتم حفظ أسئلتك · <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-500 font-medium">jad2advisory.com</a></>
@@ -275,8 +275,8 @@ const ChatInterface: React.FC = () => {
       </div>
 
       {/* Input */}
-      <div className="p-4 bg-white border-t border-slate-200">
-        <div className="flex gap-0 shadow-sm rounded-lg overflow-hidden border border-slate-300 focus-within:ring-1 focus-within:ring-navy-900 focus-within:border-navy-900 transition">
+      <div className="p-4 bg-navy-900 border-t border-navy-700">
+        <div className="flex gap-0 rounded-lg overflow-hidden border border-navy-600 focus-within:ring-1 focus-within:ring-gold-500 focus-within:border-gold-500 transition">
           <input
             type="text"
             value={input}
@@ -285,7 +285,7 @@ const ChatInterface: React.FC = () => {
             placeholder={placeholder}
             disabled={!hasAnyKey}
             dir={isRTL ? 'rtl' : 'ltr'}
-            className="flex-1 px-4 py-3 bg-white focus:outline-none text-sm text-slate-800 placeholder:text-slate-400 disabled:bg-slate-50 disabled:cursor-not-allowed"
+            className="flex-1 px-4 py-3 bg-navy-800 focus:outline-none text-sm text-slate-200 placeholder:text-slate-500 disabled:bg-navy-900 disabled:cursor-not-allowed"
           />
           <button
             onClick={handleSend}

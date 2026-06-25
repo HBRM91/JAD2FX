@@ -17,10 +17,10 @@ const FMT_BPS = (v: number) => `${v} bps`;
 const TIER_ORDER: ClientTier[] = ['CORPORATE', 'SME', 'TPE', 'INDIVIDUAL'];
 
 const TIER_ACCENT: Record<ClientTier, string> = {
-  CORPORATE: 'border-gold-500 bg-gold-500/5',
-  SME:       'border-blue-500 bg-blue-500/5',
-  TPE:       'border-slate-400 bg-slate-50',
-  INDIVIDUAL:'border-slate-300 bg-white',
+  CORPORATE: 'border-gold-500 bg-gold-900/20',
+  SME:       'border-blue-500 bg-blue-900/20',
+  TPE:       'border-slate-500 bg-slate-800/30',
+  INDIVIDUAL:'border-slate-600 bg-navy-800/20',
 };
 
 const TIER_LABEL: Record<ClientTier, string> = {
@@ -150,7 +150,7 @@ const BilletsPage: React.FC = () => {
     <div className={`space-y-6 ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
 
       {/* ── Page Header ── */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-navy-900 rounded-xl border border-navy-700 overflow-hidden">
         <div className="bg-navy-900 p-6 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-48 h-48 bg-gold-500 opacity-5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
           <div className="relative z-10">
@@ -170,11 +170,11 @@ const BilletsPage: React.FC = () => {
         </div>
 
         {/* Official links + meta */}
-        <div className="p-4 flex flex-wrap gap-3 items-center justify-between border-b border-slate-100">
+        <div className="p-4 flex flex-wrap gap-3 items-center justify-between border-b border-navy-700">
           <a
             href="https://www.bkam.ma/en/Markets/Key-indicators/Foreign-exchange-market/Foreign-exchange-rates/Foreign-banknotes-exchange-rate"
             target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-xs text-navy-800 font-semibold hover:text-gold-600 transition"
+            className="flex items-center gap-1.5 text-xs text-slate-300 font-semibold hover:text-gold-400 transition"
           >
             <ExternalLink size={12} />
             {t('billets.officialLink')}
@@ -188,7 +188,7 @@ const BilletsPage: React.FC = () => {
             <button
               onClick={buildRows}
               disabled={loading}
-              className="flex items-center gap-1 text-xs px-3 py-1.5 bg-slate-100 text-slate-600 rounded hover:bg-slate-200 transition disabled:opacity-50"
+              className="flex items-center gap-1 text-xs px-3 py-1.5 bg-navy-800 text-slate-400 rounded hover:bg-navy-700 transition disabled:opacity-50"
             >
               <RefreshCw size={11} className={loading ? 'animate-spin' : ''} />
               {t('common.refresh')}
@@ -197,10 +197,10 @@ const BilletsPage: React.FC = () => {
         </div>
 
         {/* Cash vs Wire info */}
-        <div className="p-4 bg-amber-50 border-b border-amber-100">
+        <div className="p-4 bg-amber-950/20 border-b border-amber-800/40">
           <div className="flex items-start gap-2">
-            <Info size={13} className="text-amber-600 mt-0.5 flex-shrink-0" />
-            <p className="text-xs text-amber-700 leading-relaxed">{t('billets.cashNote')}</p>
+            <Info size={13} className="text-amber-400 mt-0.5 flex-shrink-0" />
+            <p className="text-xs text-amber-400 leading-relaxed">{t('billets.cashNote')}</p>
           </div>
         </div>
       </div>
@@ -208,8 +208,8 @@ const BilletsPage: React.FC = () => {
       {/* ── Tier selector + OC commission ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* Tier selector */}
-        <div className="md:col-span-1 bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-3">
-          <h2 className="text-sm font-bold text-navy-900 uppercase tracking-wider">{t('common.currency')} · Segment Client</h2>
+        <div className="md:col-span-1 bg-navy-900 rounded-xl border border-navy-700 p-5 space-y-3">
+          <h2 className="text-sm font-bold text-white uppercase tracking-wider">{t('common.currency')} · Segment Client</h2>
           {TIER_ORDER.map(tier => {
             const tc = config.tierCommissions?.[tier] ?? DEFAULT_TIER_COMMISSIONS[tier];
             const active = selectedTier === tier;
@@ -217,10 +217,10 @@ const BilletsPage: React.FC = () => {
               <button
                 key={tier}
                 onClick={() => setSelectedTier(tier)}
-                className={`w-full text-left p-3 rounded-lg border-2 transition ${active ? TIER_ACCENT[tier] : 'border-slate-200 bg-white hover:border-slate-300'}`}
+                className={`w-full text-left p-3 rounded-lg border-2 transition ${active ? TIER_ACCENT[tier] : 'border-navy-700 bg-navy-800 hover:border-navy-600'}`}
               >
                 <div className="flex items-center justify-between">
-                  <span className={`text-xs font-bold ${active ? TIER_LABEL[tier] : 'text-slate-600'}`}>
+                  <span className={`text-xs font-bold ${active ? TIER_LABEL[tier] : 'text-slate-400'}`}>
                     {t(`tier.${tier}`)}
                   </span>
                   {active && <span className="text-[10px] text-gold-600 font-bold">✓ {locale === 'ar' ? 'نشط' : locale === 'en' ? 'active' : 'actif'}</span>}
@@ -234,46 +234,46 @@ const BilletsPage: React.FC = () => {
         </div>
 
         {/* OC commission breakdown */}
-        <div className="md:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <div className="md:col-span-2 bg-navy-900 rounded-xl border border-navy-700 p-5">
           <button
             className="w-full flex items-center justify-between mb-3"
             onClick={() => setShowOcInfo(o => !o)}
           >
-            <h2 className="text-sm font-bold text-navy-900 uppercase tracking-wider flex items-center gap-2">
-              <ShieldAlert size={14} className="text-gold-600" />
+            <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <ShieldAlert size={14} className="text-gold-500" />
               {t('billets.ocCommission')} — {t(`tier.${selectedTier}`)}
             </h2>
             <ChevronDown size={14} className={`text-slate-400 transition-transform ${showOcInfo ? 'rotate-180' : ''}`} />
           </button>
 
           <div className="grid grid-cols-2 gap-3">
-            <div className="bg-slate-50 rounded-lg p-3">
-              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
+            <div className="bg-navy-800/60 rounded-lg p-3">
+              <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">
                 {locale === 'ar' ? 'عمولة الأوراق النقدية' : locale === 'en' ? 'Banknote commission' : 'Commission billet (admin)'}
               </p>
-              <p className="text-2xl font-mono font-bold text-navy-900">{tierConfig.billetCommBps}<span className="text-sm text-slate-500 ml-1">bps</span></p>
+              <p className="text-2xl font-mono font-bold text-white">{tierConfig.billetCommBps}<span className="text-sm text-slate-400 ml-1">bps</span></p>
             </div>
-            <div className="bg-slate-50 rounded-lg p-3">
-              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
+            <div className="bg-navy-800/60 rounded-lg p-3">
+              <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">
                 {locale === 'ar' ? 'النطاق المرخص OC' : locale === 'en' ? 'OC authorised range' : 'Plage OC autorisée'}
               </p>
-              <p className="text-2xl font-mono font-bold text-navy-900">
+              <p className="text-2xl font-mono font-bold text-white">
                 {OC_BILLET_RANGE[selectedTier].min}–{OC_BILLET_RANGE[selectedTier].max}
-                <span className="text-sm text-slate-500 ml-1">bps</span>
+                <span className="text-sm text-slate-400 ml-1">bps</span>
               </p>
             </div>
           </div>
 
           {showOcInfo && (
-            <div className="mt-3 p-3 bg-gold-50 border border-gold-200 rounded-lg space-y-2 text-xs text-slate-600">
-              <p className="font-semibold text-navy-900">Réglementation OC — Billets de banque</p>
+            <div className="mt-3 p-3 bg-gold-900/20 border border-gold-700/40 rounded-lg space-y-2 text-xs text-slate-300">
+              <p className="font-semibold text-gold-400">Réglementation OC — Billets de banque</p>
               <p>
                 Les commissions sur opérations de change billets sont encadrées par la Circulaire de l'Office des Changes.
                 Elles se distinguent des commissions virement par les coûts logistiques supplémentaires :
                 transport de fonds, assurance, stockage sécurisé, et manutention des espèces.
               </p>
-              <p className="text-[10px] text-slate-400 border border-slate-200 rounded px-2 py-1">
-                Taux indicatifs — pour un accompagnement professionnel en gestion du risque de change : <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-500 font-medium">jad2advisory.com</a>
+              <p className="text-[10px] text-slate-400 border border-navy-700 rounded px-2 py-1">
+                Taux indicatifs — pour un accompagnement professionnel en gestion du risque de change : <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-500 hover:text-gold-400 font-medium">jad2advisory.com</a>
               </p>
             </div>
           )}
@@ -281,14 +281,14 @@ const BilletsPage: React.FC = () => {
       </div>
 
       {/* ── Rate table ── */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div className="p-4 border-b border-slate-100 flex items-center justify-between">
-          <h2 className="text-sm font-bold text-navy-900 uppercase tracking-wider flex items-center gap-2">
-            <Banknote size={14} className="text-gold-600" />
-            {locale === 'ar' ? 'أسعار الأوراق النقدية — 20 عملة' : locale === 'en' ? 'Banknote Rates — 20 currencies' : 'Cours Billets — 20 devises'}
+      <div className="bg-navy-900 rounded-xl border border-navy-700 overflow-hidden">
+        <div className="p-4 border-b border-navy-700 flex items-center justify-between">
+          <h2 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+            <Banknote size={14} className="text-gold-500" />
+            {locale === 'ar' ? 'أسعار الأوراق النقدية — 24 عملة' : locale === 'en' ? 'Banknote Rates — 24 currencies' : 'Cours Billets — 24 devises'}
           </h2>
           {rows.some(r => r.bbeSource === 'BKAM_OFFICIAL') && (
-            <span className="text-[9px] font-mono px-2 py-0.5 rounded border border-emerald-300 bg-emerald-50 text-emerald-700">
+            <span className="text-[9px] font-mono px-2 py-0.5 rounded border border-emerald-700/40 bg-emerald-950/20 text-emerald-400">
               ✓ BKAM CoursBBE Officiel
             </span>
           )}
@@ -303,19 +303,19 @@ const BilletsPage: React.FC = () => {
           <div className="overflow-x-auto">
             <table className="w-full text-xs min-w-[720px]">
               <thead>
-                <tr className="bg-slate-50 text-slate-500 uppercase text-[10px] border-b border-slate-200">
+                <tr className="bg-navy-800/60 text-slate-400 uppercase text-[10px] border-b border-navy-700">
                   <th className={`py-3 px-4 font-semibold ${isRTL ? 'text-right' : 'text-left'}`}>{t('common.currency')}</th>
                   <th className="py-3 px-3 text-center font-semibold" colSpan={2}>
                     Cours BKAM Billet (base)
                   </th>
-                  <th className="py-3 px-3 text-center font-semibold text-gold-600" colSpan={2}>
+                  <th className="py-3 px-3 text-center font-semibold text-gold-500" colSpan={2}>
                     Cours Client ({t(`tier.${selectedTier}`)})
                   </th>
-                  <th className="py-3 px-3 text-center font-semibold text-slate-400" colSpan={2}>
+                  <th className="py-3 px-3 text-center font-semibold" colSpan={2}>
                     {t('billets.vsBillet')} (bps)
                   </th>
                 </tr>
-                <tr className="bg-slate-50 text-[10px] text-slate-400 border-b border-slate-200">
+                <tr className="bg-navy-800/60 text-[10px] text-slate-400 border-b border-navy-700">
                   <th className="py-1 px-4" />
                   <th className="py-1 px-3 text-center">{t('common.buy')}</th>
                   <th className="py-1 px-3 text-center">{t('common.sell')}</th>
@@ -327,28 +327,28 @@ const BilletsPage: React.FC = () => {
               </thead>
               <tbody>
                 {rows.map(row => (
-                  <tr key={row.code} className="border-b border-slate-100 hover:bg-slate-50 transition">
+                  <tr key={row.code} className="border-b border-navy-800/40 hover:bg-navy-800/40 transition">
                     <td className="py-3 px-4">
                       <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
                         <span className="text-base">{row.flag}</span>
                         <div>
-                          <p className="font-bold text-navy-900">{row.code}/MAD</p>
+                          <p className="font-bold text-white">{row.code}/MAD</p>
                           <p className="text-[10px] text-slate-400">{getCurrencyName(row, locale)}</p>
                         </div>
                         {row.bkamUnit !== 1 && (
-                          <span className="text-[10px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded font-mono">×{row.bkamUnit}</span>
+                          <span className="text-[10px] bg-navy-700 text-slate-400 px-1.5 py-0.5 rounded font-mono">×{row.bkamUnit}</span>
                         )}
                         {row.bbeSource === 'BKAM_OFFICIAL' && (
-                          <span className="text-[8px] bg-emerald-50 text-emerald-600 border border-emerald-200 px-1 py-0.5 rounded font-mono">OFF</span>
+                          <span className="text-[8px] bg-emerald-950/20 text-emerald-400 border border-emerald-800/40 px-1 py-0.5 rounded font-mono">OFF</span>
                         )}
                       </div>
                     </td>
                     {/* BKAM billet base */}
-                    <td className="py-3 px-3 text-center font-mono text-slate-600">{FMT4(row.bkamBilletBuy)}</td>
-                    <td className="py-3 px-3 text-center font-mono text-slate-600">{FMT4(row.bkamBilletSell)}</td>
+                    <td className="py-3 px-3 text-center font-mono text-slate-400">{FMT4(row.bkamBilletBuy)}</td>
+                    <td className="py-3 px-3 text-center font-mono text-slate-400">{FMT4(row.bkamBilletSell)}</td>
                     {/* Client rate */}
-                    <td className="py-3 px-3 text-center font-mono font-bold text-emerald-700 bg-emerald-50">{FMT4(clientBuy(row))}</td>
-                    <td className="py-3 px-3 text-center font-mono font-bold text-red-700 bg-red-50">{FMT4(clientSell(row))}</td>
+                    <td className="py-3 px-3 text-center font-mono font-bold text-emerald-400 bg-emerald-950/20">{FMT4(clientBuy(row))}</td>
+                    <td className="py-3 px-3 text-center font-mono font-bold text-red-400 bg-red-950/20">{FMT4(clientSell(row))}</td>
                     {/* vs Virement */}
                     <td className="py-3 px-3 text-center font-mono text-amber-600 text-[10px]">
                       {vsVirBuy(row) < 0 ? vsVirBuy(row).toFixed(0) : '+' + vsVirBuy(row).toFixed(0)}

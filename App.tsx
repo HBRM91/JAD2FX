@@ -53,7 +53,7 @@ const NAV_GROUPS: NavGroup[] = [
     id: 'market',
     label: 'Données Marché',
     items: [
-      { label: 'Tableau de Bord',    view: 'DASHBOARD',   icon: LayoutDashboard, desc: '20 devises MAD live' },
+      { label: 'Tableau de Bord',    view: 'DASHBOARD',   icon: LayoutDashboard, desc: '24 devises MAD live' },
       { label: 'Live Pricer',        view: 'LIVE',        icon: Activity,         desc: 'Séances & cotations' },
       { label: 'Fixing BKAM',        view: 'FIXING',      icon: BarChart2,        desc: 'Cours officiels BAM' },
       { label: 'Billets & Chèques',  view: 'BILLETS',     icon: Banknote,         desc: 'Taux billets OC' },
@@ -393,16 +393,11 @@ function AppInner() {
           <div className="space-y-6">
 
             {/* ── Hero banner ─────────────────────────────────────────────── */}
-            <div className="relative rounded-2xl overflow-hidden border border-navy-700 min-h-[280px] sm:min-h-[340px]">
-              {/* Background image — actually visible */}
-              <div
-                className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-                style={{ backgroundImage: 'url(/hero-bg.jpg)' }}
-              />
-              {/* Single left-to-right gradient: content is left, image shows right */}
-              <div className="absolute inset-0 bg-gradient-to-r from-navy-950/95 via-navy-950/65 to-navy-950/25" />
-              {/* Subtle gold halo top-right */}
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_80%_20%,rgba(212,175,55,0.09),transparent_55%)]" />
+            <div className="relative rounded-2xl overflow-hidden border border-navy-700 min-h-[280px] sm:min-h-[340px]" style={{ background: 'linear-gradient(135deg, #040C1C 0%, #081628 50%, #0E2336 100%)' }}>
+              {/* Subtle gold radial accent top-right */}
+              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_15%,rgba(212,175,55,0.12),transparent_55%)]" />
+              {/* Grid lines for depth */}
+              <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'linear-gradient(#D4AF37 1px, transparent 1px), linear-gradient(90deg, #D4AF37 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
 
               {/* Content */}
               <div className="relative px-7 sm:px-12 py-10 sm:py-14 max-w-xl">

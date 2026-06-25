@@ -64,7 +64,7 @@ export default function FloatingChat() {
           : <MessageCircle size={22} className="text-gold-400" />
         }
         {!open && pulse && (
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-gold-500 rounded-full border-2 border-white" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-gold-500 rounded-full border-2 border-navy-900" />
         )}
       </button>
     </>

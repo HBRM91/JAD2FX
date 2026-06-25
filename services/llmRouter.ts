@@ -41,6 +41,7 @@ export async function routeQuery(config: RouteConfig): Promise<LLMResponse> {
       systemPrompt: config.systemPrompt,
       maxTokens:    config.maxTokens  ?? 900,
       temperature:  config.temperature ?? 0.3,
+      strategy:     config.strategy   ?? 'cost-first',
     }),
     signal: AbortSignal.timeout(25_000),
   });

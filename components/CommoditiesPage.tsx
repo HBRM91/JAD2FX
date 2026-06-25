@@ -29,17 +29,17 @@ const CATEGORY_ICONS: Record<CommodityCategory, React.ElementType> = {
 };
 
 const CATEGORY_COLORS: Record<CommodityCategory, string> = {
-  ENERGY:           'text-orange-500 bg-orange-50 border-orange-200',
-  PRECIOUS_METALS:  'text-yellow-600 bg-yellow-50 border-yellow-200',
-  INDUSTRIAL_METALS:'text-slate-600 bg-slate-100 border-slate-300',
-  AGRICULTURE:      'text-green-600 bg-green-50 border-green-200',
+  ENERGY:           'text-orange-400 bg-orange-900/20 border-orange-700/40',
+  PRECIOUS_METALS:  'text-yellow-400 bg-yellow-900/20 border-yellow-700/40',
+  INDUSTRIAL_METALS:'text-slate-400 bg-slate-800/40 border-slate-600/40',
+  AGRICULTURE:      'text-green-400 bg-green-900/20 border-green-700/40',
 };
 
 const CATEGORY_ACTIVE: Record<CommodityCategory, string> = {
-  ENERGY:           'border-orange-500 bg-orange-500/5 text-orange-600',
-  PRECIOUS_METALS:  'border-yellow-500 bg-yellow-500/5 text-yellow-700',
-  INDUSTRIAL_METALS:'border-slate-500 bg-slate-200 text-slate-700',
-  AGRICULTURE:      'border-green-500 bg-green-500/5 text-green-700',
+  ENERGY:           'border-orange-500 bg-orange-900/20 text-orange-400',
+  PRECIOUS_METALS:  'border-yellow-500 bg-yellow-900/20 text-yellow-400',
+  INDUSTRIAL_METALS:'border-slate-500 bg-slate-800/40 text-slate-300',
+  AGRICULTURE:      'border-green-500 bg-green-900/20 text-green-400',
 };
 
 type FilterCategory = 'ALL' | CommodityCategory;
@@ -49,13 +49,13 @@ type FilterCategory = 'ALL' | CommodityCategory;
 function RangeBar({ low, high, current }: { low: number; high: number; current: number }) {
   const pct = high > low ? ((current - low) / (high - low)) * 100 : 50;
   return (
-    <div className="relative w-full h-1.5 bg-slate-200 rounded-full overflow-visible mt-1">
+    <div className="relative w-full h-1.5 bg-navy-700 rounded-full overflow-visible mt-1">
       <div
-        className="absolute top-0 left-0 h-full bg-slate-400 rounded-full"
+        className="absolute top-0 left-0 h-full bg-navy-500 rounded-full"
         style={{ width: `${Math.max(0, Math.min(100, pct))}%` }}
       />
       <div
-        className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-navy-900 rounded-full shadow border border-white"
+        className="absolute top-1/2 -translate-y-1/2 w-2 h-2 bg-gold-400 rounded-full shadow border border-navy-800"
         style={{ left: `calc(${Math.max(0, Math.min(100, pct))}% - 4px)` }}
       />
     </div>
@@ -77,8 +77,8 @@ function CommodityCard({ q }: { q: CommodityQuote }) {
 
   return (
     <div
-      className={`bg-white rounded-xl border shadow-sm overflow-hidden cursor-pointer transition-shadow hover:shadow-md ${
-        q.source === 'FALLBACK' ? 'border-dashed border-slate-300' : 'border-slate-200'
+      className={`bg-navy-900 rounded-xl border overflow-hidden cursor-pointer transition-colors hover:border-navy-600 ${
+        q.source === 'FALLBACK' ? 'border-dashed border-navy-600' : 'border-navy-700'
       }`}
       onClick={() => setExpanded(e => !e)}
     >
@@ -89,12 +89,12 @@ function CommodityCard({ q }: { q: CommodityQuote }) {
               <CatIcon size={14} />
             </div>
             <div>
-              <p className="font-bold text-navy-900 text-sm leading-tight">{name}</p>
+              <p className="font-bold text-white text-sm leading-tight">{name}</p>
               <p className="text-[10px] text-slate-400 font-mono">{q.symbol}</p>
             </div>
           </div>
           <div className={`flex items-center gap-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded ${
-            isUp ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
+            isUp ? 'bg-emerald-950/30 text-emerald-400' : 'bg-red-950/30 text-red-400'
           }`}>
             {isUp ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
             {isUp ? '+' : ''}{q.changePercent.toFixed(2)}%
@@ -104,7 +104,7 @@ function CommodityCard({ q }: { q: CommodityQuote }) {
         <div className="grid grid-cols-2 gap-3">
           <div>
             <p className="text-[10px] text-slate-400 uppercase tracking-wider">USD{q.unit}</p>
-            <p className="text-xl font-mono font-bold text-navy-900">
+            <p className="text-xl font-mono font-bold text-white">
               {FMT_PRICE(q.price, q.symbol)}
               <span className="text-xs text-slate-400 ml-1">
                 {q.changePercent >= 0 ? '+' : ''}{FMT_PRICE(q.change, q.symbol)}
@@ -137,9 +137,9 @@ function CommodityCard({ q }: { q: CommodityQuote }) {
 
       {/* Expanded moroccan relevance */}
       {expanded && (
-        <div className="px-4 pb-4 pt-0 border-t border-slate-100 mt-2">
-          <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">🇲🇦 Morocco Relevance</p>
-          <p className="text-xs text-slate-600 leading-relaxed">{relevance}</p>
+        <div className="px-4 pb-4 pt-0 border-t border-navy-800 mt-2">
+          <p className="text-[10px] text-slate-400 uppercase tracking-wider mb-1">Morocco Relevance</p>
+          <p className="text-xs text-slate-300 leading-relaxed">{relevance}</p>
         </div>
       )}
     </div>
@@ -196,7 +196,7 @@ const CommoditiesPage: React.FC = () => {
     <div className={`space-y-6 ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
 
       {/* ── Header ── */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-navy-900 rounded-xl border border-navy-700 overflow-hidden">
         <div className="bg-navy-900 p-6 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-48 h-48 bg-gold-500 opacity-5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
           <div className="relative z-10">
@@ -233,10 +233,10 @@ const CommoditiesPage: React.FC = () => {
         </div>
 
         {/* Yahoo Finance note */}
-        <div className="p-3 bg-slate-50 border-b border-slate-200 text-[10px] text-slate-400">
+        <div className="p-3 bg-navy-800/60 border-b border-navy-700 text-[10px] text-slate-500">
           {t('commodities.source')}
           {anyFallback && (
-            <span className="ml-2 text-amber-600 font-medium">· {t('commodities.fallbackNotice')}</span>
+            <span className="ml-2 text-amber-400 font-medium">· {t('commodities.fallbackNotice')}</span>
           )}
         </div>
       </div>
@@ -256,12 +256,12 @@ const CommoditiesPage: React.FC = () => {
                   ? (cat.id === 'ALL'
                       ? 'bg-navy-900 text-white border-navy-900'
                       : CATEGORY_ACTIVE[cat.id as CommodityCategory])
-                  : 'bg-white text-slate-600 border-slate-200 hover:border-slate-400'
+                  : 'bg-navy-900 text-slate-400 border-navy-700 hover:border-navy-500'
               }`}
             >
               <CatIcon size={11} />
               {cat.label}
-              <span className={`text-[9px] rounded-full px-1 ${active ? 'bg-white/20' : 'bg-slate-100 text-slate-400'}`}>
+              <span className={`text-[9px] rounded-full px-1 ${active ? 'bg-white/20' : 'bg-navy-700 text-slate-400'}`}>
                 {count}
               </span>
             </button>
@@ -273,10 +273,10 @@ const CommoditiesPage: React.FC = () => {
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="bg-white rounded-xl border border-slate-200 p-4 animate-pulse">
-              <div className="h-4 bg-slate-200 rounded w-2/3 mb-3" />
-              <div className="h-8 bg-slate-100 rounded w-1/2 mb-2" />
-              <div className="h-2 bg-slate-100 rounded w-full" />
+            <div key={i} className="bg-navy-900 rounded-xl border border-navy-700 p-4 animate-pulse">
+              <div className="h-4 bg-navy-700 rounded w-2/3 mb-3" />
+              <div className="h-8 bg-navy-800 rounded w-1/2 mb-2" />
+              <div className="h-2 bg-navy-800 rounded w-full" />
             </div>
           ))}
         </div>
@@ -292,11 +292,11 @@ const CommoditiesPage: React.FC = () => {
 
       {/* ── CORS proxy hint ── */}
       {anyFallback && (
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3">
-          <AlertTriangle size={15} className="text-amber-600 mt-0.5 flex-shrink-0" />
+        <div className="p-4 bg-amber-950/20 border border-amber-800/40 rounded-xl flex items-start gap-3">
+          <AlertTriangle size={15} className="text-amber-400 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-amber-800">{t('common.offline')} — Yahoo Finance</p>
-            <p className="text-xs text-amber-700 mt-0.5">{t('commodities.corsNote')}</p>
+            <p className="text-sm font-semibold text-amber-400">{t('common.offline')} — Yahoo Finance</p>
+            <p className="text-xs text-amber-500 mt-0.5">{t('commodities.corsNote')}</p>
           </div>
         </div>
       )}

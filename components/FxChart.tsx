@@ -11,9 +11,9 @@ const FxChart: React.FC<FxChartProps> = ({ pair, data }) => {
   const change = ((data[data.length - 1].value - data[0].value) / data[0].value) * 100;
 
   return (
-    <div className="w-full h-64 bg-white rounded-lg p-4 shadow-sm border border-slate-100">
+    <div className="w-full h-64 bg-navy-900 rounded-lg p-4 border border-navy-700">
       <div className="flex justify-between items-center mb-4">
-        <h3 className="text-navy-900 font-serif font-semibold">{pair} Intraday</h3>
+        <h3 className="text-white font-serif font-semibold">{pair} Intraday</h3>
         <span className={`text-xs font-medium ${isUp ? 'text-green-600' : 'text-red-600'}`}>
           {isUp ? '+' : ''}{change.toFixed(2)}%
         </span>
@@ -26,13 +26,13 @@ const FxChart: React.FC<FxChartProps> = ({ pair, data }) => {
               <stop offset="95%" stopColor="#D4AF37" stopOpacity={0}/>
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-          <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#64748b'}} />
-          <YAxis 
-            domain={['dataMin - 0.05', 'dataMax + 0.05']} 
-            axisLine={false} 
-            tickLine={false} 
-            tick={{fontSize: 12, fill: '#64748b'}} 
+          <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#1E3E5C" />
+          <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{fontSize: 12, fill: '#94a3b8'}} />
+          <YAxis
+            domain={['dataMin - 0.05', 'dataMax + 0.05']}
+            axisLine={false}
+            tickLine={false}
+            tick={{fontSize: 12, fill: '#94a3b8'}}
             tickFormatter={(value) => value.toFixed(2)}
           />
           <Tooltip 
