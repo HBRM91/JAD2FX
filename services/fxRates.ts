@@ -23,18 +23,27 @@ function sanityFilter(currency: string, newRate: number): number {
   return newRate;
 }
 
-// ─── Safety cage: clamp ECB-derived rates to ±5% of last BKAM fixing ─────────
-// Per spec §4.4 — Safety Cage: [Official_Min × 1.02, Official_Max × 0.98]
-let _lastBkamMadRates: Record<string, number> = {}; // currency → madPerUnit (raw, bkamUnit=1)
+// ─── Safety cage: clamp rates to ±5% of last BKAM fixing ────────────────────
+// Spec §3.3 — Safe_Max = Official_Max × 0.98, Safe_Min = Official_Min × 1.02
+// Applied to both mid (for ECB fallback) AND final bid/ask (for spread overshoot).
+//
+// Two separate stores:
+//   _lastBkamMadRates — raw madPerUnit (bkamUnit=1), kept for cross-rate math
+//   _bkamCageRef      — bkamUnit-scaled display mid, used for cage comparisons
+//
+// Bug fixed: old code compared displayMid (×100 for JPY) against raw per-unit
+// reference — cage always fired for bkamUnit=100 currencies (JPY, INR, DZD).
+let _lastBkamMadRates: Record<string, number> = {};
+const _bkamCageRef:   Record<string, number> = {}; // currency → displayMid (bkamUnit applied)
 
-const CAGE_BAND  = 0.05; // ±5% allowed deviation from last BKAM fixing
-const CAGE_INNER = 0.02; // 2% buffer inset (98% rule)
+const CAGE_BAND  = 0.05; // BKAM official ±5% fluctuation band
+const CAGE_INNER = 0.02; // 2% inner buffer (safe ceiling = 98% of limit)
 
 function applySafetyCage(currency: string, mid: number): { mid: number; isCapped: boolean } {
-  const ref = _lastBkamMadRates[currency];
+  const ref = _bkamCageRef[currency]; // bkamUnit-scaled — apple-to-apple comparison
   if (!ref) return { mid, isCapped: false };
-  const upper = ref * (1 + CAGE_BAND) * (1 - CAGE_INNER);
-  const lower = ref * (1 - CAGE_BAND) * (1 + CAGE_INNER);
+  const upper = ref * (1 + CAGE_BAND) * (1 - CAGE_INNER); // ref × 1.029
+  const lower = ref * (1 - CAGE_BAND) * (1 + CAGE_INNER); // ref × 0.969
   if (mid > upper) return { mid: upper, isCapped: true };
   if (mid < lower) return { mid: lower, isCapped: true };
   return { mid, isCapped: false };
@@ -239,16 +248,35 @@ function computeChange24h(
 function applySmartSpread(mid: number, code: string, config: BasketConfig, dealerSpreads?: Record<string, number>) {
   // Smart BPS: per-currency pips from dealer matrix, fallback to global config
   const vPips = dealerSpreads?.[code] ?? (config.virementSpreadPercent * 10000);
-  const bPips = vPips * (config.billetSpreadPercent / config.virementSpreadPercent); // maintain billets ratio
+  const bPips = vPips * (config.billetSpreadPercent / config.virementSpreadPercent);
   const vSpread = mid * (vPips / 10000);
   const bSpread = mid * (bPips / 10000);
-  // Asymmetric: ask side 52%, bid side 48% (market convention — sell side slightly wider)
+
+  // Asymmetric: ask 52%, bid 48% — sell side slightly wider (interbank convention)
+  let vBid = mid - vSpread * 0.48;
+  let vAsk = mid + vSpread * 0.52;
+  let bBid = mid - bSpread * 0.48;
+  let bAsk = mid + bSpread * 0.52;
+
+  // Clamp final bid/ask within BKAM official bands (±5% × 98% buffer).
+  // This prevents the spread itself from pushing displayed prices outside the
+  // legal limits — e.g. billet sell at +1.8% on top of a mid already at the
+  // cage ceiling would otherwise breach the official 5% band.
+  const ref = _bkamCageRef[code];
+  if (ref) {
+    const safeMax = ref * (1 + CAGE_BAND) * (1 - CAGE_INNER);
+    const safeMin = ref * (1 - CAGE_BAND) * (1 + CAGE_INNER);
+    vBid = Math.max(vBid, safeMin);
+    vAsk = Math.min(vAsk, safeMax);
+    bBid = Math.max(bBid, safeMin);
+    bAsk = Math.min(bAsk, safeMax);
+  }
+
   return {
-    virementBuy:  +(mid - vSpread * 0.48).toFixed(4),
-    virementSell: +(mid + vSpread * 0.52).toFixed(4),
-    billetBuy:    +(mid - bSpread * 0.48).toFixed(4),
-    billetSell:   +(mid + bSpread * 0.52).toFixed(4),
-    spreadPct:    +(vPips / 100).toFixed(3),
+    virementBuy:  +vBid.toFixed(4),
+    virementSell: +vAsk.toFixed(4),
+    billetBuy:    +bBid.toFixed(4),
+    billetSell:   +bAsk.toFixed(4),
     vPips,
   };
 }
@@ -268,7 +296,7 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
   if (corsProxyUrl) {
     const [bkamMad, prevEurRates] = await Promise.all([tryFetchBkamMadRates(corsProxyUrl), prevEurRatesPromise]);
     if (bkamMad) {
-      // Persist for safety cage (raw madPerUnit, before bkamUnit scaling)
+      // Keep raw per-unit store for cross-rate math
       _lastBkamMadRates = { ...bkamMad };
 
       const usdMadMid = bkamMad['USD'];
@@ -290,6 +318,11 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
         }
 
         const displayMid = rawMid * currency.bkamUnit;
+
+        // Build bkamUnit-scaled cage reference — must happen BEFORE applySmartSpread
+        // so the cage is correct for currencies quoted per 100 units (JPY, INR, DZD).
+        _bkamCageRef[currency.code] = displayMid;
+
         const filteredMid = sanityFilter(currency.code, displayMid);
         const spread = applySmartSpread(filteredMid, currency.code, config, dealerSpreads);
 
