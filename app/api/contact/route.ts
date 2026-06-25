@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Resend } from 'resend';
 
+export const runtime = 'edge';
+
 // Simple rate limiting: max 5 contact submissions per IP per hour
 const _rateLimit = new Map<string, { count: number; reset: number }>();
 
