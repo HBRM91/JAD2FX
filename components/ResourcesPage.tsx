@@ -139,8 +139,8 @@ export default function ResourcesPage() {
             <div className="mt-3 flex items-center gap-2 bg-amber-500/5 border border-amber-500/15 rounded-lg px-3 py-2">
               <Shield size={11} className="text-amber-400 flex-shrink-0" />
               <p className="text-[10px] text-amber-400/80 leading-relaxed">
-                JAD2 Advisory est un cabinet de conseil stratégique et de formation — non intermédiaire financier agréé BAM, non conseiller en investissement AMMC.
-                Pour l'exécution de transactions de change, adressez-vous exclusivement à un établissement de crédit habilité.
+                JAD2 Advisory est un cabinet de conseil stratégique et de formation en gestion du risque de change.
+                Il ne fournit pas de conseil en investissement et n'exécute aucune transaction de change. Pour vos opérations, adressez-vous à un établissement de crédit habilité.
               </p>
             </div>
           </div>

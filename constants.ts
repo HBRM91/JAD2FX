@@ -9,9 +9,9 @@ export const THEME_COLORS = {
   BG_LIGHT: '#F8FAFC'
 };
 
-export const DISCLAIMER_TEXT = `JAD2FX est une plateforme d'information fournissant des taux de change indicatifs et des simulations pédagogiques sur 20 devises (14 cotées par Bank Al-Maghrib + 6 devises régionales calculées par taux croisés). Les taux sont calculés à partir des cours officiels BKAM et des références ECB/Frankfurter et sont fournis à titre informatif uniquement — ils ne constituent pas des cours officiels BKAM ni des prix de transaction fermes. JAD2 Advisory est un cabinet de conseil stratégique et de formation en gestion du risque de change, enregistré au Registre de Commerce de Casablanca. JAD2 Advisory n'est pas un intermédiaire financier agréé par Bank Al-Maghrib et n'exécute aucune transaction de change. Pour l'exécution de transactions de change, veuillez vous adresser à un établissement de crédit agréé.`;
+export const DISCLAIMER_TEXT = `JAD2FX est une plateforme d'information fournissant des taux de change indicatifs et des simulations pédagogiques sur 20 devises (14 cotées par Bank Al-Maghrib + 6 devises régionales calculées par taux croisés). Les taux sont calculés à partir des cours officiels BKAM et des références ECB/Frankfurter et sont fournis à titre informatif uniquement — ils ne constituent pas des cours officiels BKAM ni des prix de transaction fermes. JAD2 Advisory est un cabinet de conseil stratégique et de formation en gestion du risque de change, enregistré au Registre de Commerce de Casablanca. Ses prestations couvrent exclusivement le conseil, la formation et l'accompagnement réglementaire — sans exécution de transactions de change ni prestation de conseil en investissement. Pour toute opération de change, adressez-vous à un établissement de crédit agréé par Bank Al-Maghrib.`;
 
-export const DISCLAIMER_SHORT = "Données indicatives à titre pédagogique · JAD2 Advisory : conseil stratégique & formation — non intermédiaire financier";
+export const DISCLAIMER_SHORT = "Données indicatives à titre pédagogique · JAD2 Advisory : conseil stratégique & formation en gestion du risque de change";
 
 // ─── BKAM Currency List ───────────────────────────────────────────────────────
 // Standard G10 market order: EUR first (60% basket weight), USD second (40%),

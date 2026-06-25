@@ -5,7 +5,7 @@ const STORAGE_KEY = 'jad2fx_disclaimer_v1';
 
 const DISCLAIMER_POINTS = [
   "Les taux de change affichés sont <strong>indicatifs et pédagogiques uniquement</strong> — ils ne constituent pas des prix de transaction fermes ni des cours officiels Bank Al-Maghrib.",
-  "JAD2 Advisory est un cabinet de conseil et de formation. <strong>Il n'est pas un intermédiaire financier agréé</strong> par Bank Al-Maghrib et n'exécute aucune transaction de change.",
+  "JAD2 Advisory est un cabinet de <strong>conseil stratégique et de formation</strong> en gestion du risque de change. Il ne fournit pas de conseil en investissement et n'exécute aucune transaction de change.",
   "Les simulations de forwards et de swaps sont des <strong>outils pédagogiques</strong> basés sur la formule CIP. Elles ne constituent pas une offre commerciale d'instruments financiers.",
   "Pour toute opération de change, adressez-vous exclusivement à un <strong>établissement de crédit agréé par Bank Al-Maghrib</strong>.",
 ];
@@ -75,7 +75,7 @@ export default function DisclaimerModal() {
 
         {/* Footer */}
         <div className="px-6 py-4 border-t border-navy-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-navy-950/30">
-          <p className="text-[9px] text-navy-600 leading-relaxed text-center sm:text-left">
+          <p className="text-[11px] text-slate-500 leading-relaxed text-center sm:text-left">
             En cliquant « J'ai compris », vous confirmez avoir pris connaissance de ces conditions.
           </p>
           <button

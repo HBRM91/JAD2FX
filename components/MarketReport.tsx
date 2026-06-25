@@ -268,8 +268,8 @@ function AdvisoryCTA({ lang }: { lang: 'fr' | 'ar' }) {
         </p>
         <p className="text-[11px] text-navy-400 leading-relaxed">
           {lang === 'fr'
-            ? 'Formation équipes finance · Stratégie de couverture · Conformité OC/BKAM · Non intermédiaire financier agréé BAM'
-            : 'تدريب فرق المالية · استراتيجية التحوط · الامتثال لمكتب الصرف / BAM · غير وسيط مالي'}
+            ? 'Formation équipes finance · Stratégie de couverture · Accompagnement réglementaire OC/BKAM'
+            : 'تدريب فرق المالية · استراتيجية التحوط · الامتثال لمكتب الصرف / BAM'}
         </p>
       </div>
       <a
@@ -552,8 +552,8 @@ export default function MarketReport() {
         {disclaimerOpen && (
           <p className="mt-3 text-[11px] text-amber-300/70 leading-relaxed" dir={isRtl ? 'rtl' : 'ltr'}>
             {isRtl
-              ? 'يُقدَّم هذا التقرير للأغراض الإعلامية والتعليمية فقط. الأسعار والمعلومات المقدمة استرشادية ولا تمثل نصيحة استثمارية أو توصية تداول. JAD2 Advisory غير مرخص من بنك المغرب كوسيط مالي. للعمليات الفعلية، يُرجى استشارة بنكك.'
-              : 'Ce rapport est fourni à titre purement informatif et pédagogique. JAD2 Advisory est un cabinet de conseil stratégique et de formation — non intermédiaire financier agréé par Bank Al-Maghrib, non conseiller en investissement agréé AMMC. Les taux présentés sont indicatifs et non-exécutables. Pour des transactions de change, consultez votre banque ou un établissement agréé.'}
+              ? 'يُقدَّم هذا التقرير للأغراض الإعلامية والتعليمية فقط. الأسعار والمعلومات المقدمة استرشادية ولا تمثل نصيحة استثمارية. JAD2 Advisory مكتب استشارات استراتيجية وتدريب في إدارة مخاطر الصرف — لا يُقدِّم نصائح استثمارية ولا يُنفِّذ عمليات الصرف. للعمليات الفعلية، يُرجى استشارة بنكك أو مؤسسة معتمدة من بنك المغرب.'
+              : 'Ce rapport est fourni à titre purement informatif et pédagogique. JAD2 Advisory est un cabinet de conseil stratégique et de formation en gestion du risque de change — il ne fournit pas de conseil en investissement et n\'exécute aucune transaction de change. Les taux présentés sont indicatifs. Pour des transactions, consultez votre banque ou un établissement agréé par Bank Al-Maghrib.'}
           </p>
         )}
       </div>

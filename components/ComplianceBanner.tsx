@@ -18,9 +18,9 @@ export default function ComplianceBanner({ toolName }: Props) {
         {toolName && <span className="text-amber-400/60"> · {toolName}</span>}
         {' '}—{' '}
         Les résultats sont <strong className="text-amber-300">indicatifs et non-exécutables</strong>.
-        JAD2 Advisory est un cabinet de <strong className="text-amber-300">conseil stratégique et de formation</strong>,
-        non un intermédiaire financier agréé par Bank Al-Maghrib ni un conseiller en investissement agréé AMMC.
-        Pour l'exécution de transactions, adressez-vous à votre établissement bancaire habilité.{' '}
+        JAD2 Advisory est un cabinet de <strong className="text-amber-300">conseil stratégique et de formation</strong>{' '}
+        en gestion du risque de change. Il ne fournit pas de conseil en investissement et n'exécute aucune transaction de change.
+        Pour toute opération, rapprochez-vous de votre établissement bancaire habilité.{' '}
         <a
           href="https://jad2advisory.com"
           target="_blank"

@@ -227,8 +227,8 @@ function PrintQuoteModal({ quote, currency, tenor, notional, direction, settleme
                 </strong>
                 {' — '}
                 {locale === 'en'
-                  ? 'This document is produced for educational purposes by JAD2 Advisory (strategic consulting & FX risk management training). JAD2 Advisory is not a financial intermediary approved by Bank Al-Maghrib, nor an investment advisor approved by AMMC. Data is indicative and non-executable. For actual transactions, contact your authorized banking institution.'
-                  : "Ce document est produit à titre pédagogique par JAD2 Advisory (conseil stratégique & formation en gestion du risque de change). JAD2 Advisory n'est pas un intermédiaire financier agréé par Bank Al-Maghrib, ni un conseiller en investissement agréé AMMC. Les données sont indicatives et non-exécutables. Pour l'exécution de transactions, adressez-vous à votre établissement bancaire habilité."}
+                  ? 'This document is produced for educational purposes by JAD2 Advisory (strategic consulting & FX risk management training). Data is indicative only and does not constitute a transaction offer or investment advice. For actual transactions, contact a Bank Al-Maghrib approved institution.'
+                  : "Ce document est produit à titre pédagogique par JAD2 Advisory (conseil stratégique & formation en gestion du risque de change). Ces données sont indicatives et ne constituent pas une offre de transaction ni un conseil en investissement. Pour l'exécution de vos opérations, adressez-vous à votre établissement bancaire habilité."}
               </p>
             </div>
           </div>

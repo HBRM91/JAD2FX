@@ -526,7 +526,7 @@ function AppInner() {
                     jad2advisory.com →
                   </a>
                   <p className="text-[11px] text-slate-500 leading-relaxed">
-                    Conseil et formation · non intermédiaire financier agréé BAM.
+                    Conseil stratégique · Formation · Accompagnement réglementaire OC
                   </p>
                 </div>
 
@@ -624,9 +624,9 @@ function AppInner() {
                   comprendre les dynamiques du marché des changes MAD et la réglementation de l'Office des Changes.
                 </p>
                 <p>
-                  Cet outil ne constitue pas un conseil en investissement.{' '}
-                  <strong className="text-slate-200">JAD2FX n'est pas agréé par l'AMMC ni par Bank Al-Maghrib</strong>.
-                  Pour l'exécution de transactions, adressez-vous à un établissement de crédit agréé.
+                  JAD2FX est un outil de référence et de simulation pédagogique — il ne constitue pas un conseil en investissement.
+                  Pour toute transaction ou conseil personnalisé, consultez un{' '}
+                  <strong className="text-slate-200">établissement de crédit agréé par Bank Al-Maghrib</strong>.
                 </p>
 
                 <h3 className="text-[11px] font-bold text-white mt-6 mb-3 uppercase tracking-[0.15em] flex items-center gap-2">
@@ -657,8 +657,9 @@ function AppInner() {
 
                 <div className="mt-4 p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
                   <p className="text-[11px] text-amber-400/90">
-                    ⚠️ <strong className="text-amber-300">JAD2 Advisory n'est pas un intermédiaire financier agréé par Bank Al-Maghrib</strong>{' '}
-                    et n'exécute aucune transaction de change. Nos prestations sont exclusivement du conseil et de la formation.
+                    ℹ️ <strong className="text-amber-300">JAD2 Advisory fournit exclusivement</strong>{' '}
+                    conseil stratégique et formation en gestion du risque de change — sans exécution de transactions de change ni conseil en investissement.
+                    Pour vos opérations, adressez-vous à un établissement bancaire agréé.
                   </p>
                 </div>
 
@@ -691,7 +692,7 @@ function AppInner() {
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div>
               <p className="text-sm font-bold text-white">Formation & Conseil en Gestion du Risque de Change</p>
-              <p className="text-xs text-slate-400">Cabinet de conseil · Formation · Accompagnement réglementaire OC · Non intermédiaire financier</p>
+              <p className="text-xs text-slate-400">Cabinet de conseil · Formation en gestion du risque de change · Accompagnement réglementaire OC</p>
             </div>
             <a
               href="https://jad2advisory.com"
