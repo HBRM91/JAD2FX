@@ -1,25 +1,39 @@
 import React from 'react';
 
 interface Props {
-  countryCode: string;
+  countryCode: string;  // ISO 3166-1 alpha-2 (e.g. 'us', 'eu', 'gb')
   size?: 'xs' | 'sm' | 'md' | 'lg';
   className?: string;
 }
 
-const SIZES: Record<string, React.CSSProperties> = {
-  xs: { width: 16, height: 12, borderRadius: 2 },
-  sm: { width: 20, height: 15, borderRadius: 2 },
-  md: { width: 24, height: 18, borderRadius: 3 },
-  lg: { width: 32, height: 24, borderRadius: 4 },
+// [width, height] in px — 4:3 ratio matches standard flag proportions
+const DIMS: Record<string, [number, number]> = {
+  xs: [16, 12],
+  sm: [20, 15],
+  md: [24, 18],
+  lg: [32, 24],
 };
 
 export default function CurrencyFlag({ countryCode, size = 'sm', className = '' }: Props) {
+  const [w, h] = DIMS[size] ?? DIMS.sm;
+  const code = countryCode.toLowerCase();
   return (
-    <span
-      className={`fi fi-${countryCode.toLowerCase()} flex-shrink-0 ${className}`}
-      style={{ display: 'inline-block', ...SIZES[size] }}
-      role="img"
-      aria-label={countryCode}
+    <img
+      src={`https://flagcdn.com/w${w * 2}/${code}.png`}
+      width={w}
+      height={h}
+      alt={code.toUpperCase()}
+      loading="lazy"
+      decoding="async"
+      className={className}
+      style={{
+        borderRadius: 2,
+        objectFit: 'cover',
+        flexShrink: 0,
+        display: 'inline-block',
+        verticalAlign: 'middle',
+      }}
+      onError={e => { (e.currentTarget as HTMLImageElement).style.visibility = 'hidden'; }}
     />
   );
 }
