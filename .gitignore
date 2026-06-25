@@ -31,3 +31,6 @@ playwright-report/
 .next/
 out/
 next-env.d.ts
+
+# Cloudflare Pages build output
+.vercel/
