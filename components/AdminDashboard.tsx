@@ -12,6 +12,7 @@ import { STANDARD_TENORS } from '../services/forwardEngine';
 import { BlotterEntry, ClientTier, TierConfig, AuditEntry } from '../types';
 import { routeQuery, getAvailableProviders, PROVIDER_LABELS, PROVIDER_COLORS } from '../services/llmRouter';
 import ReportsAdmin from './admin/ReportsAdmin';
+import CurrencyFlag from './CurrencyFlag';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -233,7 +234,7 @@ function RatesTab() {
                 <tr key={c.code} className="border-b border-navy-800 hover:bg-navy-800/40">
                   <td className="py-2 px-3">
                     <div className="flex items-center gap-2">
-                      <span>{c.flag}</span>
+                      <CurrencyFlag countryCode={c.countryCode} size="xs" />
                       <span className="text-white font-bold">{c.code}/MAD</span>
                     </div>
                   </td>
@@ -451,7 +452,7 @@ function ForwardsTab() {
                 return (
                   <tr key={c.code} className="border-b border-navy-800 hover:bg-navy-800/40">
                     <td className="py-1.5 px-3">
-                      <span className="mr-2">{c.flag}</span>
+                      <CurrencyFlag countryCode={c.countryCode} size="xs" />
                       <span className="text-white font-bold">{c.code}</span>
                     </td>
                     <td className="text-right px-3 text-gold-400 font-bold">{pips}</td>

@@ -9,6 +9,7 @@ import { routeQuery, LLMProvider, PROVIDER_LABELS, PROVIDER_COLORS } from '../se
 import { fetchCommodityQuotes } from '../services/yahooFinance';
 import { useAdmin } from '../context/AdminContext';
 import { DEFAULT_BASKET_CONFIG } from '../constants';
+import CurrencyFlag from './CurrencyFlag';
 
 // ─── Module-level constants & helpers ────────────────────────────────────────
 
@@ -199,17 +200,17 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
   ];
 
   const gulfCrosses = [
-    { flag: '🇸🇦', label: 'SAR / MAD', rate: 0.266667 * usdMad, note: 'Hard peg 3.75/USD' },
-    { flag: '🇦🇪', label: 'AED / MAD', rate: 0.272294 * usdMad, note: 'Hard peg 3.6725/USD' },
-    { flag: '🇶🇦', label: 'QAR / MAD', rate: 0.274725 * usdMad, note: 'Hard peg 3.64/USD' },
-    { flag: '🇰🇼', label: 'KWD / MAD', rate: 3.25000  * usdMad, note: 'Managed float basket' },
+    { countryCode: 'sa', label: 'SAR / MAD', rate: 0.266667 * usdMad, note: 'Hard peg 3.75/USD' },
+    { countryCode: 'ae', label: 'AED / MAD', rate: 0.272294 * usdMad, note: 'Hard peg 3.6725/USD' },
+    { countryCode: 'qa', label: 'QAR / MAD', rate: 0.274725 * usdMad, note: 'Hard peg 3.64/USD' },
+    { countryCode: 'kw', label: 'KWD / MAD', rate: 3.25000  * usdMad, note: 'Managed float basket' },
   ];
 
   const emPeers = [
-    { flag: '🇪🇬', label: 'USD/EGP', rate: 53.5,                                note: 'CBE float (ref)' },
-    { flag: '🇹🇷', label: 'USD/TRY', rate: (rates['TRY'] ?? 36.5) / eu,         note: 'CBRT normalisation' },
-    { flag: '🇿🇦', label: 'USD/ZAR', rate: (rates['ZAR'] ?? 19.8) / eu,         note: 'Commodity-linked' },
-    { flag: '🇩🇿', label: 'USD/DZD', rate: 134.5,                               note: 'Parallel market gap' },
+    { countryCode: 'eg', label: 'USD/EGP', rate: 53.5,                                note: 'CBE float (ref)' },
+    { countryCode: 'tr', label: 'USD/TRY', rate: (rates['TRY'] ?? 36.5) / eu,         note: 'CBRT normalisation' },
+    { countryCode: 'za', label: 'USD/ZAR', rate: (rates['ZAR'] ?? 19.8) / eu,         note: 'Commodity-linked' },
+    { countryCode: 'dz', label: 'USD/DZD', rate: 134.5,                               note: 'Parallel market gap' },
   ];
 
   // Morocco corporate watchpoints — static but data-contextual
@@ -374,9 +375,9 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
               <span className="text-[9px] text-slate-600 ml-auto">Parités USD fixes</span>
             </div>
             <div className="grid grid-cols-2 gap-px bg-navy-800/30">
-              {gulfCrosses.map(({ flag, label, rate, note }) => (
+              {gulfCrosses.map(({ countryCode, label, rate, note }) => (
                 <div key={label} className="bg-[#0b1a30] px-3 py-3">
-                  <p className="text-[10px] text-slate-500">{flag} {label}</p>
+                  <p className="text-[10px] text-slate-500 flex items-center gap-1"><CurrencyFlag countryCode={countryCode} size="xs" /> {label}</p>
                   <p className="text-sm font-mono font-bold text-white mt-0.5">{rate.toFixed(4)}</p>
                   <p className="text-[8px] text-slate-700 mt-0.5 leading-tight">{note}</p>
                 </div>
@@ -389,10 +390,10 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
               <Globe size={11} className="text-slate-500" />
               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">EM Pairs</span>
             </div>
-            {emPeers.map(({ flag, label, rate, note }) => (
+            {emPeers.map(({ countryCode, label, rate, note }) => (
               <div key={label} className="flex items-center justify-between px-4 py-2 border-b border-navy-800/40 last:border-b-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm">{flag}</span>
+                  <CurrencyFlag countryCode={countryCode} size="sm" />
                   <div>
                     <p className="text-[10px] font-mono text-slate-300">{label}</p>
                     <p className="text-[8px] text-slate-600">{note}</p>

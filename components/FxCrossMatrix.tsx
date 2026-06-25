@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { LiveRate } from '../types';
 import { BKAM_CURRENCIES } from '../constants';
 import { useI18n } from '../context/I18nContext';
+import CurrencyFlag from './CurrencyFlag';
 
 interface Props {
   rates: LiveRate[];
@@ -57,8 +58,8 @@ export default function FxCrossMatrix({ rates }: Props) {
               <th className="py-2 px-3 text-slate-600 font-medium text-[10px] w-20 text-left">↓ / →</th>
               {DISPLAY_CODES.map(code => (
                 <th key={code} className="py-2 px-2 text-center">
-                  <div className="text-[10px] text-slate-400 font-bold">
-                    {currencyMeta[code]?.flag ?? '🏛'} {code}
+                  <div className="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+                    {currencyMeta[code] ? <CurrencyFlag countryCode={currencyMeta[code]!.countryCode} size="xs" /> : '🏛'} {code}
                   </div>
                 </th>
               ))}
@@ -69,7 +70,7 @@ export default function FxCrossMatrix({ rates }: Props) {
               <tr key={rowCode} className="border-b border-navy-800/50">
                 <td className="py-2 px-3">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-sm">{currencyMeta[rowCode]?.flag ?? '🏛'}</span>
+                    {currencyMeta[rowCode] ? <CurrencyFlag countryCode={currencyMeta[rowCode]!.countryCode} size="xs" /> : <span className="text-sm">🏛</span>}
                     <span className="text-slate-300 font-bold text-[10px]">{rowCode}</span>
                   </div>
                 </td>

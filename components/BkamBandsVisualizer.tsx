@@ -25,6 +25,7 @@ import { AlertTriangle, TrendingUp, TrendingDown, Minus, RefreshCw, Info } from 
 import { DEFAULT_BASKET_CONFIG } from '../constants';
 import { useAdmin } from '../context/AdminContext';
 import { computeDriftModel, DriftRegression, DriftPoint } from '../services/driftModel';
+import CurrencyFlag from './CurrencyFlag';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -70,7 +71,7 @@ function calcBand(spot: number, central: number): BandState {
 
 // ─── Sub: Horizontal Gauge ────────────────────────────────────────────────────
 
-function BandGauge({ data, pair, flag }: { data: BandState; pair: string; flag: string }) {
+function BandGauge({ data, pair, countryCode }: { data: BandState; pair: string; countryCode: string }) {
   const pct = Math.max(1, Math.min(99, data.utilPct));
 
   // Zone colour for the bird marker
@@ -87,11 +88,11 @@ function BandGauge({ data, pair, flag }: { data: BandState; pair: string; flag: 
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xl">{flag}</span>
+          <CurrencyFlag countryCode={countryCode} size="lg" />
           <div>
             <p className="text-[13px] font-bold text-white font-mono">{pair}</p>
             <p className="text-[10px] text-navy-500 uppercase tracking-wider">
-              Panier {flag === '🇪🇺' ? '60% EUR' : '40% USD'} · BKAM Phase II ±5%
+              Panier {countryCode === 'eu' ? '60% EUR' : '40% USD'} · BKAM Phase II ±5%
             </p>
           </div>
         </div>
@@ -360,7 +361,7 @@ export default function BkamBandsVisualizer({ compact = false }: { compact?: boo
             {/* EUR/MAD gauge */}
             {eurBand && (
               <div className="space-y-1">
-                <BandGauge data={eurBand} pair="EUR/MAD" flag="🇪🇺" />
+                <BandGauge data={eurBand} pair="EUR/MAD" countryCode="eu" />
               </div>
             )}
 
@@ -369,7 +370,7 @@ export default function BkamBandsVisualizer({ compact = false }: { compact?: boo
             {/* USD/MAD gauge */}
             {usdBand && (
               <div className="space-y-1">
-                <BandGauge data={usdBand} pair="USD/MAD" flag="🇺🇸" />
+                <BandGauge data={usdBand} pair="USD/MAD" countryCode="us" />
               </div>
             )}
 

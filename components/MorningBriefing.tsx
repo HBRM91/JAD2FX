@@ -238,7 +238,11 @@ function EventTypeBadge({ type }: { type: CalendarEvent['type'] }) {
 function BandGauge({ data, locale }: { data: BandData; locale: string }) {
   const zone = data.utilPct < 20 ? 'DANGER_LOW' : data.utilPct > 80 ? 'DANGER_HIGH' : data.utilPct < 35 ? 'CAUTION_LOW' : data.utilPct > 65 ? 'CAUTION_HIGH' : 'NEUTRAL';
   const zoneColor = zone === 'NEUTRAL' ? 'text-emerald-400' : zone.startsWith('CAUTION') ? 'text-amber-400' : 'text-red-400';
-  const zoneLabel = zone === 'NEUTRAL' ? 'Zone Neutre' : zone.startsWith('CAUTION') ? 'Zone Attention' : 'Zone Danger';
+  const zoneLabel = zone === 'NEUTRAL'
+    ? (locale === 'ar' ? 'محايد' : locale === 'en' ? 'Neutral' : 'Zone Neutre')
+    : zone.startsWith('CAUTION')
+      ? (locale === 'ar' ? 'تنبيه' : locale === 'en' ? 'Caution' : 'Zone Attention')
+      : (locale === 'ar' ? 'خطر' : locale === 'en' ? 'Danger' : 'Zone Danger');
   const driftSign = data.driftBps > 0 ? '+' : '';
 
   return (
@@ -277,13 +281,13 @@ function BandGauge({ data, locale }: { data: BandData; locale: string }) {
       {/* Labels */}
       <div className="flex items-center justify-between text-[9px] font-mono text-slate-600">
         <span>{data.lower.toFixed(3)}</span>
-        <span className="text-navy-500">Parité {data.central.toFixed(3)}</span>
+        <span className="text-navy-500">{locale === 'ar' ? 'التعادل' : locale === 'en' ? 'Parity' : 'Parité'} {data.central.toFixed(3)}</span>
         <span>{data.upper.toFixed(3)}</span>
       </div>
       {/* Drift */}
       <div className="flex items-center gap-3 text-[10px] text-slate-400">
-        <span>Cours actuel: <span className="font-mono font-bold text-white">{data.current.toFixed(4)}</span></span>
-        <span>Dérive: <span className={`font-mono font-bold ${data.driftBps > 0 ? 'text-red-400' : data.driftBps < 0 ? 'text-emerald-400' : 'text-slate-400'}`}>{driftSign}{data.driftBps} bps</span></span>
+        <span>{locale === 'ar' ? 'السعر الحالي:' : locale === 'en' ? 'Current:' : 'Cours:'} <span className="font-mono font-bold text-white">{data.current.toFixed(4)}</span></span>
+        <span>{locale === 'ar' ? 'الانحراف:' : locale === 'en' ? 'Drift:' : 'Dérive:'} <span className={`font-mono font-bold ${data.driftBps > 0 ? 'text-red-400' : data.driftBps < 0 ? 'text-emerald-400' : 'text-slate-400'}`}>{driftSign}{data.driftBps} bps</span></span>
       </div>
     </div>
   );
@@ -576,6 +580,7 @@ function MarkdownSection({ content }: { content: string }) {
 export default function MorningBriefing() {
   const { config, livePrices } = useAdmin();
   const { locale } = useI18n();
+  const L = (fr: string, en: string, ar: string) => locale === 'ar' ? ar : locale === 'en' ? en : fr;
   const [tab, setTab] = useState<BriefingTab>('OVERVIEW');
   const [report, setReport] = useState<MarketReport | null>(null);
   const [reportLoading, setReportLoading] = useState(true);
@@ -772,13 +777,13 @@ export default function MorningBriefing() {
               <table className="w-full min-w-[700px]">
                 <thead>
                   <tr className="bg-navy-950/50 text-[9px] uppercase tracking-widest text-slate-500 border-b border-navy-800">
-                    <th className="text-left px-4 py-2.5">Paire</th>
-                    <th className="text-right px-3 py-2.5">Bid (Achat)</th>
-                    <th className="text-right px-3 py-2.5">Ask (Vente)</th>
+                    <th className="text-left px-4 py-2.5">{L('Paire', 'Pair', 'الزوج')}</th>
+                    <th className="text-right px-3 py-2.5">{L('Achat', 'Bid', 'شراء')}</th>
+                    <th className="text-right px-3 py-2.5">{L('Vente', 'Ask', 'بيع')}</th>
                     <th className="text-right px-3 py-2.5">Mid</th>
-                    <th className="text-right px-3 py-2.5">Var. 24h</th>
-                    <th className="text-right px-3 py-2.5">Spread</th>
-                    <th className="text-right px-4 py-2.5">Position Bande</th>
+                    <th className="text-right px-3 py-2.5">{L('Var. 24h', 'Change 24h', 'التغير 24س')}</th>
+                    <th className="text-right px-3 py-2.5">{L('Écart', 'Spread', 'الفارق')}</th>
+                    <th className="text-right px-4 py-2.5">{L('Bande BKAM', 'BKAM Band', 'نطاق BKAM')}</th>
                   </tr>
                 </thead>
                 <tbody>

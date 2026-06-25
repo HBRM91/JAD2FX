@@ -270,6 +270,7 @@ function DriftPanel({ corsProxyUrl }: { corsProxyUrl?: string }) {
 export default function LivePricer() {
   const { config, setLivePrices } = useAdmin();
   const { locale } = useI18n();
+  const L = (fr: string, en: string, ar: string) => locale === 'ar' ? ar : locale === 'en' ? en : fr;
   const stream = usePriceStream(config);
 
   useEffect(() => {
@@ -341,7 +342,7 @@ export default function LivePricer() {
             <div className="flex items-center gap-2">
               <CountdownRing seconds={stream.countdown} total={intervalSecs} />
               <div className="text-[10px] text-slate-500 font-mono leading-tight">
-                <div>Next refresh</div>
+                <div>{L('Prochain refresh', 'Next refresh', 'التحديث التالي')}</div>
                 <div className="text-slate-300">{stream.countdown}s</div>
               </div>
             </div>
@@ -352,7 +353,7 @@ export default function LivePricer() {
             className={`flex items-center gap-1.5 px-3 py-1.5 border rounded text-xs font-medium transition ${filterOpen ? 'border-gold-600 text-gold-400 bg-gold-500/5' : 'bg-navy-800 border-navy-600 hover:border-gold-600 text-slate-300 hover:text-white'}`}
           >
             <Settings2 size={12} />
-            {visibleCodes.size < BKAM_CURRENCIES.length ? `${visibleCodes.size}/${BKAM_CURRENCIES.length}` : 'Filter'}
+            {visibleCodes.size < BKAM_CURRENCIES.length ? `${visibleCodes.size}/${BKAM_CURRENCIES.length}` : L('Filtrer', 'Filter', 'تصفية')}
           </button>
           <button
             onClick={stream.refresh}
@@ -369,11 +370,11 @@ export default function LivePricer() {
       {filterOpen && (
         <div className="bg-navy-900 border border-navy-700 rounded-lg p-4">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-xs font-bold text-white uppercase tracking-wider">Devises visibles</p>
+            <p className="text-xs font-bold text-white uppercase tracking-wider">{L('Devises visibles', 'Visible currencies', 'العملات المرئية')}</p>
             <div className="flex gap-2">
-              <button onClick={() => { const all = new Set(BKAM_CURRENCIES.map(c => c.code)); setVisibleCodes(all); localStorage.setItem('jad2fx_live_ccy', JSON.stringify([...all])); }} className="text-[10px] text-gold-400 hover:text-gold-300">Tout sélectionner</button>
+              <button onClick={() => { const all = new Set(BKAM_CURRENCIES.map(c => c.code)); setVisibleCodes(all); localStorage.setItem('jad2fx_live_ccy', JSON.stringify([...all])); }} className="text-[10px] text-gold-400 hover:text-gold-300">{L('Tout sélectionner', 'Select all', 'تحديد الكل')}</button>
               <span className="text-navy-600">·</span>
-              <button onClick={() => { const g10 = new Set(['EUR','USD','GBP','CHF','JPY','CAD','NOK','SEK','DKK','CNY']); setVisibleCodes(g10); localStorage.setItem('jad2fx_live_ccy', JSON.stringify([...g10])); }} className="text-[10px] text-navy-400 hover:text-slate-300">G10 seulement</button>
+              <button onClick={() => { const g10 = new Set(['EUR','USD','GBP','CHF','JPY','CAD','NOK','SEK','DKK','CNY']); setVisibleCodes(g10); localStorage.setItem('jad2fx_live_ccy', JSON.stringify([...g10])); }} className="text-[10px] text-navy-400 hover:text-slate-300">{L('G10 seulement', 'G10 only', 'مجموعة G10 فقط')}</button>
             </div>
           </div>
           <div className="flex flex-wrap gap-1.5">
@@ -397,12 +398,12 @@ export default function LivePricer() {
           <table className="w-full min-w-[560px]">
             <thead>
               <tr className="bg-navy-800/60 border-b border-navy-700 text-[10px] uppercase tracking-widest text-slate-500 font-medium">
-                <th className="text-left py-2.5 pl-4 pr-3">Pair</th>
-                <th className="text-right pr-3">Bid</th>
-                <th className="text-right pr-3">Ask</th>
+                <th className="text-left py-2.5 pl-4 pr-3">{L('Paire', 'Pair', 'الزوج')}</th>
+                <th className="text-right pr-3">{L('Achat', 'Bid', 'شراء')}</th>
+                <th className="text-right pr-3">{L('Vente', 'Ask', 'بيع')}</th>
                 <th className="text-right pr-3">Mid</th>
-                <th className="text-right pr-3">Change %</th>
-                <th className="text-right pr-4">Spread</th>
+                <th className="text-right pr-3">{L('Variation %', 'Change %', 'التغير %')}</th>
+                <th className="text-right pr-4">{L('Écart', 'Spread', 'الفارق')}</th>
               </tr>
             </thead>
             <tbody>
@@ -413,15 +414,15 @@ export default function LivePricer() {
                       {stream.isRefreshing ? (
                         <>
                           <RefreshCw size={28} className="text-gold-500 animate-spin" />
-                          <p className="text-slate-400 text-sm">Fetching live rates…</p>
+                          <p className="text-slate-400 text-sm">{L('Récupération des taux…', 'Fetching rates…', 'جاري جلب الأسعار…')}</p>
                         </>
                       ) : (
                         <>
                           <WifiOff size={28} className="text-slate-600" />
-                          <p className="text-slate-400 text-sm">No data — click Refresh or check connection</p>
+                          <p className="text-slate-400 text-sm">{L('Aucune donnée — actualisez', 'No data — refresh', 'لا توجد بيانات')}</p>
                           <button onClick={stream.refresh}
                             className="px-4 py-2 bg-gold-500 text-navy-900 text-xs font-bold rounded hover:bg-gold-400 transition">
-                            Fetch Now
+                            {L('Récupérer', 'Fetch', 'جلب')}
                           </button>
                         </>
                       )}

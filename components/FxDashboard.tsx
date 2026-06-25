@@ -27,6 +27,7 @@ const TAB_LABELS: Record<DashboardTab, Record<string, string>> = {
 
 const FxDashboard: React.FC = () => {
   const { locale, isRTL } = useI18n();
+  const L = (fr: string, en: string, ar: string) => locale === 'ar' ? ar : locale === 'en' ? en : fr;
   const [activeTab, setActiveTab] = useState<DashboardTab>('VIREMENTS');
   const [rates, setRates] = useState<LiveRate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -227,9 +228,9 @@ const FxDashboard: React.FC = () => {
               <th className="pb-2 text-navy-500 font-bold uppercase tracking-wider text-[9px]">
                 {locale === 'en' ? 'Establishment' : 'Établissement'}
               </th>
-              <th className="pb-2 text-right text-navy-500 font-bold uppercase tracking-wider text-[9px]">Bid Réf.</th>
-              <th className="pb-2 text-right text-navy-500 font-bold uppercase tracking-wider text-[9px]">Ask Réf.</th>
-              <th className="pb-2 text-right text-navy-500 font-bold uppercase tracking-wider text-[9px]">vs Ref.</th>
+              <th className="pb-2 text-right text-navy-500 font-bold uppercase tracking-wider text-[9px]">{L('Achat Réf.', 'Ref Bid', 'سعر الشراء')}</th>
+              <th className="pb-2 text-right text-navy-500 font-bold uppercase tracking-wider text-[9px]">{L('Vente Réf.', 'Ref Ask', 'سعر البيع')}</th>
+              <th className="pb-2 text-right text-navy-500 font-bold uppercase tracking-wider text-[9px]">{L('vs Réf.', 'vs Ref', 'مقابل المرجع')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-navy-800/60">
@@ -455,7 +456,7 @@ const FxDashboard: React.FC = () => {
                       }`}
                     >
                       <span className="flex items-center gap-2">
-                        <span className="text-[15px]">{meta?.flag}</span>
+                        {meta && <CurrencyFlag countryCode={meta.countryCode} size="md" />}
                         <div>
                           <span className="text-[11px] font-bold text-slate-300">{code}</span>
                           {meta?.bkamUnit === 100 && <span className="text-[8px] text-navy-600 ml-1">×100</span>}
@@ -510,7 +511,7 @@ const FxDashboard: React.FC = () => {
                           : 'bg-navy-800 text-navy-400 border border-navy-700 hover:text-white hover:border-navy-600'
                       }`}
                     >
-                      <span className="text-[13px]">{meta?.flag}</span>
+                      {meta && <CurrencyFlag countryCode={meta.countryCode} size="sm" />}
                       <span>{r.currency}</span>
                       {chg !== 0 && (
                         <span className={`text-[9px] font-mono ${active ? 'text-navy-800' : isUp ? 'text-emerald-400' : isDn ? 'text-red-400' : ''}`}>
@@ -528,7 +529,7 @@ const FxDashboard: React.FC = () => {
               <div className="bg-navy-900 border border-navy-800 rounded-xl overflow-hidden">
                 <div className="px-5 py-4 border-b border-navy-800 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl">{currencyMeta[selectedCurrency]?.flag}</span>
+                    {currencyMeta[selectedCurrency] && <CurrencyFlag countryCode={currencyMeta[selectedCurrency]!.countryCode} size="lg" />}
                     <div>
                       <h3 className="font-mono text-[16px] font-bold text-white">{selectedRate.pair}</h3>
                       <p className="text-[10px] text-navy-500">{getCurrencyName(currencyMeta[selectedCurrency], locale)}</p>
@@ -577,7 +578,7 @@ const FxDashboard: React.FC = () => {
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-[14px]">{meta?.flag}</span>
+                        {meta && <CurrencyFlag countryCode={meta.countryCode} size="md" />}
                         <div>
                           <p className="text-[11px] font-bold text-white">{r.currency}</p>
                           <p className="text-[9px] text-navy-600">{getCurrencyName(meta, locale)}</p>

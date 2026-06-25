@@ -13,6 +13,7 @@ import {
   RefreshCw, AlertTriangle, Info, TrendingUp, TrendingDown,
   Minus, Database, Users,
 } from 'lucide-react';
+import CurrencyFlag from './CurrencyFlag';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -532,7 +533,7 @@ export default function BkamFixing() {
                         <tr className="border-b border-navy-800/40 hover:bg-navy-800/40 transition-colors">
                           <td className="px-5 py-2.5">
                             <div className="flex items-center gap-2">
-                              <span className="text-base">{c.flag}</span>
+                              <CurrencyFlag countryCode={c.countryCode} size="sm" />
                               <span className="font-mono font-bold text-white">{c.code}</span>
                             </div>
                           </td>

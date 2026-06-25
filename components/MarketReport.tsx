@@ -8,6 +8,14 @@ import { MarketReport as MarketReportType, RadarEntry } from '../types';
 import { getPublishedReport } from '../services/reportStorage';
 import { fetchAllMadRates } from '../services/fxRates';
 import { DEFAULT_BASKET_CONFIG } from '../constants';
+import CurrencyFlag from './CurrencyFlag';
+
+const CODE_TO_CC: Record<string, string> = {
+  EUR:'eu', USD:'us', GBP:'gb', CHF:'ch', JPY:'jp', CAD:'ca',
+  NOK:'no', SEK:'se', DKK:'dk', CNY:'cn', SAR:'sa', AED:'ae',
+  QAR:'qa', KWD:'kw', OMR:'om', BHD:'bh', JOD:'jo', TND:'tn',
+  DZD:'dz', LYD:'ly', ZAR:'za', INR:'in', BRL:'br', TRY:'tr',
+};
 
 const PROXY = process.env.CORS_PROXY_URL ?? '';
 
@@ -115,7 +123,7 @@ function RadarCard({ entry, lang }: { entry: RadarEntry; lang: 'fr' | 'ar'; key?
     <div className={`rounded-xl border p-4 space-y-3 ${s.bg}`} dir={isRtl ? 'rtl' : 'ltr'}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg">{entry.flag}</span>
+          <CurrencyFlag countryCode={CODE_TO_CC[entry.currency] ?? entry.currency.toLowerCase()} size="md" />
           <div>
             <p className="font-mono font-bold text-white text-[13px] leading-none">{entry.currency}/MAD</p>
             <div className={`inline-flex items-center gap-1 mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded border ${s.badge}`}>

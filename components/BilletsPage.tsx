@@ -8,6 +8,7 @@ import { useI18n } from '../context/I18nContext';
 import {
   Banknote, RefreshCw, ExternalLink, Info, ChevronDown, ShieldAlert, Building2,
 } from 'lucide-react';
+import CurrencyFlag from './CurrencyFlag';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -43,6 +44,7 @@ const OC_BILLET_RANGE: Record<ClientTier, { min: number; max: number }> = {
 interface BilletRow {
   code: string;
   flag: string;
+  countryCode: string;
   name: string;
   nameFr: string;
   nameAr: string;
@@ -117,6 +119,7 @@ const BilletsPage: React.FC = () => {
         return {
           code: cur.code,
           flag: cur.flag,
+          countryCode: cur.countryCode,
           name: cur.name,
           nameFr: cur.nameFr,
           nameAr: cur.nameAr,
@@ -330,7 +333,7 @@ const BilletsPage: React.FC = () => {
                   <tr key={row.code} className="border-b border-navy-800/40 hover:bg-navy-800/40 transition">
                     <td className="py-3 px-4">
                       <div className={`flex items-center gap-2 ${isRTL ? 'flex-row-reverse' : ''}`}>
-                        <span className="text-base">{row.flag}</span>
+                        <CurrencyFlag countryCode={row.countryCode} size="sm" />
                         <div>
                           <p className="font-bold text-white">{row.code}/MAD</p>
                           <p className="text-[10px] text-slate-400">{getCurrencyName(row, locale)}</p>
