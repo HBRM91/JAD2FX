@@ -94,10 +94,15 @@ function NewsCard({ news }: { news: typeof MARKET_NEWS[0] }) {
       className="px-5 py-4 hover:bg-navy-800/40 transition-colors cursor-pointer"
       onClick={() => setExpanded(e => !e)}
     >
-      <div className="flex items-center gap-2 mb-2">
+      <div className="flex items-center gap-2 mb-2 flex-wrap">
         <span className="text-[10px] font-bold uppercase tracking-wide text-gold-500 bg-gold-500/10 border border-gold-500/25 px-2.5 py-0.5 rounded-full">
           {news.category}
         </span>
+        {news.date && (
+          <time dateTime={news.date} className="text-[9px] text-slate-600 font-mono">
+            {new Date(news.date).toLocaleDateString('fr-MA', { day: '2-digit', month: 'short', year: 'numeric' })}
+          </time>
+        )}
       </div>
       <h4 className="text-[14px] font-semibold text-slate-100 mb-1.5 leading-snug">{news.title}</h4>
       <p className={`text-[12px] text-slate-400 leading-relaxed transition-all ${expanded ? '' : 'line-clamp-3'}`}>
@@ -113,7 +118,7 @@ function NewsCard({ news }: { news: typeof MARKET_NEWS[0] }) {
 // ─── Inner app ─────────────────────────────────────────────────────────────────
 
 function AppInner() {
-  const { config, setLivePrices } = useAdmin();
+  const { config, setLivePrices, isAdmin } = useAdmin();
   useTheme(); // keeps ThemeProvider active (dark-only)
   const [view, setView]             = useState<ViewState>('HOME');
   const [tickerRates, setTickerRates] = useState<LiveRate[]>([]);
@@ -171,7 +176,7 @@ function AppInner() {
   const LOCALE_OPTIONS: { code: Locale; label: string }[] = [
     { code: 'fr', label: 'FR' },
     { code: 'en', label: 'EN' },
-    { code: 'ar', label: 'عر' },
+    { code: 'ar', label: 'عربي' },
   ];
 
   // ── Page title chip ───────────────────────────────────────────────────────
@@ -297,17 +302,19 @@ function AppInner() {
                 <ExternalLink size={11} />
                 Advisory
               </a>
-              <button
-                onClick={() => navTo('ADMIN')}
-                className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium border rounded transition-colors ${
-                  view === 'ADMIN'
-                    ? 'text-gold-400 border-gold-700/50 bg-gold-500/5'
-                    : 'text-navy-300 border-navy-700 hover:text-white hover:border-navy-600'
-                }`}
-              >
-                <Lock size={9} />
-                Admin
-              </button>
+              {isAdmin && (
+                <button
+                  onClick={() => navTo('ADMIN')}
+                  className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium border rounded transition-colors ${
+                    view === 'ADMIN'
+                      ? 'text-gold-400 border-gold-700/50 bg-gold-500/5'
+                      : 'text-navy-300 border-navy-700 hover:text-white hover:border-navy-600'
+                  }`}
+                >
+                  <Lock size={9} />
+                  Admin
+                </button>
+              )}
 
               {/* Mobile menu toggle */}
               <button
@@ -367,14 +374,16 @@ function AppInner() {
             >
               <MessageSquare size={14} /> Contact
             </button>
-            <button
-              onClick={() => navTo('ADMIN')}
-              className={`w-full flex items-center gap-3 px-5 py-2.5 text-[13px] font-medium text-left border-t border-navy-800 ${
-                view === 'ADMIN' ? 'text-gold-400 bg-navy-800' : 'text-slate-400 hover:text-white hover:bg-navy-800/50'
-              }`}
-            >
-              <Lock size={14} /> Admin
-            </button>
+            {isAdmin && (
+              <button
+                onClick={() => navTo('ADMIN')}
+                className={`w-full flex items-center gap-3 px-5 py-2.5 text-[13px] font-medium text-left border-t border-navy-800 ${
+                  view === 'ADMIN' ? 'text-gold-400 bg-navy-800' : 'text-slate-400 hover:text-white hover:bg-navy-800/50'
+                }`}
+              >
+                <Lock size={14} /> Admin
+              </button>
+            )}
             {/* Mobile language */}
             <div className="flex items-center gap-0 px-5 py-3 border-t border-navy-800">
               {LOCALE_OPTIONS.map(opt => (
@@ -398,12 +407,14 @@ function AppInner() {
         <p className="text-[11px] text-slate-500 tracking-wide text-center">{DISCLAIMER_SHORT}</p>
       </div>
 
-      {/* ══ Mobile simulator-mode sticky banner (hidden on desktop) ══════════ */}
-      <div className="lg:hidden sticky top-14 z-40 bg-amber-900/95 border-b border-amber-700/50 backdrop-blur-sm px-4 py-1.5 text-center">
-        <p className="text-[9px] font-bold text-amber-300 uppercase tracking-widest">
-          Mode Simulateur — Taux Non-Exécutables · Indicatif Uniquement
-        </p>
-      </div>
+      {/* ══ Mobile simulator-mode sticky banner — only on tool/calc views ═════ */}
+      {['FORWARDS', 'SWAPS', 'ANALYSIS', 'BANDS', 'REPORT', 'RESEARCH'].includes(view) && (
+        <div className="lg:hidden sticky top-14 z-40 bg-amber-900/95 border-b border-amber-700/50 backdrop-blur-sm px-4 py-1.5 text-center">
+          <p className="text-[9px] font-bold text-amber-300 uppercase tracking-widest">
+            Mode Simulateur — Taux Non-Exécutables · Indicatif Uniquement
+          </p>
+        </div>
+      )}
 
       {/* ══ Ticker ═══════════════════════════════════════════════════════════ */}
       <RatesTicker rates={tickerRates} />
@@ -496,7 +507,7 @@ function AppInner() {
                     { label: 'FX Forwards',    desc: 'CIP terme',         view: 'FORWARDS'    as ViewState, icon: TrendingUp,    color: 'text-blue-400',    border: 'border-blue-700/50',    bg: 'bg-blue-900/30' },
                     { label: 'FX Swaps',       desc: 'Near / Far legs',   view: 'SWAPS'       as ViewState, icon: ArrowLeftRight, color: 'text-purple-400',  border: 'border-purple-700/50',  bg: 'bg-purple-900/30' },
                     { label: 'Bandes BKAM',    desc: 'Cage ±5%',         view: 'BANDS'       as ViewState, icon: BarChart2,      color: 'text-gold-400',    border: 'border-gold-700/50',    bg: 'bg-yellow-900/20' },
-                    { label: 'Market Report',  desc: 'Analyse IA',        view: 'REPORT'      as ViewState, icon: Newspaper,      color: 'text-emerald-400', border: 'border-emerald-700/50', bg: 'bg-emerald-900/30' },
+                    { label: 'Morning Briefing', desc: 'Analyse Éditoriale', view: 'REPORT'     as ViewState, icon: Newspaper,      color: 'text-emerald-400', border: 'border-emerald-700/50', bg: 'bg-emerald-900/30' },
                     { label: 'Réglementation', desc: 'Office des Changes', view: 'REGULATIONS' as ViewState, icon: Scale,          color: 'text-amber-400',   border: 'border-amber-700/50',   bg: 'bg-amber-900/25' },
                   ].map(item => (
                     <button
@@ -583,10 +594,10 @@ function AppInner() {
                     { label: 'Mise à Jour', value: 'Live', sub: 'en continu', color: 'text-emerald-400' },
                     { label: 'Accès', value: 'Gratuit', sub: 'pédagogique', color: 'text-purple-400' },
                   ].map(stat => (
-                    <div key={stat.label} className="bg-navy-900 border border-navy-700 rounded-xl p-3.5 text-center">
+                    <div key={stat.label} className="bg-navy-900 border border-navy-700 rounded-xl p-3.5 text-center flex flex-col items-center">
                       <p className={`text-xl font-bold font-mono tabular-nums ${stat.color}`}>{stat.value}</p>
-                      <p className="text-[11px] text-slate-300 font-semibold mt-0.5">{stat.label}</p>
-                      <p className="text-[10px] text-slate-500 mt-0.5">{stat.sub}</p>
+                      <p className="text-[10px] text-slate-300 font-semibold mt-0.5 leading-tight text-center">{stat.label}</p>
+                      <p className="text-[9px] text-slate-500 mt-0.5">{stat.sub}</p>
                     </div>
                   ))}
                 </div>
@@ -787,8 +798,6 @@ function AppInner() {
               <span className="text-slate-700">·</span>
               <span>Yahoo Finance</span>
               <span className="text-slate-700">·</span>
-              <span>Twelve Data</span>
-              <span className="text-slate-700">·</span>
               <span>BKAM Fixing</span>
               <span className="text-slate-700">·</span>
               <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400 transition-colors">
@@ -796,7 +805,7 @@ function AppInner() {
               </a>
             </div>
             <p className="text-xs mt-2 text-slate-600 italic">
-              Market data from Yahoo Finance / Twelve Data for educational purposes only. Not for commercial trading.
+              Market data from Yahoo Finance for educational purposes only. Not for commercial trading.
             </p>
             <p className="text-xs mt-1.5 text-slate-600">{t('footer.copyright')}</p>
           </div>

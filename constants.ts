@@ -117,56 +117,56 @@ export const MARKET_NEWS = [
     id: 1,
     title: "EUR/MAD : L'ancre européenne domine la dynamique du panier",
     category: "Bank Al-Maghrib",
-    time: "Éditorial",
+    date: "2026-06-26",
     summary: "Avec 60% du panier de référence BKAM indexé sur l'euro, la politique monétaire de la BCE constitue la variable exogène la plus déterminante pour le dirham. La stabilisation du cycle de normalisation des taux BCE, combinée à un EUR/USD gravitant autour de 1,08–1,12, ancre la parité centrale USD/MAD dans un corridor étroit de 9,92–10,05. L'utilisation des bandes BKAM reste en zone neutre (35–65%) — une configuration favorable à la visibilité des entreprises exportatrices en EUR."
   },
   {
     id: 2,
     title: "Phosphates OCP & hydrocarbures : la matrice asymétrique du compte courant",
     category: "Macro Maroc",
-    time: "Éditorial",
+    date: "2026-06-26",
     summary: "Les recettes d'exportation d'OCP — libellées majoritairement en USD — génèrent un flux structurel de devises qui amortit la pression de dépréciation du dirham issue de la facture pétrolière (également en USD). Cette couverture naturelle partielle réduit le besoin net d'intervention de BKAM, mais expose la balance des paiements à une double vulnérabilité si les cours des phosphates et du Brent évoluent défavorablement en simultané — un scénario à intégrer dans les stress tests de trésorerie corporate."
   },
   {
     id: 3,
     title: "Circulaire OC n° 01/2024 : une refonte majeure du cadre de couverture",
     category: "Réglementation OC",
-    time: "Éditorial",
+    date: "2026-06-26",
     summary: "La Circulaire 01/2024 de l'Office des Changes élargit la couverture autorisée à 100% de l'exposition commerciale sous-jacente (imports et exports), et officialise les options de change vanille (puts pour importateurs, calls pour exportateurs). C'est la réforme la plus significative de l'arsenal de couverture depuis la Phase II de libéralisation (2020). Les entreprises disposant de comptes CPEC ou CDE doivent réviser leur politique de couverture pour intégrer les nouvelles limites et instruments autorisés."
   },
   {
     id: 4,
     title: "Remises MRE & tourisme : saisonnalité et impact EUR/MAD",
     category: "Flux de Capitaux",
-    time: "Éditorial",
+    date: "2026-06-26",
     summary: "Les transferts des Marocains résidant à l'étranger (MRE) dépassent structurellement 9 Mds EUR annuels, avec un pic saisonnier en Q2–Q3 (Ramadan / retour estival). Combinés à l'accélération des recettes touristiques, ces flux créent une pression acheteuse prévisible sur EUR/MAD entre mai et septembre. Les trésoriers corporate doivent anticiper ce biais saisonnier dans le calendrier de débouclement de leurs couvertures à terme EUR."
   },
   {
     id: 5,
     title: "Phase III du régime de change : signaux et préconditions BKAM",
     category: "Politique Monétaire",
-    time: "Éditorial",
+    date: "2026-06-26",
     summary: "Les discussions BKAM–FMI (Ligne de Précaution et de Liquidité) réaffirment l'objectif d'élargissement progressif des bandes d'intervention au-delà du ±5% actuel. Le Gouverneur Jouahri a conditionné cette transition à trois indicateurs : réserves officielles > 5 mois d'importations, inflation ancrée près de 2%, et consolidation du compte courant. À horizon 2027, un passage à ±7,5% est envisageable — un scénario à intégrer dans l'analyse de sensibilité des expositions MAD."
   },
   {
     id: 6,
     title: "Couronnes nordiques (NOK / SEK / DKK) : l'exposition méconnue des importateurs marocains",
     category: "Devises Nordiques",
-    time: "Éditorial",
+    date: "2026-06-26",
     summary: "Les couronnes norvégienne (NOK), suédoise (SEK) et danoise (DKK) représentent une exposition de change structurelle pour les importateurs marocains de bois, pâte à papier, produits forestiers et équipements industriels scandinaves. Ces trois devises — toutes cotées par BKAM — affichent une corrélation EUR de 60 à 75%, mais incorporent une prime spécifique : la NOK est étroitement liée aux prix du Brent (économie pétrolière norvégienne), créant une double exposition pour les entreprises importatrices exposées simultanément aux hydrocarbures. Une appréciation de 200 bps NOK/MAD renchérit mécaniquement la facture bois-construction et emballage."
   },
   {
     id: 7,
     title: "Forward et swap de change : les mécanismes autorisés aux entreprises marocaines",
     category: "Hedging Éducatif",
-    time: "Éditorial",
+    date: "2026-06-26",
     summary: "Le taux forward résulte de la formule CIP (Covered Interest Parity) : F = S × (1 + r_MAD)^T / (1 + r_Devise)^T, où les points de swap (F − S) reflètent le différentiel de taux d'intérêt entre le MAD et la devise concernée. En contexte MONIA à 2,75%, les points forward EUR/MAD à 6 mois sont structurellement positifs, traduisant le coût de portage du dirham. Le swap de change combine une jambe au comptant et une jambe à terme de sens inverse, permettant à l'entreprise de gérer sa liquidité en devises sans conversion immédiate. La Circulaire OC n°01/2024 autorise l'utilisation de ces instruments jusqu'à 100% de l'exposition commerciale documentée, sous réserve de domiciliation bancaire agréée par Bank Al-Maghrib."
   },
   {
     id: 8,
     title: "Secteur automobile marocain (Renault, BYD, Stellantis) : l'exposition EUR/JPY/USD des équipementiers",
     category: "Profil Sectoriel",
-    time: "Éditorial",
+    date: "2026-06-26",
     summary: "L'industrie automobile marocaine génère une exposition de change structurellement bi-devises : les composants européens (moteurs, électronique) sont facturés en EUR tandis que les technologies asiatiques (batteries, semi-conducteurs) arrivent en JPY/USD, quand les revenus d'exportation vers l'UE sont perçus en EUR. Les équipementiers de rang 2 et 3 supportent une volatilité EUR/JPY non cotée directement par BKAM mais dérivable via les cross-rates. La base de coûts locaux en MAD crée un troisième niveau d'exposition qui rend la gestion du risque de change particulièrement complexe pour les sous-traitants dont la marge opérationnelle est structurellement étroite."
   }
 ];

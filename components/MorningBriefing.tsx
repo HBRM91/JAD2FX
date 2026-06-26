@@ -658,7 +658,7 @@ export default function MorningBriefing() {
   const tabs: { id: BriefingTab; label: string; icon: React.ElementType }[] = [
     { id: 'OVERVIEW',  label: 'Vue Stratégique', icon: BarChart2 },
     { id: 'CALENDAR',  label: 'Calendrier Macro', icon: Calendar },
-    { id: 'ANALYSIS',  label: 'Analyse IA',       icon: FileText },
+    { id: 'ANALYSIS',  label: 'Analyse Éditoriale', icon: FileText },
   ];
 
   return (
@@ -1209,7 +1209,7 @@ export default function MorningBriefing() {
               {report.radarData?.length > 0 && (
                 <div className="bg-navy-900 border border-navy-700 rounded-xl overflow-hidden">
                   <div className="px-5 py-3 border-b border-navy-800">
-                    <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Radar Devises — Analyse IA</h3>
+                    <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Radar Devises — Analyse Éditoriale</h3>
                   </div>
                   <div className="p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                     {report.radarData.map(r => (

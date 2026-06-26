@@ -133,9 +133,15 @@ async function fetchYahooQuote(symbol: string, corsProxyUrl?: string): Promise<{
     const meta = data?.chart?.result?.[0]?.meta;
     if (!meta) return null;
 
+    const rawPrice = meta.regularMarketPrice ?? meta.previousClose ?? 0;
+    // Sanity guard: reject clearly impossible prices (likely wrong contract/field)
+    // Gold > $8,000 or Silver > $200 per oz — treat as corrupt data
+    if (symbol === 'GC=F' && rawPrice > 8000) return null;
+    if (symbol === 'SI=F' && rawPrice > 200)  return null;
+
     return {
-      price:         meta.regularMarketPrice   ?? meta.previousClose ?? 0,
-      change:        (meta.regularMarketPrice ?? 0) - (meta.chartPreviousClose ?? meta.previousClose ?? 0),
+      price:         rawPrice,
+      change:        rawPrice - (meta.chartPreviousClose ?? meta.previousClose ?? rawPrice),
       changePercent: meta.regularMarketChangePercent ?? 0,
       high52w:       meta.fiftyTwoWeekHigh ?? 0,
       low52w:        meta.fiftyTwoWeekLow  ?? 0,

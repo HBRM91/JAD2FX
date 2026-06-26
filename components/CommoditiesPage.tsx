@@ -133,6 +133,11 @@ function CommodityCard({ q }: { q: CommodityQuote }) {
             <span>Reference data</span>
           </div>
         )}
+        {q.timestamp && q.source === 'LIVE' && (
+          <p className="mt-1 text-[8px] text-slate-700 font-mono">
+            {new Date(q.timestamp).toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit' })}
+          </p>
+        )}
       </div>
 
       {/* Expanded moroccan relevance */}

@@ -29,7 +29,7 @@ export default function DisclaimerModal() {
   if (!show) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-navy-950/95 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-navy-950 backdrop-blur-sm">
       <div className="bg-navy-900 border border-navy-700 rounded-t-2xl sm:rounded-xl shadow-2xl shadow-black/60 max-w-lg w-full overflow-hidden">
 
         {/* Header */}
@@ -51,7 +51,7 @@ export default function DisclaimerModal() {
             En utilisant JAD2FX, vous reconnaissez et acceptez les conditions suivantes :
           </p>
 
-          <ol className="space-y-3">
+          <ol className="list-none space-y-3">
             {DISCLAIMER_POINTS.map((text, i) => (
               <li key={i} className="flex items-start gap-3">
                 <span className="flex-shrink-0 w-5 h-5 rounded-full bg-gold-500/15 border border-gold-500/30 text-gold-400 text-[10px] font-bold flex items-center justify-center mt-0.5">
