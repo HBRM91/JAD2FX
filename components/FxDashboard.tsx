@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { DashboardTab, LiveRate, BasketConfig, CurrencyInfo } from '../types';
 import FxChart from './FxChart';
-import { BKAM_CURRENCIES, BANKS, BANK_SPREAD_PREMIUM, DEFAULT_BASKET_CONFIG } from '../constants';
+import { BKAM_CURRENCIES, BANKS, BANK_SPREAD_PREMIUM, DEFAULT_BASKET_CONFIG, CURRENCY_ORDER } from '../constants';
 import { fetchAllMadRates, generateIntradayData } from '../services/fxRates';
 import { isJumuahReducedLiquidity } from '../services/holidays';
 import { Download, RefreshCw, Search, ArrowUpDown, TrendingUp, TrendingDown, Minus } from 'lucide-react';
@@ -35,6 +35,7 @@ const FxDashboard: React.FC = () => {
   const [ratesDate, setRatesDate] = useState<string>('');
   const [selectedCurrency, setSelectedCurrency] = useState<string>('EUR');
   const [search, setSearch] = useState('');
+  const [sortByMid, setSortByMid] = useState(false); // false = canonical G10 order
   const [sortAsc, setSortAsc] = useState(false);
   const [config] = useState<BasketConfig>(DEFAULT_BASKET_CONFIG);
 
@@ -70,7 +71,10 @@ const FxDashboard: React.FC = () => {
         meta?.nameAr.includes(search)
       );
     })
-    .sort((a, b) => sortAsc ? a.mid - b.mid : b.mid - a.mid);
+    .sort((a, b) => {
+      if (!sortByMid) return (CURRENCY_ORDER[a.currency] ?? 99) - (CURRENCY_ORDER[b.currency] ?? 99);
+      return sortAsc ? a.mid - b.mid : b.mid - a.mid;
+    });
 
   const getBuyPrice  = (r: LiveRate) => activeTab === 'BILLETS' ? r.billetBuy  : r.virementBuy;
   const getSellPrice = (r: LiveRate) => activeTab === 'BILLETS' ? r.billetSell : r.virementSell;
@@ -102,7 +106,7 @@ const FxDashboard: React.FC = () => {
             </th>
             <th
               className="px-4 py-3 text-[10px] text-navy-400 font-bold uppercase tracking-wider cursor-pointer hover:text-gold-400 transition-colors"
-              onClick={() => setSortAsc(v => !v)}
+              onClick={() => { setSortByMid(true); setSortAsc(v => !v); }}
             >
               <span className="flex items-center gap-1">
                 {locale === 'ar' ? 'سعر الوسط' : locale === 'en' ? 'Mid' : 'Moyen'} <ArrowUpDown size={10} />

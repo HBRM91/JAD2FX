@@ -108,6 +108,20 @@ export async function fetchBkamBBE(corsProxy: string): Promise<BkamBBERate[]> {
   return data;
 }
 
+// ─── CoursBBE — specific date ─────────────────────────────────────────────────
+
+const _bbeByDate = new Map<string, CacheEntry<BkamBBERate[]>>();
+
+export async function fetchBkamBBEDate(corsProxy: string, date: string): Promise<BkamBBERate[]> {
+  const cached = _bbeByDate.get(date);
+  if (cached && Date.now() - cached.ts < HIST_CACHE_MS) return cached.data;
+  const data = await bkamGet<BkamBBERate[]>(
+    proxyPath(corsProxy, 'bkam', 'cours/Version1/api/CoursBBE', { date }),
+  );
+  _bbeByDate.set(date, { data, ts: Date.now() });
+  return data;
+}
+
 // ─── CourbeBDT — BDT yield curve (requires separate BDT subscription) ────────
 // Query param is `dateCourbe` (YYYY-MM-DD); defaults to yesterday when omitted.
 
