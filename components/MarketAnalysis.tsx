@@ -137,6 +137,10 @@ const MarketAnalysis: React.FC = () => {
       const sarMad = 0.266667 * freshUsdMad;
       const aedMad = 0.272294 * freshUsdMad;
 
+      const nokMad = freshEurMad / (todayRates['NOK'] ?? 11.60);
+      const sekMad = freshEurMad / (todayRates['SEK'] ?? 11.40);
+      const dkkMad = freshEurMad / (todayRates['DKK'] ?? 7.460);
+
       const result = await routeQuery({
         strategy: 'quality-first',
         systemPrompt: `You are the chief FX strategist at a Tier-1 MENA investment bank. Write terse, data-dense institutional commentary. Strict rules:
@@ -144,15 +148,16 @@ const MarketAnalysis: React.FC = () => {
 — Quantify every observation: use basis-point moves, percentage changes, level vs prior range.
 — Do NOT give investment advice, price targets, or "you should hedge."
 — Write in the same language as the user message (French unless specified).`,
-        userMessage: `Rédige un brief institutionnel (3 paragraphes, max 260 mots) à partir de ce snapshot temps réel:
+        userMessage: `Rédige un brief institutionnel (3 paragraphes, max 300 mots) à partir de ce snapshot temps réel:
 
 G10 FX: EUR/USD ${freshEu.toFixed(4)} | GBP/USD ${gbpUsd.toFixed(4)} | USD/JPY ${usdJpy.toFixed(2)} | USD/CHF ${usdChf.toFixed(4)} | USD/CAD ${usdCad.toFixed(4)} | USD/TRY ${usdTry.toFixed(2)}
-MAD: USD/MAD ${freshUsdMad.toFixed(4)} | EUR/MAD ${freshEurMad.toFixed(4)} | SAR/MAD ${sarMad.toFixed(4)} | AED/MAD ${aedMad.toFixed(4)}
+Nordiques (EUR-cross): EUR/NOK ${(todayRates['NOK'] ?? 11.60).toFixed(2)} | EUR/SEK ${(todayRates['SEK'] ?? 11.40).toFixed(2)} | EUR/DKK ${(todayRates['DKK'] ?? 7.460).toFixed(3)}
+MAD: USD/MAD ${freshUsdMad.toFixed(4)} | EUR/MAD ${freshEurMad.toFixed(4)} | NOK/MAD ${nokMad.toFixed(4)} | SEK/MAD ${sekMad.toFixed(4)} | DKK/MAD ${dkkMad.toFixed(4)} | SAR/MAD ${sarMad.toFixed(4)} | AED/MAD ${aedMad.toFixed(4)}
 PANIER: K=${BASKET_K} · EUR/MAD_central théorique ≈ ${(BASKET_K * freshEu).toFixed(4)} vs actuel ${freshEurMad.toFixed(4)}
 
 §1 — DRIVERS G10 ACTUELS: Quels mouvements G10 spécifiques expliquent la configuration EUR/USD aujourd'hui ? Divergences de politique monétaire BCE/Fed quantifiées. Impact mécanique calculé sur la parité USD/MAD.
 §2 — MARCHÉ MAD: Position du dirham dans la bande (utilisation calculée). Flux structurels dominants cette semaine (MRE saisonnalité, recettes OCP, facture pétrolière) et leur sens sur la pression de change.
-§3 — POINTS DE VIGILANCE CORPORATE: 2-3 thèmes concrets pour les trésoriers marocains sur la base des niveaux actuels — calendrier de couverture, asymétrie de risque EUR vs USD, opportunités de refacturation Gulf (AED/SAR).
+§3 — POINTS DE VIGILANCE CORPORATE: 2-3 thèmes concrets pour les trésoriers marocains — asymétrie de risque EUR vs USD sur le panier, exposition NOK/SEK des importateurs de bois-papier-équipements nordiques (NOK liée au Brent = double exposition), opportunités de refacturation Gulf (AED/SAR stables).
 
 Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de conseil en investissement (Loi 44-12/AMMC). Conseil: jad2advisory.com"`,
         maxTokens: 800,
@@ -182,6 +187,10 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
     { pair: 'EUR/GBP', rate: rates['GBP'] ?? 0.860,                              prev: prevRates?.['GBP'],                                                     dec: 4 },
     { pair: 'EUR/CHF', rate: rates['CHF'] ?? 0.945,                              prev: prevRates?.['CHF'],                                                     dec: 4 },
     { pair: 'EUR/JPY', rate: rates['JPY'] ?? 162.5,                              prev: prevRates?.['JPY'],                                                     dec: 2 },
+    // Scandinavian pairs — essential for Moroccan wood/paper/equipment importers
+    { pair: 'EUR/NOK', rate: rates['NOK'] ?? 11.60,                              prev: prevRates?.['NOK'],                                                     dec: 2 },
+    { pair: 'EUR/SEK', rate: rates['SEK'] ?? 11.40,                              prev: prevRates?.['SEK'],                                                     dec: 2 },
+    { pair: 'EUR/DKK', rate: rates['DKK'] ?? 7.460,                              prev: prevRates?.['DKK'],                                                     dec: 3 },
   ];
 
   const madCrosses = [
@@ -197,6 +206,13 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
       prev: prevRates ? usdMadFromEurUsd(prevRates['USD'] ?? eu) * (prevRates['USD'] ?? eu) / (prevRates['CAD'] ?? 1.480) : undefined },
     { label: 'CNY / MAD', rate: usdMad * eu / (rates['CNY'] ?? 7.880),
       prev: prevRates ? usdMadFromEurUsd(prevRates['USD'] ?? eu) * (prevRates['USD'] ?? eu) / (prevRates['CNY'] ?? 7.880) : undefined },
+    // Scandinavian — NOK/SEK/DKK are all EUR-cross pairs from Frankfurter
+    { label: 'NOK / MAD', rate: eurMad / (rates['NOK'] ?? 11.60),
+      prev: prevRates ? usdMadFromEurUsd(prevRates['USD'] ?? eu) * (prevRates['USD'] ?? eu) / (prevRates['NOK'] ?? 11.60) : undefined },
+    { label: 'SEK / MAD', rate: eurMad / (rates['SEK'] ?? 11.40),
+      prev: prevRates ? usdMadFromEurUsd(prevRates['USD'] ?? eu) * (prevRates['USD'] ?? eu) / (prevRates['SEK'] ?? 11.40) : undefined },
+    { label: 'DKK / MAD', rate: eurMad / (rates['DKK'] ?? 7.460),
+      prev: prevRates ? usdMadFromEurUsd(prevRates['USD'] ?? eu) * (prevRates['USD'] ?? eu) / (prevRates['DKK'] ?? 7.460) : undefined },
   ];
 
   const gulfCrosses = [
@@ -204,6 +220,13 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
     { countryCode: 'ae', label: 'AED / MAD', rate: 0.272294 * usdMad, note: 'Hard peg 3.6725/USD' },
     { countryCode: 'qa', label: 'QAR / MAD', rate: 0.274725 * usdMad, note: 'Hard peg 3.64/USD' },
     { countryCode: 'kw', label: 'KWD / MAD', rate: 3.25000  * usdMad, note: 'Managed float basket' },
+  ];
+
+  // NOK/SEK/DKK: critical for Moroccan importers of wood, paper, pharma, equipment
+  const nordCrosses = [
+    { countryCode: 'no', label: 'NOK / MAD', rate: eurMad / (rates['NOK'] ?? 11.60), note: 'Lié au Brent — corr EUR ~70%' },
+    { countryCode: 'se', label: 'SEK / MAD', rate: eurMad / (rates['SEK'] ?? 11.40), note: 'Riksbank — corr EUR ~75%' },
+    { countryCode: 'dk', label: 'DKK / MAD', rate: eurMad / (rates['DKK'] ?? 7.460), note: 'Peg EUR quasi-fixe (±2.25%)' },
   ];
 
   const emPeers = [
@@ -380,6 +403,26 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
                   <p className="text-[10px] text-slate-500 flex items-center gap-1"><CurrencyFlag countryCode={countryCode} size="xs" /> {label}</p>
                   <p className="text-sm font-mono font-bold text-white mt-0.5">{rate.toFixed(4)}</p>
                   <p className="text-[8px] text-slate-700 mt-0.5 leading-tight">{note}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Scandinavian MAD crosses — bois, papier, équipements */}
+          <div className="bg-[#0b1a30] border border-navy-700/50 rounded-xl overflow-hidden">
+            <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
+              <Globe size={11} className="text-blue-400" />
+              <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Nordiques MAD</span>
+              <span className="text-[9px] text-slate-600 ml-auto">Bois · Papier · Pharma</span>
+            </div>
+            <div className="grid grid-cols-1 gap-px bg-navy-800/30">
+              {nordCrosses.map(({ countryCode, label, rate, note }) => (
+                <div key={label} className="bg-[#0b1a30] px-3 py-3 flex items-center justify-between">
+                  <div>
+                    <p className="text-[10px] text-slate-500 flex items-center gap-1"><CurrencyFlag countryCode={countryCode} size="xs" /> {label}</p>
+                    <p className="text-[8px] text-slate-700 leading-tight">{note}</p>
+                  </div>
+                  <p className="text-sm font-mono font-bold text-white">{rate.toFixed(4)}</p>
                 </div>
               ))}
             </div>

@@ -98,33 +98,66 @@ export async function computeDriftModel(
   let dataSource: DriftRegression['dataSource'] = 'BKAM_OFFICIAL';
 
   // ── Try BKAM official history ───────────────────────────────────────────────
+  //
+  // FX QUANT NOTE — why ECB EUR/USD must be the exogenous basket input:
+  //
+  // The basket formula is: USD/MAD = K / (0.60 × EUR/USD + 0.40)
+  //
+  // If we derive EUR/USD from BKAM's OWN cross-rates (EUR/MAD ÷ USD/MAD),
+  // substituting back into the basket formula gives:
+  //   basket = K / (0.60 × (EUR/MAD÷USD/MAD) + 0.40)
+  //   drift  = USD/MAD − basket ≈ 0  (algebraically circular → always near-zero)
+  //
+  // The correct approach: use ECB Frankfurter EUR/USD as the EXOGENOUS market
+  // rate, then compute the basket parity and measure BKAM's deviation from it.
+  // This captures BKAM's actual discretionary component (reference EUR/USD choice,
+  // intraday smoothing, intervention within the ±5% band).
+  // Typical range: ±5 to ±50 bps — small but non-zero and directionally meaningful.
+  //
   if (corsProxyUrl) {
     const workingDays = getLastNWorkingDays(nDays);
-    const settled = await Promise.allSettled(
-      workingDays.map(d => fetchBkamVirementDate(corsProxyUrl, d)),
-    );
 
-    for (let i = 0; i < settled.length; i++) {
-      const result = settled[i];
-      if (result.status !== 'fulfilled' || !result.value.length) continue;
+    // Fetch BKAM and ECB data in parallel for each date
+    const [bkamSettled, ecbSettled] = await Promise.all([
+      Promise.allSettled(workingDays.map(d => fetchBkamVirementDate(corsProxyUrl, d))),
+      Promise.allSettled(workingDays.map(d =>
+        fetch(`https://api.frankfurter.app/${d}?from=EUR&to=USD`, {
+          signal: AbortSignal.timeout(6_000),
+        })
+          .then(r => r.json())
+          .then((data: { rates?: Record<string, number> }) => data.rates?.['USD'] ?? null)
+          .catch(() => null)
+      )),
+    ]);
 
-      const madMap = virementToMadPerUnit(result.value);
+    for (let i = 0; i < bkamSettled.length; i++) {
+      const bkamResult = bkamSettled[i];
+      if (bkamResult.status !== 'fulfilled' || !bkamResult.value.length) continue;
+
+      const madMap = virementToMadPerUnit(bkamResult.value);
       const usdMad = madMap['USD'];
       const eurMad = madMap['EUR'];
-
       if (!usdMad || !eurMad) continue;
 
-      const eurUsd      = eurMad / usdMad;
+      // ECB EUR/USD: exogenous market reference for basket parity.
+      // Fall back to BKAM-implied cross only if ECB fetch failed.
+      const ecbResult = ecbSettled[i];
+      const ecbEurUsd = ecbResult.status === 'fulfilled' ? ecbResult.value : null;
+      const eurUsd = ecbEurUsd ?? (eurMad / usdMad); // ECB preferred; BKAM cross as last resort
+
+      // Non-circular basket parity: uses ECB EUR/USD, not BKAM cross-rate
       const basketUsdMad = K / (EUR_W * eurUsd + USD_W);
-      const driftBps    = ((usdMad - basketUsdMad) / basketUsdMad) * 10_000;
+
+      // Drift = BKAM_actual − ECB_basket (captures BKAM's discretionary component)
+      const driftBps = ((usdMad - basketUsdMad) / basketUsdMad) * 10_000;
 
       points.push({
-        date:       workingDays[i],
-        dateLabel:  labelDate(workingDays[i]),
+        date:          workingDays[i],
+        dateLabel:     labelDate(workingDays[i]),
         actualUsdMad:  +usdMad.toFixed(4),
         basketUsdMad:  +basketUsdMad.toFixed(4),
-        driftBps:       +driftBps.toFixed(2),
-        eurUsd:         +eurUsd.toFixed(4),
+        driftBps:      +driftBps.toFixed(2),
+        eurUsd:        +eurUsd.toFixed(4), // ECB EUR/USD stored (not BKAM cross)
         source: 'BKAM_OFFICIAL',
       });
     }

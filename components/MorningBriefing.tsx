@@ -607,9 +607,9 @@ export default function MorningBriefing() {
 
   useEffect(() => { loadReport(); }, [loadReport]);
 
-  // Fetch rates locally when AdminContext hasn't populated livePrices yet
+  // Always fetch rates locally on mount — ensures Morning Briefing is never blank
+  // (livePrices from AdminContext may be empty or stale during first render)
   useEffect(() => {
-    if (livePrices.length > 0) return;
     setRatesLoading(true);
     fetchAllMadRates(DEFAULT_BASKET_CONFIG, config.corsProxyUrl || undefined)
       .then(({ rates }) => {
@@ -630,7 +630,7 @@ export default function MorningBriefing() {
       })
       .catch(() => {})
       .finally(() => setRatesLoading(false));
-  }, [livePrices.length, config.corsProxyUrl]);
+  }, [config.corsProxyUrl]); // fires on mount and when proxy changes; no livePrices dep
 
   // ── Computed analytics ──────────────────────────────────────────────────────
   const effectivePrices = livePrices.length > 0 ? livePrices : localPrices;
