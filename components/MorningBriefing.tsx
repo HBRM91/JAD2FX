@@ -13,8 +13,9 @@ import {
 import { useAdmin } from '../context/AdminContext';
 import { useI18n } from '../context/I18nContext';
 import { getPublishedReport } from '../services/reportStorage';
+import { fetchAllMadRates } from '../services/fxRates';
 import { MarketReport, LivePriceEntry } from '../types';
-import { DEFAULT_BASKET_CONFIG } from '../constants';
+import { DEFAULT_BASKET_CONFIG, BKAM_CURRENCIES } from '../constants';
 import CurrencyFlag from './CurrencyFlag';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -584,6 +585,8 @@ export default function MorningBriefing() {
   const [tab, setTab] = useState<BriefingTab>('OVERVIEW');
   const [report, setReport] = useState<MarketReport | null>(null);
   const [reportLoading, setReportLoading] = useState(true);
+  const [localPrices, setLocalPrices] = useState<LivePriceEntry[]>([]);
+  const [ratesLoading, setRatesLoading] = useState(false);
   const [now, setNow] = useState(new Date());
 
   // Live Casablanca clock
@@ -604,14 +607,40 @@ export default function MorningBriefing() {
 
   useEffect(() => { loadReport(); }, [loadReport]);
 
+  // Fetch rates locally when AdminContext hasn't populated livePrices yet
+  useEffect(() => {
+    if (livePrices.length > 0) return;
+    setRatesLoading(true);
+    fetchAllMadRates(DEFAULT_BASKET_CONFIG, config.corsProxyUrl || undefined)
+      .then(({ rates }) => {
+        const entries: LivePriceEntry[] = rates.map(r => {
+          const chgPct = r.change24h ?? 0;
+          const prevMid = chgPct !== 0 ? r.mid / (1 + chgPct / 100) : r.mid;
+          return {
+            currency: r.currency, pair: r.pair,
+            bid: r.virementBuy, ask: r.virementSell, mid: r.mid,
+            prevMid,
+            change: +(r.mid - prevMid).toFixed(4),
+            changePercent: chgPct,
+            spreadPips: Math.round((r.virementSell - r.virementBuy) * 10000),
+            lastUpdated: r.timestamp,
+          };
+        });
+        setLocalPrices(entries);
+      })
+      .catch(() => {})
+      .finally(() => setRatesLoading(false));
+  }, [livePrices.length, config.corsProxyUrl]);
+
   // ── Computed analytics ──────────────────────────────────────────────────────
-  const bandData   = getBandData(livePrices);
-  const sentiment  = computeSentiment(livePrices);
+  const effectivePrices = livePrices.length > 0 ? livePrices : localPrices;
+  const bandData   = getBandData(effectivePrices);
+  const sentiment  = computeSentiment(effectivePrices);
   const upcoming   = getUpcomingEvents(60);
   const nextEvent  = upcoming[0];
 
-  const eurEntry = livePrices.find(p => p.currency === 'EUR');
-  const usdEntry = livePrices.find(p => p.currency === 'USD');
+  const eurEntry = effectivePrices.find(p => p.currency === 'EUR');
+  const usdEntry = effectivePrices.find(p => p.currency === 'USD');
   const eurBand  = bandData.find(b => b.currency === 'EUR');
   const usdBand  = bandData.find(b => b.currency === 'USD');
 
@@ -638,7 +667,7 @@ export default function MorningBriefing() {
       {/* ══ Print-only document (hidden in browser, appears in PDF) ════════════ */}
       <PrintLayout
         casaDate={casaDate}
-        livePrices={livePrices}
+        livePrices={effectivePrices}
         bandData={bandData}
         sentiment={sentiment}
         report={report}
@@ -771,7 +800,7 @@ export default function MorningBriefing() {
                 <Activity size={13} className="text-gold-500" />
                 <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Taux de Change Indicatifs — Séance en cours</h3>
               </div>
-              <span className="text-[9px] text-slate-500 font-mono">{livePrices.length} paires · ECB / BKAM</span>
+              <span className="text-[9px] text-slate-500 font-mono">{effectivePrices.length} paires · ECB / BKAM{ratesLoading ? ' · chargement…' : ''}</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[700px]">
@@ -787,7 +816,7 @@ export default function MorningBriefing() {
                   </tr>
                 </thead>
                 <tbody>
-                  {livePrices.slice(0, 10).map(p => {
+                  {effectivePrices.slice(0, 10).map(p => {
                     const up = p.changePercent > 0;
                     const dn = p.changePercent < 0;
                     const band = bandData.find(b => b.currency === p.currency);

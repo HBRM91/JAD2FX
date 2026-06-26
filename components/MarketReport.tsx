@@ -165,12 +165,25 @@ interface SectionMeta {
 }
 
 const SECTION_META: Record<string, SectionMeta> = {
-  'synthèse': { keyFr: 'Synthèse Exécutive', icon: FileText, color: 'text-gold-400', bg: 'bg-gold-500/8' },
-  'contexte': { keyFr: 'Contexte Macro',      icon: Globe,    color: 'text-blue-400', bg: 'bg-blue-500/8' },
-  'analyse':  { keyFr: 'Analyse Panier MAD',  icon: BarChart2, color: 'text-emerald-400', bg: 'bg-emerald-500/8' },
-  'niveaux':  { keyFr: 'Niveaux Techniques',  icon: TrendingUp, color: 'text-purple-400', bg: 'bg-purple-500/8' },
-  'scénarios': { keyFr: 'Scénarios de Risque', icon: Shield, color: 'text-amber-400', bg: 'bg-amber-500/8' },
-  'implications': { keyFr: 'Implications Stratégiques', icon: Building2, color: 'text-cyan-400', bg: 'bg-cyan-500/8' },
+  // GS-level sections (new daily briefing format)
+  'macro backdrop':  { keyFr: 'Macro Backdrop',             icon: Globe,          color: 'text-blue-400',    bg: 'bg-blue-500/8' },
+  'macro':           { keyFr: 'Contexte Macro',             icon: Globe,          color: 'text-blue-400',    bg: 'bg-blue-500/8' },
+  'configuration':   { keyFr: 'Configuration Technique',    icon: BarChart2,      color: 'text-emerald-400', bg: 'bg-emerald-500/8' },
+  'banques':         { keyFr: 'Banques Centrales',          icon: Shield,         color: 'text-purple-400',  bg: 'bg-purple-500/8' },
+  'thèmes':          { keyFr: 'Thèmes Structurels',         icon: TrendingUp,     color: 'text-amber-400',   bg: 'bg-amber-500/8' },
+  'corporate':       { keyFr: 'Contexte Corporate',         icon: Building2,      color: 'text-cyan-400',    bg: 'bg-cyan-500/8' },
+  'moniteur':        { keyFr: 'Moniteur de Risques',        icon: AlertTriangle,  color: 'text-red-400',     bg: 'bg-red-500/8' },
+  // Legacy sections (older report format — kept for backward compat)
+  'synthèse':        { keyFr: 'Synthèse Exécutive',         icon: FileText,       color: 'text-gold-400',    bg: 'bg-gold-500/8' },
+  'contexte':        { keyFr: 'Contexte Macro',             icon: Globe,          color: 'text-blue-400',    bg: 'bg-blue-500/8' },
+  'analyse':         { keyFr: 'Analyse Panier MAD',         icon: BarChart2,      color: 'text-emerald-400', bg: 'bg-emerald-500/8' },
+  'paires':          { keyFr: 'Paires MAD',                 icon: BarChart2,      color: 'text-emerald-400', bg: 'bg-emerald-500/8' },
+  'niveaux':         { keyFr: 'Niveaux Techniques',         icon: TrendingUp,     color: 'text-purple-400',  bg: 'bg-purple-500/8' },
+  'scénarios':       { keyFr: 'Scénarios de Risque',        icon: Shield,         color: 'text-amber-400',   bg: 'bg-amber-500/8' },
+  'risques':         { keyFr: 'Risques',                    icon: AlertTriangle,  color: 'text-red-400',     bg: 'bg-red-500/8' },
+  'impact':          { keyFr: 'Impact',                     icon: Building2,      color: 'text-cyan-400',    bg: 'bg-cyan-500/8' },
+  'perspectives':    { keyFr: 'Perspectives',               icon: TrendingUp,     color: 'text-purple-400',  bg: 'bg-purple-500/8' },
+  'implications':    { keyFr: 'Implications Stratégiques',  icon: Building2,      color: 'text-cyan-400',    bg: 'bg-cyan-500/8' },
 };
 
 function getSectionMeta(title: string): SectionMeta {
@@ -212,43 +225,115 @@ function SectionCard({ section, isRtl, defaultOpen = false }: { section: MdSecti
 // ─── SME Executive Summary card ───────────────────────────────────────────────
 
 function SmeCard({ sections, excerpt, isRtl }: { sections: MdSection[]; excerpt: string; isRtl: boolean }) {
-  const execSection = sections.find(s => s.title.toLowerCase().includes('synthèse') || s.title.toLowerCase().includes('executive'));
-  const riskSection = sections.find(s => s.title.toLowerCase().includes('scénarios'));
+  // Support both new GS sections and legacy section names
+  const macroSection = sections.find(s => {
+    const t = s.title.toLowerCase();
+    return t.includes('macro backdrop') || t.includes('macro') || t.includes('synthèse') || t.includes('contexte');
+  }) ?? sections[0];
+
+  const corporateSection = sections.find(s => {
+    const t = s.title.toLowerCase();
+    return t.includes('corporate') || t.includes('impact') || t.includes('pme') || t.includes('flux');
+  });
+
+  const riskSection = sections.find(s => {
+    const t = s.title.toLowerCase();
+    return t.includes('moniteur') || t.includes('risque') || t.includes('scénarios');
+  });
+
+  const technicalSection = sections.find(s => {
+    const t = s.title.toLowerCase();
+    return t.includes('configuration') || t.includes('technique') || t.includes('analyse') || t.includes('niveaux');
+  });
 
   return (
     <div className="space-y-4">
-      {/* Exec summary */}
+      {/* Executive excerpt */}
       <div className="bg-gradient-to-br from-navy-900 to-navy-800 border border-gold-500/20 rounded-xl p-5" dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="flex items-center gap-2 mb-3">
           <div className="w-6 h-6 rounded bg-gold-500/15 border border-gold-500/25 flex items-center justify-center">
             <FileText size={12} className="text-gold-400" />
           </div>
           <span className="text-[10px] font-bold text-gold-400 uppercase tracking-wider">
-            {isRtl ? 'للمؤسسات — ما يجب معرفته' : 'Essentiel PME — Ce qu\'il faut retenir'}
+            {isRtl ? 'ملخص تنفيذي' : 'Synthèse Exécutive'}
           </span>
         </div>
-        <p className="text-[13px] text-slate-300 leading-relaxed italic border-l-2 border-gold-500/40 pl-3 mb-3">
+        <p className="text-[13px] text-slate-200 leading-relaxed italic border-l-2 border-gold-500/40 pl-3">
           {excerpt}
         </p>
-        {execSection && (
-          <div className="mt-3">
-            <MarkdownContent text={execSection.content.split('\n').filter(l => l.startsWith('- ') || l.startsWith('* ')).join('\n')} isRtl={isRtl} />
-          </div>
-        )}
       </div>
 
-      {/* Risk alert */}
-      {riskSection && (
-        <div className="bg-amber-500/5 border border-amber-500/15 rounded-xl p-4" dir={isRtl ? 'rtl' : 'ltr'}>
-          <div className="flex items-center gap-2 mb-2">
-            <Shield size={13} className="text-amber-400" />
-            <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">
-              {isRtl ? 'سيناريوهات المخاطر' : 'Scénarios de Risque'}
+      {/* Macro context */}
+      {macroSection && (
+        <div className="bg-navy-900 border border-blue-500/15 rounded-xl overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
+          <div className="flex items-center gap-2 px-5 py-3 border-b border-navy-800 bg-blue-500/5">
+            <Globe size={12} className="text-blue-400" />
+            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">
+              {isRtl ? 'السياق الكلي' : macroSection.title}
             </span>
           </div>
-          <MarkdownContent text={riskSection.content.split('\n').filter(l => l.startsWith('### ')).map(l => '- ' + l.slice(4)).join('\n')} isRtl={isRtl} />
+          <div className="px-5 py-4">
+            <MarkdownContent text={macroSection.content} isRtl={isRtl} />
+          </div>
         </div>
       )}
+
+      {/* Technical configuration */}
+      {technicalSection && (
+        <div className="bg-navy-900 border border-emerald-500/15 rounded-xl overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
+          <div className="flex items-center gap-2 px-5 py-3 border-b border-navy-800 bg-emerald-500/5">
+            <BarChart2 size={12} className="text-emerald-400" />
+            <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+              {isRtl ? 'الإعداد التقني' : technicalSection.title}
+            </span>
+          </div>
+          <div className="px-5 py-4">
+            <MarkdownContent text={technicalSection.content} isRtl={isRtl} />
+          </div>
+        </div>
+      )}
+
+      {/* Corporate context */}
+      {corporateSection && (
+        <div className="bg-navy-900 border border-cyan-500/15 rounded-xl overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
+          <div className="flex items-center gap-2 px-5 py-3 border-b border-navy-800 bg-cyan-500/5">
+            <Building2 size={12} className="text-cyan-400" />
+            <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider">
+              {isRtl ? 'السياق المؤسسي' : corporateSection.title}
+            </span>
+          </div>
+          <div className="px-5 py-4">
+            <MarkdownContent text={corporateSection.content} isRtl={isRtl} />
+          </div>
+        </div>
+      )}
+
+      {/* Risk monitor */}
+      {riskSection && (
+        <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl overflow-hidden" dir={isRtl ? 'rtl' : 'ltr'}>
+          <div className="flex items-center gap-2 px-5 py-3 border-b border-amber-500/15">
+            <AlertTriangle size={12} className="text-amber-400" />
+            <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">
+              {isRtl ? 'مراقب المخاطر' : riskSection.title}
+            </span>
+          </div>
+          <div className="px-5 py-4">
+            <MarkdownContent text={riskSection.content} isRtl={isRtl} />
+          </div>
+        </div>
+      )}
+
+      {/* If nothing parsed, show all sections as open cards */}
+      {!macroSection && !corporateSection && !riskSection && sections.map((section, i) => (
+        <div key={section.id} className="bg-navy-900 border border-navy-800 rounded-xl overflow-hidden">
+          <div className="px-5 py-3 border-b border-navy-800">
+            <span className="text-[11px] font-bold text-white">{section.title}</span>
+          </div>
+          <div className="px-5 py-4">
+            <MarkdownContent text={section.content} isRtl={isRtl} />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -402,15 +487,15 @@ export default function MarketReport() {
               {/* Badges */}
               <div className="flex flex-wrap items-center gap-2 mb-3">
                 <span className="text-[9px] bg-gold-500/15 border border-gold-500/30 text-gold-400 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
-                  {isRtl ? 'تقرير أسبوعي' : 'Rapport Hebdomadaire'}
+                  {isRtl ? 'بريفينج يومي' : 'Briefing Quotidien'}
                 </span>
                 {report.isPublished && (
                   <span className="text-[9px] bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
                     {isRtl ? 'منشور' : 'PUBLIÉ'}
                   </span>
                 )}
-                <span className="text-[9px] bg-navy-800 border border-navy-700 text-navy-400 px-2 py-0.5 rounded font-mono">
-                  {report.llmModel}
+                <span className="text-[9px] bg-navy-800 border border-navy-700 text-navy-400 px-2 py-0.5 rounded">
+                  {isRtl ? 'مولَّد بالذكاء الاصطناعي · بيانات السوق' : 'Généré par IA · Données de marché'}
                 </span>
               </div>
 
@@ -532,12 +617,12 @@ export default function MarketReport() {
               {isRtl ? 'التقرير التحليلي الكامل' : 'Analyse Institutionnelle Complète'}
             </h2>
           </div>
-          {sections.map((section, i) => (
+          {sections.map((section) => (
             <SectionCard
               key={section.id}
               section={section}
               isRtl={isRtl}
-              defaultOpen={i === 0}
+              defaultOpen={true}
             />
           ))}
         </div>
@@ -577,7 +662,7 @@ export default function MarketReport() {
 
       {/* ── Footer meta ───────────────────────────────────────────────── */}
       <div className="text-center text-[10px] text-navy-700 pb-4" dir="ltr">
-        <p>JAD2FX Market Intelligence · {report.llmModel} · {new Date(report.createdAt).toLocaleDateString('fr-MA')}</p>
+        <p>JAD2FX Market Intelligence · Généré par IA · Données BKAM / ECB · {new Date(report.createdAt).toLocaleDateString('fr-MA')}</p>
         <p>© {new Date().getFullYear()} JAD2 Advisory — conseil stratégique & formation risque de change · Non conseil en investissement</p>
       </div>
     </div>

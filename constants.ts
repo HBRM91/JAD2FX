@@ -146,7 +146,14 @@ export const MARKET_NEWS = [
     title: "Phase III du régime de change : signaux et préconditions BKAM",
     category: "Politique Monétaire",
     time: "Éditorial",
-    summary: "Les discussions BKAM–FMI (Ligne de Précaution et de Liquidité) réaffirment l'objectif d'élargissement progressif des bandes d'intervention au-delà du ±5% actuel. Le Gouverneur Jouahri a conditionné cette transition à trois indicateurs : réserves officielles > 5 mois d'importations, inflation ancrée près de 2%, et consolidation du compte courant. À horizon 2027, un passage à ±7,5% est envisageable — un scénario à intégrer dans l'analyse de sensibilité des expositions MAD. Pour toute décision de couverture, consultez votre banque ou un intermédiaire agréé BAM."
+    summary: "Les discussions BKAM–FMI (Ligne de Précaution et de Liquidité) réaffirment l'objectif d'élargissement progressif des bandes d'intervention au-delà du ±5% actuel. Le Gouverneur Jouahri a conditionné cette transition à trois indicateurs : réserves officielles > 5 mois d'importations, inflation ancrée près de 2%, et consolidation du compte courant. À horizon 2027, un passage à ±7,5% est envisageable — un scénario à intégrer dans l'analyse de sensibilité des expositions MAD."
+  },
+  {
+    id: 6,
+    title: "Couronnes nordiques (NOK / SEK / DKK) : l'exposition méconnue des importateurs marocains",
+    category: "Devises Nordiques",
+    time: "Éditorial",
+    summary: "Les couronnes norvégienne (NOK), suédoise (SEK) et danoise (DKK) représentent une exposition de change structurelle pour les importateurs marocains de bois, pâte à papier, produits forestiers, équipements industriels et pharmaceutiques scandinaves. Ces trois devises — toutes cotées par BKAM — affichent une corrélation EUR de 60 à 75%, mais incorporent une prime spécifique : la NOK est étroitement liée aux prix du Brent (économie pétrolière norvégienne), tandis que la SEK suit la posture de la Riksbank et le cycle industriel européen. Une appréciation de 200 bps NOK/MAD renchérit mécaniquement la facture bois-construction et emballage — inputs stratégiques pour l'industrie marocaine. Les trésoriers de groupes actifs dans l'import de matières premières nordiques ont tout intérêt à surveiller NOK/MAD et SEK/MAD dans leur tableau de bord devise, au même titre que les paires majeures."
   }
 ];
 
