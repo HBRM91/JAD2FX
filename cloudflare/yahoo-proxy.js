@@ -982,6 +982,66 @@ async function storeDailyDrift(env, date, todayRates) {
   console.log(`[DRIFT] ${date}: drift=${driftBps.toFixed(1)}bps util=${bandUtilPct.toFixed(1)}% band=±${(bandPct*100).toFixed(1)}%`);
 }
 
+// ─── Drift backfill — process historical dates in batches ────────────────────
+// Triggered by setting KV key 'drift:backfill_trigger' = N (number of days).
+// The scheduled handler detects the key, runs the backfill, then deletes the key.
+
+async function runDriftBackfill(env, days) {
+  if (!env.BKAM_FX_KEY || !env.REPORTS_KV) {
+    console.warn('[BACKFILL] Missing BKAM_FX_KEY or REPORTS_KV');
+    return { processed: 0, failed: 0 };
+  }
+  const t0 = Date.now();
+  console.log(`[BACKFILL] Starting ${days}-day drift backfill...`);
+
+  // Build list of working days (Mon–Fri), oldest first
+  const dates = [];
+  const d = new Date();
+  d.setUTCHours(12, 0, 0, 0);
+  while (dates.length < days) {
+    d.setUTCDate(d.getUTCDate() - 1);
+    const dow = d.getUTCDay();
+    if (dow !== 0 && dow !== 6) dates.unshift(d.toISOString().slice(0, 10));
+  }
+
+  // Skip dates already stored in KV
+  const idx = await getDriftIndex(env.REPORTS_KV);
+  const toProcess = dates.filter(dt => !idx.includes(dt));
+  console.log(`[BACKFILL] ${dates.length} working days, ${idx.length} already stored → ${toProcess.length} to fetch`);
+
+  if (!toProcess.length) {
+    console.log('[BACKFILL] Nothing to do.');
+    return { processed: 0, failed: 0, skipped: dates.length };
+  }
+
+  let processed = 0, failed = 0;
+  const BATCH = 5; // parallel requests per batch
+
+  for (let i = 0; i < toProcess.length; i += BATCH) {
+    const batch = toProcess.slice(i, i + BATCH);
+    const settled = await Promise.allSettled(
+      batch.map(async date => {
+        const bkamData = await fetchBkamRates(env.BKAM_FX_KEY, date);
+        if (bkamData && bkamData['USD']) {
+          await storeDailyDrift(env, date, bkamData);
+          return 'ok';
+        }
+        return 'no_bkam_data';
+      })
+    );
+    settled.forEach(r => {
+      if (r.status === 'fulfilled' && r.value === 'ok') processed++;
+      else failed++;
+    });
+    const batchNum = Math.floor(i / BATCH) + 1;
+    const totalBatches = Math.ceil(toProcess.length / BATCH);
+    console.log(`[BACKFILL] Batch ${batchNum}/${totalBatches} → processed=${processed} failed=${failed}`);
+  }
+
+  console.log(`[BACKFILL] Complete: ${processed} stored, ${failed} failed in ${Date.now() - t0}ms`);
+  return { processed, failed, total: toProcess.length };
+}
+
 // GET /api/drift/history?days=30 — public, serves historical drift from KV
 async function handleGetDriftHistory(request, env, origin) {
   if (!env.REPORTS_KV) return json({ points: [], bandPct: BAND_DEFAULT }, 200, origin);
@@ -1076,12 +1136,27 @@ async function fetchAndStoreBdt(env) {
 
 // ─── Scheduled handler — 9h00 Casablanca, auto market report ─────────────────
 async function handleScheduled(env) {
-  if (!env.GROQ_API_KEY) {
-    console.error('[CRON] GROQ_API_KEY not configured — skipping report generation');
-    return;
-  }
   if (!env.REPORTS_KV) {
     console.error('[CRON] REPORTS_KV not configured');
+    return;
+  }
+
+  // ── Backfill trigger check ─────────────────────────────────────────────────
+  // Set KV key 'drift:backfill_trigger' = '90' (or any N) to trigger a one-shot
+  // historical drift backfill on the next cron run. Key is deleted after execution.
+  try {
+    const backfillDays = await env.REPORTS_KV.get('drift:backfill_trigger');
+    if (backfillDays) {
+      console.log(`[CRON] Backfill trigger detected: ${backfillDays} days`);
+      await env.REPORTS_KV.delete('drift:backfill_trigger');
+      await runDriftBackfill(env, Math.min(365, Math.max(1, parseInt(backfillDays))));
+    }
+  } catch (e) {
+    console.warn('[CRON] Backfill trigger check failed:', e);
+  }
+
+  if (!env.GROQ_API_KEY) {
+    console.error('[CRON] GROQ_API_KEY not configured — skipping report generation');
     return;
   }
 
