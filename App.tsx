@@ -17,6 +17,7 @@ import MorningBriefing   from './components/MorningBriefing';
 import RegulationsPage    from './components/RegulationsPage';
 import FloatingChat       from './components/FloatingChat';
 import Jad2Logo           from './components/Jad2Logo';
+import LogoJad2Fx         from './components/LogoJad2Fx';
 import MarketSessionsClock from './components/MarketSessionsClock';
 import DisclaimerModal    from './components/DisclaimerModal';
 import CurrencyHeatmap   from './components/CurrencyHeatmap';
@@ -213,16 +214,11 @@ function AppInner() {
 
             {/* Logo */}
             <button
-              className="flex items-center gap-3 flex-shrink-0"
+              className="flex-shrink-0 focus:outline-none"
               onClick={() => navTo('HOME')}
+              aria-label="JAD2FX — Accueil"
             >
-              <div className="w-8 h-8 bg-gradient-to-br from-gold-400 to-gold-700 rounded flex items-center justify-center shadow-lg shadow-gold-900/40">
-                <span className="font-serif font-bold text-navy-950 text-sm leading-none">J2</span>
-              </div>
-              <div className="hidden sm:block">
-                <span className="font-bold text-white tracking-[0.2em] text-sm uppercase">JAD2FX</span>
-                <span className="text-[9px] text-navy-400 tracking-wider ml-2 hidden md:inline">by JAD2 Advisory</span>
-              </div>
+              <LogoJad2Fx height={34} dark={true} showSub={false} />
             </button>
 
             {/* Desktop grouped nav */}
@@ -672,7 +668,7 @@ function AppInner() {
 
                 {/* Advisory card */}
                 <div className="bg-navy-900 border border-navy-700 rounded-2xl p-5 flex flex-col items-center text-center gap-4">
-                  <Jad2Logo width={120} showAdvisory={true} />
+                  <LogoJad2Fx height={48} dark={true} showSub={true} />
                   <div>
                     <p className="text-xs font-bold text-white mb-1.5 uppercase tracking-wider">Cabinet de Conseil Stratégique</p>
                     <p className="text-xs text-slate-400 leading-relaxed">
@@ -822,10 +818,9 @@ function AppInner() {
             </div>
             <div className="bg-navy-900 border border-navy-800 rounded-xl p-8">
               <div className="flex items-center gap-4 mb-6 pb-6 border-b border-navy-800">
-                <Jad2Logo width={110} showAdvisory={true} />
+                <LogoJad2Fx height={56} dark={true} showSub={true} />
                 <div className="border-l border-navy-700 pl-4">
-                  <h2 className="text-2xl font-bold text-white tracking-[0.18em] uppercase font-serif">JAD2FX</h2>
-                  <p className="text-[10px] text-gold-500 tracking-wider mt-0.5">Outil de Données de Change — by JAD2 Advisory</p>
+                  <p className="text-[10px] text-gold-500 tracking-wider mt-0.5">Outil de Données de Change MAD · Pédagogique</p>
                 </div>
               </div>
 

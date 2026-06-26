@@ -1,7 +1,7 @@
 import React from 'react';
 import { Shield, BookOpen, BarChart2, Scale, ExternalLink } from 'lucide-react';
 import ContactForm from './ContactForm';
-import Jad2Logo from './Jad2Logo';
+import LogoJad2Fx from './LogoJad2Fx';
 
 export default function AboutJad2() {
   return (
@@ -11,7 +11,7 @@ export default function AboutJad2() {
       <div className="bg-navy-900 border border-navy-700 rounded-2xl overflow-hidden">
         <div className="h-0.5 bg-gradient-to-r from-gold-700 via-gold-400 to-gold-700" />
         <div className="p-8 flex flex-col sm:flex-row items-start gap-6">
-          <Jad2Logo width={100} showAdvisory={true} />
+          <LogoJad2Fx height={64} dark={true} showSub={true} />
           <div className="border-t sm:border-t-0 sm:border-l border-navy-700 pt-4 sm:pt-0 sm:pl-6">
             <h1 className="text-2xl font-serif font-bold text-white mb-1">JAD2 Advisory</h1>
             <p className="text-[11px] text-gold-500 tracking-widest uppercase">
