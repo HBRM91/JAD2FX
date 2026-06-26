@@ -58,7 +58,7 @@ export const DEFAULT_ADMIN_CONFIG: AdminConfig = {
     { pair: 'USD/MAD', min:  9.60, max: 10.20, enabled: false },
   ],
   tierCommissions: DEFAULT_TIER_COMMISSIONS,
-  corsProxyUrl: process.env.CORS_PROXY_URL ?? '',
+  corsProxyUrl: process.env.CORS_PROXY_URL ?? 'https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev',
 };
 
 const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE ?? '';
@@ -98,7 +98,14 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [config, setConfigState] = useState<AdminConfig>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? { ...DEFAULT_ADMIN_CONFIG, ...JSON.parse(stored) } : DEFAULT_ADMIN_CONFIG;
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const merged = { ...DEFAULT_ADMIN_CONFIG, ...parsed };
+        // Migrate: if stored config has empty corsProxyUrl, use the current default
+        if (!merged.corsProxyUrl) merged.corsProxyUrl = DEFAULT_ADMIN_CONFIG.corsProxyUrl;
+        return merged;
+      }
+      return DEFAULT_ADMIN_CONFIG;
     } catch { return DEFAULT_ADMIN_CONFIG; }
   });
 

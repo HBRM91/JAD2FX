@@ -8,11 +8,11 @@ binding = "REPORTS_KV"
 id = "c105b1084a094471be4516496000fa1d"
 
 # ── Scheduled cron ───────────────────────────────────────────────────────────
-# Single trigger at 09:00 Casablanca (08:00 UTC) on weekdays.
-# Consolidated from 2 → 1 cron to stay within free-plan limit (5 total across account).
-# Morocco: UTC+1 year-round (UTC+0 during Ramadan).
+# 17:00 Casablanca (16:00 UTC) weekdays — BKAM publishes CoursVirement at 16:30 Casablanca.
+# Running at 17:00 ensures data is available before capture.
+# Morocco: UTC+1 year-round (UTC+0 during Ramadan, adjust manually if needed).
 [triggers]
-crons = ["0 8 * * 1-5"]
+crons = ["0 16 * * 1-5"]
 
 # ── Required secrets (wrangler secret put <NAME>) ────────────────────────────
 # BKAM_FX_KEY      — BKAM FX API subscription key
