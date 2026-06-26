@@ -23,6 +23,7 @@ import CurrencyHeatmap   from './components/CurrencyHeatmap';
 import BkamBandsVisualizer from './components/BkamBandsVisualizer';
 import ResourcesPage from './components/ResourcesPage';
 import ResearchHub from './components/ResearchHub';
+import DriftAlertChip from './components/DriftAlertChip';
 import ContactForm        from './components/ContactForm';
 import FxCrossMatrix      from './components/FxCrossMatrix';
 import MarketRadar        from './components/MarketRadar';
@@ -33,7 +34,7 @@ import {
   Building2, FileText, LayoutDashboard, Menu,
   Globe, ChevronRight, TrendingUp, ArrowLeftRight, Activity,
   Lock, X, BarChart2, Banknote, PackageOpen, Newspaper, Scale,
-  ChevronDown, ExternalLink, Zap, MessageSquare, BookOpen,
+  ChevronDown, ExternalLink, Zap, MessageSquare, BookOpen, Shield,
 } from 'lucide-react';
 
 // ─── Nav data ─────────────────────────────────────────────────────────────────
@@ -119,6 +120,7 @@ function NewsCard({ news }: { news: typeof MARKET_NEWS[0] }) {
 
 function AppInner() {
   const { config, setLivePrices, isAdmin } = useAdmin();
+  const [contactDrawerOpen, setContactDrawerOpen] = React.useState(false);
   useTheme(); // keeps ThemeProvider active (dark-only)
   const [view, setView]             = useState<ViewState>('HOME');
   const [tickerRates, setTickerRates] = useState<LiveRate[]>([]);
@@ -457,7 +459,103 @@ function AppInner() {
         {view === 'HOME' && (
           <div className="space-y-6">
 
-            {/* ── Hero banner ─────────────────────────────────────────────── */}
+            {/* ── Persona split hero (Task 2.1) ───────────────────────────── */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {/* Corporate MAD persona */}
+              <div className="bg-navy-900 border border-gold-700/30 rounded-2xl p-6 flex flex-col gap-4 hover:border-gold-600/50 transition-colors">
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-bold text-gold-500 uppercase tracking-[0.2em] bg-gold-500/10 border border-gold-500/25 px-2 py-0.5 rounded">
+                    PME &amp; Corporate Maroc
+                  </span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-serif font-bold text-white leading-tight mb-2">
+                    Maîtrisez votre exposition de change MAD
+                  </h2>
+                  <p className="text-sm text-slate-400 leading-relaxed">
+                    Forward, swap, conformité OC 01/2024 — outils pédagogiques, Morning Briefing
+                    quotidien et accompagnement stratégique pour les trésoriers marocains.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-auto">
+                  <button
+                    onClick={() => navTo('RESEARCH')}
+                    className="flex items-center gap-2 bg-gold-500 text-navy-950 font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-gold-400 transition-colors shadow-lg shadow-gold-900/30"
+                  >
+                    <Shield size={14} /> Diagnostiquer mon exposition
+                  </button>
+                  <button
+                    onClick={() => navTo('FORWARDS')}
+                    className="flex items-center gap-2 text-gold-300 border border-gold-500/40 font-semibold text-sm px-4 py-2.5 rounded-lg hover:border-gold-400 hover:bg-gold-500/5 transition-colors"
+                  >
+                    <TrendingUp size={14} /> Calculateur Forward
+                  </button>
+                </div>
+              </div>
+
+              {/* European fintech persona */}
+              <div className="bg-navy-900 border border-blue-700/30 rounded-2xl p-6 flex flex-col gap-4 hover:border-blue-600/50 transition-colors">
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.2em] bg-blue-500/10 border border-blue-500/25 px-2 py-0.5 rounded">
+                    European Fintech &amp; Tech
+                  </span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-serif font-bold text-white leading-tight mb-2">
+                    Morocco FX corridor intelligence
+                  </h2>
+                  <p className="text-sm text-slate-400 leading-relaxed">
+                    API-ready MAD rate data, regulatory mapping for the Morocco–Europe payment corridor,
+                    and go-to-market advisory for EMI/PI operators entering MENA.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2 mt-auto">
+                  <button
+                    onClick={() => setContactDrawerOpen(true)}
+                    className="flex items-center gap-2 border border-blue-500/50 text-blue-300 font-bold text-sm px-5 py-2.5 rounded-lg hover:border-blue-400 hover:bg-blue-500/5 transition-colors"
+                  >
+                    <Globe size={14} /> Explore the corridor
+                  </button>
+                  <button
+                    onClick={() => navTo('ANALYSIS')}
+                    className="flex items-center gap-2 text-slate-400 border border-navy-700 font-medium text-sm px-4 py-2.5 rounded-lg hover:border-navy-500 hover:text-white hover:bg-navy-800/50 transition-colors"
+                  >
+                    <BarChart2 size={14} /> Market Analysis
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* ── Drift alert chip (Task 2.3) ──────────────────────────────── */}
+            {config.corsProxyUrl && (
+              <DriftAlertChip
+                proxyUrl={config.corsProxyUrl}
+                onNavigate={() => navTo('BANDS')}
+              />
+            )}
+
+            {/* ── Trust bar (Task 2.2) ─────────────────────────────────────── */}
+            <div className="bg-navy-900/60 border border-navy-800 rounded-xl px-5 py-3">
+              <p className="text-[9px] text-slate-600 uppercase tracking-wider text-center mb-2.5 font-bold">
+                Accompagne des entreprises dans leur gestion de change MAD
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+                {[
+                  { sector: 'Équipementier automobile',  city: 'Tanger' },
+                  { sector: 'Importateur bois & papier', city: 'Casablanca' },
+                  { sector: 'Exportateur textile',        city: 'Fès-Meknès' },
+                  { sector: 'Opérateur phosphates',       city: 'Khouribga' },
+                  { sector: 'Fintech européenne',         city: 'Corridor MENA' },
+                ].map(c => (
+                  <div key={c.city} className="flex items-center gap-1.5 text-[10px] text-slate-600">
+                    <span className="w-1 h-1 rounded-full bg-gold-500/40 flex-shrink-0" />
+                    <span>{c.sector} · <em className="not-italic text-slate-700">{c.city}</em></span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* ── Original hero banner (now secondary / data terminal showcase) */}
             <div className="relative rounded-2xl overflow-hidden border border-navy-700 min-h-[280px] sm:min-h-[340px]" style={{ background: 'linear-gradient(135deg, #040C1C 0%, #081628 50%, #0E2336 100%)' }}>
               {/* Subtle gold radial accent top-right */}
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_15%,rgba(212,175,55,0.12),transparent_55%)]" />
@@ -778,6 +876,35 @@ function AppInner() {
       {/* ══ Floating chatbot ═════════════════════════════════════════════════ */}
       <FloatingChat />
 
+      {/* ══ In-platform contact drawer (Task 2.4) ═══════════════════════════ */}
+      {contactDrawerOpen && (
+        <div
+          className="fixed inset-0 z-[9998] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-navy-950/85 backdrop-blur-sm"
+          onClick={() => setContactDrawerOpen(false)}
+        >
+          <div
+            className="bg-navy-900 border border-navy-700 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="px-6 py-4 border-b border-navy-800 flex items-center justify-between">
+              <div>
+                <h3 className="text-base font-bold text-white">Parler à un expert JAD2</h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">Réponse sous 24h ouvrées · Confidentiel</p>
+              </div>
+              <button
+                onClick={() => setContactDrawerOpen(false)}
+                className="text-navy-500 hover:text-slate-300 transition-colors p-1"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6">
+              <ContactForm />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* ══ Footer ═══════════════════════════════════════════════════════════ */}
       <footer className="bg-navy-900 text-slate-400 border-t border-navy-700 mt-auto">
         {/* Advisory CTA */}
@@ -787,14 +914,12 @@ function AppInner() {
               <p className="text-sm font-bold text-white">Formation & Conseil en Gestion du Risque de Change</p>
               <p className="text-xs text-slate-400">Cabinet de conseil · Formation en gestion du risque de change · Accompagnement réglementaire OC</p>
             </div>
-            <a
-              href="https://jad2advisory.com"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              onClick={() => setContactDrawerOpen(true)}
               className="flex-shrink-0 px-5 py-2 bg-gold-500 text-navy-950 text-sm font-bold rounded hover:bg-gold-400 transition-colors"
             >
-              JAD2 Advisory →
-            </a>
+              Parler à un expert →
+            </button>
           </div>
         </div>
 

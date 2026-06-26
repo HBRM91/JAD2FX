@@ -15,9 +15,19 @@ interface Article {
   tags: string[];
 }
 
+type ContentTier = 'STRATEGIC' | 'REGULATORY' | 'TACTICAL' | 'TOOL';
+
+const TIER_META: Record<ContentTier, { label: string; style: string }> = {
+  STRATEGIC:  { label: 'Brief Stratégique', style: 'bg-red-500/15 text-red-400 border-red-500/30' },
+  REGULATORY: { label: 'Alerte Régl.',      style: 'bg-amber-500/15 text-amber-400 border-amber-500/30' },
+  TACTICAL:   { label: 'Tactique',           style: 'bg-blue-500/15 text-blue-400 border-blue-500/30' },
+  TOOL:       { label: 'Outil',              style: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30' },
+};
+
 interface Pillar {
   id: string;
   name: string;
+  tier: ContentTier;
   icon: React.ElementType;
   color: string;
   border: string;
@@ -48,6 +58,7 @@ const PILLARS: Pillar[] = [
   {
     id: 'bam-watch',
     name: 'BAM Watch',
+    tier: 'STRATEGIC' as ContentTier,
     icon: Eye,
     color: 'text-gold-400',
     border: 'border-gold-700/40',
@@ -82,6 +93,7 @@ const PILLARS: Pillar[] = [
   {
     id: 'reglementaire',
     name: 'Réglementaire & OC',
+    tier: 'REGULATORY' as ContentTier,
     icon: Scale,
     color: 'text-blue-400',
     border: 'border-blue-700/40',
@@ -125,6 +137,7 @@ const PILLARS: Pillar[] = [
   {
     id: 'macro',
     name: 'Macro & Monétaire',
+    tier: 'STRATEGIC' as ContentTier,
     icon: TrendingUp,
     color: 'text-emerald-400',
     border: 'border-emerald-700/40',
@@ -168,6 +181,7 @@ const PILLARS: Pillar[] = [
   {
     id: 'sectoriel',
     name: 'Profils Sectoriels FX',
+    tier: 'TACTICAL' as ContentTier,
     icon: BarChart2,
     color: 'text-purple-400',
     border: 'border-purple-700/40',
@@ -211,6 +225,7 @@ const PILLARS: Pillar[] = [
   {
     id: 'hedging',
     name: 'Éducation Hedging',
+    tier: 'TOOL' as ContentTier,
     icon: BookOpen,
     color: 'text-amber-400',
     border: 'border-amber-700/40',
@@ -255,6 +270,7 @@ const PILLARS: Pillar[] = [
   {
     id: 'historique',
     name: 'Analyse Historique',
+    tier: 'STRATEGIC' as ContentTier,
     icon: Clock,
     color: 'text-cyan-400',
     border: 'border-cyan-700/40',
@@ -298,6 +314,7 @@ const PILLARS: Pillar[] = [
   {
     id: 'outils',
     name: 'Outils & Templates',
+    tier: 'TOOL' as ContentTier,
     icon: Zap,
     color: 'text-rose-400',
     border: 'border-rose-700/40',
@@ -407,7 +424,14 @@ function PillarCTA({ pillar, onAction }: {
         <div className={`w-8 h-8 rounded-lg border ${pillar.border} flex items-center justify-center flex-shrink-0`}>
           <Icon size={15} className={pillar.color} />
         </div>
-        <p className="text-[12px] font-bold text-white">{pillar.name}</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-[12px] font-bold text-white">{pillar.name}</p>
+          {pillar.tier && (
+            <span className={`text-[8px] font-bold border px-1.5 py-0.5 rounded uppercase tracking-wide ${TIER_META[pillar.tier].style}`}>
+              {TIER_META[pillar.tier].label}
+            </span>
+          )}
+        </div>
       </div>
       <p className="text-[11px] text-slate-400 mb-4 leading-relaxed">
         {pillar.ctaType === 'newsletter' && 'Restez informé des dernières analyses sur ce pilier. Publication hebdomadaire — sans conseil d\'investissement.'}
@@ -658,9 +682,16 @@ export default function ResearchHub({ navTo }: ResearchHubProps) {
                     }`}
                   >
                     <PIcon size={14} className="flex-shrink-0" />
-                    <span className="text-[11px] font-semibold leading-tight">{p.name}</span>
+                    <div className="flex-1 min-w-0">
+                      <span className="text-[11px] font-semibold leading-tight block truncate">{p.name}</span>
+                      {p.tier && !isActive && (
+                        <span className={`text-[7px] font-bold border px-1 py-0 rounded uppercase ${TIER_META[p.tier].style}`}>
+                          {TIER_META[p.tier].label}
+                        </span>
+                      )}
+                    </div>
                     {isActive && (
-                      <span className="ml-auto text-[9px] font-bold uppercase bg-gold-500 text-navy-950 px-1.5 py-0.5 rounded">
+                      <span className="ml-auto text-[9px] font-bold uppercase bg-gold-500 text-navy-950 px-1.5 py-0.5 rounded flex-shrink-0">
                         {activePillar.articles.length}
                       </span>
                     )}
