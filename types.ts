@@ -262,7 +262,7 @@ export interface AuditEntry {
 }
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
-export type ViewState = 'HOME' | 'DASHBOARD' | 'ANALYSIS' | 'FIXING' | 'BILLETS' | 'COMMODITIES' | 'FORWARDS' | 'SWAPS' | 'LIVE' | 'ADMIN' | 'ABOUT' | 'REPORT' | 'REGULATIONS' | 'BANDS' | 'RESOURCES' | 'CONTACT' | 'RESEARCH' | 'ABOUT_JAD2' | 'TOOL_OC_ASSESS' | 'TOOL_CORRIDOR' | 'TOOL_INVOICE' | 'TOOL_FWD_EXT' | 'SECTOR_AUTO' | 'SECTOR_TEXTILE' | 'SECTOR_NORDIQUE' | 'SECTOR_AGRI';
+export type ViewState = 'HOME' | 'DASHBOARD' | 'ANALYSIS' | 'FIXING' | 'BILLETS' | 'COMMODITIES' | 'FORWARDS' | 'SWAPS' | 'LIVE' | 'ADMIN' | 'ABOUT' | 'REPORT' | 'REGULATIONS' | 'BANDS' | 'RESOURCES' | 'CONTACT' | 'RESEARCH' | 'ABOUT_JAD2' | 'TOOL_OC_ASSESS' | 'TOOL_CORRIDOR' | 'TOOL_INVOICE' | 'TOOL_FWD_EXT' | 'SECTOR_AUTO' | 'SECTOR_TEXTILE' | 'SECTOR_NORDIQUE' | 'SECTOR_AGRI' | 'PARITY_MATRIX';
 export type DashboardTab = 'VIREMENTS' | 'BILLETS' | 'GLOBAL_FX';
 
 // ─── Market Reports ───────────────────────────────────────────────────────────

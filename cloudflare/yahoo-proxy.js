@@ -907,13 +907,94 @@ async function setBkamRatesIndex(kv, idx) {
   await kv.put('bkam:virement:index', JSON.stringify(idx));
 }
 
-async function storeBkamRatesInKV(env, date, rawRates) {
+// ─── Basket parity + cross-rate enrichment ────────────────────────────────────
+// Computes, for every BKAM-published currency:
+//   basketParity = USD/MAD_basket × (CCY/USD cross-rate)
+//   driftBps     = (BKAM_fixing − basket) / basket × 10 000
+//   bandUtilPct  = position in ±5% band around basket parity (0–100%)
+//
+// USD cross-rate sources (priority):
+//   EUR/USD  → ECB Frankfurter (exogenous, non-circular for USD/EUR)
+//   G10/EM   → ECB Frankfurter EUR/CCY cross  →  CCY/USD = EUR/USD / EUR/CCY
+//   Gulf     → Official USD pegs (SAR/USD, AED/USD, etc.)
+//   Others   → BKAM implied cross = BKAM_CCY / BKAM_USD
+
+const GULF_PEGS = {           // CCY per 1 USD (official pegs)
+  SAR: 3.75000, AED: 3.67250, QAR: 3.64000,
+  KWD: 0.30700, OMR: 0.38500, BHD: 0.37600, JOD: 0.70900,
+};
+
+function enrichBkamRates(rawRates, ecbEurUsd, ecbRates) {
+  if (!rawRates?.length || !ecbEurUsd) return rawRates;
+
+  const K = 10.49, wEUR = 0.60, wUSD = 0.40;
+  const usdMadBasket = K / (wEUR * ecbEurUsd + wUSD);
+
+  // BKAM per-unit map (normalised to per 1 unit)
+  const bkamMap = {};
+  for (const r of rawRates) {
+    if (r.uniteDevise > 0) bkamMap[r.libDevise] = r.moyen / r.uniteDevise;
+  }
+  const bkamUsdPerUnit = bkamMap['USD'] ?? usdMadBasket;
+
+  return rawRates.map(r => {
+    const bkamPerUnit = bkamMap[r.libDevise];
+    if (bkamPerUnit == null) return r;
+
+    let basketPerUnit = null;
+
+    if (r.libDevise === 'USD') {
+      basketPerUnit = usdMadBasket;
+    } else if (r.libDevise === 'EUR') {
+      basketPerUnit = usdMadBasket * ecbEurUsd;
+    } else if (GULF_PEGS[r.libDevise]) {
+      // Gulf peg: CCY/USD = 1 / (USD per CCY) → invert since peg is CCY per USD
+      const ccyPerUsd = 1 / GULF_PEGS[r.libDevise];
+      basketPerUnit = usdMadBasket * ccyPerUsd;
+    } else if (ecbRates && ecbRates[r.libDevise]) {
+      // ECB gives EUR/CCY rate → CCY/USD = EUR/USD / EUR/CCY
+      const eurPerCcy = ecbRates[r.libDevise];
+      basketPerUnit = usdMadBasket * (ecbEurUsd / eurPerCcy);
+    } else {
+      // No ECB data: use BKAM implied cross (CCY/USD = BKAM_CCY / BKAM_USD)
+      const ccyPerUsd = bkamPerUnit / bkamUsdPerUnit;
+      basketPerUnit = usdMadBasket * ccyPerUsd;
+    }
+
+    // Scale by uniteDevise for display
+    const displayRate    = +(bkamPerUnit    * r.uniteDevise).toFixed(4);
+    const basketDisplay  = +(basketPerUnit  * r.uniteDevise).toFixed(4);
+    const driftBps       = +((bkamPerUnit - basketPerUnit) / basketPerUnit * 10000).toFixed(2);
+    const bandLow        = basketPerUnit * 0.95;
+    const bandHigh       = basketPerUnit * 1.05;
+    const bandUtilPct    = +Math.max(0, Math.min(100,
+      ((bkamPerUnit - bandLow) / (bandHigh - bandLow)) * 100
+    )).toFixed(1);
+
+    return { ...r, displayRate, basketParity: basketDisplay, driftBps, bandUtilPct };
+  });
+}
+
+async function storeBkamRatesInKV(env, date, rawRates, ecbEurUsd, ecbRates) {
   if (!env.REPORTS_KV || !rawRates?.length) return;
-  const payload = { date, rates: rawRates, fetchedAt: new Date().toISOString(), count: rawRates.length };
+
+  // Enrich with basket parities for ALL currencies
+  const enrichedRates = enrichBkamRates(rawRates, ecbEurUsd, ecbRates);
+
+  const payload = {
+    date,
+    rates: enrichedRates,          // includes driftBps, basketParity, bandUtilPct
+    rawRates,                       // original BKAM response preserved
+    ecbEurUsd: ecbEurUsd ?? null,
+    usdMadBasket: ecbEurUsd ? +( (10.49 / (0.60 * ecbEurUsd + 0.40)).toFixed(4) ) : null,
+    fetchedAt: new Date().toISOString(),
+    count: rawRates.length,
+  };
+
   await env.REPORTS_KV.put(
     `bkam:virement:${date}`,
     JSON.stringify(payload),
-    { expirationTtl: 60 * 60 * 24 * 500 }, // 500 days
+    { expirationTtl: 60 * 60 * 24 * 500 },
   );
   // Update date index
   const idx = await getBkamRatesIndex(env.REPORTS_KV);
@@ -923,30 +1004,77 @@ async function storeBkamRatesInKV(env, date, rawRates) {
     if (idx.length > 500) idx.splice(0, idx.length - 500);
     await setBkamRatesIndex(env.REPORTS_KV, idx);
   }
-  console.log(`[BKAM-DB] Stored ${rawRates.length} rates for ${date}`);
+  console.log(`[BKAM-DB] Stored ${rawRates.length} enriched rates for ${date} (ecbEurUsd=${ecbEurUsd})`);
 }
 
-// GET /api/bkam-rates?date=YYYY-MM-DD — serves from KV, fetches from API on miss
+// Fetch ECB cross-rates for a specific date (for basket parity enrichment)
+async function fetchEcbRatesForDate(date) {
+  try {
+    const symbols = 'USD,GBP,CHF,JPY,CAD,NOK,SEK,DKK,CNY,TRY,ZAR,INR,BRL,MAD,AUD,EGP';
+    const res = await fetch(
+      `https://api.frankfurter.app/${date}?from=EUR&to=${symbols}`,
+      { signal: AbortSignal.timeout(7_000) }
+    );
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.rates ?? null;  // { USD: 1.134, GBP: 0.847, ... }
+  } catch { return null; }
+}
+
+// GET /api/bkam-rates?date=YYYY-MM-DD — serves from KV (enriched), fetches+enriches on miss
 async function handleGetBkamRates(request, env, origin) {
   if (!env.REPORTS_KV) return json({ error: 'KV not configured' }, 503, origin);
-  const url    = new URL(request.url);
-  const date   = url.searchParams.get('date') ?? new Date().toISOString().slice(0, 10);
+  const url   = new URL(request.url);
+  const date  = url.searchParams.get('date') ?? new Date().toISOString().slice(0, 10);
+  const force = url.searchParams.get('force') === 'true'; // bypass cache for re-enrichment
 
-  // 1. Try KV cache
-  const cached = await env.REPORTS_KV.get(`bkam:virement:${date}`);
-  if (cached) {
-    return new Response(cached, {
-      headers: { 'Content-Type': 'application/json', 'X-Cache': 'HIT', 'X-Source': 'KV', ...corsHeaders(origin) },
-    });
+  // 1. Try KV cache (always check, even when force=true — we can enrich in-place)
+  const cachedStr = await env.REPORTS_KV.get(`bkam:virement:${date}`);
+  if (cachedStr) {
+    const parsed = JSON.parse(cachedStr);
+    // Already fully enriched → serve immediately
+    if (!force && parsed.rates?.[0]?.basketParity !== undefined) {
+      return new Response(cachedStr, {
+        headers: { 'Content-Type': 'application/json', 'X-Cache': 'HIT', 'X-Source': 'KV', ...corsHeaders(origin) },
+      });
+    }
+    // Has BKAM data but not enriched → enrich from ECB cross-rates (no BKAM re-fetch needed)
+    const rawFromKV = parsed.rawRates ?? parsed.rates;
+    if (rawFromKV?.length) {
+      const ecbRates = await fetchEcbRatesForDate(date);
+      const ecbEurUsd = ecbRates?.USD ?? null;
+      await storeBkamRatesInKV(env, date, rawFromKV, ecbEurUsd, ecbRates);
+      const enriched = enrichBkamRates(rawFromKV, ecbEurUsd, ecbRates);
+      const payload = {
+        date, rates: enriched, rawRates: rawFromKV, ecbEurUsd,
+        usdMadBasket: ecbEurUsd ? +((10.49 / (0.60 * ecbEurUsd + 0.40)).toFixed(4)) : null,
+        fetchedAt: new Date().toISOString(), count: rawFromKV.length,
+      };
+      return new Response(JSON.stringify(payload), {
+        headers: { 'Content-Type': 'application/json', 'X-Cache': 'ENRICHED', 'X-Source': 'KV+ECB', ...corsHeaders(origin) },
+      });
+    }
   }
 
-  // 2. Cache miss → fetch from BKAM API and store
+  // 2. No KV data at all → fetch from BKAM API (only works during API window)
   if (!env.BKAM_FX_KEY) return json({ error: 'BKAM_FX_KEY not configured', date }, 503, origin);
-  const rawRates = await fetchBkamRatesRaw(env.BKAM_FX_KEY, date);
+
+  const [rawRates, ecbRates] = await Promise.all([
+    fetchBkamRatesRaw(env.BKAM_FX_KEY, date),
+    fetchEcbRatesForDate(date),
+  ]);
   if (!rawRates?.length) return json({ error: `No BKAM data for ${date}`, date }, 404, origin);
 
-  await storeBkamRatesInKV(env, date, rawRates);
-  const payload = { date, rates: rawRates, fetchedAt: new Date().toISOString(), count: rawRates.length };
+  const ecbEurUsd = ecbRates?.USD ?? null;
+  await storeBkamRatesInKV(env, date, rawRates, ecbEurUsd, ecbRates);
+
+  // Return the enriched payload (same format as KV)
+  const enriched = enrichBkamRates(rawRates, ecbEurUsd, ecbRates);
+  const payload = {
+    date, rates: enriched, rawRates, ecbEurUsd,
+    usdMadBasket: ecbEurUsd ? +((10.49 / (0.60 * ecbEurUsd + 0.40)).toFixed(4)) : null,
+    fetchedAt: new Date().toISOString(), count: rawRates.length,
+  };
   return new Response(JSON.stringify(payload), {
     status: 200,
     headers: { 'Content-Type': 'application/json', 'X-Cache': 'MISS', 'X-Source': 'BKAM-API', ...corsHeaders(origin) },
@@ -1281,10 +1409,15 @@ async function handleScheduled(env) {
 
   // ── 1. Fetch today's BKAM rates (raw array) and populate KV database ─────
   const todayStr  = new Date().toISOString().slice(0, 10);
-  const rawToday  = await fetchBkamRatesRaw(env.BKAM_FX_KEY, null);
+  // Fetch BKAM rates + ECB cross-rates in parallel for complete enrichment
+  const [rawToday, ecbTodayRates] = await Promise.all([
+    fetchBkamRatesRaw(env.BKAM_FX_KEY, null),
+    fetchEcbRatesForDate(todayStr),
+  ]);
+  const ecbEurUsdToday = ecbTodayRates?.USD ?? null;
   if (rawToday?.length) {
-    await storeBkamRatesInKV(env, todayStr, rawToday);
-    console.log(`[CRON] BKAM DB: stored ${rawToday.length} rates for ${todayStr}`);
+    await storeBkamRatesInKV(env, todayStr, rawToday, ecbEurUsdToday, ecbTodayRates);
+    console.log(`[CRON] BKAM DB: stored ${rawToday.length} enriched rates for ${todayStr}`);
   }
   // Convert to map for downstream use
   const todayRates = rawToday ? Object.fromEntries(

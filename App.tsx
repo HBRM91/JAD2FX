@@ -30,6 +30,7 @@ import OcComplianceAssessment from './components/tools/OcComplianceAssessment';
 import CorridorCalculator from './components/tools/CorridorCalculator';
 import InvoiceImpactCalc from './components/tools/InvoiceImpactCalc';
 import ForwardExtension from './components/tools/ForwardExtension';
+import BkamParityMatrix from './components/BkamParityMatrix';
 import SectorLanding from './components/SectorLanding';
 import ContactForm        from './components/ContactForm';
 import FxCrossMatrix      from './components/FxCrossMatrix';
@@ -67,6 +68,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Live Pricer',          view: 'LIVE',        icon: Activity,        desc: 'Cours temps réel · 24 devises' },
       { label: 'Tableau de Bord',      view: 'DASHBOARD',   icon: LayoutDashboard, desc: 'Virements, billets, global FX' },
       { label: 'Fixing BKAM',          view: 'FIXING',      icon: BarChart2,       desc: 'Cours officiels Bank Al-Maghrib' },
+      { label: 'Matrice de Parité',     view: 'PARITY_MATRIX', icon: BarChart2,     desc: 'Dérive panier · 30 devises · Graphes' },
       { label: 'Billets de Banque',    view: 'BILLETS',     icon: Banknote,        desc: 'Cours officiels billets BKAM' },
       { label: 'Matières Premières',   view: 'COMMODITIES', icon: PackageOpen,     desc: 'Brent · Or · Blé · Cuivre' },
     ],
@@ -777,6 +779,7 @@ function AppInner() {
         {view === 'TOOL_CORRIDOR'  && <CorridorCalculator />}
         {view === 'TOOL_INVOICE'   && <InvoiceImpactCalc />}
         {view === 'TOOL_FWD_EXT'  && <ForwardExtension />}
+        {view === 'PARITY_MATRIX' && <BkamParityMatrix />}
         {view === 'SECTOR_AUTO'     && <SectorLanding sectorId="auto"     navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_TEXTILE'  && <SectorLanding sectorId="textile"  navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_NORDIQUE' && <SectorLanding sectorId="nordique" navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
