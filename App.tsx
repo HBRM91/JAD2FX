@@ -22,6 +22,7 @@ import DisclaimerModal    from './components/DisclaimerModal';
 import CurrencyHeatmap   from './components/CurrencyHeatmap';
 import BkamBandsVisualizer from './components/BkamBandsVisualizer';
 import ResourcesPage from './components/ResourcesPage';
+import ResearchHub from './components/ResearchHub';
 import ContactForm        from './components/ContactForm';
 import FxCrossMatrix      from './components/FxCrossMatrix';
 import MarketRadar        from './components/MarketRadar';
@@ -32,7 +33,7 @@ import {
   Building2, FileText, LayoutDashboard, Menu,
   Globe, ChevronRight, TrendingUp, ArrowLeftRight, Activity,
   Lock, X, BarChart2, Banknote, PackageOpen, Newspaper, Scale,
-  ChevronDown, ExternalLink, Zap, MessageSquare,
+  ChevronDown, ExternalLink, Zap, MessageSquare, BookOpen,
 } from 'lucide-react';
 
 // ─── Nav data ─────────────────────────────────────────────────────────────────
@@ -76,9 +77,10 @@ const NAV_GROUPS: NavGroup[] = [
     id: 'research',
     label: 'Recherche',
     items: [
-      { label: 'Morning Briefing',    view: 'REPORT',      icon: Newspaper,    desc: 'Briefing 9h · Stratégiste en chef' },
-      { label: 'Réglementation OC',  view: 'REGULATIONS', icon: Scale,        desc: 'Circulaires Office des Changes' },
-      { label: 'Ressources',         view: 'RESOURCES',   icon: ExternalLink, desc: 'Liens institutionnels & data' },
+      { label: 'Intelligence de Marché', view: 'RESEARCH',    icon: BookOpen,     desc: '7 piliers · Recherche & Analyse' },
+      { label: 'Morning Briefing',       view: 'REPORT',      icon: Newspaper,    desc: 'Briefing 9h · Stratégiste en chef' },
+      { label: 'Réglementation OC',      view: 'REGULATIONS', icon: Scale,        desc: 'Circulaires Office des Changes' },
+      { label: 'Ressources',             view: 'RESOURCES',   icon: ExternalLink, desc: 'Liens institutionnels & data' },
     ],
   },
 ];
@@ -643,6 +645,7 @@ function AppInner() {
         {view === 'SWAPS'       && <SwapSimulator />}
         {view === 'BANDS'       && <BkamBandsVisualizer />}
         {view === 'RESOURCES'   && <ResourcesPage />}
+        {view === 'RESEARCH'    && <ResearchHub navTo={navTo} />}
 
         {view === 'LIVE' && (
           <div className="space-y-6">

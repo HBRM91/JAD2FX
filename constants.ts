@@ -130,7 +130,7 @@ export const MARKET_NEWS = [
   {
     id: 3,
     title: "Circulaire OC n° 01/2024 : une refonte majeure du cadre de couverture",
-    category: "Réglementation",
+    category: "Réglementation OC",
     time: "Éditorial",
     summary: "La Circulaire 01/2024 de l'Office des Changes élargit la couverture autorisée à 100% de l'exposition commerciale sous-jacente (imports et exports), et officialise les options de change vanille (puts pour importateurs, calls pour exportateurs). C'est la réforme la plus significative de l'arsenal de couverture depuis la Phase II de libéralisation (2020). Les entreprises disposant de comptes CPEC ou CDE doivent réviser leur politique de couverture pour intégrer les nouvelles limites et instruments autorisés."
   },
@@ -139,7 +139,7 @@ export const MARKET_NEWS = [
     title: "Remises MRE & tourisme : saisonnalité et impact EUR/MAD",
     category: "Flux de Capitaux",
     time: "Éditorial",
-    summary: "Les transferts des Marocains résidant à l'étranger (MRE) dépassent structurellement 9 Mds EUR annuels, avec un pic saisonnier en Q2–Q3 (Ramadan / retour estival). Combinés à l'accélération des recettes touristiques, ces flux créent une pression acheteuse prévisible sur EUR/MAD entre mai et septembre. Les trésoriers corporate devraient anticiper ce biais saisonnier dans le calendrier de débouclement de leurs couvertures à terme EUR."
+    summary: "Les transferts des Marocains résidant à l'étranger (MRE) dépassent structurellement 9 Mds EUR annuels, avec un pic saisonnier en Q2–Q3 (Ramadan / retour estival). Combinés à l'accélération des recettes touristiques, ces flux créent une pression acheteuse prévisible sur EUR/MAD entre mai et septembre. Les trésoriers corporate doivent anticiper ce biais saisonnier dans le calendrier de débouclement de leurs couvertures à terme EUR."
   },
   {
     id: 5,
@@ -153,7 +153,21 @@ export const MARKET_NEWS = [
     title: "Couronnes nordiques (NOK / SEK / DKK) : l'exposition méconnue des importateurs marocains",
     category: "Devises Nordiques",
     time: "Éditorial",
-    summary: "Les couronnes norvégienne (NOK), suédoise (SEK) et danoise (DKK) représentent une exposition de change structurelle pour les importateurs marocains de bois, pâte à papier, produits forestiers, équipements industriels et pharmaceutiques scandinaves. Ces trois devises — toutes cotées par BKAM — affichent une corrélation EUR de 60 à 75%, mais incorporent une prime spécifique : la NOK est étroitement liée aux prix du Brent (économie pétrolière norvégienne), tandis que la SEK suit la posture de la Riksbank et le cycle industriel européen. Une appréciation de 200 bps NOK/MAD renchérit mécaniquement la facture bois-construction et emballage — inputs stratégiques pour l'industrie marocaine. Les trésoriers de groupes actifs dans l'import de matières premières nordiques ont tout intérêt à surveiller NOK/MAD et SEK/MAD dans leur tableau de bord devise, au même titre que les paires majeures."
+    summary: "Les couronnes norvégienne (NOK), suédoise (SEK) et danoise (DKK) représentent une exposition de change structurelle pour les importateurs marocains de bois, pâte à papier, produits forestiers et équipements industriels scandinaves. Ces trois devises — toutes cotées par BKAM — affichent une corrélation EUR de 60 à 75%, mais incorporent une prime spécifique : la NOK est étroitement liée aux prix du Brent (économie pétrolière norvégienne), créant une double exposition pour les entreprises importatrices exposées simultanément aux hydrocarbures. Une appréciation de 200 bps NOK/MAD renchérit mécaniquement la facture bois-construction et emballage."
+  },
+  {
+    id: 7,
+    title: "Forward et swap de change : les mécanismes autorisés aux entreprises marocaines",
+    category: "Hedging Éducatif",
+    time: "Éditorial",
+    summary: "Le taux forward résulte de la formule CIP (Covered Interest Parity) : F = S × (1 + r_MAD)^T / (1 + r_Devise)^T, où les points de swap (F − S) reflètent le différentiel de taux d'intérêt entre le MAD et la devise concernée. En contexte MONIA à 2,75%, les points forward EUR/MAD à 6 mois sont structurellement positifs, traduisant le coût de portage du dirham. Le swap de change combine une jambe au comptant et une jambe à terme de sens inverse, permettant à l'entreprise de gérer sa liquidité en devises sans conversion immédiate. La Circulaire OC n°01/2024 autorise l'utilisation de ces instruments jusqu'à 100% de l'exposition commerciale documentée, sous réserve de domiciliation bancaire agréée par Bank Al-Maghrib."
+  },
+  {
+    id: 8,
+    title: "Secteur automobile marocain (Renault, BYD, Stellantis) : l'exposition EUR/JPY/USD des équipementiers",
+    category: "Profil Sectoriel",
+    time: "Éditorial",
+    summary: "L'industrie automobile marocaine génère une exposition de change structurellement bi-devises : les composants européens (moteurs, électronique) sont facturés en EUR tandis que les technologies asiatiques (batteries, semi-conducteurs) arrivent en JPY/USD, quand les revenus d'exportation vers l'UE sont perçus en EUR. Les équipementiers de rang 2 et 3 supportent une volatilité EUR/JPY non cotée directement par BKAM mais dérivable via les cross-rates. La base de coûts locaux en MAD crée un troisième niveau d'exposition qui rend la gestion du risque de change particulièrement complexe pour les sous-traitants dont la marge opérationnelle est structurellement étroite."
   }
 ];
 
