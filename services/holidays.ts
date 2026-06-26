@@ -40,10 +40,16 @@ const ISLAMIC_HOLIDAYS: IslamicCalendar = {
     '2025-06-26', // Awal Moharrem (approx)
   ],
   2026: [
-    '2026-12-23', // Aid Al Mawlid (approx)
-    '2026-03-19', '2026-03-20', // Aid Al Fitr (approx)
-    '2026-05-27', '2026-05-28', // Aid Al Adha (approx)
-    '2026-06-16', // Awal Moharrem (approx)
+    '2026-03-19', '2026-03-20', '2026-03-21', // Aid Al Fitr (fin Ramadan)
+    '2026-05-27', '2026-05-28', '2026-05-29', // Aid Al Adha
+    '2026-06-17', // Awal Moharrem (Hijri New Year 1448)
+    '2026-09-25', // Aid Al Mawlid (Prophète)
+  ],
+  2027: [
+    '2027-03-09', '2027-03-10', '2027-03-11', // Aid Al Fitr (approx)
+    '2027-05-16', '2027-05-17', '2027-05-18', // Aid Al Adha (approx)
+    '2027-06-06', // Awal Moharrem (approx)
+    '2027-09-14', // Aid Al Mawlid (approx)
   ],
 };
 

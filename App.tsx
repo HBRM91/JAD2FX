@@ -28,6 +28,7 @@ import AboutJad2 from './components/AboutJad2';
 import OcComplianceAssessment from './components/tools/OcComplianceAssessment';
 import CorridorCalculator from './components/tools/CorridorCalculator';
 import InvoiceImpactCalc from './components/tools/InvoiceImpactCalc';
+import ForwardExtension from './components/tools/ForwardExtension';
 import SectorLanding from './components/SectorLanding';
 import ContactForm        from './components/ContactForm';
 import FxCrossMatrix      from './components/FxCrossMatrix';
@@ -59,37 +60,37 @@ interface NavGroup {
 
 const NAV_GROUPS: NavGroup[] = [
   {
-    id: 'market',
-    label: 'Données Marché',
+    id: 'marches',
+    label: 'Taux & Marchés',
     items: [
-      { label: 'Tableau de Bord',    view: 'DASHBOARD',   icon: LayoutDashboard, desc: '24 devises MAD live' },
-      { label: 'Live Pricer',        view: 'LIVE',        icon: Activity,         desc: 'Séances & cotations' },
-      { label: 'Fixing BKAM',        view: 'FIXING',      icon: BarChart2,        desc: 'Cours officiels BAM' },
-      { label: 'Billets & Chèques',  view: 'BILLETS',     icon: Banknote,         desc: 'Taux billets OC' },
-      { label: 'Matières Premières', view: 'COMMODITIES', icon: PackageOpen,       desc: 'Pétrole & métaux' },
+      { label: 'Live Pricer',          view: 'LIVE',        icon: Activity,        desc: 'Cours temps réel · 24 devises' },
+      { label: 'Tableau de Bord',      view: 'DASHBOARD',   icon: LayoutDashboard, desc: 'Virements, billets, global FX' },
+      { label: 'Fixing BKAM',          view: 'FIXING',      icon: BarChart2,       desc: 'Cours officiels Bank Al-Maghrib' },
+      { label: 'Billets de Banque',    view: 'BILLETS',     icon: Banknote,        desc: 'Cours officiels billets BKAM' },
+      { label: 'Matières Premières',   view: 'COMMODITIES', icon: PackageOpen,     desc: 'Brent · Or · Blé · Cuivre' },
     ],
   },
   {
-    id: 'tools',
-    label: 'Outils Trading',
+    id: 'simulateurs',
+    label: 'Simulateurs',
     items: [
-      { label: 'Forward Calculator', view: 'FORWARDS',  icon: TrendingUp,    desc: 'Couverture CIP terme' },
-      { label: 'FX Swap Simulator',  view: 'SWAPS',     icon: ArrowLeftRight, desc: 'Near / Far legs' },
-      { label: 'Analyse de Marché',  view: 'ANALYSIS',  icon: FileText,       desc: 'Indicateurs & drift' },
-      { label: 'Bandes BKAM',        view: 'BANDS',     icon: BarChart2,      desc: 'Cage ±5% & oiseau' },
+      { label: 'Forward de Change',        view: 'FORWARDS',    icon: TrendingUp,     desc: 'Taux à terme CIP · T+2 ajusté' },
+      { label: 'Prorogation & Levée',      view: 'TOOL_FWD_EXT', icon: ArrowLeftRight, desc: 'Extension · Dénouement · Marge banque' },
+      { label: 'FX Swap (Near/Far)',        view: 'SWAPS',       icon: ArrowLeftRight, desc: 'Points swap · Legs Near/Far' },
+      { label: 'Impact Facture MAD',        view: 'TOOL_INVOICE', icon: BarChart2,      desc: 'Érosion marge / scénarios change' },
+      { label: 'Bandes BKAM ±5%',          view: 'BANDS',       icon: BarChart2,      desc: 'Cage · Bird · Drift model' },
     ],
   },
   {
-    id: 'research',
-    label: 'Recherche',
+    id: 'intelligence',
+    label: 'Intelligence',
     items: [
-      { label: 'Intelligence de Marché', view: 'RESEARCH',       icon: BookOpen,     desc: '7 piliers · Recherche & Analyse' },
-      { label: 'Morning Briefing',       view: 'REPORT',         icon: Newspaper,    desc: 'Briefing 9h · Stratégiste en chef' },
-      { label: 'Diagnostic OC',          view: 'TOOL_OC_ASSESS', icon: Shield,       desc: 'Auto-évaluation Circ. OC 01/2024' },
-      { label: 'Corridor Fintech',       view: 'TOOL_CORRIDOR',  icon: Globe,        desc: 'Morocco market entry scorecard' },
-      { label: 'Impact Facture',          view: 'TOOL_INVOICE',   icon: BarChart2,    desc: 'Érosion marge / mouvement change' },
-      { label: 'Réglementation OC',      view: 'REGULATIONS',    icon: Scale,        desc: 'Circulaires Office des Changes' },
-      { label: 'Ressources',             view: 'RESOURCES',      icon: ExternalLink, desc: 'Liens institutionnels & data' },
+      { label: 'Morning Briefing',         view: 'REPORT',          icon: Newspaper,    desc: 'Briefing quotidien · Stratégiste en chef' },
+      { label: 'Analyse de Marché',        view: 'ANALYSIS',        icon: FileText,     desc: 'G10 FX · MAD · Macro · IA brief' },
+      { label: 'Research Hub',             view: 'RESEARCH',        icon: BookOpen,     desc: '7 piliers · Recherche institutionnelle' },
+      { label: 'Diagnostic OC',            view: 'TOOL_OC_ASSESS',  icon: Shield,       desc: 'Auto-évaluation Circ. OC 01/2024' },
+      { label: 'Réglementation OC',        view: 'REGULATIONS',     icon: Scale,        desc: 'Circulaires · Instructions · Guides' },
+      { label: 'À Propos JAD2',            view: 'ABOUT_JAD2',      icon: Building2,    desc: 'Statut · Services · Méthodologie' },
     ],
   },
 ];
@@ -179,7 +180,12 @@ function AppInner() {
     return () => document.removeEventListener('mousedown', onOutside);
   }, []);
 
-  const navTo = (v: ViewState) => { setView(v); setMobileOpen(false); setOpenGroup(null); };
+  const navTo = (v: ViewState) => {
+    setView(v);
+    setMobileOpen(false);
+    setOpenGroup(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const activeGroupId = NAV_GROUPS.find(g => g.items.some(i => i.view === view))?.id ?? null;
 
@@ -774,6 +780,7 @@ function AppInner() {
         {view === 'TOOL_OC_ASSESS' && <OcComplianceAssessment />}
         {view === 'TOOL_CORRIDOR'  && <CorridorCalculator />}
         {view === 'TOOL_INVOICE'   && <InvoiceImpactCalc />}
+        {view === 'TOOL_FWD_EXT'  && <ForwardExtension />}
         {view === 'SECTOR_AUTO'     && <SectorLanding sectorId="auto"     navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_TEXTILE'  && <SectorLanding sectorId="textile"  navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_NORDIQUE' && <SectorLanding sectorId="nordique" navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}

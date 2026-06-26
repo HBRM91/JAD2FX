@@ -519,8 +519,8 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
         </div>
         <div className="px-4 py-2.5 border-t border-navy-700/40 bg-navy-800/10">
           <p className="text-[9px] text-slate-600">
-            Circulaire OC n° 01/2024 · Instruction BKAM n° 03/2021 · Dahir n° 1-73-318 ·
-            Pour couverture structurée: <span className="text-gold-600">jad2advisory.com</span>
+            Circ. OC n° 01/2024 · IGOC 2024 · Données indicatives uniquement — pour toute opération,
+            adressez-vous à un <span className="text-gold-600">établissement de crédit agréé par Bank Al-Maghrib</span>
           </p>
         </div>
       </div>

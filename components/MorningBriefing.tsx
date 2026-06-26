@@ -844,11 +844,11 @@ export default function MorningBriefing() {
                         <td className="px-4 py-2.5">
                           <div className="flex items-center gap-2">
                             <CurrencyFlag countryCode={
-                              p.currency === 'EUR' ? 'eu' : p.currency === 'USD' ? 'us' :
-                              p.currency === 'GBP' ? 'gb' : p.currency === 'CHF' ? 'ch' :
-                              p.currency === 'JPY' ? 'jp' : p.currency === 'CAD' ? 'ca' :
-                              p.currency === 'CNY' ? 'cn' : p.currency === 'SAR' ? 'sa' :
-                              p.currency === 'AED' ? 'ae' : p.currency === 'NOK' ? 'no' : 'un'
+                              ({ EUR:'eu',USD:'us',GBP:'gb',CHF:'ch',JPY:'jp',
+                                 CAD:'ca',NOK:'no',SEK:'se',DKK:'dk',CNY:'cn',
+                                 SAR:'sa',AED:'ae',QAR:'qa',KWD:'kw',OMR:'om',
+                                 BHD:'bh',JOD:'jo',TND:'tn',DZD:'dz',LYD:'ly',
+                                 ZAR:'za',INR:'in',BRL:'br',TRY:'tr' }[p.currency]) ?? 'un'
                             } size="xs" />
                             <span className="font-mono font-bold text-white text-[12px]">{p.pair}</span>
                           </div>
