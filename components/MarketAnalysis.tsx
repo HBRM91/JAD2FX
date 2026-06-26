@@ -143,6 +143,7 @@ const MarketAnalysis: React.FC = () => {
 
       const result = await routeQuery({
         strategy: 'quality-first',
+        proxyUrl: config.corsProxyUrl || undefined,
         systemPrompt: `You are the chief FX strategist at a Tier-1 MENA investment bank. Write terse, data-dense institutional commentary. Strict rules:
 — Anchor EVERY claim to the live numbers provided. Do not state generic facts (e.g. "the band is ±5%" or "EUR has 60% weight") — those are known to the reader.
 — Quantify every observation: use basis-point moves, percentage changes, level vs prior range.

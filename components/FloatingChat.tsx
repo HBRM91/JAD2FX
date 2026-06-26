@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { MessageCircle, X, ChevronDown } from 'lucide-react';
 import ChatInterface from './ChatInterface';
 import { useI18n } from '../context/I18nContext';
+import { useAdmin } from '../context/AdminContext';
 
 export default function FloatingChat() {
+  const { config } = useAdmin();
   const [open, setOpen] = useState(false);
   const [pulse, setPulse] = useState(true);
   const { locale, isRTL } = useI18n();
@@ -39,7 +41,7 @@ export default function FloatingChat() {
             </button>
           </div>
           <div style={{ maxHeight: 'calc(100vh - 8rem)', overflowY: 'auto' }}>
-            <ChatInterface />
+            <ChatInterface proxyUrl={config.corsProxyUrl || undefined} />
           </div>
         </div>
       )}

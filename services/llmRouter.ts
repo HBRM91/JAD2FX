@@ -21,16 +21,21 @@ interface RouteConfig {
   userMessage: string;
   maxTokens?: number;
   temperature?: number;
+  /** Override the proxy URL. Falls back to process.env.CORS_PROXY_URL (build-time inject).
+   *  Pass config.corsProxyUrl from useAdmin() to ensure the admin-configured URL is used
+   *  even when the build-time env var was not set (e.g. CI secret missing). */
+  proxyUrl?: string;
 }
 
 // ─── Worker proxy call ────────────────────────────────────────────────────────
 
-function getProxyUrl(): string {
+function getBuildTimeProxy(): string {
   return (process.env.CORS_PROXY_URL ?? '').replace(/\/$/, '');
 }
 
 export async function routeQuery(config: RouteConfig): Promise<LLMResponse> {
-  const base = getProxyUrl();
+  // Prefer runtime-provided URL (from admin config) over build-time env var
+  const base = (config.proxyUrl?.replace(/\/$/, '')) || getBuildTimeProxy();
   if (!base) throw new Error('CORS_PROXY_URL not configured — cannot reach LLM proxy');
 
   const res = await fetch(`${base}/api/llm/chat`, {
@@ -62,9 +67,8 @@ export async function routeQuery(config: RouteConfig): Promise<LLMResponse> {
 
 // ─── Helpers — kept for UI compatibility ─────────────────────────────────────
 
-export function getAvailableProviders(): LLMProvider[] {
-  // Providers are available if the proxy URL is configured (keys live in Worker)
-  return getProxyUrl() ? (['groq', 'gemini'] as LLMProvider[]) : [];
+export function getAvailableProviders(runtimeProxyUrl?: string): LLMProvider[] {
+  return (runtimeProxyUrl?.trim() || getBuildTimeProxy()) ? (['groq', 'gemini'] as LLMProvider[]) : [];
 }
 
 export const PROVIDER_LABELS: Record<LLMProvider, string> = {

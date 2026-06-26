@@ -161,6 +161,7 @@ export async function generateReport(
   const strategy = input.preferredModel === 'gemini' ? 'quality-first' : 'cost-first';
   const llmResult = await routeQuery({
     strategy,
+    proxyUrl:    input.corsProxyUrl || undefined,
     systemPrompt,
     userMessage,
     maxTokens:   5000,

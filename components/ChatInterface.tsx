@@ -37,7 +37,7 @@ const SUGGESTED: Record<string, string[]> = {
   ],
 };
 
-const ChatInterface: React.FC = () => {
+const ChatInterface: React.FC<{ proxyUrl?: string }> = ({ proxyUrl }) => {
   const { locale, isRTL } = useI18n();
   const docCount = getDocumentCount();
 
@@ -65,7 +65,7 @@ const ChatInterface: React.FC = () => {
 
   useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
-  const available = getAvailableProviders();
+  const available = getAvailableProviders(proxyUrl);
   const hasAnyKey = available.length > 0;
 
   const handleSend = async () => {
@@ -89,6 +89,7 @@ const ChatInterface: React.FC = () => {
 
       const result = await routeQuery({
         strategy: 'cost-first',
+        proxyUrl,
         systemPrompt: GEMINI_SYSTEM_INSTRUCTION,
         userMessage,
         maxTokens: 900,
