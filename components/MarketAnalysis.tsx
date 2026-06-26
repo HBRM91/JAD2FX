@@ -160,7 +160,7 @@ PANIER: K=${BASKET_K} · EUR/MAD_central théorique ≈ ${(BASKET_K * freshEu).t
 §2 — MARCHÉ MAD: Position du dirham dans la bande (utilisation calculée). Flux structurels dominants cette semaine (MRE saisonnalité, recettes OCP, facture pétrolière) et leur sens sur la pression de change.
 §3 — POINTS DE VIGILANCE CORPORATE: 2-3 thèmes concrets pour les trésoriers marocains — asymétrie de risque EUR vs USD sur le panier, exposition NOK/SEK des importateurs de bois-papier-équipements nordiques (NOK liée au Brent = double exposition), opportunités de refacturation Gulf (AED/SAR stables).
 
-Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de conseil en investissement (Loi 44-12/AMMC). Conseil: jad2advisory.com"`,
+Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de conseil en investissement (Loi n° 43-12 / Dahir n° 1-13-21). Conseil: jad2advisory.com"`,
         maxTokens: 800,
         temperature: 0.25,
       });

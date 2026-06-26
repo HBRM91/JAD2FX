@@ -40,7 +40,7 @@ export default function DisclaimerModal() {
           <div>
             <h2 className="font-serif font-bold text-white text-base">Avertissement Légal</h2>
             <p className="text-[9px] text-gold-500/70 tracking-widest uppercase font-bold">
-              JAD2FX · Loi 19-14 · Loi 103-12
+              JAD2FX · Loi n° 43-12 · Loi 103-12
             </p>
           </div>
         </div>

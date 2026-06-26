@@ -9,7 +9,7 @@
  */
 
 const BOT_UA_RE =
-  /Googlebot|Bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|Sogou|Exabot|ia_archiver|AhrefsBot|SemrushBot|facebot|LinkedInBot|Twitterbot/i;
+  /Googlebot|Googlebot-Image|Googlebot-News|AdsBot-Google|DuplexWeb-Google|Bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|Sogou|Exabot|ia_archiver|AhrefsBot|SemrushBot|facebot|LinkedInBot|LinkedInBot-Proxy|Twitterbot|WhatsApp|Slackbot|facebookexternalhit|Discordbot|TelegramBot|Applebot|Pinterest|Snapchat/i;
 
 const K = 10.49;        // BKAM basket constant
 const EUR_W = 0.60;     // 60% EUR weight

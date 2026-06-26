@@ -407,11 +407,20 @@ function AppInner() {
         <p className="text-[11px] text-slate-500 tracking-wide text-center">{DISCLAIMER_SHORT}</p>
       </div>
 
-      {/* ══ Mobile simulator-mode sticky banner — only on tool/calc views ═════ */}
+      {/* ══ Persistent non-executable rate notice (all tool views, all devices) ═ */}
+      {['FORWARDS', 'SWAPS', 'ANALYSIS', 'BANDS', 'LIVE', 'DASHBOARD', 'FIXING', 'BILLETS'].includes(view) && (
+        <div className="sticky top-14 z-40 border-b border-gold-600/20 bg-gold-500/5 px-4 py-1 text-center">
+          <p className="text-[9px] text-gold-600/80 font-medium">
+            Taux JAD2FX strictement indicatifs — non utilisables pour des opérations de change
+            (BKAM Méthodologie 2024, §II) · Pour un cours ferme : votre banque domiciliataire agréée BAM
+          </p>
+        </div>
+      )}
+      {/* ══ Mobile simulator banner — calc/simulation views only ══════════════ */}
       {['FORWARDS', 'SWAPS', 'ANALYSIS', 'BANDS', 'REPORT', 'RESEARCH'].includes(view) && (
-        <div className="lg:hidden sticky top-14 z-40 bg-amber-900/95 border-b border-amber-700/50 backdrop-blur-sm px-4 py-1.5 text-center">
-          <p className="text-[9px] font-bold text-amber-300 uppercase tracking-widest">
-            Mode Simulateur — Taux Non-Exécutables · Indicatif Uniquement
+        <div className="lg:hidden sticky top-[calc(56px+28px)] z-39 bg-amber-900/95 border-b border-amber-700/50 backdrop-blur-sm px-4 py-1 text-center">
+          <p className="text-[8px] font-bold text-amber-300 uppercase tracking-widest">
+            Mode Simulateur — Résultats Non-Exécutables · Usage Pédagogique Uniquement
           </p>
         </div>
       )}
@@ -806,6 +815,12 @@ function AppInner() {
             </div>
             <p className="text-xs mt-2 text-slate-600 italic">
               Market data from Yahoo Finance for educational purposes only. Not for commercial trading.
+            </p>
+            <p className="text-[10px] mt-2 text-slate-600 leading-relaxed max-w-3xl mx-auto">
+              JAD2 Advisory — Cabinet de conseil en management · Non établissement financier agréé BAM/AMMC ·
+              Loi n° 43-12 &amp; Dahir n° 1-13-21 · Les taux JAD2FX ne peuvent être utilisés comme
+              référence d'exécution conformément à la Méthodologie BKAM 2024 (§II) ·
+              Données personnelles : Loi marocaine 09-08 · CNDP Déclaration en cours
             </p>
             <p className="text-xs mt-1.5 text-slate-600">{t('footer.copyright')}</p>
           </div>

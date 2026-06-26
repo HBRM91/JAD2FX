@@ -21,10 +21,11 @@
  */
 
 const ALLOWED_ORIGIN_PATTERNS = [
-  /^https:\/\/[a-z0-9-]+\.jad2fx\.pages\.dev$/,  // all Pages preview + prod URLs
-  /^https:\/\/jad2fx\.com$/,
-  /^https:\/\/jad2fx\.pages\.dev$/,
-  /^http:\/\/localhost:(3000|5173|4173)$/,
+  /^https:\/\/[a-z0-9-]+\.jad2fx\.pages\.dev$/,  // Cloudflare Pages preview URLs
+  /^https:\/\/jad2fx\.pages\.dev$/,               // Cloudflare Pages production
+  /^https:\/\/fx\.jad2advisory\.com$/,             // Primary custom domain
+  /^https:\/\/jad2fx\.com$/,                       // Legacy domain
+  /^http:\/\/localhost:(3000|5173|4173)$/,          // Local dev
 ];
 
 const CORS_HEADERS = {
@@ -41,7 +42,7 @@ function isAllowedOrigin(origin) {
 }
 
 function corsHeaders(origin) {
-  const allowed = isAllowedOrigin(origin) ? origin : 'https://jad2fx.pages.dev';
+  const allowed = isAllowedOrigin(origin) ? origin : 'https://fx.jad2advisory.com';
   return { ...CORS_HEADERS, 'Access-Control-Allow-Origin': allowed };
 }
 
@@ -716,7 +717,7 @@ async function handleNewsletterSubscribe(request, env, origin) {
   }
 
   // Send welcome email
-  const siteUrl = env.SITE_URL ?? 'https://jad2fx.pages.dev';
+  const siteUrl = env.SITE_URL ?? 'https://fx.jad2advisory.com';
   await sendWelcomeEmail(email, env, siteUrl);
 
   return json({ ok: true }, 200, origin);
@@ -758,7 +759,7 @@ async function sendDailyNewsletter(report, todayRates, env) {
   const index = await getNlIndex(env.REPORTS_KV);
   if (!index.length) { console.log('[CRON][NL] No subscribers'); return; }
 
-  const siteUrl = env.SITE_URL ?? 'https://jad2fx.pages.dev';
+  const siteUrl = env.SITE_URL ?? 'https://fx.jad2advisory.com';
   const dateStr = new Date().toLocaleDateString('fr-MA', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Casablanca',
   });

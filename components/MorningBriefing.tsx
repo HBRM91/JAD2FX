@@ -298,12 +298,13 @@ function BandGauge({ data, locale }: { data: BandData; locale: string }) {
 
 function NewsletterSignup({ proxyUrl }: { proxyUrl: string }) {
   const [email, setEmail] = useState('');
+  const [consent, setConsent] = useState(false);
   const [status, setStatus] = useState<NlStatus>('idle');
   const [errMsg, setErrMsg] = useState('');
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!email.trim() || !proxyUrl) return;
+    if (!email.trim() || !proxyUrl || !consent) return;
     setStatus('loading');
     try {
       const res = await fetch(`${proxyUrl.replace(/\/$/, '')}/api/newsletter/subscribe`, {
@@ -332,24 +333,42 @@ function NewsletterSignup({ proxyUrl }: { proxyUrl: string }) {
   );
 
   return (
-    <form onSubmit={submit} className="flex flex-col sm:flex-row gap-2">
-      <input
-        type="email"
-        required
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        placeholder="votre@email.ma"
-        className="flex-1 bg-navy-950 border border-navy-700 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/30 transition-colors"
-      />
-      <button
-        type="submit"
-        disabled={status === 'loading' || !email}
-        className="flex items-center gap-2 bg-gold-500 text-navy-950 font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-gold-400 disabled:opacity-50 transition-colors flex-shrink-0"
-      >
-        <Send size={13} />
-        {status === 'loading' ? 'Inscription...' : 'S\'inscrire'}
-      </button>
-      {status === 'error' && <p className="text-xs text-red-400 mt-1">{errMsg}</p>}
+    <form onSubmit={submit} className="space-y-3">
+      <div className="flex flex-col sm:flex-row gap-2">
+        <input
+          type="email"
+          required
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          placeholder="votre@email.ma"
+          className="flex-1 bg-navy-950 border border-navy-700 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-gold-500 focus:ring-1 focus:ring-gold-500/30 transition-colors"
+        />
+        <button
+          type="submit"
+          disabled={status === 'loading' || !email || !consent}
+          className="flex items-center gap-2 bg-gold-500 text-navy-950 font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-gold-400 disabled:opacity-50 transition-colors flex-shrink-0"
+        >
+          <Send size={13} />
+          {status === 'loading' ? 'Inscription...' : 'S\'inscrire'}
+        </button>
+      </div>
+      {/* CNDP-compliant consent — Loi 09-08 / GDPR Art. 6(1)(a) */}
+      <label className="flex items-start gap-2.5 cursor-pointer">
+        <input
+          type="checkbox"
+          required
+          checked={consent}
+          onChange={e => setConsent(e.target.checked)}
+          className="mt-0.5 flex-shrink-0 accent-gold-500 w-3.5 h-3.5"
+        />
+        <span className="text-[9px] text-slate-600 leading-relaxed">
+          J'accepte que <strong className="text-slate-500">JAD2 Advisory</strong> (contrôleur, RC Casablanca) traite mon email
+          pour le Morning Briefing FX quotidien. Finalité : communication informative.
+          Durée : 24 mois. Retrait : <span className="text-slate-500">contact@jad2advisory.com</span>.
+          Conforme Loi marocaine 09-08 · RGPD Art. 6(1)(a).
+        </span>
+      </label>
+      {status === 'error' && <p className="text-xs text-red-400">{errMsg}</p>}
     </form>
   );
 }

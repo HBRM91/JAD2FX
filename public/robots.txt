@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /api/
 
-Sitemap: https://jad2fx.pages.dev/sitemap.xml
+Sitemap: https://fx.jad2advisory.com/sitemap.xml
