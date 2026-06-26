@@ -83,6 +83,31 @@ const NAV_GROUPS: NavGroup[] = [
   },
 ];
 
+// ─── Expandable news card ─────────────────────────────────────────────────────
+
+function NewsCard({ news }: { news: typeof MARKET_NEWS[0] }) {
+  const [expanded, setExpanded] = React.useState(false);
+  return (
+    <div
+      className="px-5 py-4 hover:bg-navy-800/40 transition-colors cursor-pointer"
+      onClick={() => setExpanded(e => !e)}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-[10px] font-bold uppercase tracking-wide text-gold-500 bg-gold-500/10 border border-gold-500/25 px-2.5 py-0.5 rounded-full">
+          {news.category}
+        </span>
+      </div>
+      <h4 className="text-[14px] font-semibold text-slate-100 mb-1.5 leading-snug">{news.title}</h4>
+      <p className={`text-[12px] text-slate-400 leading-relaxed transition-all ${expanded ? '' : 'line-clamp-3'}`}>
+        {news.summary}
+      </p>
+      <button className="text-[10px] text-gold-500 hover:text-gold-300 mt-1.5 font-semibold transition-colors">
+        {expanded ? '▲ Réduire' : '▼ Lire la suite'}
+      </button>
+    </div>
+  );
+}
+
 // ─── Inner app ─────────────────────────────────────────────────────────────────
 
 function AppInner() {
@@ -505,15 +530,7 @@ function AppInner() {
                 </div>
                 <div className="divide-y divide-navy-700/60">
                   {MARKET_NEWS.map(news => (
-                    <div key={news.id} className="px-5 py-4 hover:bg-navy-800/40 transition-colors cursor-default">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wide text-gold-500 bg-gold-500/10 border border-gold-500/25 px-2.5 py-0.5 rounded-full">
-                          {news.category}
-                        </span>
-                      </div>
-                      <h4 className="text-[14px] font-semibold text-slate-100 mb-1.5 leading-snug">{news.title}</h4>
-                      <p className="text-[12px] text-slate-400 line-clamp-3 leading-relaxed">{news.summary}</p>
-                    </div>
+                    <NewsCard key={news.id} news={news} />
                   ))}
                 </div>
               </div>

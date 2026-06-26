@@ -646,7 +646,7 @@ export default function MorningBriefing() {
       />
 
       {/* ══ Screen content (hidden when printing) ══════════════════════════════ */}
-      <div className="briefing-screen">
+      <div className="briefing-screen space-y-5">
 
       {/* ══ Briefing Header ════════════════════════════════════════════════════ */}
       <div className="bg-navy-900 border border-navy-700 rounded-xl overflow-hidden">
