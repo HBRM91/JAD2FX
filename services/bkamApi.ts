@@ -68,11 +68,36 @@ function proxyPath(corsProxy: string, route: 'bkam' | 'bkam-bdt', path: string, 
   return `${corsProxy}/${route}/${path}${qs}`;
 }
 
-// ─── CoursVirement — today ────────────────────────────────────────────────────
+// ─── CoursVirement from KV Database (primary) or BKAM API (fallback) ─────────
+//
+// Architecture:
+//   1. KV database (via Worker /api/bkam-rates): fast, always-on, accumulates daily
+//   2. BKAM API proxy (via Worker /bkam/...): live fetch, limited historical window
+//   3. Memory cache: avoids redundant requests within the same browser session
+
+// Fetch from KV-backed database endpoint
+async function fetchFromDB(corsProxy: string, date?: string): Promise<BkamVirementRate[] | null> {
+  try {
+    const base = corsProxy.replace(/\/$/, '');
+    const url  = date ? `${base}/api/bkam-rates?date=${date}` : `${base}/api/bkam-rates`;
+    const res  = await fetch(url, { signal: AbortSignal.timeout(8_000) });
+    if (!res.ok) return null;
+    const payload = await res.json() as { rates?: BkamVirementRate[]; count?: number };
+    return payload.rates?.length ? payload.rates : null;
+  } catch {
+    return null;
+  }
+}
 
 export async function fetchBkamVirement(corsProxy: string): Promise<BkamVirementRate[]> {
   if (_virementToday && Date.now() - _virementToday.ts < VIREMENT_CACHE_MS) {
     return _virementToday.data;
+  }
+  // Try KV database first (stored by cron), fall back to live BKAM proxy
+  const fromDB = await fetchFromDB(corsProxy);
+  if (fromDB?.length) {
+    _virementToday = { data: fromDB, ts: Date.now() };
+    return fromDB;
   }
   const data = await bkamGet<BkamVirementRate[]>(
     proxyPath(corsProxy, 'bkam', 'cours/Version1/api/CoursVirement'),
@@ -81,18 +106,48 @@ export async function fetchBkamVirement(corsProxy: string): Promise<BkamVirement
   return data;
 }
 
-// ─── CoursVirement — specific date ───────────────────────────────────────────
-
 export async function fetchBkamVirementDate(corsProxy: string, date: string): Promise<BkamVirementRate[]> {
   const cached = _virementByDate.get(date);
   if (cached && Date.now() - cached.ts < HIST_CACHE_MS) return cached.data;
 
+  // Try KV database first (most reliable for historical dates)
+  const fromDB = await fetchFromDB(corsProxy, date);
+  if (fromDB?.length) {
+    _virementByDate.set(date, { data: fromDB, ts: Date.now() });
+    return fromDB;
+  }
+
+  // Fall back to live BKAM API via proxy
   const data = await bkamGet<BkamVirementRate[]>(
     proxyPath(corsProxy, 'bkam', 'cours/Version1/api/CoursVirement', { date }),
   );
-
   _virementByDate.set(date, { data, ts: Date.now() });
   return data;
+}
+
+// ─── Fetch full history series from KV database ───────────────────────────────
+
+export interface BkamRatesDBEntry {
+  date: string;
+  rates: BkamVirementRate[];
+  count: number;
+  fetchedAt: string;
+}
+
+export async function fetchBkamRatesHistory(
+  corsProxy: string,
+  days: number = 10,
+): Promise<{ dates: string[]; points: BkamRatesDBEntry[]; totalDatesInDB: number }> {
+  try {
+    const base = corsProxy.replace(/\/$/, '');
+    const res = await fetch(`${base}/api/bkam-rates/history?days=${days}`, {
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) return { dates: [], points: [], totalDatesInDB: 0 };
+    return res.json();
+  } catch {
+    return { dates: [], points: [], totalDatesInDB: 0 };
+  }
 }
 
 // ─── CoursBBE — today ─────────────────────────────────────────────────────────

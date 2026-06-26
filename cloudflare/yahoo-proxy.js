@@ -855,9 +855,13 @@ async function sendDailyNewsletter(report, todayRates, env) {
 }
 
 // ─── BKAM rate fetch (used in scheduled handler) ──────────────────────────────
-async function fetchBkamRates(apiKey, dateStr) {
+// ─── BKAM raw fetch — returns full array with moyen + uniteDevise ─────────────
+// Use ISO datetime for maximum compatibility per BKAM OpenAPI spec.
+async function fetchBkamRatesRaw(apiKey, dateStr) {
   if (!apiKey) return null;
-  const qs = dateStr ? `?date=${dateStr}` : '';
+  // BKAM API accepts ISO datetime (2026-06-26T12:30:00.000Z) or YYYY-MM-DD
+  // Use YYYY-MM-DD for simplicity; BKAM returns the fixing for that calendar day.
+  const qs = dateStr ? `?date=${encodeURIComponent(dateStr)}` : '';
   const url = `${BKAM_BASE}/cours/Version1/api/CoursVirement${qs}`;
   try {
     const res = await fetch(url, {
@@ -867,18 +871,106 @@ async function fetchBkamRates(apiKey, dateStr) {
     if (!res.ok) return null;
     const raw = await res.json();
     const arr = Array.isArray(raw) ? raw : (raw?.data ?? []);
-    // Convert to { CURRENCY: madPerUnit }
-    const map = {};
-    for (const r of arr) {
-      if (r.libDevise && r.moyen && r.uniteDevise > 0) {
-        map[r.libDevise] = r.moyen / r.uniteDevise;
-      }
-    }
-    return Object.keys(map).length > 0 ? map : null;
+    return arr.length > 0 ? arr : null;
   } catch (err) {
-    console.warn('[BKAM fetch]', dateStr ?? 'today', err);
+    console.warn('[BKAM raw fetch]', dateStr ?? 'today', err);
     return null;
   }
+}
+
+// Legacy helper (returns { CURRENCY: madPerUnit } map — used by cron report logic)
+async function fetchBkamRates(apiKey, dateStr) {
+  const arr = await fetchBkamRatesRaw(apiKey, dateStr);
+  if (!arr) return null;
+  const map = {};
+  for (const r of arr) {
+    if (r.libDevise && r.moyen && r.uniteDevise > 0) {
+      map[r.libDevise] = r.moyen / r.uniteDevise;
+    }
+  }
+  return Object.keys(map).length > 0 ? map : null;
+}
+
+// ─── BKAM Rates KV Database ────────────────────────────────────────────────────
+// Key:   bkam:virement:YYYY-MM-DD → { date, rates:[{libDevise,moyen,uniteDevise}], fetchedAt }
+// Index: bkam:virement:index      → sorted string[] of available dates (max 500)
+//
+// This creates a persistent historical database of BKAM official rates.
+// The cron populates it daily; the /api/bkam-rates endpoint serves from it.
+// Client-side bkamApi.ts reads via the /api/bkam-rates proxy endpoint.
+
+async function getBkamRatesIndex(kv) {
+  try { const r = await kv.get('bkam:virement:index'); return r ? JSON.parse(r) : []; }
+  catch { return []; }
+}
+async function setBkamRatesIndex(kv, idx) {
+  await kv.put('bkam:virement:index', JSON.stringify(idx));
+}
+
+async function storeBkamRatesInKV(env, date, rawRates) {
+  if (!env.REPORTS_KV || !rawRates?.length) return;
+  const payload = { date, rates: rawRates, fetchedAt: new Date().toISOString(), count: rawRates.length };
+  await env.REPORTS_KV.put(
+    `bkam:virement:${date}`,
+    JSON.stringify(payload),
+    { expirationTtl: 60 * 60 * 24 * 500 }, // 500 days
+  );
+  // Update date index
+  const idx = await getBkamRatesIndex(env.REPORTS_KV);
+  if (!idx.includes(date)) {
+    idx.push(date);
+    idx.sort();
+    if (idx.length > 500) idx.splice(0, idx.length - 500);
+    await setBkamRatesIndex(env.REPORTS_KV, idx);
+  }
+  console.log(`[BKAM-DB] Stored ${rawRates.length} rates for ${date}`);
+}
+
+// GET /api/bkam-rates?date=YYYY-MM-DD — serves from KV, fetches from API on miss
+async function handleGetBkamRates(request, env, origin) {
+  if (!env.REPORTS_KV) return json({ error: 'KV not configured' }, 503, origin);
+  const url    = new URL(request.url);
+  const date   = url.searchParams.get('date') ?? new Date().toISOString().slice(0, 10);
+
+  // 1. Try KV cache
+  const cached = await env.REPORTS_KV.get(`bkam:virement:${date}`);
+  if (cached) {
+    return new Response(cached, {
+      headers: { 'Content-Type': 'application/json', 'X-Cache': 'HIT', 'X-Source': 'KV', ...corsHeaders(origin) },
+    });
+  }
+
+  // 2. Cache miss → fetch from BKAM API and store
+  if (!env.BKAM_FX_KEY) return json({ error: 'BKAM_FX_KEY not configured', date }, 503, origin);
+  const rawRates = await fetchBkamRatesRaw(env.BKAM_FX_KEY, date);
+  if (!rawRates?.length) return json({ error: `No BKAM data for ${date}`, date }, 404, origin);
+
+  await storeBkamRatesInKV(env, date, rawRates);
+  const payload = { date, rates: rawRates, fetchedAt: new Date().toISOString(), count: rawRates.length };
+  return new Response(JSON.stringify(payload), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json', 'X-Cache': 'MISS', 'X-Source': 'BKAM-API', ...corsHeaders(origin) },
+  });
+}
+
+// GET /api/bkam-rates/history?days=N — returns N days of stored BKAM rates from KV
+async function handleGetBkamRatesHistory(request, env, origin) {
+  if (!env.REPORTS_KV) return json({ dates: [], points: [] }, 200, origin);
+  const url  = new URL(request.url);
+  const days = Math.min(365, Math.max(1, parseInt(url.searchParams.get('days') ?? '10')));
+
+  const idx     = await getBkamRatesIndex(env.REPORTS_KV);
+  const targets = idx.slice(-days);
+  const points  = [];
+
+  for (const date of targets) {
+    const raw = await env.REPORTS_KV.get(`bkam:virement:${date}`);
+    if (raw) {
+      try { points.push(JSON.parse(raw)); } catch {}
+    }
+  }
+
+  return json({ dates: targets, points, totalDatesInDB: idx.length }, 200, origin);
 }
 
 // ─── Drift history — store/serve daily drift from BKAM fixing vs basket ──────
@@ -1187,8 +1279,17 @@ async function handleScheduled(env) {
   const t0 = Date.now();
   console.log('[CRON] Starting 09h00 Casablanca market report generation');
 
-  // ── 1. Fetch today's BKAM rates ───────────────────────────────────────────
-  const todayRates = await fetchBkamRates(env.BKAM_FX_KEY, null);
+  // ── 1. Fetch today's BKAM rates (raw array) and populate KV database ─────
+  const todayStr  = new Date().toISOString().slice(0, 10);
+  const rawToday  = await fetchBkamRatesRaw(env.BKAM_FX_KEY, null);
+  if (rawToday?.length) {
+    await storeBkamRatesInKV(env, todayStr, rawToday);
+    console.log(`[CRON] BKAM DB: stored ${rawToday.length} rates for ${todayStr}`);
+  }
+  // Convert to map for downstream use
+  const todayRates = rawToday ? Object.fromEntries(
+    rawToday.filter(r => r.uniteDevise > 0).map(r => [r.libDevise, r.moyen / r.uniteDevise])
+  ) : null;
 
   // ── 2. Fetch last week's BKAM rates (same weekday, -7 days) for drift calc ─
   const lastWeekDate = new Date();
@@ -1578,6 +1679,16 @@ export default {
     if (pathname === '/api/bdt/curve') {
       if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
       return handleBdtCurve(env, origin);
+    }
+
+    // ── BKAM Rates KV Database ────────────────────────────────────────────────
+    if (pathname === '/api/bkam-rates') {
+      if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
+      return handleGetBkamRates(request, env, origin);
+    }
+    if (pathname === '/api/bkam-rates/history') {
+      if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
+      return handleGetBkamRatesHistory(request, env, origin);
     }
 
     // ── Drift history & band config ───────────────────────────────────────────

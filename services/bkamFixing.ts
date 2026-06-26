@@ -13,7 +13,7 @@
 
 import { FixingDayRow } from '../types';
 import { BKAM_CURRENCIES, GULF_USD_RATES, DEFAULT_BASKET_CONFIG } from '../constants';
-import { fetchBkamVirementDate, getLastNWorkingDays as bkamWorkingDays } from './bkamApi';
+import { fetchBkamVirementDate, fetchBkamRatesHistory, getLastNWorkingDays as bkamWorkingDays } from './bkamApi';
 
 const K     = DEFAULT_BASKET_CONFIG.referenceBasketValue; // 10.49
 const EUR_W = DEFAULT_BASKET_CONFIG.eurWeight;            // 0.60
@@ -221,17 +221,46 @@ export async function fetchFixingHistory(
   specificDate?: string,
 ): Promise<FixingDayRow[]> {
 
-  // ── Primary: BKAM CoursVirement (requires proxy) ──────────────────────────
+  // ── Primary: KV Database via /api/bkam-rates/history (most reliable) ─────
+  if (corsProxyUrl && !specificDate) {
+    try {
+      const dbResult = await fetchBkamRatesHistory(corsProxyUrl, nDays + 5);
+      if (dbResult.points.length > 0) {
+        // Build rows from KV data + ECB EUR/USD for each date
+        const rows: FixingDayRow[] = [];
+        for (const entry of dbResult.points) {
+          try {
+            let ecbEurUsd: number | null = null;
+            try {
+              const ecbRes = await fetch(
+                `https://api.frankfurter.app/${entry.date}?from=EUR&to=USD`,
+                { signal: AbortSignal.timeout(5_000) },
+              );
+              if (ecbRes.ok) {
+                const ecbData = await ecbRes.json() as { rates?: { USD?: number } };
+                ecbEurUsd = ecbData.rates?.USD ?? null;
+              }
+            } catch { /* use BKAM cross-rate fallback */ }
+            rows.push(buildRowFromBkam(entry.date, entry.rates, ecbEurUsd ?? undefined));
+          } catch { /* skip corrupt entries */ }
+        }
+        if (rows.length > 0) {
+          return rows.sort((a, b) => a.date.localeCompare(b.date)).slice(-nDays);
+        }
+      }
+    } catch { /* fall through */ }
+  }
+
+  // ── Secondary: Direct BKAM API per date (for specific date or KV miss) ────
   if (corsProxyUrl) {
     try {
       const workingDays = specificDate ? [specificDate] : bkamWorkingDays(nDays + 2);
 
-      // For each date, fetch BKAM + ECB EUR/USD in parallel for non-circular drift
       const settled = await Promise.allSettled(
         workingDays.map(async d => {
           const [bkam, ecb] = await Promise.all([
             fetchBkamVirementDate(corsProxyUrl, d),
-            fetch(`https://api.frankfurter.app/${d}?from=EUR&to=USD`, { signal: AbortSignal.timeout(6_000) })
+            fetch(`https://api.frankfurter.app/${d}?from=EUR&to=USD`, { signal: AbortSignal.timeout(5_000) })
               .then(r => r.json())
               .then((j: { rates?: { USD?: number } }) => j.rates?.USD ?? null)
               .catch(() => null),
@@ -245,7 +274,7 @@ export async function fetchFixingHistory(
         if (r.status !== 'fulfilled' || !r.value.bkam?.length) continue;
         try {
           bkamRows.push(buildRowFromBkam(r.value.date, r.value.bkam, r.value.ecbEurUsd ?? undefined));
-        } catch { /* skip dates with missing USD/EUR */ }
+        } catch { /* skip */ }
       }
 
       if (bkamRows.length >= (specificDate ? 1 : Math.min(nDays, 3))) {
