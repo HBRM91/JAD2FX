@@ -1073,12 +1073,12 @@ async function handleScheduled(env) {
     '  "contentFr": "Rapport markdown FR avec sections ## Synthèse, ## Paires MAD, ## Impact PME, ## Perspectives",',
     '  "contentAr": "التقرير بالعربية مع الأقسام نفسها",',
     '  "radarData": [',
-    '    { "currency":"EUR","flag":"🇪🇺","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"...","expectationAr":"..." },',
-    '    { "currency":"USD","flag":"🇺🇸","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"...","expectationAr":"..." },',
-    '    { "currency":"GBP","flag":"🇬🇧","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"...","expectationAr":"..." },',
-    '    { "currency":"SAR","flag":"🇸🇦","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"...","expectationAr":"..." },',
-    '    { "currency":"AED","flag":"🇦🇪","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"...","expectationAr":"..." },',
-    '    { "currency":"QAR","flag":"🇶🇦","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"...","expectationAr":"..." }',
+    '    { "currency":"EUR","currentRate":0,"weeklyChangeBps":0,"headline":"one sentence FR","headlineAr":"جملة واحدة","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"one sentence FR","expectationAr":"جملة واحدة" },',
+    '    { "currency":"USD","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"...","expectationAr":"..." },',
+    '    { "currency":"GBP","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"...","expectationAr":"..." },',
+    '    { "currency":"SAR","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"...","expectationAr":"..." },',
+    '    { "currency":"AED","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"...","expectationAr":"..." },',
+    '    { "currency":"QAR","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"...","expectationAr":"..." }',
     '  ]',
     '}',
   ].join('\n');
@@ -1157,12 +1157,14 @@ async function handleScheduled(env) {
   }
 
   // ── 9. Overlay real BKAM rates and drift on radar ────────────────────────
+  // Emoji flag lookup (LLM must never generate these — we inject them server-side)
+  const RADAR_FLAGS = { EUR:'🇪🇺', USD:'🇺🇸', GBP:'🇬🇧', SAR:'🇸🇦', AED:'🇦🇪', QAR:'🇶🇦' };
+
   const radarData = (parsed.radarData && Array.isArray(parsed.radarData) && parsed.radarData.length >= 3)
     ? parsed.radarData.map(r => ({
         ...r,
-        // Use real BKAM rate if available, else keep LLM value
+        flag: RADAR_FLAGS[r.currency] ?? '',        // inject flag server-side, never from LLM
         currentRate: todayRates?.[r.currency] ?? r.currentRate,
-        // Overlay computed drift (real data beats LLM estimate)
         weeklyChangeBps: lastWeekRates ? weeklyChangeBps(r.currency, todayRates, lastWeekRates) : (r.weeklyChangeBps ?? 0),
       }))
     : RADAR_CURRENCIES.map(c => ({
