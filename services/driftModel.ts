@@ -1,14 +1,34 @@
 /**
  * BKAM MAD Drift Model — OLS regression of actual BKAM fixing vs basket parity.
  *
- * The theoretical BKAM peg formula: USD/MAD = K / (0.60 × EUR/USD + 0.40)
- * with K ≈ 10.49.
+ * CORRECT METHODOLOGY (confirmed with user, per BKAM Doc 1 §I):
  *
- * "Drift" = (actual BKAM fix − basket parity) in basis points.
- * A positive drift means MAD is weaker than pure basket mechanics would imply.
+ *   Step 1 — EUR/USD at fixing time:
+ *     BKAM MIC session runs 08:30–15:30 Casablanca (09:15–13:15 Ramadan).
+ *     The fixing is published at 16:15 (14:00 Ramadan). We use the ECB Frankfurter
+ *     daily rate as a proxy for EUR/USD at the time of the fixing calculation.
+ *     ECB publishes its official daily rate at ~16:00 CET ≈ 15:00 UTC, which
+ *     corresponds to ~16:00 Casablanca — close enough to the MIC session close.
  *
- * We fit a linear OLS trend over the last 5 working days to detect structural
- * bias or mean-reversion dynamics in BKAM's daily fixing decision.
+ *   Step 2 — Theoretical basket parity:
+ *     USD/MAD_théorique = K / (w_EUR × EUR/USD_ECB + w_USD)
+ *     where K ≈ 10.49, w_EUR = 0.60, w_USD = 0.40.
+ *     This is the pure basket formula output — the regulatory reference midpoint.
+ *
+ *   Step 3 — Drift:
+ *     Drift = (USD/MAD_BKAM_published − USD/MAD_théorique) / USD/MAD_théorique × 10 000 bps
+ *     Positive drift → MAD weaker than basket implies (BKAM allows depreciation).
+ *     Negative drift → MAD stronger than basket implies (BKAM supports MAD).
+ *
+ * CRITICAL: EUR/USD must be the ECB rate (exogenous), NOT derived from BKAM's
+ * own cross-rates (eurMad / usdMad). Using BKAM's cross-rate is circular:
+ * it substitutes back into the formula that BKAM used to compute both rates,
+ * making drift ≈ 0 by construction (rounding only).
+ *
+ * We fit a linear OLS trend over the last N working days to detect structural
+ * bias (persistent drift) or mean-reversion dynamics in BKAM's daily fixing.
+ * Historical drift is accumulated in Cloudflare KV by the daily cron for
+ * multi-month trend analysis (see BkamBandsVisualizer > HistoricalDriftChart).
  */
 
 import { fetchBkamVirementDate, getLastNWorkingDays, virementToMadPerUnit } from './bkamApi';

@@ -857,6 +857,185 @@ async function fetchBkamRates(apiKey, dateStr) {
   }
 }
 
+// ─── Drift history — store/serve daily drift from BKAM fixing vs basket ──────
+//
+// CORRECT METHODOLOGY (per BKAM Doc 1 §I and user specification):
+//   1. Get ECB EUR/USD at the time BKAM calculates its fixing (MIC closes 15:30
+//      Casablanca = ~14:30 UTC). ECB publishes its official daily rate at ~16:00 CET
+//      (≈15:00 UTC) via Frankfurter — close enough given T-day ECB publication.
+//   2. Compute theoretical basket parity: USD/MAD_théorique = K/(0.60×EUR/USD_ECB+0.40)
+//   3. Drift = (USD/MAD_BKAM_published − USD/MAD_théorique) / USD/MAD_théorique × 10 000 bps
+//      Positive = MAD weaker than basket implies; Negative = MAD stronger.
+//   This is non-circular: ECB EUR/USD is exogenous (not derived from BKAM's own cross).
+//
+// Band detection heuristic: if the last BAND_ALERT_WINDOW days show avg band
+// utilisation >90% or <10%, a band change may have occurred. We flag it in KV.
+
+const BAND_DEFAULT    = 0.05;  // BKAM Phase II ±5% (current since Mar 2020)
+const BAND_ALERT_WINDOW = 10;  // days to look back for band change detection
+const DRIFT_HISTORY_TTL = 60 * 60 * 24 * 400; // 400-day KV TTL
+
+async function getBandPct(kv) {
+  if (!kv) return BAND_DEFAULT;
+  try {
+    const v = await kv.get('config:band_pct');
+    return v ? parseFloat(v) : BAND_DEFAULT;
+  } catch { return BAND_DEFAULT; }
+}
+
+async function getDriftIndex(kv) {
+  try { const r = await kv.get('drift:index'); return r ? JSON.parse(r) : []; }
+  catch { return []; }
+}
+async function setDriftIndex(kv, idx) {
+  await kv.put('drift:index', JSON.stringify(idx));
+}
+
+// Compute and persist daily drift point after each successful BKAM fetch.
+// Called inside handleScheduled with todayRates (BKAM CoursVirement per-unit).
+async function storeDailyDrift(env, date, todayRates) {
+  if (!env.REPORTS_KV || !todayRates?.['USD']) return;
+
+  // Step 1 — ECB EUR/USD for the fixing date (closest to 15:30 Casablanca session close)
+  let ecbEurUsd = null;
+  try {
+    const ecbRes = await fetch(
+      `https://api.frankfurter.app/${date}?from=EUR&to=USD`,
+      { signal: AbortSignal.timeout(8_000) }
+    );
+    if (ecbRes.ok) {
+      const ecbData = await ecbRes.json();
+      ecbEurUsd = ecbData.rates?.['USD'] ?? null;
+    }
+  } catch (e) { console.warn('[DRIFT] ECB fetch failed:', e); }
+
+  if (!ecbEurUsd) { console.warn('[DRIFT] No ECB EUR/USD — skipping drift storage'); return; }
+
+  const K = 10.49, wEUR = 0.60, wUSD = 0.40;
+  const bkamUsdMad  = todayRates['USD'];
+  // Step 2 — Theoretical basket parity using ECB EUR/USD (non-circular)
+  const basketUsdMad = K / (wEUR * ecbEurUsd + wUSD);
+  // Step 3 — Drift
+  const driftBps = ((bkamUsdMad - basketUsdMad) / basketUsdMad) * 10_000;
+
+  const bandPct = await getBandPct(env.REPORTS_KV);
+  const lower = basketUsdMad * (1 - bandPct);
+  const upper = basketUsdMad * (1 + bandPct);
+  const bandUtilPct = Math.max(0, Math.min(100, ((bkamUsdMad - lower) / (upper - lower)) * 100));
+
+  const point = {
+    date,
+    actualUsdMad:  +bkamUsdMad.toFixed(4),
+    actualEurMad:  todayRates['EUR'] ? +(todayRates['EUR']).toFixed(4) : null,
+    basketUsdMad:  +basketUsdMad.toFixed(4),
+    driftBps:      +driftBps.toFixed(2),
+    eurUsd:        +ecbEurUsd.toFixed(4),
+    bandPct,
+    bandUtilPct:   +bandUtilPct.toFixed(1),
+    source: 'BKAM_OFFICIAL',
+  };
+
+  await env.REPORTS_KV.put(`drift:${date}`, JSON.stringify(point), { expirationTtl: DRIFT_HISTORY_TTL });
+
+  // Update chronological index (keep last 365 days)
+  const idx = await getDriftIndex(env.REPORTS_KV);
+  if (!idx.includes(date)) {
+    idx.push(date);
+    idx.sort();
+    if (idx.length > 365) idx.splice(0, idx.length - 365);
+    await setDriftIndex(env.REPORTS_KV, idx);
+  }
+
+  // ── Dynamic band change detection ────────────────────────────────────────
+  // Heuristic: if recent fixings are consistently at the band extremes,
+  // BKAM may have widened the band. We can't confirm without official data
+  // so we flag it for admin review.
+  const recentDates = idx.slice(-BAND_ALERT_WINDOW);
+  if (recentDates.length >= BAND_ALERT_WINDOW) {
+    const rawPoints = await Promise.all(
+      recentDates.map(d => env.REPORTS_KV.get(`drift:${d}`).then(r => r ? JSON.parse(r) : null).catch(() => null))
+    );
+    const validPts = rawPoints.filter(Boolean);
+    if (validPts.length >= Math.floor(BAND_ALERT_WINDOW * 0.8)) {
+      const avgUtil = validPts.reduce((s, p) => s + (p.bandUtilPct ?? 50), 0) / validPts.length;
+      const maxDrift = Math.max(...validPts.map(p => Math.abs(p.driftBps)));
+
+      // Trigger alert if avg band util > 88% or < 12% for BAND_ALERT_WINDOW days
+      if (avgUtil > 88 || avgUtil < 12) {
+        const alert = {
+          detectedAt: new Date().toISOString(),
+          avgBandUtilPct: +avgUtil.toFixed(1),
+          maxAbsDriftBps: +maxDrift.toFixed(1),
+          currentBandPct: bandPct,
+          severity: avgUtil > 95 || avgUtil < 5 ? 'HIGH' : 'MEDIUM',
+          message: `Band change detection: avg utilisation ${avgUtil.toFixed(1)}% over last ${BAND_ALERT_WINDOW} days. Current assumed band ±${(bandPct * 100).toFixed(1)}%. Verify on bkam.ma.`,
+        };
+        await env.REPORTS_KV.put('drift:band_alert', JSON.stringify(alert), { expirationTtl: 60 * 60 * 24 * 30 });
+        console.warn('[DRIFT][BAND] Potential band change:', alert.message);
+      } else {
+        // Clear stale alert if conditions have normalised
+        await env.REPORTS_KV.delete('drift:band_alert').catch(() => {});
+      }
+    }
+  }
+
+  console.log(`[DRIFT] ${date}: drift=${driftBps.toFixed(1)}bps util=${bandUtilPct.toFixed(1)}% band=±${(bandPct*100).toFixed(1)}%`);
+}
+
+// GET /api/drift/history?days=30 — public, serves historical drift from KV
+async function handleGetDriftHistory(request, env, origin) {
+  if (!env.REPORTS_KV) return json({ points: [], bandPct: BAND_DEFAULT }, 200, origin);
+  const url = new URL(request.url);
+  const days = Math.min(365, Math.max(1, parseInt(url.searchParams.get('days') ?? '30')));
+
+  const idx = await getDriftIndex(env.REPORTS_KV);
+  const requestedDates = idx.slice(-days);
+
+  const points = [];
+  for (const date of requestedDates) {
+    try {
+      const raw = await env.REPORTS_KV.get(`drift:${date}`);
+      if (raw) points.push(JSON.parse(raw));
+    } catch { /* skip corrupt entries */ }
+  }
+
+  const bandPct = await getBandPct(env.REPORTS_KV);
+  const alert = await env.REPORTS_KV.get('drift:band_alert').then(r => r ? JSON.parse(r) : null).catch(() => null);
+
+  return json({ points, bandPct, alert }, 200, origin);
+}
+
+// GET /api/band-config — public, returns current band config + alert
+async function handleGetBandConfig(env, origin) {
+  const bandPct  = await getBandPct(env.REPORTS_KV);
+  const updatedAt = env.REPORTS_KV ? await env.REPORTS_KV.get('config:band_updated_at').catch(() => null) : null;
+  const alert    = env.REPORTS_KV ? await env.REPORTS_KV.get('drift:band_alert').then(r => r ? JSON.parse(r) : null).catch(() => null) : null;
+  return json({ bandPct, updatedAt, alert, phase: bandPct <= 0.025 ? 'Phase I' : bandPct <= 0.05 ? 'Phase II' : 'Phase III+' }, 200, origin);
+}
+
+// POST /api/admin/band — admin only, update band assumption in KV
+async function handleUpdateBand(request, env, origin) {
+  const denied = adminGate(request, env, origin);
+  if (denied) return denied;
+  if (!env.REPORTS_KV) return json({ error: 'KV non configuré' }, 503, origin);
+
+  const rawBody = await readBodySafe(request);
+  let body;
+  try { body = JSON.parse(rawBody); } catch { return json({ error: 'JSON invalide' }, 400, origin); }
+
+  const bandPct = typeof body.bandPct === 'number' ? body.bandPct : null;
+  if (!bandPct || bandPct < 0.01 || bandPct > 0.20) {
+    return json({ error: 'bandPct must be 0.01–0.20 (1%–20%)' }, 400, origin);
+  }
+
+  await env.REPORTS_KV.put('config:band_pct', String(bandPct));
+  await env.REPORTS_KV.put('config:band_updated_at', new Date().toISOString());
+  // Clear any stale alert when admin manually updates the band
+  await env.REPORTS_KV.delete('drift:band_alert').catch(() => {});
+
+  return json({ ok: true, bandPct, message: `Band mis à jour: ±${(bandPct * 100).toFixed(1)}%` }, 200, origin);
+}
+
 // ─── BKAM BDT yield curve (KV-cached, refreshed by cron) ─────────────────────
 
 // GET /api/bdt/curve — public; serves cached BDT data from KV
@@ -1217,6 +1396,11 @@ async function handleScheduled(env) {
   // Send daily newsletter to subscribers
   await sendDailyNewsletter(report, todayRates, env);
 
+  // Store daily drift point with correct methodology:
+  // theoretical = K/(0.60×ECB_EUR/USD+0.40) vs BKAM published fixing
+  const driftDate = new Date().toISOString().slice(0, 10);
+  await storeDailyDrift(env, driftDate, todayRates);
+
   // Refresh BDT yield curve in KV for forward pricing
   await fetchAndStoreBdt(env);
 }
@@ -1295,6 +1479,20 @@ export default {
     if (pathname === '/api/bdt/curve') {
       if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
       return handleBdtCurve(env, origin);
+    }
+
+    // ── Drift history & band config ───────────────────────────────────────────
+    if (pathname === '/api/drift/history') {
+      if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
+      return handleGetDriftHistory(request, env, origin);
+    }
+    if (pathname === '/api/band-config') {
+      if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
+      return handleGetBandConfig(env, origin);
+    }
+    if (pathname === '/api/admin/band') {
+      if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
+      return handleUpdateBand(request, env, origin);
     }
 
     // ── Newsletter ────────────────────────────────────────────────────────────

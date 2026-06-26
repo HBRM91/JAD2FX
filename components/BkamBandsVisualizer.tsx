@@ -25,6 +25,7 @@ import { AlertTriangle, TrendingUp, TrendingDown, Minus, RefreshCw, Info } from 
 import { DEFAULT_BASKET_CONFIG } from '../constants';
 import { useAdmin } from '../context/AdminContext';
 import { computeDriftModel, DriftRegression, DriftPoint } from '../services/driftModel';
+import { fetchDriftHistory, fetchBandConfig, driftStats, DriftHistoryPoint, BandAlert } from '../services/driftHistory';
 import CurrencyFlag from './CurrencyFlag';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -275,6 +276,166 @@ function DriftChart({ drift, loading }: { drift: DriftRegression | null; loading
   );
 }
 
+// ─── Historical drift chart ───────────────────────────────────────────────────
+
+type HistDays = 30 | 60 | 90 | 180;
+
+function HistoricalDriftChart({ corsProxyUrl }: { corsProxyUrl: string }) {
+  const [days, setDays]             = useState<HistDays>(30);
+  const [data, setData]             = useState<DriftHistoryPoint[]>([]);
+  const [bandPct, setBandPct]       = useState(BAND);
+  const [alert, setAlert]           = useState<BandAlert | null>(null);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState(false);
+
+  useEffect(() => {
+    setLoading(true); setError(false);
+    fetchDriftHistory(corsProxyUrl, days)
+      .then(res => { setData(res.points); setBandPct(res.bandPct); setAlert(res.alert); })
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  }, [corsProxyUrl, days]);
+
+  const stats = useMemo(() => driftStats(data), [data]);
+
+  if (loading) return (
+    <div className="h-48 flex items-center justify-center gap-2 text-navy-500 text-xs">
+      <RefreshCw size={13} className="animate-spin" /> Chargement historique…
+    </div>
+  );
+  if (error || !data.length) return (
+    <div className="h-48 flex items-center justify-center text-navy-600 text-xs text-center px-4">
+      {error
+        ? 'Historique non disponible — le proxy doit être configuré et le cron doit avoir tourné au moins une fois.'
+        : `Aucun point d'historique pour les ${days} derniers jours. L'historique s'accumule au fil des jours ouvrés.`}
+    </div>
+  );
+
+  const chartData = data.map(p => ({
+    label:   p.date.slice(5),          // MM-DD
+    date:    p.date,
+    drift:   +p.driftBps.toFixed(1),
+    util:    +p.bandUtilPct.toFixed(1),
+    actual:  p.actualUsdMad,
+    basket:  p.basketUsdMad,
+  }));
+
+  const maxAbsDrift = Math.max(Math.abs(stats?.min ?? 0), Math.abs(stats?.max ?? 0), 20);
+  const yDomain: [number, number] = [-Math.ceil(maxAbsDrift * 1.15), Math.ceil(maxAbsDrift * 1.15)];
+  // Alert thresholds in bps: ±5% band ≈ ±500 bps max; show ±100 bps caution lines
+  const cautionBps = 100;
+
+  return (
+    <div className="space-y-4">
+      {/* Header + days selector */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <p className="text-[11px] font-bold text-white uppercase tracking-wider">
+            Historique de Dérive — {data.length} jours ouvrés
+          </p>
+          <p className="text-[9px] text-navy-500">
+            Fixing BKAM officiel − parité panier théorique (EUR/USD ECB à l'heure du fixing)
+          </p>
+        </div>
+        <div className="flex gap-1">
+          {([30, 60, 90, 180] as HistDays[]).map(d => (
+            <button
+              key={d}
+              onClick={() => setDays(d)}
+              className={`text-[9px] font-mono px-2 py-0.5 rounded border transition ${
+                days === d
+                  ? 'bg-gold-500 text-navy-950 border-gold-500 font-bold'
+                  : 'border-navy-700 text-navy-400 hover:border-navy-600 hover:text-slate-300'
+              }`}
+            >
+              {d}j
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Band alert */}
+      {alert && (
+        <div className={`flex items-start gap-2 px-3 py-2 rounded-lg border text-xs ${
+          alert.severity === 'HIGH'
+            ? 'bg-red-950/30 border-red-700/50 text-red-300'
+            : 'bg-amber-950/30 border-amber-700/50 text-amber-300'
+        }`}>
+          <AlertTriangle size={12} className="flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="font-bold text-[10px]">
+              ⚠️ Alerte bande ({alert.severity}) — {new Date(alert.detectedAt).toLocaleDateString('fr-MA')}
+            </p>
+            <p className="text-[10px] opacity-90 leading-relaxed">{alert.message}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Chart — drift bps over time */}
+      <div className="h-44">
+        <ResponsiveContainer width="100%" height="100%">
+          <ComposedChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#1C3558" />
+            <XAxis
+              dataKey="label"
+              tick={{ fill: '#3D6491', fontSize: 8 }}
+              interval={Math.ceil(chartData.length / 8) - 1}
+            />
+            <YAxis tick={{ fill: '#3D6491', fontSize: 8 }} unit=" pb" width={48} domain={yDomain} />
+            <Tooltip
+              contentStyle={{ background: '#0A1628', border: '1px solid #1C3558', borderRadius: 6, fontSize: 10 }}
+              formatter={(v: number, name: string) => [
+                name === 'drift' ? `${v} pb` : name === 'util' ? `${v}%` : v.toFixed(4),
+                name === 'drift' ? 'Dérive (pb)' : name === 'util' ? 'Util. bande %' : name,
+              ]}
+              labelFormatter={(l: string, payload) => payload?.[0]?.payload?.date ?? l}
+            />
+            {/* Zero line = at basket parity */}
+            <ReferenceLine y={0} stroke="#D4AF37" strokeWidth={1} strokeDasharray="4 2" label={{ value: 'Parité', fill: '#8a6a20', fontSize: 8 }} />
+            {/* Caution lines */}
+            <ReferenceLine y={cautionBps}  stroke="#f59e0b" strokeWidth={0.5} strokeDasharray="3 3" />
+            <ReferenceLine y={-cautionBps} stroke="#10b981" strokeWidth={0.5} strokeDasharray="3 3" />
+            <Area
+              dataKey="drift"
+              fill="#D4AF37"
+              fillOpacity={0.12}
+              stroke="#D4AF37"
+              strokeWidth={1.5}
+              dot={{ r: 2, fill: '#D4AF37' }}
+              name="drift"
+            />
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Rolling statistics */}
+      {stats && (
+        <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 text-center">
+          {[
+            { label: 'Moy.', value: `${stats.mean >= 0 ? '+' : ''}${stats.mean.toFixed(0)}pb`, color: Math.abs(stats.mean) < 20 ? '#10b981' : '#f59e0b' },
+            { label: 'Écart-type', value: `${stats.stdDev.toFixed(0)}pb`, color: '#94a3b8' },
+            { label: 'Min', value: `${stats.min.toFixed(0)}pb`, color: '#10b981' },
+            { label: 'Max', value: `${stats.max.toFixed(0)}pb`, color: '#f59e0b' },
+            { label: 'Util. moy.', value: `${stats.avgBandUtil}%`, color: stats.avgBandUtil > 65 || stats.avgBandUtil < 35 ? '#f59e0b' : '#10b981' },
+            { label: '↑ MAD−', value: `${stats.positiveCount}j`, color: '#f59e0b', title: 'Jours MAD plus faible que panier' },
+            { label: '↓ MAD+', value: `${stats.negativeCount}j`, color: '#10b981', title: 'Jours MAD plus fort que panier' },
+          ].map(m => (
+            <div key={m.label} className="bg-navy-900 border border-navy-800 rounded px-1.5 py-1" title={m.title}>
+              <p className="text-[8px] text-navy-500 uppercase tracking-wider leading-tight">{m.label}</p>
+              <p className="text-[11px] font-mono font-bold" style={{ color: m.color }}>{m.value}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <p className="text-[8px] text-navy-700 font-mono">
+        Bande assumée: ±{(bandPct * 100).toFixed(1)}% · Méthodologie: K/(w_EUR×EUR/USD_ECB+w_USD), K=10.49
+        · Les données s'accumulent quotidiennement via le cron BKAM à 09h00 Casablanca
+      </p>
+    </div>
+  );
+}
+
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function BkamBandsVisualizer({ compact = false }: { compact?: boolean }) {
@@ -403,11 +564,19 @@ export default function BkamBandsVisualizer({ compact = false }: { compact?: boo
               </div>
             </div>
 
-            {/* Drift chart — only when not compact */}
+            {/* Drift chart (recent 7d) — only when not compact */}
             {!compact && (
               <>
                 <div className="border-t border-navy-800" />
                 <DriftChart drift={drift} loading={driftLoading} />
+              </>
+            )}
+
+            {/* Historical drift — requires cron to have run at least once */}
+            {!compact && config.corsProxyUrl && (
+              <>
+                <div className="border-t border-navy-800" />
+                <HistoricalDriftChart corsProxyUrl={config.corsProxyUrl} />
               </>
             )}
           </>
