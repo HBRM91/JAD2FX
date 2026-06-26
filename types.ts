@@ -202,23 +202,29 @@ export interface BlotterEntry {
 
 // ─── BKAM Fixing ─────────────────────────────────────────────────────────────
 export interface FixingDayRow {
-  date: string;           // ISO "2025-06-23"
-  dateLabel: string;      // "Lun 23 Juin"
-  eurUsd: number;         // EUR/USD from ECB
+  date: string;
+  dateLabel: string;
+  eurUsd: number;         // EUR/USD (ECB exogenous for basket calc)
 
-  // EUR/MAD
-  eurMad_ecb: number;     // ECB reference rate (proxy for BKAM fixing)
-  eurMad_basket: number;  // Theoretical BKAM basket parity
-  eurMad_div_bps: number; // Divergence (actual − basket) × 10 000
-  eurMad_div_pct: number; // Divergence as % of basket
+  // EUR/MAD — "ecb" field holds the actual BKAM official rate when source=BKAM_OFFICIAL
+  eurMad_ecb: number;     // Actual rate (BKAM official OR ECB proxy)
+  eurMad_basket: number;  // Basket formula theoretical parity
+  eurMad_div_bps: number; // (actual − basket) / basket × 10 000
+  eurMad_div_pct: number;
 
   // USD/MAD
   usdMad_ecb: number;
   usdMad_basket: number;
   usdMad_div_bps: number;
 
-  // All 20 currency cross-rates against MAD (bkamUnit applied)
+  // BKAM_CURRENCIES rates (bkamUnit already applied for display)
   allRates: Record<string, number>;
+
+  // Extra currencies returned by BKAM API but not in BKAM_CURRENCIES (AUD, EGP, GIP…)
+  extraRates?: Record<string, number>;
+
+  // Raw BKAM response for CSV export (moyen per uniteDevise, as BKAM publishes)
+  rawBkamRates?: Array<{ libDevise: string; moyen: number; uniteDevise: number }>;
 
   source: 'BKAM_OFFICIAL' | 'ECB_PROXY' | 'COMPUTED';
 }
