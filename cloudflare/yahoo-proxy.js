@@ -952,9 +952,11 @@ async function handleScheduled(env) {
 
   // ── 5. Tavily web searches ────────────────────────────────────────────────
   const SEARCH_QUERIES = [
-    'taux de change dirham marocain EUR USD actualité semaine',
-    'Bank Al-Maghrib BKAM politique monétaire inflation Maroc',
-    'économie marocaine commerce extérieur import export actualité',
+    'EUR USD exchange rate overnight move Federal Reserve ECB policy',
+    'Bank Al-Maghrib BKAM Morocco monetary policy dirham reserves',
+    'Morocco economy trade balance OCP phosphate remittances MRE',
+    'Brent crude oil price today Morocco energy imports',
+    'ECB European Central Bank interest rates decision eurozone inflation',
   ];
   const searchResults = [];
 
@@ -987,25 +989,82 @@ async function handleScheduled(env) {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Africa/Casablanca',
   });
 
+  // Compute basket-derived band utilization for context
+  let bandCtx = '';
+  if (todayRates?.['EUR'] && todayRates?.['USD']) {
+    const K = 10.49, wEUR = 0.60, wUSD = 0.40;
+    const eurUsd = todayRates['EUR'] / todayRates['USD'];
+    const centralUsd = K / (wEUR * eurUsd + wUSD);
+    const centralEur = centralUsd * eurUsd;
+    const eurBand = ((todayRates['EUR'] - centralEur * 0.95) / (centralEur * 1.10)) * 100;
+    const usdBand = ((todayRates['USD'] - centralUsd * 0.95) / (centralUsd * 1.10)) * 100;
+    const driftEurBps = Math.round(((todayRates['EUR'] - centralEur) / centralEur) * 10000);
+    const driftUsdBps = Math.round(((todayRates['USD'] - centralUsd) / centralUsd) * 10000);
+    const eurZone = eurBand < 35 ? 'ZONE NEUTRE BAS' : eurBand > 65 ? 'ZONE ATTENTION HAUT' : 'ZONE NEUTRE';
+    const usdZone = usdBand < 35 ? 'ZONE NEUTRE BAS' : usdBand > 65 ? 'ZONE ATTENTION HAUT' : 'ZONE NEUTRE';
+    bandCtx = [
+      `EUR/MAD: parité centrale ${centralEur.toFixed(4)} | cours ${todayRates['EUR'].toFixed(4)} | dérive ${driftEurBps > 0 ? '+' : ''}${driftEurBps} bps | utilisation bande ${eurBand.toFixed(0)}% (${eurZone})`,
+      `USD/MAD: parité centrale ${centralUsd.toFixed(4)} | cours ${todayRates['USD'].toFixed(4)} | dérive ${driftUsdBps > 0 ? '+' : ''}${driftUsdBps} bps | utilisation bande ${usdBand.toFixed(0)}% (${usdZone})`,
+    ].join('\n');
+  }
+
   const systemPrompt = [
-    'Tu es un expert en marchés des changes marocains qui rédige un briefing quotidien ÉDUCATIF et INFORMATIF.',
-    'Public : directeurs financiers, trésoriers et responsables import/export de PME/ETI marocaines.',
-    'Objectif : contextualiser les dynamiques du marché MAD pour COMPRENDRE, pas pour conseiller.',
+    'Tu es le Stratégiste FX en Chef d\'une banque d\'investissement de premier rang (standard Goldman Sachs GIR / JPMorgan FX Strategy).',
+    'Tu rédiges le Morning Briefing MAD quotidien pour des Directeurs Financiers et Trésoriers d\'entreprises marocaines d\'envergure.',
     '',
-    '⚠️ CONTRAINTES ABSOLUES — Ne jamais violer :',
-    '- INTERDIT : "conseil", "recommandation", "couvrir", "hedger", "acheter", "vendre", "contrat de change", "position"',
-    '- INTERDIT : tout impératif directionnel ("vous devez", "il faut", "profitez de")',
-    '- AUTORISÉ : "contexte de marché", "dynamique", "à surveiller", "élément pédagogique", "données indicatives"',
-    '- Pour les opérations : toujours rediriger vers "votre établissement bancaire agréé par Bank Al-Maghrib"',
+    'TON STANDARD ÉDITORIAL :',
+    '- Niveau : Goldman Sachs Global Investment Research — dense, précis, quantitatif',
+    '- Aucune platitude générique : chaque phrase contient une donnée chiffrée ou un raisonnement analytique',
+    '- Utilise systématiquement : bps (basis points), band utilization, CIP, panier 60/40, dérive, K=10.49',
+    '- Cite les données concrètes fournies (taux BKAM, veille web) — ne les invente pas',
+    '- Prose fluide professionnelle — pas de listes à puces sauf pour les risques',
+    '- Longueur contentFr : 800-1200 mots, sections denses',
     '',
-    'Ton éditorial : Factuel, dense, institutionnel. Référence au panier 60% EUR / 40% USD. Fixing BKAM 11h30 Casablanca.',
-    'Sections FR : ## Contexte Macro, ## Paires MAD du Jour, ## À Surveiller, ## Éclairage Pédagogique',
-    'Sections AR : نفس الأقسام بالعربية',
+    '⚠️ CONTRAINTES LÉGALES STRICTES (violation = rapport invalide) :',
+    '- JAMAIS : "couvrir", "hedger", "conseil", "recommandation", "acheter", "vendre", "contrat à terme", "prendre position"',
+    '- JAMAIS : impératif transactionnel ("il faut", "vous devriez", "profitez de")',
+    '- TOUJOURS : "niveau de référence", "données indicatives", "contexte de marché", "dynamique à surveiller"',
+    '- Pour les opérations : "votre banque domiciliataire agréée par Bank Al-Maghrib"',
     '',
-    '⚠️ BRIEFING QUOTIDIEN (pas hebdomadaire) — Axé sur la séance du jour, les données macro overnight,',
-    '   la position du MAD dans sa bande ±5%, et les événements des prochaines 48h.',
+    'STRUCTURE OBLIGATOIRE contentFr (6 sections en markdown) :',
     '',
-    'Réponds UNIQUEMENT avec un objet JSON valide respectant exactement cette structure :',
+    '## Macro Backdrop — Les Trois Piliers du MAD',
+    'Analyse les trois piliers structurels du dirham : (1) Pilier EUR (60% panier) — dynamique BCE/EUR/USD overnight ;',
+    '(2) Pilier USD (40% panier) — trajectoire Fed, USD Index, données macro US ; (3) Pilier Maroc — BKAM, réserves,',
+    'OCP/recettes phosphates, transferts MRE, facture pétrolière. Cite les mouvements overnight en bps.',
+    '',
+    '## Configuration Technique du MAD',
+    'Position exacte dans la bande ±5% BKAM (en % d\'utilisation et zone). Dérive du cours vs parité panier',
+    'théorique K=10.49 (en bps). Formule : USD/MAD central = K / (0.60×EUR/USD + 0.40). Niveaux techniques',
+    'indicatifs : support/résistance naturels dérivés de la cage et de la parité. Conclusion sur le biais directionnel.',
+    '',
+    '## Banques Centrales — Signaux de Politique Monétaire',
+    'BCE : posture actuelle, dernières déclarations, impact EUR/USD → EUR/MAD (60% basket). Fed : trajectoire FOMC,',
+    'dot plot, impact USD/MAD (40% basket). BKAM : taux directeur 2.75%, prochain Conseil de Politique Monétaire,',
+    'stance vis-à-vis de la flexibilité du régime de change. Calendrier des prochains événements macro (J-X).',
+    '',
+    '## Thèmes Structurels de la Semaine',
+    'Trois thèmes analytiques majeurs affectant le MAD cette semaine. Chaque thème : une analyse causale',
+    'complète (driver → transmission → impact MAD en bps/%) avec données quantitatives. Niveau d\'urgence.',
+    '',
+    '## Contexte Corporate — Lecture des Flux (Éducatif)',
+    'Analyse des implications pour les entreprises marocaines à vocation internationale. IMPORTATEURS : contexte',
+    'EUR/MAD et USD/MAD pour la lecture de leurs flux d\'approvisionnement. EXPORTATEURS : dynamique MAD',
+    'pour l\'anticipation des recettes en devises. OCP/PHOSPHATES : impact prix phosphates sur flux USD.',
+    'ÉNERGIE : facture pétrolière et pression sur le compte courant. Toujours conclure :',
+    '"Pour toute opération de change, adressez-vous à votre banque domiciliataire agréée par Bank Al-Maghrib."',
+    '',
+    '## Moniteur de Risques',
+    'Cinq risques quantifiés pour le MAD, classés par probabilité/impact. Format : [RISQUE] — [MÉCANISME',
+    'DE TRANSMISSION] — [IMPACT ESTIMÉ EN BPS]. Couvre : géopolitique, macro global, technique marché,',
+    'politique monétaire, spécifique Maroc.',
+    '',
+    'VERSION ARABE contentAr : Mêmes sections, même niveau analytique, en arabe professionnel financier.',
+    '',
+    'RADAR DATA : Pour chaque devise, sentiment BULLISH = pression baissière MAD, BEARISH = soutien MAD,',
+    'NEUTRAL = stabilité. Les weeklyChangeBps DOIVENT refléter exactement les données fournies.',
+    '',
+    'Réponds UNIQUEMENT avec un objet JSON valide (pas de markdown autour) :',
     '{',
     '  "titleFr": "Titre court (≤80 cars)",',
     '  "titleAr": "العنوان بالعربية",',
@@ -1025,16 +1084,33 @@ async function handleScheduled(env) {
   ].join('\n');
 
   const userMessage = [
-    `Date : ${today}`,
-    `Taux BKAM (avec variation hebdomadaire en bps) : ${ratesCtx}`,
+    `═══ MORNING BRIEFING — ${today} ═══`,
     '',
-    '## Veille web',
+    '── TAUX BKAM LIVE (MAD par unité, source officielle) ──',
+    ratesCtx,
+    '',
+    '── ANALYSE DE BANDE (calculée sur données BKAM ci-dessus) ──',
+    bandCtx || 'Données BKAM indisponibles — utiliser références ECB approximées.',
+    '',
+    `── DÉRIVE HEBDOMADAIRE (vs ${lastWeekStr}) ──`,
+    RADAR_CURRENCIES.map(c => {
+      const bps = weeklyChangeBps(c.code, todayRates, lastWeekRates);
+      const t = todayRates?.[c.code];
+      const l = lastWeekRates?.[c.code];
+      return `${c.code}/MAD: ${t ? t.toFixed(4) : 'N/A'} (7j: ${bps > 0 ? '+' : ''}${bps} bps${l ? ` | semaine précédente: ${l.toFixed(4)}` : ''})`;
+    }).join(' | '),
+    '',
+    '── VEILLE MARCHÉ OVERNIGHT (sources web) ──',
     searchCtx,
     '',
-    'Notes : Briefing quotidien automatique — généré à 09h00 heure de Casablanca · Données indicatives uniquement.',
-    'Évite tout langage transactionnel. Focalise sur le CONTEXTE éducatif et la COMPRÉHENSION des dynamiques.',
+    '── INSTRUCTIONS RÉDACTIONNELLES ──',
+    'Standard: Goldman Sachs GIR. Dense, quantitatif, institutionnel.',
+    'Utilise les données chiffrées ci-dessus dans le rapport (ne pas inventer les taux).',
+    'Calcule et cite l\'utilisation des bandes BKAM ±5% dans la section technique.',
+    'Mentionne le prochain événement macro le plus proche parmi: FOMC, BCE, BKAM CPM, NFP, CPI.',
+    'Rappel légal obligatoire en fin de section Corporate: "Pour toute opération de change, adressez-vous à votre banque domiciliataire agréée par Bank Al-Maghrib."',
     '',
-    'Génère le briefing JSON. Les weeklyChangeBps dans radarData reflètent les chiffres réels ci-dessus.',
+    'Génère maintenant le briefing JSON complet. Les weeklyChangeBps dans radarData DOIVENT refléter les chiffres exacts ci-dessus.',
   ].join('\n');
 
   // ── 7. Groq API call ──────────────────────────────────────────────────────
@@ -1052,8 +1128,8 @@ async function handleScheduled(env) {
           { role: 'system', content: systemPrompt },
           { role: 'user', content: userMessage },
         ],
-        max_tokens: 3500,
-        temperature: 0.4,
+        max_tokens: 6000,
+        temperature: 0.35,
         response_format: { type: 'json_object' },
       }),
       signal: AbortSignal.timeout(90_000),
