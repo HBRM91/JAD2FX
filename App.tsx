@@ -27,6 +27,8 @@ import DriftAlertChip from './components/DriftAlertChip';
 import AboutJad2 from './components/AboutJad2';
 import OcComplianceAssessment from './components/tools/OcComplianceAssessment';
 import CorridorCalculator from './components/tools/CorridorCalculator';
+import InvoiceImpactCalc from './components/tools/InvoiceImpactCalc';
+import SectorLanding from './components/SectorLanding';
 import ContactForm        from './components/ContactForm';
 import FxCrossMatrix      from './components/FxCrossMatrix';
 import MarketRadar        from './components/MarketRadar';
@@ -85,6 +87,7 @@ const NAV_GROUPS: NavGroup[] = [
       { label: 'Morning Briefing',       view: 'REPORT',         icon: Newspaper,    desc: 'Briefing 9h · Stratégiste en chef' },
       { label: 'Diagnostic OC',          view: 'TOOL_OC_ASSESS', icon: Shield,       desc: 'Auto-évaluation Circ. OC 01/2024' },
       { label: 'Corridor Fintech',       view: 'TOOL_CORRIDOR',  icon: Globe,        desc: 'Morocco market entry scorecard' },
+      { label: 'Impact Facture',          view: 'TOOL_INVOICE',   icon: BarChart2,    desc: 'Érosion marge / mouvement change' },
       { label: 'Réglementation OC',      view: 'REGULATIONS',    icon: Scale,        desc: 'Circulaires Office des Changes' },
       { label: 'Ressources',             view: 'RESOURCES',      icon: ExternalLink, desc: 'Liens institutionnels & data' },
     ],
@@ -508,8 +511,8 @@ function AppInner() {
                     Morocco FX corridor intelligence
                   </h2>
                   <p className="text-sm text-slate-400 leading-relaxed">
-                    API-ready MAD rate data, regulatory mapping for the Morocco–Europe payment corridor,
-                    and go-to-market advisory for EMI/PI operators entering MENA.
+                    Regulatory mapping, BKAM/OC compliance intelligence, and go-to-market advisory
+                    for operators entering the Morocco–Europe payment corridor.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-auto">
@@ -614,11 +617,11 @@ function AppInner() {
               <div className="relative px-7 sm:px-12 pb-7">
                 <div className="border-t border-navy-700/50 pt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
                   {[
-                    { label: 'FX Forwards',    desc: 'CIP terme',         view: 'FORWARDS'    as ViewState, icon: TrendingUp,    color: 'text-blue-400',    border: 'border-blue-700/50',    bg: 'bg-blue-900/30' },
-                    { label: 'FX Swaps',       desc: 'Near / Far legs',   view: 'SWAPS'       as ViewState, icon: ArrowLeftRight, color: 'text-purple-400',  border: 'border-purple-700/50',  bg: 'bg-purple-900/30' },
-                    { label: 'Bandes BKAM',    desc: 'Cage ±5%',         view: 'BANDS'       as ViewState, icon: BarChart2,      color: 'text-gold-400',    border: 'border-gold-700/50',    bg: 'bg-yellow-900/20' },
-                    { label: 'Morning Briefing', desc: 'Analyse Éditoriale', view: 'REPORT'     as ViewState, icon: Newspaper,      color: 'text-emerald-400', border: 'border-emerald-700/50', bg: 'bg-emerald-900/30' },
-                    { label: 'Réglementation', desc: 'Office des Changes', view: 'REGULATIONS' as ViewState, icon: Scale,          color: 'text-amber-400',   border: 'border-amber-700/50',   bg: 'bg-amber-900/25' },
+                    { label: 'Diagnostic OC',    desc: 'Conformité 01/2024', view: 'TOOL_OC_ASSESS' as ViewState, icon: Shield,        color: 'text-amber-400',   border: 'border-amber-700/50',   bg: 'bg-amber-900/25' },
+                    { label: 'FX Forwards',      desc: 'CIP terme',          view: 'FORWARDS'       as ViewState, icon: TrendingUp,    color: 'text-blue-400',    border: 'border-blue-700/50',    bg: 'bg-blue-900/30' },
+                    { label: 'Bandes BKAM',      desc: 'Cage ±5%',          view: 'BANDS'          as ViewState, icon: BarChart2,      color: 'text-gold-400',    border: 'border-gold-700/50',    bg: 'bg-yellow-900/20' },
+                    { label: 'Morning Briefing', desc: 'Analyse Éditoriale', view: 'REPORT'         as ViewState, icon: Newspaper,      color: 'text-emerald-400', border: 'border-emerald-700/50', bg: 'bg-emerald-900/30' },
+                    { label: 'Impact Facture',   desc: 'Érosion marge MAD',  view: 'TOOL_INVOICE'   as ViewState, icon: BarChart2,      color: 'text-purple-400',  border: 'border-purple-700/50',  bg: 'bg-purple-900/30' },
                   ].map(item => (
                     <button
                       key={item.view}
@@ -766,10 +769,15 @@ function AppInner() {
         {view === 'SWAPS'       && <SwapSimulator />}
         {view === 'BANDS'       && <BkamBandsVisualizer />}
         {view === 'RESOURCES'   && <ResourcesPage />}
-        {view === 'RESEARCH'      && <ResearchHub navTo={navTo} />}
-        {view === 'ABOUT_JAD2'    && <AboutJad2 />}
+        {view === 'RESEARCH'       && <ResearchHub navTo={navTo} />}
+        {view === 'ABOUT_JAD2'     && <AboutJad2 />}
         {view === 'TOOL_OC_ASSESS' && <OcComplianceAssessment />}
         {view === 'TOOL_CORRIDOR'  && <CorridorCalculator />}
+        {view === 'TOOL_INVOICE'   && <InvoiceImpactCalc />}
+        {view === 'SECTOR_AUTO'     && <SectorLanding sectorId="auto"     navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
+        {view === 'SECTOR_TEXTILE'  && <SectorLanding sectorId="textile"  navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
+        {view === 'SECTOR_NORDIQUE' && <SectorLanding sectorId="nordique" navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
+        {view === 'SECTOR_AGRI'     && <SectorLanding sectorId="agri"     navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
 
         {view === 'LIVE' && (
           <div className="space-y-6">

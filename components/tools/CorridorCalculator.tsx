@@ -59,8 +59,8 @@ function computeCorridor(i: Inputs): ScoreOutput {
     msgs.push({ type: 'ok', text: 'Règlement en MAD possible via correspondant bancaire agréé BAM. Condition : compte nostro MAD auprès d\'une banque marocaine.' });
   }
 
-  if (i.integration === 'api') {
-    msgs.push({ type: 'ok', text: 'API-first : les principales banques marocaines (Attijariwafa, BMCE) disposent d\'APIs de trésorerie en production. Standards SWIFT MT103/MT202 supportés.' });
+  if (i.integration === 'digital') {
+    msgs.push({ type: 'ok', text: 'Intégration numérique : les principales banques marocaines (Attijariwafa, BMCE) supportent les standards SWIFT MT103/MT202 et SEPA pour les flux transfrontaliers.' });
   }
 
   if (i.jurisdiction === 'us') {
@@ -211,7 +211,7 @@ export default function CorridorCalculator() {
           <div>
             <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2 font-bold">Integration preference</p>
             <div className="grid grid-cols-2 gap-2">
-              {[['api','API-first'],['file','File-based (SFTP)'],['hybrid','Hybrid'],['undecided','Undecided']].map(([v,l]) => (
+              {[['digital','Digital (SWIFT/SEPA)'],['file','File-based (SFTP)'],['hybrid','Hybrid'],['undecided','Undecided']].map(([v,l]) => (
                 <button key={v} onClick={() => sel('integration', v)} className={inputCls(inputs.integration===v)}>{l}</button>
               ))}
             </div>

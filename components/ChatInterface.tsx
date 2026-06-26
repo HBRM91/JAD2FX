@@ -133,10 +133,10 @@ const ChatInterface: React.FC<{ proxyUrl?: string }> = ({ proxyUrl }) => {
       ? 'Ask your question about OC regulations...'
       : 'Posez votre question sur la réglementation OC...')
     : (locale === 'ar'
-      ? 'مفتاح API مطلوب — راجع .env.example'
+      ? 'المساعد غير متاح حالياً — الرجاء المحاولة لاحقاً'
       : locale === 'en'
-      ? 'API key required — see .env.example'
-      : 'Clé API requise — voir .env.example');
+      ? 'Assistant unavailable — please try again later'
+      : 'Assistant temporairement indisponible — réessayez ultérieurement');
 
   return (
     <div
