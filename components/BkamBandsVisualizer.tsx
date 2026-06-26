@@ -248,20 +248,29 @@ function DriftChart({ drift, loading }: { drift: DriftRegression | null; loading
         </ResponsiveContainer>
       </div>
 
-      {/* Key stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
+      {/* Key stats — 6-cell grid (2 rows × 3) */}
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center">
         {[
-          { label: 'Dérive actuelle', value: `${drift.latestDriftBps >= 0 ? '+' : ''}${drift.latestDriftBps.toFixed(0)} pb`, color: drift.latestDriftBps > 20 ? '#f59e0b' : drift.latestDriftBps < -20 ? '#10b981' : '#94a3b8' },
-          { label: 'Pente OLS', value: `${drift.beta >= 0 ? '+' : ''}${drift.beta.toFixed(1)} pb/j`, color: trendColor },
-          { label: 'R²', value: drift.r2.toFixed(2), color: drift.r2 > 0.7 ? '#10b981' : '#94a3b8' },
-          { label: 'Source', value: drift.dataSource === 'BKAM_OFFICIAL' ? 'BKAM' : drift.dataSource === 'ECB_PROXY' ? 'ECB' : 'MIXTE', color: drift.dataSource === 'BKAM_OFFICIAL' ? '#10b981' : '#f59e0b' },
+          { label: 'Dérive actuelle', value: `${drift.latestDriftBps >= 0 ? '+' : ''}${drift.latestDriftBps.toFixed(0)} pb`, color: Math.abs(drift.latestDriftBps) > 20 ? '#f59e0b' : '#94a3b8', title: 'Dérive = fixing BKAM − parité panier (ECB EUR/USD exogène). Non-circulaire.' },
+          { label: 'Pente OLS β', value: `${drift.beta >= 0 ? '+' : ''}${drift.beta.toFixed(1)} pb/j`, color: trendColor, title: 'Pente de la régression OLS sur les N derniers jours. Positif = creusement de la dérive.' },
+          { label: 'R²', value: drift.r2.toFixed(2), color: drift.r2 > 0.7 ? '#10b981' : '#94a3b8', title: 'Coefficient de détermination du modèle OLS.' },
+          { label: 'Util. bande', value: `${drift.bandUtilLatest.toFixed(0)}%`, color: drift.bandUtilLatest > 65 || drift.bandUtilLatest < 35 ? '#f59e0b' : '#10b981', title: 'Utilisation actuelle de la bande ±5% BKAM. 50% = parité centrale.' },
+          { label: 'Util. moy.', value: `${drift.bandUtilAvg.toFixed(0)}%`, color: '#94a3b8', title: 'Utilisation moyenne de la bande sur la période.' },
+          { label: 'Source', value: drift.dataSource === 'BKAM_OFFICIAL' ? '✓ BKAM' : drift.dataSource === 'ECB_PROXY' ? 'ECB' : 'MIXTE', color: drift.dataSource === 'BKAM_OFFICIAL' ? '#10b981' : '#f59e0b', title: drift.dataSource === 'BKAM_OFFICIAL' ? 'Fixing interb. pondéré (Doc 1 §I.1.a)' : 'Proxy ECB/Frankfurter.' },
         ].map(m => (
-          <div key={m.label} className="bg-navy-900 border border-navy-800 rounded px-2 py-1.5">
+          <div key={m.label} className="bg-navy-900 border border-navy-800 rounded px-2 py-1.5" title={m.title}>
             <p className="text-[9px] text-navy-500 uppercase tracking-wider">{m.label}</p>
             <p className="text-[12px] font-mono font-bold" style={{ color: m.color }}>{m.value}</p>
           </div>
         ))}
       </div>
+
+      {/* Method footnote per BKAM Doc 1 */}
+      <p className="text-[8px] text-navy-700 font-mono leading-relaxed">
+        Dérive = (USD/MAD_BKAM − USD/MAD_basket) / USD/MAD_basket × 10 000 pb ·
+        Basket = K / (w_EUR × EUR/USD_ECB + w_USD), K=10.49 ·
+        Source: Doc 1 §I méthode principale (transactions &gt;12M USD, &gt;6 opérations, &gt;6 TM) ou méthode de substitution (cotations fermes 5 min)
+      </p>
     </div>
   );
 }

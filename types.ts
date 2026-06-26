@@ -17,6 +17,10 @@ export interface CurrencyInfo {
   flag: string;
   countryCode: string;
   bkamUnit: number;
+  /** Doc 1 §I.1.b: UMA currencies (TND, DZD, LYD) use bilateral convention rates,
+   *  NOT market cross-rates from ECB. Their cross-USD are set per the Convention de
+   *  paiement bilatérale unifiée des Banques centrales UMA. */
+  umaConvention?: boolean;
 }
 
 export interface LiveRate {
@@ -30,8 +34,19 @@ export interface LiveRate {
   change24h: number;
   source: 'CALCULATED' | 'CACHED' | 'FALLBACK';
   timestamp: string;
-  isCapped?: boolean;                                   // true if safety cage clamped this rate
+  isCapped?: boolean;
   feedStatus?: 'LIVE' | 'DELAYED' | 'STALE' | 'FALLBACK';
+  /** Basket formula central parity (K / (w_EUR×EUR/USD + w_USD)) scaled by bkamUnit.
+   *  This is the regulatory reference midpoint from which the ±5% band is measured.
+   *  Doc 1 §I.1: USD/MAD_central = K / (0.60 × EUR/USD + 0.40), K ≈ 10.49. */
+  centralParity?: number;
+  /** Band utilisation 0–100%: position of mid within the ±5% regulatory band.
+   *  50% = at central parity; <35% = lower zone; >65% = upper zone.
+   *  Doc 3, Art 3: banks must apply rates within BKAM-published fluctuation bands. */
+  bandUtilPct?: number;
+  /** True for TND/DZD/LYD: rates set by UMA bilateral convention, not ECB market.
+   *  Doc 1 §I.1.b footnote. */
+  umaConvention?: boolean;
 }
 
 export interface BankRate {

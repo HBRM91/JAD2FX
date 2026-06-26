@@ -37,10 +37,12 @@ export const BKAM_CURRENCIES: CurrencyInfo[] = [
   { code: 'OMR', name: 'Omani Rial',        nameFr: 'Rial omanais',          nameAr: 'ريال عماني',           flag: '🇴🇲', countryCode: 'om', bkamUnit: 1   },
   { code: 'BHD', name: 'Bahraini Dinar',    nameFr: 'Dinar bahreïni',        nameAr: 'دينار بحريني',         flag: '🇧🇭', countryCode: 'bh', bkamUnit: 1   },
   { code: 'JOD', name: 'Jordanian Dinar',   nameFr: 'Dinar jordanien',       nameAr: 'دينار أردني',          flag: '🇯🇴', countryCode: 'jo', bkamUnit: 1   },
-  // ── North African (indicative cross-rates) ───────────────────────────────
-  { code: 'TND', name: 'Tunisian Dinar',    nameFr: 'Dinar tunisien',        nameAr: 'دينار تونسي',          flag: '🇹🇳', countryCode: 'tn', bkamUnit: 1   },
-  { code: 'DZD', name: 'Algerian Dinar',    nameFr: 'Dinar algérien',        nameAr: 'دينار جزائري',         flag: '🇩🇿', countryCode: 'dz', bkamUnit: 100 },
-  { code: 'LYD', name: 'Libyan Dinar',      nameFr: 'Dinar libyen',          nameAr: 'دينار ليبي',           flag: '🇱🇾', countryCode: 'ly', bkamUnit: 1   },
+  // ── North African — UMA bilateral convention (Doc 1 §I.1.b) ────────────
+  // Cross-rates vs USD set by Convention de paiement bilatérale unifiée UMA,
+  // NOT from market cross-rates. BKAM uses a separate rate-setting process.
+  { code: 'TND', name: 'Tunisian Dinar',    nameFr: 'Dinar tunisien',        nameAr: 'دينار تونسي',          flag: '🇹🇳', countryCode: 'tn', bkamUnit: 1,   umaConvention: true },
+  { code: 'DZD', name: 'Algerian Dinar',    nameFr: 'Dinar algérien',        nameAr: 'دينار جزائري',         flag: '🇩🇿', countryCode: 'dz', bkamUnit: 100, umaConvention: true },
+  { code: 'LYD', name: 'Libyan Dinar',      nameFr: 'Dinar libyen',          nameAr: 'دينار ليبي',           flag: '🇱🇾', countryCode: 'ly', bkamUnit: 1,   umaConvention: true },
   // ── EM majors (ECB Frankfurter cross-rates) ──────────────────────────────
   { code: 'ZAR', name: 'South African Rand', nameFr: 'Rand sud-africain',    nameAr: 'راند جنوب أفريقي',     flag: '🇿🇦', countryCode: 'za', bkamUnit: 1   },
   { code: 'INR', name: 'Indian Rupee',       nameFr: 'Roupie indienne',       nameAr: 'روبية هندية',          flag: '🇮🇳', countryCode: 'in', bkamUnit: 100 },

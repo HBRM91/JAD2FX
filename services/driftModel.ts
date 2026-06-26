@@ -22,23 +22,38 @@ const USD_W = DEFAULT_BASKET_CONFIG.usdWeight;
 export interface DriftPoint {
   date: string;
   dateLabel: string;
+  /** BKAM actual fixing: volume-weighted average of interbank USD/MAD transactions
+   *  (Method 1, Doc 1 §I.1.a) OR median of 5-min quote snapshots (Method 2, §I.2.a). */
   actualUsdMad: number;
+  /** Basket central parity: K / (w_EUR × EUR/USD_ECB + w_USD).
+   *  This is the regulatory reference midpoint (Doc 1 §I); the ±5% band is centred here. */
   basketUsdMad: number;
+  /** Drift = (actualUsdMad − basketUsdMad) / basketUsdMad × 10,000 bps.
+   *  Positive → MAD weaker than pure basket implies; negative → MAD stronger.
+   *  Non-circular: uses ECB EUR/USD (exogenous), NOT BKAM's own cross-rate. */
   driftBps: number;
+  /** ECB Frankfurter EUR/USD used as exogenous basket input (not BKAM cross-rate). */
   eurUsd: number;
+  /** Band utilisation 0–100% per BKAM ±5% regulatory band (Doc 3, Art 3).
+   *  50% = at central parity; <35% = lower zone; >65% = upper zone; <20%/>80% = danger. */
+  bandUtilPct: number;
   source: 'BKAM_OFFICIAL' | 'ECB_PROXY';
 }
 
 export interface DriftRegression {
   points: DriftPoint[];
-  alpha: number;           // intercept (bps), drift at day 0
-  beta: number;            // slope (bps/day) — positive = widening
-  r2: number;              // R² of fit
-  stdErrBps: number;       // standard error
-  latestDriftBps: number;  // most recent actual drift
-  expectedTodayBps: number;// regression extrapolated to today
+  alpha: number;
+  beta: number;
+  r2: number;
+  stdErrBps: number;
+  latestDriftBps: number;
+  expectedTodayBps: number;
   trendDir: 'WIDENING' | 'NARROWING' | 'STABLE';
   dataSource: 'BKAM_OFFICIAL' | 'ECB_PROXY' | 'MIXED';
+  /** Average band utilisation across all points (0–100%). */
+  bandUtilAvg: number;
+  /** Latest band utilisation (most recent DriftPoint). */
+  bandUtilLatest: number;
 }
 
 // ─── OLS ──────────────────────────────────────────────────────────────────────
@@ -151,13 +166,20 @@ export async function computeDriftModel(
       // Drift = BKAM_actual − ECB_basket (captures BKAM's discretionary component)
       const driftBps = ((usdMad - basketUsdMad) / basketUsdMad) * 10_000;
 
+      // Band utilisation: where is today's actual fixing within the ±5% band?
+      // lower = basket × 0.95, upper = basket × 1.05  (Doc 3, Art 3 / Art 10)
+      const bLower = basketUsdMad * (1 - 0.05);
+      const bUpper = basketUsdMad * (1 + 0.05);
+      const bUtil  = Math.max(0, Math.min(100, ((usdMad - bLower) / (bUpper - bLower)) * 100));
+
       points.push({
-        date:          workingDays[i],
-        dateLabel:     labelDate(workingDays[i]),
-        actualUsdMad:  +usdMad.toFixed(4),
-        basketUsdMad:  +basketUsdMad.toFixed(4),
-        driftBps:      +driftBps.toFixed(2),
-        eurUsd:        +eurUsd.toFixed(4), // ECB EUR/USD stored (not BKAM cross)
+        date:         workingDays[i],
+        dateLabel:    labelDate(workingDays[i]),
+        actualUsdMad: +usdMad.toFixed(4),
+        basketUsdMad: +basketUsdMad.toFixed(4),
+        driftBps:     +driftBps.toFixed(2),
+        eurUsd:       +eurUsd.toFixed(4),
+        bandUtilPct:  +bUtil.toFixed(1),
         source: 'BKAM_OFFICIAL',
       });
     }
@@ -172,13 +194,17 @@ export async function computeDriftModel(
       // Only add if we don't already have this date from BKAM
       if (points.find(p => p.date === row.date)) continue;
 
+      const eLower = row.usdMad_basket * 0.95;
+      const eUpper = row.usdMad_basket * 1.05;
+      const eUtil  = Math.max(0, Math.min(100, ((row.usdMad_ecb - eLower) / (eUpper - eLower)) * 100));
       points.push({
-        date:       row.date,
-        dateLabel:  row.dateLabel,
-        actualUsdMad:  row.usdMad_ecb,
-        basketUsdMad:  row.usdMad_basket,
-        driftBps:       row.usdMad_div_bps,
-        eurUsd:         row.eurUsd,
+        date:         row.date,
+        dateLabel:    row.dateLabel,
+        actualUsdMad: row.usdMad_ecb,
+        basketUsdMad: row.usdMad_basket,
+        driftBps:     row.usdMad_div_bps,
+        eurUsd:       row.eurUsd,
+        bandUtilPct:  +eUtil.toFixed(1),
         source: 'ECB_PROXY',
       });
     }
@@ -195,14 +221,19 @@ export async function computeDriftModel(
       alpha: 0, beta: 0, r2: 0, stdErrBps: 0,
       latestDriftBps: 0, expectedTodayBps: 0,
       trendDir: 'STABLE', dataSource: 'ECB_PROXY',
+      bandUtilAvg: 50, bandUtilLatest: 50,
     };
   }
 
-  const driftSeries = points.map(p => p.driftBps);
+  const driftSeries   = points.map(p => p.driftBps);
+  const bandUtilSeries = points.map(p => p.bandUtilPct);
   const { alpha, beta, r2, stdErr } = ols(driftSeries);
 
   const latestDriftBps   = driftSeries[driftSeries.length - 1];
-  const expectedTodayBps = alpha + beta * (points.length);  // one step ahead
+  const expectedTodayBps = alpha + beta * points.length;  // one-step-ahead forecast
+
+  const bandUtilAvg    = bandUtilSeries.reduce((s, v) => s + v, 0) / bandUtilSeries.length;
+  const bandUtilLatest = bandUtilSeries[bandUtilSeries.length - 1];
 
   const STABLE_THRESHOLD_BPS = 0.5;
   const trendDir: DriftRegression['trendDir'] =
@@ -214,10 +245,12 @@ export async function computeDriftModel(
     alpha: +alpha.toFixed(3),
     beta:  +beta.toFixed(3),
     r2:    +r2.toFixed(3),
-    stdErrBps: +stdErr.toFixed(3),
-    latestDriftBps: +latestDriftBps.toFixed(2),
+    stdErrBps:        +stdErr.toFixed(3),
+    latestDriftBps:   +latestDriftBps.toFixed(2),
     expectedTodayBps: +expectedTodayBps.toFixed(2),
     trendDir,
     dataSource,
+    bandUtilAvg:    +bandUtilAvg.toFixed(1),
+    bandUtilLatest: +bandUtilLatest.toFixed(1),
   };
 }

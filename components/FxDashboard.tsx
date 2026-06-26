@@ -162,6 +162,9 @@ const FxDashboard: React.FC = () => {
                         {meta?.bkamUnit === 100 && (
                           <span className="text-[8px] bg-navy-800 text-navy-400 border border-navy-700 px-1 rounded">×100</span>
                         )}
+                        {meta?.umaConvention && (
+                          <span title="Taux fixé par Convention UMA (Doc 1 §I.1.b) — non coté en cross ECB" className="text-[7px] bg-amber-950/30 text-amber-600 border border-amber-800/40 px-1 rounded">UMA</span>
+                        )}
                       </div>
                       <p className="text-[10px] text-navy-500">{getCurrencyName(meta, locale)}</p>
                     </div>

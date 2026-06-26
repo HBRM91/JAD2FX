@@ -245,6 +245,21 @@ function computeChange24h(
   return +((todayMid - prevMid) / prevMid * 100).toFixed(4);
 }
 
+/**
+ * Compute band utilisation per BKAM Doc 1 §I methodology.
+ * Band = ±5% of the basket central parity (Doc 3, Art 3 & 10).
+ * Returns 0–100%: 50% = at central parity, <35% = lower zone, >65% = upper zone.
+ *
+ *   utilPct = (spot − lower) / (upper − lower) × 100
+ *   where lower = central × 0.95, upper = central × 1.05
+ */
+function bandUtil(spot: number, central: number): number {
+  if (!central || !spot) return 50;
+  const lower = central * (1 - CAGE_BAND);
+  const upper = central * (1 + CAGE_BAND);
+  return Math.max(0, Math.min(100, ((spot - lower) / (upper - lower)) * 100));
+}
+
 function applySmartSpread(mid: number, code: string, config: BasketConfig, dealerSpreads?: Record<string, number>) {
   // Smart BPS: per-currency pips from dealer matrix, fallback to global config
   const vPips = dealerSpreads?.[code] ?? (config.virementSpreadPercent * 10000);
@@ -296,31 +311,43 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
   if (corsProxyUrl) {
     const [bkamMad, prevEurRates] = await Promise.all([tryFetchBkamMadRates(corsProxyUrl), prevEurRatesPromise]);
     if (bkamMad) {
-      // Keep raw per-unit store for cross-rate math
       _lastBkamMadRates = { ...bkamMad };
 
       const usdMadMid = bkamMad['USD'];
       const eurMadMid = bkamMad['EUR'];
 
+      // Basket central parity using BKAM-implied EUR/USD (Doc 1 §I).
+      // EUR/USD derived from BKAM's own fixing pair: eurMad / usdMad.
+      // centralUsdMad ≠ usdMadMid — the actual fixing reflects real transaction
+      // volume weighting; the central parity is the pure basket formula output.
+      const bkamImpliedEurUsd = eurMadMid / usdMadMid;
+      const centralUsdMad = config.referenceBasketValue / (config.eurWeight * bkamImpliedEurUsd + config.usdWeight);
+      const centralEurMad = centralUsdMad * bkamImpliedEurUsd;
+
       for (const currency of BKAM_CURRENCIES) {
         let rawMid: number;
+        let rawCentral: number;
 
         if (currency.code === 'EUR') {
           rawMid = eurMadMid;
+          rawCentral = centralEurMad;
         } else if (currency.code === 'USD') {
           rawMid = usdMadMid;
+          rawCentral = centralUsdMad;
         } else if (bkamMad[currency.code] !== undefined) {
           rawMid = bkamMad[currency.code];
+          // Cross-rate central parity: USD_central × (CCY/USD)
+          rawCentral = centralUsdMad * (rawMid / usdMadMid);
         } else if (GULF_USD_RATES[currency.code]) {
           rawMid = GULF_USD_RATES[currency.code] * usdMadMid;
+          rawCentral = GULF_USD_RATES[currency.code] * centralUsdMad;
         } else {
           continue;
         }
 
-        const displayMid = rawMid * currency.bkamUnit;
+        const displayMid     = rawMid     * currency.bkamUnit;
+        const displayCentral = rawCentral * currency.bkamUnit;
 
-        // Build bkamUnit-scaled cage reference — must happen BEFORE applySmartSpread
-        // so the cage is correct for currencies quoted per 100 units (JPY, INR, DZD).
         _bkamCageRef[currency.code] = displayMid;
 
         const filteredMid = sanityFilter(currency.code, displayMid);
@@ -338,6 +365,9 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
           source: 'CALCULATED',
           feedStatus: 'LIVE',
           timestamp: new Date().toISOString(),
+          centralParity: +displayCentral.toFixed(4),
+          bandUtilPct:   +bandUtil(filteredMid, displayCentral).toFixed(1),
+          umaConvention: currency.umaConvention,
         });
       }
 
@@ -371,10 +401,10 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
       rawMid = xToUsd * usdMadMid;
     }
 
+    // In ECB fallback path, displayMid = basket formula central parity by construction.
+    // centralParity = displayMid (before caging); filteredMid may differ after cage/filter.
     const displayMid = rawMid * currency.bkamUnit;
-    // Apply safety cage (clamps to ±5% of last known BKAM fixing)
     const { mid: cagedMid, isCapped } = applySafetyCage(currency.code, displayMid);
-    // Apply sanity filter (rejects ticks > 2%/min)
     const filteredMid = sanityFilter(currency.code, cagedMid);
     const spread = applySmartSpread(filteredMid, currency.code, config, dealerSpreads);
 
@@ -391,6 +421,10 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
       feedStatus,
       isCapped,
       timestamp: new Date().toISOString(),
+      // ECB path: displayMid IS the basket central parity (K-formula)
+      centralParity: +displayMid.toFixed(4),
+      bandUtilPct:   +bandUtil(filteredMid, displayMid).toFixed(1),
+      umaConvention: currency.umaConvention,
     });
   }
 
