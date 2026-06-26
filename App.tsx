@@ -24,6 +24,9 @@ import BkamBandsVisualizer from './components/BkamBandsVisualizer';
 import ResourcesPage from './components/ResourcesPage';
 import ResearchHub from './components/ResearchHub';
 import DriftAlertChip from './components/DriftAlertChip';
+import AboutJad2 from './components/AboutJad2';
+import OcComplianceAssessment from './components/tools/OcComplianceAssessment';
+import CorridorCalculator from './components/tools/CorridorCalculator';
 import ContactForm        from './components/ContactForm';
 import FxCrossMatrix      from './components/FxCrossMatrix';
 import MarketRadar        from './components/MarketRadar';
@@ -78,10 +81,12 @@ const NAV_GROUPS: NavGroup[] = [
     id: 'research',
     label: 'Recherche',
     items: [
-      { label: 'Intelligence de Marché', view: 'RESEARCH',    icon: BookOpen,     desc: '7 piliers · Recherche & Analyse' },
-      { label: 'Morning Briefing',       view: 'REPORT',      icon: Newspaper,    desc: 'Briefing 9h · Stratégiste en chef' },
-      { label: 'Réglementation OC',      view: 'REGULATIONS', icon: Scale,        desc: 'Circulaires Office des Changes' },
-      { label: 'Ressources',             view: 'RESOURCES',   icon: ExternalLink, desc: 'Liens institutionnels & data' },
+      { label: 'Intelligence de Marché', view: 'RESEARCH',       icon: BookOpen,     desc: '7 piliers · Recherche & Analyse' },
+      { label: 'Morning Briefing',       view: 'REPORT',         icon: Newspaper,    desc: 'Briefing 9h · Stratégiste en chef' },
+      { label: 'Diagnostic OC',          view: 'TOOL_OC_ASSESS', icon: Shield,       desc: 'Auto-évaluation Circ. OC 01/2024' },
+      { label: 'Corridor Fintech',       view: 'TOOL_CORRIDOR',  icon: Globe,        desc: 'Morocco market entry scorecard' },
+      { label: 'Réglementation OC',      view: 'REGULATIONS',    icon: Scale,        desc: 'Circulaires Office des Changes' },
+      { label: 'Ressources',             view: 'RESOURCES',      icon: ExternalLink, desc: 'Liens institutionnels & data' },
     ],
   },
 ];
@@ -259,18 +264,16 @@ function AppInner() {
 
               {/* Standalone items */}
               <button
-                onClick={() => navTo('ABOUT')}
+                onClick={() => navTo('ABOUT_JAD2')}
                 className={`flex items-center gap-1.5 px-4 h-full text-[11px] font-semibold tracking-wide uppercase transition-colors ${
-                  view === 'ABOUT' ? 'text-gold-400 border-b-2 border-gold-500' : 'text-navy-300 hover:text-white'
+                  view === 'ABOUT_JAD2' ? 'text-gold-400 border-b-2 border-gold-500' : 'text-navy-300 hover:text-white'
                 }`}
               >
                 À Propos
               </button>
               <button
-                onClick={() => navTo('CONTACT')}
-                className={`flex items-center gap-1.5 px-4 h-full text-[11px] font-semibold tracking-wide uppercase transition-colors ${
-                  view === 'CONTACT' ? 'text-gold-400 border-b-2 border-gold-500' : 'text-navy-300 hover:text-white'
-                }`}
+                onClick={() => setContactDrawerOpen(true)}
+                className="flex items-center gap-1.5 px-4 h-full text-[11px] font-semibold tracking-wide uppercase transition-colors text-navy-300 hover:text-white"
               >
                 Contact
               </button>
@@ -763,7 +766,10 @@ function AppInner() {
         {view === 'SWAPS'       && <SwapSimulator />}
         {view === 'BANDS'       && <BkamBandsVisualizer />}
         {view === 'RESOURCES'   && <ResourcesPage />}
-        {view === 'RESEARCH'    && <ResearchHub navTo={navTo} />}
+        {view === 'RESEARCH'      && <ResearchHub navTo={navTo} />}
+        {view === 'ABOUT_JAD2'    && <AboutJad2 />}
+        {view === 'TOOL_OC_ASSESS' && <OcComplianceAssessment />}
+        {view === 'TOOL_CORRIDOR'  && <CorridorCalculator />}
 
         {view === 'LIVE' && (
           <div className="space-y-6">
