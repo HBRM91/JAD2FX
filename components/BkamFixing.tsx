@@ -40,8 +40,11 @@ function divBg(bps: number): string {
 
 // ─── Band gauge ───────────────────────────────────────────────────────────────
 
-function BandGauge({ bps }: { bps: number }) {
-  const pct   = Math.min(Math.max((bps / BAND_BPS) * 50 + 50, 1), 99);
+function BandGauge({ bps, bandUtilPct }: { bps: number; bandUtilPct?: number }) {
+  // bandUtilPct: 0–100% position in ±5% band (pre-computed by Worker); fallback from bps
+  const pct   = bandUtilPct != null
+    ? Math.min(Math.max(bandUtilPct, 1), 99)
+    : Math.min(Math.max((bps / BAND_BPS) * 50 + 50, 1), 99);
   const color = Math.abs(bps) < 50 ? '#10b981' : Math.abs(bps) < 150 ? '#f59e0b' : '#ef4444';
   return (
     <div className="w-full">
@@ -253,7 +256,11 @@ export default function BkamFixing() {
             <Info size={11} className="text-navy-400 mt-0.5 flex-shrink-0" />
             <p className="text-[10px] text-slate-500 leading-relaxed">
               {isOfficial
-                ? 'Taux de change virements (CoursVirement) publiés quotidiennement par Bank Al-Maghrib à 16h15. Ces taux sont le cours de référence officiel MAD. Ils ne constituent pas des prix de transaction (Art. 3, Circ. LC/BKAM/2018/2).'
+                ? <>Taux de change virements (CoursVirement) publiés par Bank Al-Maghrib à 16h15. Parité panier&nbsp;:
+                    <span className="font-mono text-gold-600 mx-1">USD/MAD = K/(w<sub>EUR</sub>·EUR/USD<sub>BCE</sub> + w<sub>USD</sub>)</span>
+                    avec K=10,49 · w<sub>EUR</sub>=0,60 · w<sub>USD</sub>=0,40.
+                    Dérive = <span className="font-mono text-gold-600 mx-1">(Fixing<sub>BKAM</sub>−Parité)/Parité × 10 000 pb</span>.
+                    Art.&nbsp;3, Circ.&nbsp;LC/BKAM/2018/2 — non contractuel.</>
                 : 'Aucun proxy configuré — données BCE/Frankfurter utilisées comme proxy indicatif. Configurez un proxy CORS dans Admin pour accéder aux fixing officiels BKAM.'}
               {' '}
               <a href="https://www.bkam.ma/en/Markets/Key-indicators/Foreign-exchange-market/Foreign-exchange-rates/Transfer-exchange-rate"
@@ -387,16 +394,16 @@ export default function BkamFixing() {
                     const rate    = latest.allRates[c.code];
                     if (!rate) return null;
 
-                    // For divergence: compute basket rate for this currency
-                    const basketRate = c.code === 'EUR'
-                      ? latest.eurMad_basket * c.bkamUnit
-                      : c.code === 'USD'
-                      ? latest.usdMad_basket * c.bkamUnit
-                      : null; // cross-rates don't have individual basket parity
-
-                    const divBps = basketRate
-                      ? ((rate - basketRate) / basketRate) * 10_000
-                      : null;
+                    // Use enriched basket parity and drift stored in KV (all 30 currencies)
+                    const enriched = latest.rawBkamRates?.find(r => r.libDevise === c.code);
+                    const basketRate = enriched?.basketParity
+                      ?? (c.code === 'EUR' ? latest.eurMad_basket * c.bkamUnit
+                        : c.code === 'USD' ? latest.usdMad_basket * c.bkamUnit
+                        : null);
+                    const divBps = enriched?.driftBps !== undefined && enriched.driftBps !== null
+                      ? enriched.driftBps
+                      : (basketRate ? ((rate - basketRate) / basketRate) * 10_000 : null);
+                    const bandUtil = enriched?.bandUtilPct ?? null;
 
                     return (
                       <tr key={c.code} className="hover:bg-navy-800/30 transition-colors">
@@ -430,7 +437,7 @@ export default function BkamFixing() {
                           ) : <span className="text-slate-700 text-[10px]">—</span>}
                         </td>
                         <td className="py-2.5 px-4 w-32">
-                          {divBps !== null ? <BandGauge bps={divBps} /> : <span className="text-slate-700 text-[9px]">—</span>}
+                          {divBps !== null ? <BandGauge bps={divBps} bandUtilPct={bandUtil ?? undefined} /> : <span className="text-slate-700 text-[9px]">—</span>}
                         </td>
                       </tr>
                     );

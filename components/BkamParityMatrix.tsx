@@ -87,7 +87,7 @@ export default function BkamParityMatrix() {
   const [loading, setLoading] = useState(true);
   const [error, setError]     = useState<string | null>(null);
   const [tab, setTab]         = useState<TabId>('drift-bar');
-  const [sortBy, setSortBy]   = useState<'drift' | 'band' | 'alpha'>('drift');
+  const [sortBy, setSortBy]   = useState<'g10' | 'drift' | 'band' | 'alpha'>('g10');
   const [showAll, setShowAll] = useState(false);
 
   const proxyUrl = config.corsProxyUrl?.replace(/\/$/, '') ?? '';
@@ -116,11 +116,21 @@ export default function BkamParityMatrix() {
   useEffect(() => { load(); }, [proxyUrl]);
 
   // ── Sorted enriched rates for today ────────────────────────────────────────
+  // G10 canonical order (MAD-relevant), then EM, then Gulf pegs
+  const G10_ORDER: Record<string, number> = {
+    EUR: 1, USD: 2, GBP: 3, CHF: 4, JPY: 5, CAD: 6,
+    NOK: 7, SEK: 8, DKK: 9, AUD: 10, CNY: 11,
+    SAR: 12, AED: 13, QAR: 14, KWD: 15, OMR: 16, BHD: 17, JOD: 18,
+    TRY: 19, ZAR: 20, INR: 21, BRL: 22, RUB: 23,
+    TND: 24, DZD: 25, LYD: 26, XOF: 27, EGP: 28, MRO: 29, GIP: 30,
+  };
+
   const enrichedRates = useMemo(() => {
     if (!latest?.rates) return [];
     return latest.rates
       .filter(r => r.driftBps != null && r.basketParity != null)
       .sort((a, b) => {
+        if (sortBy === 'g10')   return (G10_ORDER[a.libDevise] ?? 99) - (G10_ORDER[b.libDevise] ?? 99);
         if (sortBy === 'drift') return Math.abs(b.driftBps!) - Math.abs(a.driftBps!);
         if (sortBy === 'band')  return Math.abs((b.bandUtilPct ?? 50) - 50) - Math.abs((a.bandUtilPct ?? 50) - 50);
         return a.libDevise.localeCompare(b.libDevise);
@@ -248,10 +258,10 @@ export default function BkamParityMatrix() {
                   Dérive Fixing BKAM vs Parité Panier — {enrichedRates.length} Devises · {latest.date}
                 </h3>
                 <div className="flex items-center gap-1.5">
-                  {(['drift', 'band', 'alpha'] as const).map(s => (
+                  {(['g10', 'drift', 'band', 'alpha'] as const).map(s => (
                     <button key={s} onClick={() => setSortBy(s)}
                       className={`text-[9px] font-bold px-2 py-0.5 rounded border transition ${sortBy===s ? 'border-gold-600/60 bg-gold-500/10 text-gold-400' : 'border-navy-700 text-slate-500 hover:border-navy-600'}`}>
-                      {s === 'drift' ? '|Dérive|↓' : s === 'band' ? 'Bande↓' : 'A→Z'}
+                      {s === 'g10' ? 'G10↓' : s === 'drift' ? '|Dérive|↓' : s === 'band' ? 'Bande↓' : 'A→Z'}
                     </button>
                   ))}
                 </div>

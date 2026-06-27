@@ -79,9 +79,9 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Forward de Change',        view: 'FORWARDS',    icon: TrendingUp,     desc: 'Taux à terme CIP · T+2 ajusté' },
       { label: 'Prorogation & Levée',      view: 'TOOL_FWD_EXT', icon: ArrowLeftRight, desc: 'Extension · Dénouement · Marge banque' },
-      { label: 'FX Swap (Near/Far)',        view: 'SWAPS',       icon: ArrowLeftRight, desc: 'Points swap · Legs Near/Far' },
+      { label: 'Swap de Change MAD',          view: 'SWAPS',       icon: ArrowLeftRight, desc: 'Points swap · Jambe proche / lointaine' },
       { label: 'Impact Facture MAD',        view: 'TOOL_INVOICE', icon: BarChart2,      desc: 'Érosion marge / scénarios change' },
-      { label: 'Bandes BKAM ±5%',          view: 'BANDS',       icon: BarChart2,      desc: 'Cage · Bird · Drift model' },
+      { label: 'Bandes BKAM ±5%',          view: 'BANDS',       icon: BarChart2,      desc: 'Cage réglementaire · Dérive · Modèle' },
     ],
   },
   {

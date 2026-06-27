@@ -223,8 +223,16 @@ export interface FixingDayRow {
   // Extra currencies returned by BKAM API but not in BKAM_CURRENCIES (AUD, EGP, GIP…)
   extraRates?: Record<string, number>;
 
-  // Raw BKAM response for CSV export (moyen per uniteDevise, as BKAM publishes)
-  rawBkamRates?: Array<{ libDevise: string; moyen: number; uniteDevise: number }>;
+  // Raw BKAM response enriched with basket parity from Worker KV
+  rawBkamRates?: Array<{
+    libDevise: string;
+    moyen: number | null;
+    uniteDevise: number;
+    basketParity?: number;
+    driftBps?: number | null;
+    bandUtilPct?: number | null;
+    source?: string;
+  }>;
 
   source: 'BKAM_OFFICIAL' | 'ECB_PROXY' | 'COMPUTED';
 }

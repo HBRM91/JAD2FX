@@ -226,22 +226,15 @@ export async function fetchFixingHistory(
     try {
       const dbResult = await fetchBkamRatesHistory(corsProxyUrl, nDays + 5);
       if (dbResult.points.length > 0) {
-        // Build rows from KV data + ECB EUR/USD for each date
         const rows: FixingDayRow[] = [];
         for (const entry of dbResult.points) {
+          // Skip ECB-only entries (moyen=null means no BKAM fixing was published)
+          const hasActualRates = entry.rates?.some((r: { moyen: number | null }) => r.moyen != null && r.moyen > 0);
+          if (!hasActualRates) continue;
           try {
-            let ecbEurUsd: number | null = null;
-            try {
-              const ecbRes = await fetch(
-                `https://api.frankfurter.app/${entry.date}?from=EUR&to=USD`,
-                { signal: AbortSignal.timeout(5_000) },
-              );
-              if (ecbRes.ok) {
-                const ecbData = await ecbRes.json() as { rates?: { USD?: number } };
-                ecbEurUsd = ecbData.rates?.USD ?? null;
-              }
-            } catch { /* use BKAM cross-rate fallback */ }
-            rows.push(buildRowFromBkam(entry.date, entry.rates, ecbEurUsd ?? undefined));
+            // Use ecbEurUsd already stored in KV — avoids redundant Frankfurter fetches
+            const ecbEurUsd = (entry as unknown as { ecbEurUsd?: number }).ecbEurUsd ?? undefined;
+            rows.push(buildRowFromBkam(entry.date, entry.rates as Parameters<typeof buildRowFromBkam>[1], ecbEurUsd));
           } catch { /* skip corrupt entries */ }
         }
         if (rows.length > 0) {
