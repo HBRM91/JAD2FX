@@ -96,14 +96,17 @@ export default function BkamParityMatrix() {
     if (!proxyUrl) { setError('Proxy URL non configuré'); setLoading(false); return; }
     setLoading(true); setError(null);
     try {
-      const [todayRes, histRes] = await Promise.all([
-        fetch(`${proxyUrl}/api/bkam-rates`, { signal: AbortSignal.timeout(10_000) }),
-        fetch(`${proxyUrl}/api/bkam-rates/history?days=10`, { signal: AbortSignal.timeout(10_000) }),
-      ]);
-      if (todayRes.ok) setLatest(await todayRes.json());
+      const histRes = await fetch(`${proxyUrl}/api/bkam-rates/history?days=90`, { signal: AbortSignal.timeout(15_000) });
       if (histRes.ok) {
         const h: HistoryPayload = await histRes.json();
-        setHistory(h.points ?? []);
+        const pts = h.points ?? [];
+        setHistory(pts);
+        // Use most recent date with actual BKAM data as "latest"; fall back to most recent ECB-only
+        const bkamEntry = [...pts].reverse().find(p => p.rates?.some(r => r.driftBps != null));
+        const fallback  = pts[pts.length - 1] ?? null;
+        setLatest(bkamEntry ?? fallback);
+      } else {
+        setError('Historique indisponible.');
       }
     } catch (e) {
       setError('Impossible de charger les données. Vérifiez la configuration du proxy.');
@@ -298,9 +301,16 @@ export default function BkamParityMatrix() {
           {/* ── Tab: Historical trend ── */}
           {tab === 'history' && (
             <div className="bg-navy-900 border border-navy-700 rounded-2xl p-5 space-y-5">
-              <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">
-                Tendance Dérive EUR/MAD · USD/MAD · GBP/MAD — {history.length} séances
-              </h3>
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">
+                  Tendance Dérive EUR/MAD · USD/MAD · GBP/MAD — {history.length} séances
+                </h3>
+                <div className="flex items-center gap-3 text-[9px]">
+                  <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-gold-400" /> BKAM Officiel</span>
+                  <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-gold-400 opacity-50" style={{borderTop:'1px dashed'}} /> Panier ECB (continu)</span>
+                  <span className="text-slate-600">Points isolés = séances sans fixing BKAM (dérive N/A)</span>
+                </div>
+              </div>
 
               {/* Drift bps over time */}
               <div>
@@ -315,9 +325,9 @@ export default function BkamParityMatrix() {
                         formatter={(v: number) => [`${v?.toFixed(1)} bps`]} />
                       <Legend iconSize={8} wrapperStyle={{ fontSize: 10 }} />
                       <ReferenceLine y={0} stroke="#D4AF37" strokeWidth={1} strokeDasharray="4 2" label={{ value: 'Parité', fill: '#8a6a20', fontSize: 8 }} />
-                      <Line type="monotone" dataKey="eurDrift" stroke="#D4AF37" strokeWidth={2} dot={{ r: 3 }} name="EUR/MAD drift" connectNulls />
-                      <Line type="monotone" dataKey="usdDrift" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} name="USD/MAD drift" connectNulls />
-                      <Line type="monotone" dataKey="gbpDrift" stroke="#a78bfa" strokeWidth={1.5} dot={{ r: 2 }} name="GBP/MAD drift" connectNulls />
+                      <Line type="monotone" dataKey="eurDrift" stroke="#D4AF37" strokeWidth={2} dot={{ r: 3 }} name="EUR/MAD drift" />
+                      <Line type="monotone" dataKey="usdDrift" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} name="USD/MAD drift" />
+                      <Line type="monotone" dataKey="gbpDrift" stroke="#a78bfa" strokeWidth={1.5} dot={{ r: 2 }} name="GBP/MAD drift" />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -335,10 +345,10 @@ export default function BkamParityMatrix() {
                       <Tooltip contentStyle={{ background: '#081628', border: '1px solid #1C3558', borderRadius: 6, fontSize: 11 }}
                         formatter={(v: number) => [v?.toFixed(4)]} />
                       <Legend iconSize={8} wrapperStyle={{ fontSize: 10 }} />
-                      <Line type="monotone" dataKey="eurFixing" stroke="#D4AF37" strokeWidth={2} dot={{ r: 3 }} name="EUR/MAD BKAM" connectNulls />
-                      <Line type="monotone" dataKey="eurBasket" stroke="#D4AF37" strokeWidth={1} strokeDasharray="5 3" dot={false} name="EUR/MAD Panier" connectNulls opacity={0.5} />
-                      <Line type="monotone" dataKey="usdFixing" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} name="USD/MAD BKAM" connectNulls />
-                      <Line type="monotone" dataKey="usdBasketRate" stroke="#3b82f6" strokeWidth={1} strokeDasharray="5 3" dot={false} name="USD/MAD Panier" connectNulls opacity={0.5} />
+                      <Line type="monotone" dataKey="eurFixing" stroke="#D4AF37" strokeWidth={2} dot={{ r: 3, strokeWidth: 0 }} name="EUR/MAD BKAM" />
+                      <Line type="monotone" dataKey="eurBasket" stroke="#D4AF37" strokeWidth={1} strokeDasharray="5 3" dot={false} name="EUR/MAD Panier" connectNulls opacity={0.6} />
+                      <Line type="monotone" dataKey="usdFixing" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3, strokeWidth: 0 }} name="USD/MAD BKAM" />
+                      <Line type="monotone" dataKey="usdBasketRate" stroke="#3b82f6" strokeWidth={1} strokeDasharray="5 3" dot={false} name="USD/MAD Panier" connectNulls opacity={0.6} />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>

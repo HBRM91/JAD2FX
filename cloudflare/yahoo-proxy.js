@@ -1738,6 +1738,169 @@ async function handleScheduled(env) {
   await fetchAndStoreBdt(env);
 }
 
+// ─── BKAM bulk backfill — admin endpoint to seed historical KV data ──────────
+// GET /api/bkam-rates/backfill?from=YYYY-MM-DD&to=YYYY-MM-DD&force=false
+// Protected by ?key=BKAM_FX_KEY (avoids exposing ADMIN_PASSCODE in scripts).
+// Processes all weekdays in range, batch of 6 in parallel per iteration.
+// For each date: fetches BKAM + ECB → stores enriched rates + drift point.
+
+// Build ECB-only synthetic rate entries when BKAM data unavailable.
+// Currencies sourced from ECB cross-rates; moyen/driftBps left null.
+function buildEcbOnlyRates(ecbEurUsd, ecbRates) {
+  if (!ecbEurUsd) return [];
+  const K = 10.49, wEUR = 0.60, wUSD = 0.40;
+  const usdMadBasket = K / (wEUR * ecbEurUsd + wUSD);
+
+  const rows = [];
+
+  // EUR and USD — derived directly from basket formula
+  rows.push({ libDevise: 'EUR', moyen: null, uniteDevise: 1, basketParity: +(usdMadBasket * ecbEurUsd).toFixed(4), driftBps: null, bandUtilPct: null, source: 'ECB_ONLY' });
+  rows.push({ libDevise: 'USD', moyen: null, uniteDevise: 1, basketParity: +usdMadBasket.toFixed(4), driftBps: null, bandUtilPct: null, source: 'ECB_ONLY' });
+
+  // G10 / EM from ECB cross-rates (EUR/CCY → CCY/USD = EUR/USD / EUR/CCY)
+  const ECB_CCY_UNITS = { GBP:1, CHF:1, JPY:100, CAD:1, NOK:100, SEK:100, DKK:100, CNY:1, TRY:1, ZAR:1, INR:1, BRL:1, AUD:1, EGP:1 };
+  for (const [ccy, unit] of Object.entries(ECB_CCY_UNITS)) {
+    const eurPerCcy = ecbRates?.[ccy];
+    if (!eurPerCcy) continue;
+    const basketPerUnit = usdMadBasket * (ecbEurUsd / eurPerCcy) * unit;
+    rows.push({ libDevise: ccy, moyen: null, uniteDevise: unit, basketParity: +basketPerUnit.toFixed(4), driftBps: null, bandUtilPct: null, source: 'ECB_ONLY' });
+  }
+
+  // Gulf pegs (official USD pegs)
+  for (const [ccy, pegPerUsd] of Object.entries(GULF_PEGS)) {
+    const basketPerUnit = usdMadBasket / pegPerUsd;
+    rows.push({ libDevise: ccy, moyen: null, uniteDevise: 1, basketParity: +basketPerUnit.toFixed(4), driftBps: null, bandUtilPct: null, source: 'ECB_ONLY' });
+  }
+
+  return rows;
+}
+
+async function handleBkamRatesBackfill(request, env, origin) {
+  // Auth: BKAM_FX_KEY passed as ?key= param
+  const url   = new URL(request.url);
+  const key   = url.searchParams.get('key') ?? '';
+  if (!env.BKAM_FX_KEY || key !== env.BKAM_FX_KEY) {
+    return json({ error: 'Unauthorized' }, 401, origin);
+  }
+  if (!env.REPORTS_KV) return json({ error: 'KV not configured' }, 503, origin);
+
+  const fromStr  = url.searchParams.get('from') ?? '';
+  const toStr    = url.searchParams.get('to')   ?? new Date().toISOString().slice(0, 10);
+  const force    = url.searchParams.get('force') === 'true';
+
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fromStr)) {
+    return json({ error: 'from=YYYY-MM-DD required' }, 400, origin);
+  }
+
+  // Build list of weekdays in range (Mon–Fri)
+  const dates = [];
+  const d = new Date(fromStr + 'T12:00:00Z');
+  const end = new Date(toStr + 'T12:00:00Z');
+  while (d <= end) {
+    const dow = d.getUTCDay();
+    if (dow !== 0 && dow !== 6) dates.push(d.toISOString().slice(0, 10));
+    d.setUTCDate(d.getUTCDate() + 1);
+  }
+
+  // Load existing indexes to check what's already stored
+  const [bkamIdx, driftIdx] = await Promise.all([
+    getBkamRatesIndex(env.REPORTS_KV),
+    getDriftIndex(env.REPORTS_KV),
+  ]);
+
+  const results = [];
+  const BATCH = 6; // parallel requests per batch (BKAM + ECB per date = 12 concurrent fetches)
+
+  for (let i = 0; i < dates.length; i += BATCH) {
+    const batch = dates.slice(i, i + BATCH);
+    const settled = await Promise.allSettled(batch.map(async date => {
+      // Skip if already fully enriched (unless force=true)
+      if (!force && bkamIdx.includes(date)) {
+        const existing = await env.REPORTS_KV.get(`bkam:virement:${date}`);
+        if (existing) {
+          const p = JSON.parse(existing);
+          if (p.rates?.[0]?.basketParity !== undefined) {
+            return { date, status: 'skipped' };
+          }
+        }
+      }
+
+      // Fetch BKAM + ECB in parallel for this date
+      const [rawRates, ecbRates] = await Promise.all([
+        fetchBkamRatesRaw(env.BKAM_FX_KEY, date),
+        fetchEcbRatesForDate(date),
+      ]);
+
+      if (!rawRates?.length) {
+        // ECB-only fallback: store basket parity for all ECB currencies
+        const ecbEurUsd2 = ecbRates?.USD ?? null;
+        if (!ecbEurUsd2) return { date, status: 'no_bkam_data' };
+        const ecbOnlyRates = buildEcbOnlyRates(ecbEurUsd2, ecbRates);
+        const payload = {
+          date, rates: ecbOnlyRates, rawRates: null,
+          ecbEurUsd: ecbEurUsd2,
+          usdMadBasket: +((10.49 / (0.60 * ecbEurUsd2 + 0.40)).toFixed(4)),
+          fetchedAt: new Date().toISOString(),
+          count: ecbOnlyRates.length,
+          source: 'ECB_ONLY',
+        };
+        await env.REPORTS_KV.put(`bkam:virement:${date}`, JSON.stringify(payload), { expirationTtl: 60*60*24*500 });
+        const idx2 = await getBkamRatesIndex(env.REPORTS_KV);
+        if (!idx2.includes(date)) {
+          idx2.push(date); idx2.sort();
+          if (idx2.length > 500) idx2.splice(0, idx2.length - 500);
+          await setBkamRatesIndex(env.REPORTS_KV, idx2);
+        }
+        return { date, status: 'ecb_only', count: ecbOnlyRates.length, ecbEurUsd: ecbEurUsd2 };
+      }
+
+      const ecbEurUsd = ecbRates?.USD ?? null;
+      await storeBkamRatesInKV(env, date, rawRates, ecbEurUsd, ecbRates);
+
+      // Store drift point (USD/MAD vs basket)
+      const bkamMap = {};
+      for (const r of rawRates) {
+        if (r.uniteDevise > 0) bkamMap[r.libDevise] = r.moyen / r.uniteDevise;
+      }
+      if (bkamMap['USD'] && ecbEurUsd && !driftIdx.includes(date)) {
+        await storeDailyDrift(env, date, bkamMap);
+      }
+
+      return { date, status: 'ok', count: rawRates.length, ecbEurUsd };
+    }));
+
+    settled.forEach((r, idx) => {
+      if (r.status === 'fulfilled') results.push(r.value);
+      else results.push({ date: batch[idx], status: 'error', reason: String(r.reason) });
+    });
+  }
+
+  const ok      = results.filter(r => r.status === 'ok').length;
+  const ecbOnly = results.filter(r => r.status === 'ecb_only').length;
+  const skipped = results.filter(r => r.status === 'skipped').length;
+  const noBkam  = results.filter(r => r.status === 'no_bkam_data').length;
+  const errors  = results.filter(r => r.status === 'error').length;
+
+  // Rebuild index from scratch after bulk write to avoid parallel-update race conditions
+  const processedDates = results
+    .filter(r => r.status === 'ok' || r.status === 'ecb_only' || r.status === 'skipped')
+    .map(r => r.date);
+  if (processedDates.length > 0) {
+    const finalIdx = await getBkamRatesIndex(env.REPORTS_KV);
+    let changed = false;
+    for (const d of processedDates) {
+      if (!finalIdx.includes(d)) { finalIdx.push(d); changed = true; }
+    }
+    if (changed) {
+      finalIdx.sort();
+      if (finalIdx.length > 500) finalIdx.splice(0, finalIdx.length - 500);
+      await setBkamRatesIndex(env.REPORTS_KV, finalIdx);
+    }
+  }
+
+  return json({ ok, ecb_only: ecbOnly, skipped, no_bkam_data: noBkam, errors, total: dates.length, results }, 200, origin);
+}
+
 // ─── Main fetch handler ───────────────────────────────────────────────────────
 
 export default {
@@ -1822,6 +1985,10 @@ export default {
     if (pathname === '/api/bkam-rates/history') {
       if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
       return handleGetBkamRatesHistory(request, env, origin);
+    }
+    if (pathname === '/api/bkam-rates/backfill') {
+      if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
+      return handleBkamRatesBackfill(request, env, origin);
     }
 
     // ── Drift history & band config ───────────────────────────────────────────
