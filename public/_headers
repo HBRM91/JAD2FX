@@ -1,6 +1,30 @@
 /*
-  X-Frame-Options: DENY
-  X-Content-Type-Options: nosniff
-  Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(), microphone=(), geolocation=()
-  X-XSS-Protection: 1; mode=block
+  Security headers (P1.18 hardening + OWASP baseline)
+  CSP tuned for a financial SPA: allows Plausible, Resend images, jad2advisory.
+  X-Frame-Options: deny clickjacking. Strict-Transport-Security forces HTTPS.
+  Referrer-Policy: only origin. Permissions-Policy: zero camera/mic/geo.
+  X-Content-Type-Options: no MIME sniffing. COOP/COEP for cross-origin isolation.
+  Cross-Origin-Resource-Policy: same-origin restricts asset embeds.
+*/
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+Cross-Origin-Resource-Policy: same-origin
+X-XSS-Protection: 1; mode=block
+Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://plausible.io https://*.jad2advisory.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev https://plausible.io https://api.aladhan.com https://api.tavily.com; frame-src https://calendly.com https://*.jad2advisory.com; worker-src 'self'; manifest-src 'self'
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*.svg
+  Cache-Control: public, max-age=86400
+
+/api/*
+  X-Robots-Tag: noindex

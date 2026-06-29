@@ -307,7 +307,12 @@ export default function PmeDiagnostic() {
         </button>
         {step < QUESTIONS.length - 1 ? (
           <button
-            onClick={() => setStep((s) => s + 1)}
+            onClick={() => {
+              if (typeof window !== 'undefined' && (window as any).plausible) {
+                (window as any).plausible('pme_diagnostic_step', { props: { step: step + 1 } });
+              }
+              setStep((s) => s + 1);
+            }}
             disabled={!answers[currentQ.id as keyof Answers]}
             className="flex items-center gap-1 px-4 py-2 bg-gold-500 text-navy-950 text-[12px] font-bold rounded-lg hover:bg-gold-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
@@ -315,7 +320,12 @@ export default function PmeDiagnostic() {
           </button>
         ) : (
           <button
-            onClick={() => setDone(true)}
+            onClick={() => {
+              if (typeof window !== 'undefined' && (window as any).plausible) {
+                (window as any).plausible('pme_diagnostic_complete', { props: { step: QUESTIONS.length } });
+              }
+              setDone(true);
+            }}
             disabled={!answers[currentQ.id as keyof Answers]}
             className="flex items-center gap-1 px-4 py-2 bg-gold-500 text-navy-950 text-[12px] font-bold rounded-lg hover:bg-gold-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >

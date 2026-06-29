@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { TrendingUp, ChevronDown, Calendar, AlertTriangle } from 'lucide-react';
 import { BKAM_CURRENCIES } from '../constants';
 
@@ -12,6 +12,14 @@ export default function QuarterlyHedge() {
   const [amountPerQ, setAmountPerQ] = useState<number>(250_000);
   const [spot, setSpot] = useState<number>(10.85);
   const [hedgeStrategy, setHedgeStrategy] = useState<'NONE' | 'FORWARD_3M' | 'FORWARD_ROLLING' | 'LAYERED'>('FORWARD_3M');
+
+  // P3.12 — Plausible funnel event
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).plausible) {
+      (window as any).plausible('tool_use', { props: { tool: 'quarterly_hedge', currency, strategy: hedgeStrategy } });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const quarters = useMemo(() => {
     const out = [];

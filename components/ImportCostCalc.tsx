@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+
 import { Calculator, TrendingUp, TrendingDown, AlertTriangle, FileText, Info } from 'lucide-react';
 import { BKAM_CURRENCIES } from '../constants';
 
@@ -11,13 +11,23 @@ import { BKAM_CURRENCIES } from '../constants';
  * payable in 90 days, what is my MAD exposure? How much would a 3M
  * forward save me if the MAD moves?"
  */
+import { useState, useMemo, useEffect } from 'react';
+
 export default function ImportCostCalc() {
   const [currency, setCurrency] = useState('EUR');
   const [amount, setAmount] = useState<number>(100_000);
   const [spotRate, setSpotRate] = useState<number>(10.85);
   const [daysUntil, setDaysUntil] = useState<number>(90);
-  const [forwardRate, setForwardRate] = useState<number>(10.91); // Default plausible forward
-  const [hedgePct, setHedgePct] = useState<number>(80); // % hedged via forward
+  const [forwardRate, setForwardRate] = useState<number>(10.91);
+  const [hedgePct, setHedgePct] = useState<number>(80);
+
+  // P3.12 — Plausible funnel event
+  useEffect(() => {
+    if (typeof window !== 'undefined' && (window as any).plausible) {
+      (window as any).plausible('tool_use', { props: { tool: 'import_cost_calc', currency, amount } });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const result = useMemo(() => {
     const spotCostMAD = amount * spotRate;

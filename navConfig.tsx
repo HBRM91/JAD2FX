@@ -1,7 +1,7 @@
 // Shared nav data — extracted from App.tsx so other components (command palette, etc.)
 // can use it without re-importing the whole App.
 
-import { Activity, Award, BarChart2, BookOpen, Building2, Code, Calculator, Calendar, ClipboardCheck, FileText, Headphones, LayoutDashboard, Newspaper, PackageOpen, Scale, Shield, TrendingUp, ArrowLeftRight, Banknote, ScrollText } from 'lucide-react';
+import { Activity, Award, BarChart2, BookOpen, Building2, Code, Calculator, Calendar, ClipboardCheck, FileText, Headphones, LayoutDashboard, Newspaper, PackageOpen, Scale, Shield, TrendingUp, ArrowLeftRight, Banknote, ScrollText, Layers } from 'lucide-react';
 
 export interface NavItem {
   label: string;
@@ -58,6 +58,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'Research Hub',             view: 'RESEARCH',        icon: BookOpen,     desc: '7 piliers · Recherche institutionnelle' },
       { label: 'Diagnostic OC',            view: 'TOOL_OC_ASSESS',  icon: Shield,       desc: 'Auto-évaluation Circ. OC 01/2024' },
       { label: 'Journal d\'Audit',         view: 'AUDIT_LOG',       icon: ScrollText,   desc: 'Traçabilité session · Export CSV · OC 01/2024' },
+      { label: 'Cockpit FX',              view: 'COCKPIT',         icon: Layers,       desc: 'Master flight cockpit · P&L · VaR · Alertes' },
       { label: 'Réglementation OC',        view: 'REGULATIONS',     icon: Scale,        desc: 'Circulaires · Instructions · Guides' },
       { label: 'À Propos JAD2',            view: 'ABOUT_JAD2',      icon: Building2,    desc: 'Statut · Services · Méthodologie' },
     ],

@@ -14,6 +14,7 @@ import DriftAlertChip     from './components/DriftAlertChip';
 import ContactForm        from './components/ContactForm';
 import CommandPalette     from './components/CommandPalette';
 import CheatSheet         from './components/CheatSheet';
+import NotFound           from './components/NotFound';
 import NewsletterSignup   from './components/NewsletterSignup';
 import { SkipToContent } from './utils/a11y';
 import Onboarding from './components/Onboarding';
@@ -24,6 +25,7 @@ const ForwardCalculator     = lazy(() => import('./components/ForwardCalculator'
 const SwapSimulator         = lazy(() => import('./components/SwapSimulator'));
 const LivePricer            = lazy(() => import('./components/LivePricer'));
 const AdminDashboard        = lazy(() => import('./components/AdminDashboard'));
+const AdminCockpit          = lazy(() => import('./components/AdminCockpit'));
 const BkamFixing            = lazy(() => import('./components/BkamFixing'));
 const BilletsPage           = lazy(() => import('./components/BilletsPage'));
 const CommoditiesPage       = lazy(() => import('./components/CommoditiesPage'));
@@ -156,6 +158,58 @@ function AppInner() {
   const [view, setView]             = useState<ViewState>('HOME');
   const [tickerRates, setTickerRates] = useState<LiveRate[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  // P4.16 — Dynamic per-view OG image & title (sets document head for SEO/sharing)
+  useEffect(() => {
+    const titles: Partial<Record<ViewState, string>> = {
+      HOME: 'JAD2FX — Conseil FX & Stratégie Maroc',
+      DASHBOARD: 'Tableau de Bord FX | JAD2FX',
+      FORWARDS: 'Forward Calculator & CIP | JAD2FX',
+      FIXING: 'Fixing Officiel BKAM | JAD2FX',
+      VOL_SURFACE: 'Surface de Volatilité G10-MAD | JAD2FX',
+      BANK_RATES: 'Comparatif 5 Banques Marocaines | JAD2FX',
+      COCKPIT: 'Cockpit FX — Desk de Trading | JAD2FX',
+      GLOSSARY: 'Glossaire FX & Marché Marocain | JAD2FX',
+      BLOG: 'Recherche & Analyses FX | JAD2FX',
+      REPORT: 'Morning Briefing FX | JAD2FX',
+      SERVICES: 'Services & Tarification | JAD2FX',
+      PRESS: 'Press Kit | JAD2FX',
+      API_DOCS: 'API Documentation | JAD2FX',
+      AUDIT_LANDING: 'Audit FX Gratuit 30min | JAD2FX',
+      QUARTERLY_OUTLOOK: 'MAD Quarterly Outlook Q2 2026 | JAD2FX',
+      AUDIT_LOG: 'Journal d\'Audit Trésorier | JAD2FX',
+    };
+    const subs: Partial<Record<ViewState, string>> = {
+      HOME: 'Terminal pédagogique · Bank Al-Maghrib',
+      DASHBOARD: 'Vue d\'ensemble 24 devises · P&L · Volatilité',
+      FORWARDS: 'CIP · Cubic spline · Holiday-aware T+2',
+      FIXING: 'Cours officiels Bank Al-Maghrib',
+      VOL_SURFACE: 'Smile · 25D risk reversal · ATM forward',
+      BANK_RATES: 'Attijariwafa · BP · BMCE · CIH · SG',
+      COCKPIT: 'P&L live · VaR 95% · Positions · Alertes',
+      GLOSSARY: '198 termes FX · MAD · OC',
+      BLOG: 'Recherche institutionnelle sur le MAD',
+      REPORT: 'Briefing quotidien · Stratégiste en chef',
+      SERVICES: '4 offres · Conseil · Formation · Audit · Automatisation',
+      PRESS: 'Logos · Bios · Assets',
+      API_DOCS: 'REST API · OpenAPI 3.0 · Clé gratuite',
+      AUDIT_LANDING: 'Conformité Circ. OC 01/2024',
+      QUARTERLY_OUTLOOK: 'Perspectives trimestrielles · Phosphate · Tourisme · MRE',
+      AUDIT_LOG: 'Traçabilité session · Export CSV',
+    };
+    const t = titles[view] ?? 'JAD2FX — Taux de Change MAD | Bank Al-Maghrib';
+    const s = subs[view] ?? 'Terminal pédagogique · Bank Al-Maghrib';
+    document.title = t;
+    const setMeta = (prop: string, val: string) => {
+      let el = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement | null;
+      if (!el) { el = document.createElement('meta'); el.setAttribute('property', prop); document.head.appendChild(el); }
+      el.content = val;
+    };
+    setMeta('og:title', t);
+    setMeta('og:description', s);
+    setMeta('og:url', `https://fx.jad2advisory.com/?view=${view}`);
+    setMeta('og:image', `https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev/og-image?title=${encodeURIComponent(t)}&subtitle=${encodeURIComponent(s)}`);
+  }, [view]);
   const [openGroup, setOpenGroup]   = useState<string | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [cheatsheetOpen, setCheatsheetOpen] = useState(false);
@@ -897,6 +951,8 @@ function AppInner() {
         )}
 
         {view === 'ADMIN'   && <AdminDashboard />}
+        {view === 'COCKPIT' && <AdminCockpit navTo={navTo} />}
+        {view === 'NOT_FOUND' && <NotFound variant="404" onRetry={() => navTo('HOME')} />}
 
         {view === 'CONTACT' && (
           <div className="space-y-6">

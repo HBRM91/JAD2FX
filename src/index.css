@@ -2,3 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 @import './light.css';
+
+/* ── Global financial-platform polish ─────────────────────────────────────── */
+/* High-DPI rendering, font optimization, smooth scrolling */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  /* Fast tap response on touch devices (no 300ms delay) */
+  touch-action: manipulation;
+  /* Prevent overscroll bounce on iOS */
+  overscroll-behavior-y: none;
+}
+
+body {
+  font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  /* Tabular nums for financial data alignment */
+  font-variant-numeric: tabular-nums;
+  -webkit-tap-highlight-color: transparent;
+  /* iOS safe area for notch devices */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* Tabular nums enforced everywhere (price tables, KPIs) */
+.font-mono, .tabular-nums, table, code, kbd {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Tablet (iPad) specific tuning — 768px to 1024px */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .container { max-width: 768px; }
+  h1 { font-size: 1.875rem; }
+  h2 { font-size: 1.5rem; }
+  /* Larger touch targets on tablet (44pt minimum) */
+  button, a[role="button"], [role="button"] { min-height: 40px; }
+}
+
+/* Mobile — under 768px */
+@media (max-width: 767px) {
+  /* Slightly larger base font for readability on small screens */
+  body { font-size: 15px; }
+  /* Compact table cells */
+  .compact-table th, .compact-table td { padding: 0.4rem 0.5rem; }
+}
+
+/* High-DPI / Retina support for SVG and icons */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  img, svg { image-rendering: -webkit-optimize-contrast; }
+}
+
+/* Reduce motion for users who prefer it (a11y) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus-visible for keyboard nav (financial platforms must be keyboard-friendly) */
+:focus-visible {
+  outline: 2px solid #D4AF37;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Selection color matching brand */
+::selection {
+  background: #D4AF37;
+  color: #040C1C;
+}
