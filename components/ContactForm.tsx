@@ -67,6 +67,9 @@ export default function ContactForm() {
 
       setStatus('success');
       setForm({ name: '', email: '', company: '', service: '', message: '' });
+      if (typeof window !== 'undefined' && (window as any).plausible) {
+        (window as any).plausible('contact_submit', { props: { service: form.service, source: 'contact_form' } });
+      }
     } catch (err) {
       setStatus('error');
       setErrorMsg(err instanceof Error ? err.message : 'Erreur inattendue — réessayez plus tard');

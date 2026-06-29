@@ -1,43 +1,78 @@
-import { useState } from 'react';
-import { Banknote, ArrowUpDown, ExternalLink, Building2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Banknote, ArrowUpDown, ExternalLink, Building2, RefreshCw } from 'lucide-react';
 import { BKAM_CURRENCIES } from '../constants';
+import { Skeleton } from './Skeleton';
 
 /**
  * P1.8 — Bank quotes comparison page.
- * Synthetic display of 5 Moroccan banks' indicative EUR/MAD quotes.
- * In production: real quotes from a licensed FX data aggregator.
+ * Fetches indicative quotes from worker /v1/bank-quotes (KV-cached, refreshed
+ * daily by cron). Falls back to local synthetic quotes when worker offline.
  */
 
 const BANKS = [
-  { id: 'attijariwafa', name: 'Attijariwafa Bank',      emoji: '🏛️', color: 'text-blue-400' },
-  { id: 'bp',           name: 'Banque Populaire',      emoji: '🏛️', color: 'text-emerald-400' },
-  { id: 'bmce',         name: 'BMCE (Bank of Africa)', emoji: '🏛️', color: 'text-amber-400' },
-  { id: 'cih',          name: 'CIH Bank',              emoji: '🏛️', color: 'text-purple-400' },
+  { id: 'attijariwafa', name: 'Attijariwafa Bank',       emoji: '🏛️', color: 'text-blue-400' },
+  { id: 'bp',           name: 'Banque Populaire',       emoji: '🏛️', color: 'text-emerald-400' },
+  { id: 'bmce',         name: 'BMCE (Bank of Africa)',  emoji: '🏛️', color: 'text-amber-400' },
+  { id: 'cih',          name: 'CIH Bank',               emoji: '🏛️', color: 'text-purple-400' },
   { id: 'sg',           name: 'Société Générale Maroc', emoji: '🏛️', color: 'text-red-400' },
 ];
 
-/** Indicative quotes — synthetic spread pattern around mid. */
-function getBankQuote(currency: string, mid: number, bankId: string): { bid: number; ask: number } {
-  // Bank-specific spread premium (bps) — synthetic
-  const premiums: Record<string, number> = {
-    attijariwafa: 0.10,
-    bp: 0.12,
-    bmce: 0.15,
-    cih: 0.18,
-    sg: 0.08,
-  };
-  const p = premiums[bankId] || 0.10;
+/** Local fallback quotes — used when worker is offline. */
+const FALLBACK_MID: Record<string, number> = {
+  EUR: 10.85, USD: 9.95, GBP: 12.59, JPY: 6.66, CHF: 11.46, CAD: 7.32,
+};
+const FALLBACK_PREMIUMS: Record<string, number> = {
+  attijariwafa: 0.0010, bp: 0.0012, bmce: 0.0015, cih: 0.0018, sg: 0.0008,
+};
+
+function getLocalQuote(currency: string, bankId: string): { bid: number; ask: number; spreadBps: number } {
+  const mid = FALLBACK_MID[currency] || 10.85;
+  const p = FALLBACK_PREMIUMS[bankId] || 0.001;
   const half = (mid * p) / 2;
-  return { bid: +(mid - half).toFixed(4), ask: +(mid + half).toFixed(4) };
+  const bid = +(mid - half).toFixed(4);
+  const ask = +(mid + half).toFixed(4);
+  const spreadBps = +(((ask - bid) / mid) * 10000).toFixed(1);
+  return { bid, ask, spreadBps };
 }
 
 export default function BankRatesPage() {
   const [currency, setCurrency] = useState('EUR');
-  // Use a synthetic mid — in production read from live ticker
-  const midMap: Record<string, number> = {
-    EUR: 10.85, USD: 9.95, GBP: 12.59, JPY: 6.66, CHF: 11.46, CAD: 7.32,
-  };
-  const mid = midMap[currency] || 10.85;
+  const [remoteQuotes, setRemoteQuotes] = useState<Record<string, { bid: number; ask: number; spreadBps: number; name: string }> | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [generatedAt, setGeneratedAt] = useState<string | null>(null);
+
+  useEffect(() => {
+    const base = (import.meta as any).env?.VITE_API_BASE
+      || (typeof window !== 'undefined' && (window as any).__JAD2_API__)
+      || 'https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev';
+    fetch(`${base}/v1/bank-quotes?pair=${currency}/MAD`)
+      .then(r => r.json())
+      .then(d => {
+        if (d && d.quotes && d.quotes.banks) {
+          const map: Record<string, any> = {};
+          for (const b of d.quotes.banks) {
+            map[b.id] = { bid: b.bid, ask: b.ask, spreadBps: b.spreadBps, name: b.name };
+          }
+          setRemoteQuotes(map);
+          setGeneratedAt(d.generatedAt || null);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [currency]);
+
+  if (loading && !remoteQuotes) {
+    return (
+      <div className="space-y-4 max-w-4xl mx-auto p-4">
+        <Skeleton className="h-12 w-full" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  const mid = remoteQuotes && Object.values(remoteQuotes)[0]
+    ? (Object.values(remoteQuotes)[0] as any).bid + ((Object.values(remoteQuotes)[0] as any).spreadBps * 0.0001 * (remoteQuotes && Object.values(remoteQuotes)[0] ? (Object.values(remoteQuotes)[0] as any).bid : 10) / 2)
+    : FALLBACK_MID[currency] || 10.85;
 
   return (
     <div className="space-y-4 max-w-4xl mx-auto">
@@ -57,7 +92,7 @@ export default function BankRatesPage() {
       {/* Currency selector */}
       <div className="bg-navy-900 border border-navy-700 rounded-xl p-3 flex items-center gap-3 flex-wrap">
         <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">CCY / MAD</span>
-        {Object.keys(midMap).map((c) => (
+        {Object.keys(FALLBACK_MID).map((c) => (
           <button
             key={c}
             onClick={() => setCurrency(c)}
@@ -76,7 +111,9 @@ export default function BankRatesPage() {
       <div className="bg-navy-900 border border-gold-700/40 rounded-xl p-4 text-center">
         <p className="text-[10px] text-slate-500 uppercase tracking-wider">Mid de référence</p>
         <p className="text-3xl font-bold font-mono text-gold-400 mt-1">{mid.toFixed(4)}</p>
-        <p className="text-[10px] text-slate-500 mt-1">{currency}/MAD · indicatif</p>
+        <p className="text-[10px] text-slate-500 mt-1">
+          {currency}/MAD · {generatedAt ? `mis à jour ${new Date(generatedAt).toLocaleString('fr-MA')}` : 'indicatif'}
+        </p>
       </div>
 
       {/* Bank comparison table */}
@@ -93,8 +130,8 @@ export default function BankRatesPage() {
           </thead>
           <tbody className="divide-y divide-navy-800">
             {BANKS.map((bank) => {
-              const q = getBankQuote(currency, mid, bank.id);
-              const spreadBps = +(((q.ask - q.bid) / mid) * 10000).toFixed(1);
+              const q = remoteQuotes?.[bank.id] || getLocalQuote(currency, bank.id);
+              const spreadBps = q.spreadBps;
               const cost = +((q.ask - mid) * 100000).toFixed(0);
               return (
                 <tr key={bank.id} className="hover:bg-navy-800/30">

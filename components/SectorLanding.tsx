@@ -13,13 +13,16 @@ export interface SectorConfig {
   description: string;
   primaryCurrency: string;   // e.g. 'EUR'
   primaryCountry: string;    // e.g. 'eu'
-  secondaryCurrencies: Array<{ code: string; cc: string; role: string }>;
+    secondaryCurrencies: Array<{ code: string; cc: string; role: string; label?: string }>;
   exposureType: string;
   keyRisk: string;
   keyRiskDetail: string;
   ocRelevance: string;
   ocArticle: string;
   watchpoints: string[];
+  exposure?: string;
+  challenges?: string[];
+  solutions?: string[];
 }
 
 export const SECTORS: SectorConfig[] = [
@@ -122,6 +125,31 @@ export const SECTORS: SectorConfig[] = [
       'Prix blé Chicago (ZW=F) : corrélation avec tensions géopolitiques (Ukraine)',
       'Prix sucre ICE (SB=F) : COSUMAR et transformateurs directement exposés',
       'BRL/MAD : alternative brésilienne au soja américain (prix et change)',
+    ],
+  },
+  {
+    id: 'phosphate',
+    badge: 'Phosphates & Mining',
+    badgeStyle: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30',
+    title: 'Phosphates & Mining — Exposition USD Massive, Couverture >120M EUR',
+    subtitle: 'OCP & sous-traitants · Khouribga · Youssoufia · Jorf Lasfar',
+    description: 'Le secteur phosphates marocain (OCP et sous-traitants) exporte massivement en USD (98% du CA). La conversion vers MAD pour les coûts opérationnels (énergie, salaires, fournitures) crée une exposition USD/MAD structurelle massive. La stratégie de couverture combine forwards, conservation en CDE/CPEC et options pour gérer des maturités longues non couvertes par les banques.',
+    primaryCurrency: 'USD',
+    primaryCountry: 'us',
+    secondaryCurrencies: [
+      { code: 'EUR', cc: 'eu', role: 'Equipement', label: 'EUR · Équipement industriel (Allemagne, France)' },
+      { code: 'CNY', cc: 'cn', role: 'Composants', label: 'CNY · Composants chimiques' },
+    ],
+    exposureType: 'USD (98% CA) · 1.5-2 Md USD/an (OCP) · 50-200M USD/an (sous-traitants)',
+    keyRisk: 'Couverture >12M refusée par les banques · Couts en MAD, CA en USD',
+    keyRiskDetail: 'Forwards 12M refusés par les banques (ligne insuffisante). Couverture rollée 3M mais exposition résiduelle structurelle. Volatilité USD/MAD peut faire varier le résultat consolidé de 5-8% sur un trimestre.',
+    ocRelevance: 'Circ. 3/2019 · CDE/CPEC · IFRS 9',
+    ocArticle: 'CDE/CPEC pour conservation 70% recettes export (Circ. 3/2019). Forwards 12-24M non accessibles directement — utiliser CCS ou options exotiques auprès de la BMCE. Hedge accounting IFRS 9 requis pour couverture >12 mois.',
+    watchpoints: [
+      'USD/MAD : exposition directe et massive (volume × variation)',
+      'Prix DAP/TSP (engrais) sur les marchés mondiaux : corrélation prix × change',
+      'Spread OAT 10Y Maroc vs UST 10Y : indicateur souverain du risque de change',
+      'Demande indienne et brésilienne (DAP) : impact sur le pricing power',
     ],
   },
 ];

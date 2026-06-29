@@ -22,6 +22,7 @@ import { getDefaultCurve, FORWARD_TENORS } from '../services/interestRates';
 import { useAdmin } from '../context/AdminContext';
 import { useI18n } from '../context/I18nContext';
 import { logSimTelemetry } from '../services/telemetry';
+import TimeWindowSelector, { getStartDateForWindow, type TimeWindow } from './TimeWindowSelector';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -515,6 +516,71 @@ function MtmSection({ spot, currency }: { spot: number; currency: string }) {
   );
 }
 
+// ─── P2.8 — Historical Comparison Section ─────────────────────────────────────
+// Compare a currency's theoretical forward across multiple time windows.
+function HistoricalComparisonSection({ currency }: { currency: string }) {
+  const [window, setWindow] = useState<TimeWindow>('1M');
+  const startDate = useMemo(() => getStartDateForWindow(window), [window]);
+
+  // Theoretical forward points: change from spot = (r_dom - r_for) × days/360
+  const MAD_RATE = 0.0275;
+  const CCY_RATES: Record<string, number> = { EUR: 0.04, USD: 0.0475, GBP: 0.045, JPY: 0.005, CHF: 0.0275, CAD: 0.038, AUD: 0.041, CNY: 0.0295 };
+  const spotMap: Record<string, number> = { EUR: 10.85, USD: 9.95, GBP: 12.59, JPY: 6.66, CHF: 11.46, CAD: 7.32, AUD: 6.42, CNY: 1.37 };
+  const rForeign = CCY_RATES[currency] ?? 0.04;
+  const spot = spotMap[currency] ?? 10;
+  const daysSince = (d: Date) => Math.max(1, Math.floor((Date.now() - d.getTime()) / 86400000));
+
+  const rows = useMemo(() => {
+    return [1, 7, 30, 60, 90, 180, 365, 730].map(d => {
+      const fwdRate = spot * (1 + (MAD_RATE - rForeign) * d / 360);
+      const fwdPoints = fwdRate - spot;
+      return { d, fwdRate, fwdPoints, isInWindow: d <= daysSince(startDate) };
+    });
+  }, [spot, rForeign, startDate]);
+
+  return (
+    <div className="space-y-4 mt-4">
+      <div className="flex items-center gap-3 flex-wrap">
+        <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Fenêtre:</span>
+        <TimeWindowSelector value={window} onChange={setWindow} />
+        <span className="text-[10px] text-slate-500">
+          depuis {startDate.toLocaleDateString('fr-MA')}
+        </span>
+      </div>
+
+      <div className="bg-navy-900 border border-navy-700 rounded-xl overflow-hidden">
+        <table className="w-full text-xs">
+          <thead className="bg-navy-950">
+            <tr className="text-[9px] text-slate-500 uppercase tracking-wider">
+              <th className="px-3 py-2 text-left">Tenor</th>
+              <th className="px-3 py-2 text-right">Forward théorique</th>
+              <th className="px-3 py-2 text-right">Points forward</th>
+              <th className="px-3 py-2 text-right">Bande (r_d - r_f)</th>
+              <th className="px-3 py-2 text-right">Dans la fenêtre</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-navy-800">
+            {rows.map(r => (
+              <tr key={r.d} className={r.isInWindow ? 'bg-gold-500/5' : ''}>
+                <td className="px-3 py-2 font-mono text-slate-200">{r.d}J</td>
+                <td className="px-3 py-2 text-right font-mono text-gold-400">{r.fwdRate.toFixed(4)}</td>
+                <td className="px-3 py-2 text-right font-mono text-emerald-400">{(r.fwdPoints >= 0 ? '+' : '')}{r.fwdPoints.toFixed(4)}</td>
+                <td className="px-3 py-2 text-right font-mono text-slate-400">{((MAD_RATE - rForeign) * 10000).toFixed(0)} bps</td>
+                <td className="px-3 py-2 text-right text-slate-400">{r.isInWindow ? '✓' : '—'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="text-[10px] text-slate-500 leading-relaxed">
+        Forward théorique calculé par parité des taux d&apos;intérêt couverte (CIP): F = S × (1 + r_d × T) − S.
+        Taux domestiques: BAM 2.75% · Taux étranger variable par devise. Fenêtre sélectionnée met en surbrillance les maturités disponibles.
+      </p>
+    </div>
+  );
+}
+
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 export default function ForwardCalculator() {
@@ -644,6 +710,7 @@ export default function ForwardCalculator() {
           <TabButton active={activeTab === 'CURVE'}  onClick={() => setActiveTab('CURVE')}>{tabCurve}</TabButton>
           <TabButton active={activeTab === 'MTM'}    onClick={() => setActiveTab('MTM')}>{tabMtm}</TabButton>
           <TabButton active={activeTab === 'SPREADS' as any} onClick={() => setActiveTab('SPREADS' as any)}>{locale === 'ar' ? '??????' : locale === 'en' ? 'Spreads' : 'Spreads'}</TabButton>
+          <TabButton active={activeTab === 'HISTORICAL' as any} onClick={() => setActiveTab('HISTORICAL' as any)}>{locale === 'ar' ? 'تاريخي' : locale === 'en' ? 'Historical' : 'Historique'}</TabButton>
         </div>
       </div>
 
@@ -966,6 +1033,11 @@ export default function ForwardCalculator() {
         {/* ── MTM TAB ── */}
         {activeTab === 'MTM' && (
           <MtmSection spot={spot} currency={currency} />
+        )}
+
+        {/* ── HISTORICAL TAB (P2.8) ── */}
+        {activeTab === ('HISTORICAL' as any) && (
+          <HistoricalComparisonSection currency={currency} />
         )}
         {activeTab === 'SPREADS' && (
           <SpreadsTab spot={spot} currency={currency} />

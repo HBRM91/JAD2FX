@@ -54,6 +54,9 @@ export default function NewsletterSignup({ proxyUrl, variant = 'card', source, d
         setStatus('success');
         setMessage('Merci ! Vérifiez votre boîte mail pour confirmer.');
         try { localStorage.setItem('jad2fx_newsletter_subscribed', '1'); } catch { /* ignore */ }
+        if (typeof window !== 'undefined' && (window as any).plausible) {
+          (window as any).plausible('newsletter_subscribe', { props: { source: 'signup_form' } });
+        }
       } else {
         throw new Error(data.message ?? 'Erreur');
       }

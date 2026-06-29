@@ -13,6 +13,7 @@ import DisclaimerModal    from './components/DisclaimerModal';
 import DriftAlertChip     from './components/DriftAlertChip';
 import ContactForm        from './components/ContactForm';
 import CommandPalette     from './components/CommandPalette';
+import CheatSheet         from './components/CheatSheet';
 import NewsletterSignup   from './components/NewsletterSignup';
 import { SkipToContent } from './utils/a11y';
 import Onboarding from './components/Onboarding';
@@ -66,6 +67,7 @@ import ThemeToggle from './components/ThemeToggle';
 // P3 — Funnel + social proof
 const ServicesPage          = lazy(() => import('./components/ServicesPage'));
 const AuditLanding          = lazy(() => import('./components/AuditLanding'));
+const AuditLog              = lazy(() => import('./components/AuditLog'));
 const SectorCaseStudy       = lazy(() => import('./components/SectorCaseStudy'));
 const SocialProofModule     = lazy(() => import('./components/SocialProof'));
 const WhatsAppButton        = lazy(() => import('./components/WhatsAppButton'));
@@ -156,15 +158,24 @@ function AppInner() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openGroup, setOpenGroup]   = useState<string | null>(null);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [cheatsheetOpen, setCheatsheetOpen] = useState(false);
   const { t, locale, setLocale, isRTL } = useI18n();
   const navDropdownRef = useRef<HTMLDivElement>(null);
 
-  // P2.3 — Global Cmd/Ctrl+K to open command palette
+  // P2.3 + P2.12 — Global keyboard shortcuts: Cmd+K (palette), ? (cheatsheet), h, etc.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable) return;
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
         setPaletteOpen((o) => !o);
+        return;
+      }
+      if (e.key === '?' || (e.key === 'h' && !e.metaKey && !e.ctrlKey)) {
+        e.preventDefault();
+        setCheatsheetOpen((o) => !o);
+        return;
       }
     };
     document.addEventListener('keydown', onKey);
@@ -245,6 +256,7 @@ function AppInner() {
         onClose={() => setPaletteOpen(false)}
         onNavigate={(v) => navTo(v as ViewState)}
       />
+      <CheatSheet open={cheatsheetOpen} onClose={() => setCheatsheetOpen(false)} />
       <ExitIntentModal />
       <WhatsAppButton />
       <Onboarding />
@@ -861,6 +873,7 @@ function AppInner() {
         {view === 'QUARTERLY_OUTLOOK' && <QuarterlyOutlook />}
         {view === 'SERVICES' && <ServicesPage />}
         {view === 'AUDIT_LANDING' && <AuditLanding />}
+        {view === 'AUDIT_LOG' && <AuditLog />}
         {view === 'TESTIMONIALS' && <SocialProofModule />}
         {view === 'VOL_SURFACE' && <VolSurfacePage />}
         {view === 'MONEY_MARKET' && <MoneyMarketPage />}
@@ -872,6 +885,7 @@ function AppInner() {
         {view === 'SECTOR_TEXTILE'  && <SectorLanding sectorId="textile"  navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_NORDIQUE' && <SectorLanding sectorId="nordique" navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_AGRI'     && <SectorLanding sectorId="agri"     navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
+        {view === 'SECTOR_PHOSPHATE' && <SectorLanding sectorId="phosphate" navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
 
         {view === 'LIVE' && (
           <div className="space-y-6">

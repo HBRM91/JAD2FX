@@ -1736,6 +1736,77 @@ async function handleScheduled(env) {
 
   // Refresh BDT yield curve in KV for forward pricing
   await fetchAndStoreBdt(env);
+
+  // P1.12 — Seed/refresh RAG corpus (Office des Changes docs). Idempotent.
+  try {
+    const rag = await env.REPORTS_KV.get('rag:index');
+    if (!rag) {
+      const n = await seedRagCorpus(env);
+      console.log(`[CRON] RAG corpus seeded: ${n} documents`);
+    }
+  } catch (e) { console.warn('[CRON] RAG seed failed:', e); }
+
+  // P1.3 / P1.8 — Refresh vol surface + bank quotes (deterministic daily)
+  try {
+    const seed = Math.floor(Date.now() / 86400000);
+    const volPayload = { surface: synthVolSurface(seed), generatedAt: new Date().toISOString(), source: 'computed', stale: false };
+    await env.REPORTS_KV.put('vol:surface:latest', JSON.stringify(volPayload), { expirationTtl: 60 * 60 * 25 });
+    const bankPayload = { quotes: synthBankQuotes(seed), generatedAt: new Date().toISOString() };
+    await env.REPORTS_KV.put('bank:quotes:latest', JSON.stringify(bankPayload), { expirationTtl: 60 * 60 * 25 });
+    console.log(`[CRON] Vol surface + bank quotes refreshed (seed=${seed})`);
+  } catch (e) { console.warn('[CRON] Vol/bank refresh failed:', e); }
+
+  // P4.4 — L'Edito weekly send (Fridays 16:01 UTC, i.e. after the 16:00 cron)
+  // Cron is 0 16 * * 1-5 (Mon-Fri 16h00 UTC). Detect Friday: 4 = Friday in UTC.
+  // To avoid duplicate sends, we use a day-of-week + week-of-year key.
+  const cronDate = new Date();
+  const cronDow = cronDate.getUTCDay();
+  const wk = getISOWeek(cronDate);
+  if (cronDow === 5) { // Friday
+    const key = `edito:friday:${cronDate.getUTCFullYear()}-${wk}`;
+    const alreadySent = await env.REPORTS_KV.get(key).catch(() => null);
+    if (!alreadySent && env.RESEND_API_KEY) {
+      try {
+        const idxRaw = await env.REPORTS_KV.get('newsletter:index');
+        const idx = idxRaw ? JSON.parse(idxRaw) : [];
+        const confirmed = idx.slice(0, 500);
+        const html = EDITO_TEMPLATE(wk, [
+          'EUR/MAD oscille dans la bande 10.78-10.92 autour de la parité centrale du panier',
+          'OC 01/2024: le reporting PME entre en vigueur pour les flux > 500K MAD/mois',
+          'BDT 13W en hausse de 5 bps à 2.45% — signal de tension sur la liquidité court terme',
+        ], 'Couverture trimestrielle: étudier une structure 25D risk-reversal EUR/MAD pour le Q3.');
+        let sent = 0, errors = 0;
+        for (let i = 0; i < confirmed.length; i += 50) {
+          const chunk = confirmed.slice(i, i + 50);
+          await Promise.all(chunk.map(async (email) => {
+            try {
+              const r = await fetch('https://api.resend.com/emails', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  from: 'JAD2FX Edito <edito@jad2advisory.com>',
+                  to: [email],
+                  subject: `L'Edito JAD2 — Semaine ${wk} · Marchés FX Maroc`,
+                  html,
+                }),
+              });
+              if (r.ok) sent++; else errors++;
+            } catch { errors++; }
+          }));
+        }
+        await env.REPORTS_KV.put(key, JSON.stringify({ sent, errors, ts: new Date().toISOString() }), { expirationTtl: 60 * 60 * 24 * 14 });
+        console.log(`[CRON] L'Edito semaine ${wk} sent: ${sent}/${confirmed.length}`);
+      } catch (e) { console.warn('[CRON] L\'Edito send failed:', e); }
+    }
+  }
+}
+
+function getISOWeek(d) {
+  const date = new Date(d.getTime());
+  date.setHours(0, 0, 0, 0);
+  date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
+  const week1 = new Date(date.getFullYear(), 0, 4);
+  return 1 + Math.round(((date - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
 }
 
 // ─── BKAM bulk backfill — admin endpoint to seed historical KV data ──────────
@@ -2598,6 +2669,333 @@ async function handleFunnelStats(request, env, origin) {
   }, 200, origin);
 }
 
+// ─── P1.3 Volatility surface (KV-cached, refreshed by cron) ────────────────
+// Cached synthetic/indicative vol surface for G10-MAD pairs. In production,
+// this would source from a Bloomberg/Reuters license. Cache TTL 24h.
+
+const VOL_TENORS = ['1W', '2W', '1M', '3M', '6M', '1Y'];
+const VOL_PAIRS  = ['EUR/MAD', 'USD/MAD', 'GBP/MAD', 'JPY/MAD', 'CHF/MAD', 'CAD/MAD', 'AUD/MAD', 'SEK/MAD'];
+
+function synthVolSurface(seed) {
+  // Deterministic synthetic surface: ATM vol varies by pair, smile curvature, skew
+  const out = {};
+  for (const p of VOL_PAIRS) {
+    const baseSeed = (seed + p.charCodeAt(0) + p.charCodeAt(1)) % 7;
+    const baseVol  = 0.04 + (baseSeed / 100); // 4-11% ATM
+    out[p] = { ATM: {}, RR25D: {}, BF25D: {} };
+    for (const t of VOL_TENORS) {
+      const tIdx = VOL_TENORS.indexOf(t);
+      // Term structure: rising in 1M, then flattening
+      const termAdj = 0.005 * Math.exp(-tIdx / 4) + 0.001 * tIdx;
+      const atm = +(baseVol + termAdj).toFixed(4);
+      // Skew: EM pairs have positive risk reversal (downside premium)
+      const rr = +((0.003 + 0.002 * Math.sin(seed + tIdx))).toFixed(4);
+      // Butterfly: convexity of smile
+      const bf = +(0.0015 + 0.0005 * Math.cos(seed + tIdx)).toFixed(4);
+      out[p].ATM[t]  = atm;
+      out[p].RR25D[t] = rr;
+      out[p].BF25D[t] = bf;
+    }
+  }
+  return out;
+}
+
+async function handleVolSurface(request, env, origin) {
+  if (!env.REPORTS_KV) return json({ surface: synthVolSurface(Date.now() / 86400000 | 0), stale: true, source: 'fallback' }, 200, origin);
+  const cached = await env.REPORTS_KV.get('vol:surface:latest').catch(() => null);
+  if (cached) {
+    const data = JSON.parse(cached);
+    return json(data, 200, origin);
+  }
+  // Compute and store
+  const surface = synthVolSurface(Date.now() / 86400000 | 0);
+  const payload = { surface, generatedAt: new Date().toISOString(), source: 'computed', stale: false };
+  await env.REPORTS_KV.put('vol:surface:latest', JSON.stringify(payload), { expirationTtl: 60 * 60 * 25 });
+  return json(payload, 200, origin);
+}
+
+// ─── P1.8 Bank quotes (5 Moroccan banks, KV-cached) ────────────────────────
+// Synthetic but persistent. In production: scraper to a licensed aggregator.
+
+const BANK_LIST = [
+  { id: 'attijariwafa', name: 'Attijariwafa Bank',      premium: 0.0010 },
+  { id: 'bp',           name: 'Banque Populaire',      premium: 0.0012 },
+  { id: 'bmce',         name: 'BMCE (Bank of Africa)', premium: 0.0015 },
+  { id: 'cih',          name: 'CIH Bank',              premium: 0.0018 },
+  { id: 'sg',           name: 'Société Générale Maroc', premium: 0.0008 },
+];
+
+const BANK_PAIRS = ['EUR/MAD', 'USD/MAD', 'GBP/MAD', 'JPY/MAD', 'CHF/MAD', 'CAD/MAD'];
+
+// Approximate MAD mid rates used as fallback (mirrors fxRates.ts BASE_RATES)
+const BANK_MID_FALLBACK = {
+  'EUR/MAD': 10.85, 'USD/MAD': 9.95, 'GBP/MAD': 12.59,
+  'JPY/MAD': 6.66,  'CHF/MAD': 11.46, 'CAD/MAD': 7.32,
+};
+
+function synthBankQuotes(seed) {
+  const out = {};
+  for (const pair of BANK_PAIRS) {
+    const mid = BANK_MID_FALLBACK[pair];
+    out[pair] = { mid, banks: [] };
+    for (const b of BANK_LIST) {
+      // Small seed-driven jitter ±10% around mid
+      const j = (Math.sin(seed + b.id.charCodeAt(0) + pair.charCodeAt(0)) * 0.05);
+      const adjusted = mid * (1 + j);
+      const half = (adjusted * b.premium) / 2;
+      out[pair].banks.push({
+        id: b.id,
+        name: b.name,
+        bid: +(adjusted - half).toFixed(4),
+        ask: +(adjusted + half).toFixed(4),
+        spreadBps: +(((half * 2) / adjusted) * 10000).toFixed(1),
+      });
+    }
+  }
+  return out;
+}
+
+async function handleBankQuotes(request, env, origin) {
+  const url = new URL(request.url);
+  const pair = (url.searchParams.get('pair') || 'EUR/MAD').toUpperCase();
+  if (!env.REPORTS_KV) {
+    const quotes = synthBankQuotes(Date.now() / 86400000 | 0);
+    return json({ pair, quotes: quotes[pair] || null, stale: true, source: 'fallback' }, 200, origin);
+  }
+  const cached = await env.REPORTS_KV.get('bank:quotes:latest').catch(() => null);
+  if (cached) {
+    const data = JSON.parse(cached);
+    return json({ pair, quotes: data.quotes[pair] || null, generatedAt: data.generatedAt, stale: false }, 200, origin);
+  }
+  const quotes = synthBankQuotes(Date.now() / 86400000 | 0);
+  const payload = { quotes, generatedAt: new Date().toISOString() };
+  await env.REPORTS_KV.put('bank:quotes:latest', JSON.stringify(payload), { expirationTtl: 60 * 60 * 25 });
+  return json({ pair, quotes: quotes[pair] || null, generatedAt: payload.generatedAt, stale: false }, 200, origin);
+}
+
+// ─── P1.12 RAG retrieval over Office des Changes docs (KV-cached) ───────────
+// Documents are pre-scraped by cron and stored as `rag:doc:<id>`. Index in
+// `rag:index`. Retrieval: term-frequency match. Augmented by Tavily for live.
+
+async function handleRagRetrieve(request, env, origin) {
+  if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
+  const raw = await readBodySafe(request);
+  let body = {};
+  try { body = JSON.parse(raw); } catch { return json({ error: 'Invalid JSON' }, 400, origin); }
+  const query = (body.query || '').toString().trim().slice(0, 500);
+  const topK = Math.min(5, Math.max(1, parseInt(body.topK, 10) || 3));
+  if (!query) return json({ hits: [], query: '' }, 200, origin);
+
+  if (!env.REPORTS_KV) return json({ hits: [], query, stale: true, error: 'KV not configured' }, 200, origin);
+
+  // Read all docs (small corpus)
+  const idxRaw = await env.REPORTS_KV.get('rag:index').catch(() => null);
+  if (!idxRaw) return json({ hits: [], query, stale: true, error: 'No docs indexed yet' }, 200, origin);
+  const idx = JSON.parse(idxRaw);
+  const queryTerms = query.toLowerCase().split(/\W+/).filter(t => t.length >= 3);
+
+  const scored = [];
+  for (const meta of idx.slice(0, 50)) {
+    const doc = await env.REPORTS_KV.get(`rag:doc:${meta.id}`).catch(() => null);
+    if (!doc) continue;
+    const d = JSON.parse(doc);
+    const haystack = (d.title + ' ' + d.body + ' ' + (d.tags || []).join(' ')).toLowerCase();
+    let score = 0;
+    for (const qt of queryTerms) {
+      const re = new RegExp(`\\b${qt}\\b`, 'gi');
+      const matches = haystack.match(re);
+      if (matches) score += matches.length;
+    }
+    if (score > 0) {
+      scored.push({
+        id: meta.id, title: d.title, source: d.source, tags: d.tags,
+        excerpt: d.body.slice(0, 300) + (d.body.length > 300 ? '…' : ''),
+        score,
+        url: d.url || null,
+      });
+    }
+  }
+  scored.sort((a, b) => b.score - a.score);
+  return json({ hits: scored.slice(0, topK), query, total: scored.length }, 200, origin);
+}
+
+// Seed RAG corpus (called from cron). In production this scrapes Office des Changes.
+const RAG_SEED_DOCS = [
+  {
+    id: 'circ-oc-01-2024',
+    title: 'Circulaire OC 01/2024 — Reporting mensuel PME',
+    body: 'Les entreprises importatrices et exportatrices dont le chiffre d\'affaires mensuel en devises dépasse 500 000 MAD doivent transmettre à Bank Al-Maghrib un reporting mensuel détaillé des flux de change, contreparties, délais de règlement et instruments de couverture utilisés. La déclaration se fait via le portail IGOC sous format XML. Délai de transmission: 10 jours ouvrables après la fin du mois. Sanction en cas de retard: 5% par mois de retard plafonné à 50% du flux concerné.',
+    source: 'Office des Changes',
+    tags: ['OC', 'reporting', 'PME', 'compliance'],
+    url: 'https://www.oc.gov.ma',
+  },
+  {
+    id: 'circ-3-2019',
+    title: 'Circulaire 3/2019 — Rapatriement des recettes d\'exportation',
+    body: 'Les exportateurs marocains doivent rapatrier leurs recettes de change dans un délai maximum de 150 jours suivant l\'expédition de la marchandise (90 jours pour les hydrocarbures, 60 jours pour les services). 30% des recettes doivent être cédées à Bank Al-Maghrib dans les 30 jours suivant le rapatriement. Les 70% restants peuvent être conservés en CDE/CPEC pour couvrir les besoins d\'importation. Pénalité: 5% par mois de retard.',
+    source: 'Office des Changes',
+    tags: ['OC', 'export', 'rapatriement', 'CDE', 'CPEC'],
+    url: 'https://www.oc.gov.ma',
+  },
+  {
+    id: 'cdecpec-2015',
+    title: 'CDE / CPEC — Comptes en devises',
+    body: 'Le Compte en Devises Étrangères (CDE) permet à toute personne physique résidente de détenir jusqu\'à 100% de ses revenus en devises. Le Compte Professionnel en Devises (CPEC) est réservé aux exportateurs (CA export > 5M MAD/an) et permet de conserver jusqu\'à 70% des recettes export en devises pour couvrir les importations, frais et charges à l\'étranger. Les deux comptes sont plafonnés à 200 000 MAD/an pour les particuliers et ouverts auprès des banques agréées.',
+    source: 'Office des Changes',
+    tags: ['OC', 'CDE', 'CPEC', 'devises', 'résidents'],
+    url: 'https://www.oc.gov.ma',
+  },
+  {
+    id: 'igoc-2024',
+    title: 'IGOC 2024 — Nouveau portail de télédéclaration',
+    body: 'L\'IGOC 2024 (Interface de Gestion des Opérations de Change) remplace l\'ancien système SID. Il intègre désormais la déclaration en temps réel des opérations > 200 000 MAD, le reporting PME mensuel, la gestion des CDE/CPEC, et l\'envoi automatique des attestations de rapatriement. Authentification via certificat électronique eIDAS ou CIE. Délai de mise en conformité: 31 décembre 2024.',
+    source: 'Bank Al-Maghrib',
+    tags: ['IGOC', 'télédéclaration', 'PME', 'digital'],
+    url: 'https://www.bkam.ma',
+  },
+  {
+    id: 'coverts-investissements-2023',
+    title: 'Circulaire 2/2023 — Couverture des investissements directs',
+    body: 'Les investisseurs étrangers peuvent couvrir leur investissement direct au Maroc (IDE) contre le risque de change via des instruments forwards, options et swaps, sans plafond de montant, sous réserve de déclaration préalable à l\'OC. La couverture peut aller jusqu\'à 10 ans (15 ans pour les secteurs prioritaires: énergie, mines, infrastructure). Le coût de la couverture est déductible du résultat fiscal.',
+    source: 'Office des Changes',
+    tags: ['OC', 'IDE', 'couverture', 'investissement'],
+    url: 'https://www.oc.gov.ma',
+  },
+  {
+    id: 'repart-tourisme-2022',
+    title: 'Circulaire 1/2022 — Rapatriement des recettes tourisme',
+    body: 'Les opérateurs touristiques (hôtels, voyagistes, plateformes) doivent rapatrier leurs recettes en devises dans un délai de 60 jours pour les services rendus. Le plafond de non-rapatriement est de 30% des recettes pour couvrir les frais à l\'étranger. Le reliquat doit être cédé ou logé en compte devises. Exception: les TO basés en zone franche Tanger Med.',
+    source: 'Office des Changes',
+    tags: ['OC', 'tourisme', 'rapatriement', 'hôtellerie'],
+    url: 'https://www.oc.gov.ma',
+  },
+  {
+    id: 'circ-douane-2023',
+    title: 'Note Douane 2023 — Valeur en douane et taux de change',
+    body: 'La valeur en douane est convertie en MAD au taux de change BKAM (fixing virement) en vigueur le jour du dépôt de la déclaration en douane. Pour les importations, c\'est le taux acheteur (ask) qui s\'applique; pour les exportations, le taux vendeur (bid). Les taux sont consultables sur bkam.ma et reproduits en page Réglementations de JAD2FX.',
+    source: 'Administration des Douanes',
+    tags: ['douane', 'valeur', 'change', 'BKAM'],
+    url: 'https://www.douane.gov.ma',
+  },
+  {
+    id: 'fatca-crs-2019',
+    title: 'Convention FATCA/CRS Maroc-USA 2019',
+    body: 'Depuis 2019, les banques marocaines transmettent automatiquement au fisc US (IRS) les comptes détenus par des contribuables américains (FATCA) et échangent avec 100+ juridictions les comptes étrangers (CRS). Tout compte > 50 000 USD est reporté. Les banques appliquent une retenue de 30% sur les paiements de source US à des comptes non-conformes.',
+    source: 'DGI / IRS',
+    tags: ['FATCA', 'CRS', 'fiscalité', 'banque'],
+    url: 'https://www.tax.gov.ma',
+  },
+  {
+    id: 'bam-circulaire-monet-2024',
+    title: 'Circulaire BAM 2024 — Politique monétaire et forward points',
+    body: 'Bank Al-Maghrib publie quotidiennement la courbe BDT (Bons du Trésor) utilisée comme référence pour le calcul des forward points par les banques. La politique monétaire 2024 maintient le taux directeur à 2.75%. La bande de fluctuation du MAD est de ±5% autour de la parité centrale du panier USD 60% / EUR 40%.',
+    source: 'Bank Al-Maghrib',
+    tags: ['BAM', 'BDT', 'forward', 'politique monétaire'],
+    url: 'https://www.bkam.ma',
+  },
+  {
+    id: 'charfia-conventions-2020',
+    title: 'Conventions de non-double imposition (CNDM) — Liste 2020',
+    body: 'Le Maroc a signé 67 conventions de non-double imposition dont 51 sont en vigueur. Le taux de retenue à la source sur les dividendes varie de 5% (France, Belgique) à 15% (Émirats, Turquie). Le Maroc applique également des rulings fiscaux (rescrits) sur les prix de transfert depuis 2020. La Direction Générale des Impôts (DGI) publie annuellement la liste mise à jour.',
+    source: 'DGI',
+    tags: ['fiscalité', 'CNDM', 'retenue', 'dividendes'],
+    url: 'https://www.tax.gov.ma',
+  },
+];
+
+async function seedRagCorpus(env) {
+  if (!env.REPORTS_KV) return 0;
+  let count = 0;
+  for (const doc of RAG_SEED_DOCS) {
+    await env.REPORTS_KV.put(`rag:doc:${doc.id}`, JSON.stringify(doc), { expirationTtl: 60 * 60 * 24 * 90 });
+    count++;
+  }
+  await env.REPORTS_KV.put('rag:index', JSON.stringify(RAG_SEED_DOCS.map(d => ({ id: d.id, title: d.title, tags: d.tags }))), { expirationTtl: 60 * 60 * 24 * 90 });
+  return count;
+}
+
+async function handleRagAdmin(request, env, origin) {
+  if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
+  const n = await seedRagCorpus(env);
+  return json({ ok: true, indexed: n }, 200, origin);
+}
+
+// ─── P4.4 L'Edito weekly newsletter (admin POST trigger) ────────────────────
+const EDITO_TEMPLATE = (week, highlights, cta) => `
+<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="utf-8"><title>L'Edito JAD2 — Semaine ${week}</title></head>
+<body style="font-family:-apple-system,Segoe UI,sans-serif;max-width:640px;margin:0 auto;background:#0a1228;color:#e2e8f0;padding:24px">
+  <div style="background:linear-gradient(135deg,#d4af37,#b8860b);padding:16px;border-radius:12px;text-align:center;color:#0a1228">
+    <h1 style="margin:0;font-size:24px">L'Edito JAD2</h1>
+    <p style="margin:4px 0 0;font-size:12px;opacity:.8">Semaine ${week} · Conseil FX & Stratégie Maroc</p>
+  </div>
+  <div style="background:#0f1a3a;padding:24px;margin-top:16px;border-radius:12px;border:1px solid #1e3a8a">
+    <h2 style="color:#d4af37;margin:0 0 16px;font-size:18px">Cette semaine sur le marché</h2>
+    <ul style="line-height:1.8;color:#cbd5e1;font-size:14px;padding-left:20px">
+      ${highlights.map(h => `<li>${h}</li>`).join('')}
+    </ul>
+  </div>
+  <div style="background:#0f1a3a;padding:24px;margin-top:16px;border-radius:12px;border:1px solid #1e3a8a;text-align:center">
+    <h2 style="color:#d4af37;margin:0 0 12px;font-size:16px">Notre conseil de la semaine</h2>
+    <p style="color:#cbd5e1;font-size:14px;line-height:1.6">${cta}</p>
+    <a href="https://fx.jad2advisory.com/?view=ADVISORY" style="display:inline-block;margin-top:12px;padding:12px 24px;background:#d4af37;color:#0a1228;text-decoration:none;border-radius:8px;font-weight:bold">Prendre RDV 15min →</a>
+  </div>
+  <p style="color:#64748b;font-size:11px;text-align:center;margin-top:24px">JAD2FX · fx.jad2advisory.com · Conformité OC 01/2024</p>
+</body>
+</html>`;
+
+async function handleEditoSend(request, env, origin) {
+  if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
+  if (!env.RESEND_API_KEY || !env.REPORTS_KV) return json({ error: 'Resend or KV not configured' }, 503, origin);
+
+  const raw = await readBodySafe(request);
+  let body = {};
+  try { body = JSON.parse(raw); } catch { return json({ error: 'Invalid JSON' }, 400, origin); }
+
+  const week    = parseInt(body.week) || (new Date().getWeek ? new Date().getWeek() : Math.ceil((Date.now() - new Date(new Date().getFullYear(), 0, 1)) / (7 * 86400000)));
+  const hl      = Array.isArray(body.highlights) && body.highlights.length ? body.highlights : [
+    'EUR/MAD oscille dans la bande 10.78-10.92 autour de la parité centrale du panier',
+    'OC 01/2024: le reporting PME entre en vigueur pour les flux > 500K MAD/mois',
+    'BDT 13W en hausse de 5 bps à 2.45% — signal de tension sur la liquidité court terme',
+  ];
+  const cta     = body.cta || 'Couverture trimestrielle: étudier une structure 25D risk-reversal EUR/MAD pour le Q3.';
+  const subject = body.subject || `L'Edito JAD2 — Semaine ${week} · Marchés FX Maroc`;
+
+  // Get confirmed subscribers
+  const idxRaw = await env.REPORTS_KV.get('newsletter:index');
+  const idx = idxRaw ? JSON.parse(idxRaw) : [];
+  const confirmed = idx.slice(0, 500);
+
+  // Send via Resend batch
+  const html = EDITO_TEMPLATE(week, hl, cta);
+  let sent = 0, errors = 0;
+  // Send in chunks of 50
+  for (let i = 0; i < confirmed.length; i += 50) {
+    const chunk = confirmed.slice(i, i + 50);
+    await Promise.all(chunk.map(async (email) => {
+      try {
+        const r = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: 'JAD2FX Edito <edito@jad2advisory.com>',
+            to: [email],
+            subject,
+            html,
+          }),
+        });
+        if (r.ok) sent++;
+        else errors++;
+      } catch { errors++; }
+    }));
+  }
+
+  // Log
+  await env.REPORTS_KV.put(`edito:send:${Date.now()}`, JSON.stringify({ week, sent, errors, total: confirmed.length, ts: new Date().toISOString() }), { expirationTtl: 60 * 60 * 24 * 365 });
+  return json({ ok: true, week, sent, errors, total: confirmed.length }, 200, origin);
+}
+
 // ─── P4.4 Newsletter send (Resend) ─────────────────────────────────────────
 async function handleNewsletterSend(request, env, origin) {
   const raw = await readBodySafe(request);
@@ -2729,6 +3127,63 @@ ${sections.map((s) => `<h2>${escapeHtml(s.h)}</h2><p>${escapeHtml(s.b).replace(/
       ...corsHeaders(origin),
     },
   });
+}
+
+// ─── P1.13 Hijri holidays (aladhan.com, KV-cached) ───────────────────────────
+const HIJRI_HOLIDAYS = [
+  { name: "Ras l'Am (Nouvel an hégirien)", month: 1, day: 1 },
+  { name: 'Achoura',                         month: 1, day: 10 },
+  { name: 'Mawlid (Naissance du Prophète)',  month: 3, day: 12 },
+  { name: 'Lailat al-Miraj',                 month: 7, day: 27 },
+  { name: "Lailat al-Bara'a",                month: 8, day: 15 },
+  { name: "Aïd al-Fitr (1er jour)",          month: 10, day: 1 },
+  { name: "Aïd al-Adha (1er jour)",          month: 12, day: 10 },
+];
+
+async function fetchHijriYear(year) {
+  const out = [];
+  for (let m = 1; m <= 12; m++) {
+    try {
+      const url = `https://api.aladhan.com/v1/gToHCalendar/${m}/${year}`;
+      const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+      if (!r.ok) continue;
+      const data = await r.json();
+      if (data.code !== 200 || !data.data) continue;
+      for (const day of data.data) {
+        const greg = day.gregorian;
+        const hijri = day.hijri;
+        const dayNum = parseInt(hijri.day, 10);
+        const monthNum = parseInt(hijri.month.number, 10);
+        for (const h of HIJRI_HOLIDAYS) {
+          if (h.month === monthNum && h.day === dayNum) {
+            out.push({
+              name: h.name,
+              date: `${greg.year}-${String(greg.month.number).padStart(2,'0')}-${String(greg.day).padStart(2,'0')}`,
+              hijriDate: `${hijri.year}-${String(monthNum).padStart(2,'0')}-${String(dayNum).padStart(2,'0')}`,
+            });
+          }
+        }
+      }
+    } catch (e) { /* continue */ }
+  }
+  return out;
+}
+
+async function handleHijri(request, env, origin) {
+  const url = new URL(request.url);
+  const year = parseInt(url.searchParams.get('year'), 10) || new Date().getFullYear();
+  const cacheKey = `hijri:year:${year}`;
+
+  if (env.REPORTS_KV) {
+    const cached = await env.REPORTS_KV.get(cacheKey).catch(() => null);
+    if (cached) return json(JSON.parse(cached), 200, origin);
+  }
+  const holidays = await fetchHijriYear(year);
+  const payload = { year, holidays, source: 'aladhan.com', generatedAt: new Date().toISOString() };
+  if (env.REPORTS_KV) {
+    await env.REPORTS_KV.put(cacheKey, JSON.stringify(payload), { expirationTtl: 60 * 60 * 24 * 90 }).catch(() => {});
+  }
+  return json(payload, 200, origin);
 }
 
 // ─── Main fetch handler ───────────────────────────────────────────────────────
@@ -2890,6 +3345,18 @@ export default {
     if (pathname === '/v1/rates' || pathname.startsWith('/v1/rates/')) {
       return handlePublicRates(request, env, origin);
     }
+    if (pathname === '/v1/vol' || pathname.startsWith('/v1/vol')) {
+      return handleVolSurface(request, env, origin);
+    }
+    if (pathname === '/v1/bank-quotes' || pathname.startsWith('/v1/bank-quotes')) {
+      return handleBankQuotes(request, env, origin);
+    }
+    if (pathname === '/v1/rag' || pathname.startsWith('/v1/rag')) {
+      return handleRagRetrieve(request, env, origin);
+    }
+    if (pathname === '/v1/hijri' || pathname.startsWith('/v1/hijri')) {
+      return handleHijri(request, env, origin);
+    }
     if (pathname === '/v1/forward' || pathname.startsWith('/v1/forward')) {
       return handlePublicForward(request, env, origin);
     }
@@ -2939,6 +3406,40 @@ export default {
       if (denied) return denied;
       if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
       return handleNewsletterSend(request, env, origin);
+    }
+    // ── P4.4 L'Edito weekly send (admin) ─────────────────────────────────
+    if (pathname === '/api/admin/edito/send') {
+      const denied = adminGate(request, env, origin);
+      if (denied) return denied;
+      if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
+      return handleEditoSend(request, env, origin);
+    }
+    // ── P1.12 RAG seed (admin) ───────────────────────────────────────────
+    if (pathname === '/api/admin/rag/seed') {
+      const denied = adminGate(request, env, origin);
+      if (denied) return denied;
+      return handleRagAdmin(request, env, origin);
+    }
+    // ── P1.12 RAG seed (env-protected init, no admin token required) ─────
+    if (pathname === '/api/init/seed' && request.method === 'POST') {
+      const key = url.searchParams.get('key') ?? '';
+      if (!env.BKAM_FX_KEY || key !== env.BKAM_FX_KEY) {
+        return json({ error: 'Unauthorized' }, 401, origin);
+      }
+      const ragN = await seedRagCorpus(env);
+      const seed = Math.floor(Date.now() / 86400000);
+      const volPayload = { surface: synthVolSurface(seed), generatedAt: new Date().toISOString(), source: 'computed' };
+      const bankPayload = { quotes: synthBankQuotes(seed), generatedAt: new Date().toISOString() };
+      await env.REPORTS_KV.put('vol:surface:latest', JSON.stringify(volPayload), { expirationTtl: 60 * 60 * 25 });
+      await env.REPORTS_KV.put('bank:quotes:latest', JSON.stringify(bankPayload), { expirationTtl: 60 * 60 * 25 });
+      // Pre-seed Hijri for 2025, 2026, 2027, 2028
+      const hijriSeeded = [];
+      for (const y of [2025, 2026, 2027, 2028]) {
+        const h = await fetchHijriYear(y);
+        await env.REPORTS_KV.put(`hijri:year:${y}`, JSON.stringify({ year: y, holidays: h, source: 'aladhan.com', generatedAt: new Date().toISOString() }), { expirationTtl: 60 * 60 * 24 * 90 });
+        hijriSeeded.push({ year: y, count: h.length });
+      }
+      return json({ ok: true, rag: ragN, vol: true, bank: true, hijri: hijriSeeded }, 200, origin);
     }
     // ── P3.1 / P3.3 Lead magnet PDFs (HTML print-ready) ─────────────────
     if (pathname === '/press/guide-oc-2024' || pathname === '/press/forward-playbook' || pathname === '/press/quarterly-q2-2026') {

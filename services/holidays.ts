@@ -75,6 +75,37 @@ const ISLAMIC_HOLIDAYS: IslamicCalendar = {
 
 // ─── Build holiday set for a given year ──────────────────────────────────────
 
+const HIJRI_API_CACHE: Record<number, Set<string>> = {};
+
+async function fetchHijriFromApi(year: number): Promise<Set<string>> {
+  if (HIJRI_API_CACHE[year]) return HIJRI_API_CACHE[year];
+  try {
+    const base = (typeof window !== 'undefined' && (window as any).__JAD2_API__)
+      || 'https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev';
+    const r = await fetch(`${base}/v1/hijri?year=${year}`, { signal: AbortSignal.timeout(5000) });
+    if (!r.ok) throw new Error('API error');
+    const data = await r.json();
+    if (!data.holidays) throw new Error('Empty');
+    const set = new Set<string>();
+    for (const h of data.holidays) set.add(h.date);
+    HIJRI_API_CACHE[year] = set;
+    return set;
+  } catch {
+    const fallback = new Set(ISLAMIC_HOLIDAYS[year] ?? []);
+    return fallback;
+  }
+}
+
+async function buildHolidaySetAsync(year: number): Promise<Set<string>> {
+  const set = new Set<string>();
+  for (const mmdd of FIXED_HOLIDAYS) {
+    set.add(`${year}-${mmdd}`);
+  }
+  const hijri = await fetchHijriFromApi(year);
+  for (const d of hijri) set.add(d);
+  return set;
+}
+
 function buildHolidaySet(year: number): Set<string> {
   const set = new Set<string>();
   for (const mmdd of FIXED_HOLIDAYS) {
@@ -110,6 +141,34 @@ export function isBusinessDay(date: Date): boolean {
 function nextCalDay(date: Date): Date {
   const d = new Date(date);
   d.setDate(d.getDate() + 1);
+  return d;
+}
+
+/**
+ * Async version of isBusinessDay that fetches Hijri dates from the worker
+ * API (aladhan.com) when available. Use this for production paths; the
+ * sync version uses hardcoded estimates.
+ */
+export async function isBusinessDayAsync(date: Date): Promise<boolean> {
+  if (isWeekend(date)) return false;
+  const year = date.getFullYear();
+  const set = await buildHolidaySetAsync(year);
+  return !set.has(isoDate(date));
+}
+
+/**
+ * Async version of previousBusinessDay using live Hijri API.
+ */
+export async function previousBusinessDayAsync(date: Date = new Date()): Promise<Date> {
+  const d = new Date(date);
+  d.setDate(d.getDate() - 1);
+  let set = await buildHolidaySetAsync(d.getFullYear());
+  while (isWeekend(d) || set.has(isoDate(d))) {
+    d.setDate(d.getDate() - 1);
+    if (d.getFullYear() !== (new Date(d.getTime() + 86400000)).getFullYear()) {
+      set = await buildHolidaySetAsync(d.getFullYear());
+    }
+  }
   return d;
 }
 
