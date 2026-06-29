@@ -276,15 +276,15 @@ export default function BkamParityMatrix() {
                       width={38} />
                     <Tooltip
                       contentStyle={{ background: '#081628', border: '1px solid #1C3558', borderRadius: 6, fontSize: 11 }}
-                      formatter={(v: number, name: string) => [
+                      formatter={((v: number, name: string) => [
                         name === 'driftBps' ? `${v.toFixed(1)} bps` : v.toFixed(4),
                         name === 'driftBps' ? 'Dérive' : name,
-                      ]}
-                      labelFormatter={(l: string) => {
+                      ]) as any}
+                      labelFormatter={((l: string) => {
                         const m = ALL_META[l];
                         const r = latest.rates.find(x => x.libDevise === l);
                         return `${l} — ${m?.nameFr ?? ''}\nBKAM: ${r?.moyen} | Panier: ${r?.basketParity} | Bande: ${r?.bandUtilPct}%`;
-                      }}
+                      }) as any}
                     />
                     <ReferenceLine x={0} stroke="#D4AF37" strokeWidth={1} strokeDasharray="4 2" />
                     <Bar dataKey="driftBps" name="driftBps" radius={[0, 3, 3, 0]}>
@@ -332,7 +332,7 @@ export default function BkamParityMatrix() {
                       <XAxis dataKey="date" tick={{ fill: '#3D6491', fontSize: 9 }} />
                       <YAxis tick={{ fill: '#3D6491', fontSize: 9 }} unit=" pb" width={52} />
                       <Tooltip contentStyle={{ background: '#081628', border: '1px solid #1C3558', borderRadius: 6, fontSize: 11 }}
-                        formatter={(v: number) => [`${v?.toFixed(1)} bps`]} />
+                        formatter={((v: number) => [`${v?.toFixed(1)} bps`]) as any} />
                       <Legend iconSize={8} wrapperStyle={{ fontSize: 10 }} />
                       <ReferenceLine y={0} stroke="#D4AF37" strokeWidth={1} strokeDasharray="4 2" label={{ value: 'Parité', fill: '#8a6a20', fontSize: 8 }} />
                       <Line type="monotone" dataKey="eurDrift" stroke="#D4AF37" strokeWidth={2} dot={{ r: 3 }} name="EUR/MAD drift" />
@@ -353,7 +353,7 @@ export default function BkamParityMatrix() {
                       <XAxis dataKey="date" tick={{ fill: '#3D6491', fontSize: 9 }} />
                       <YAxis tick={{ fill: '#3D6491', fontSize: 9 }} domain={['auto', 'auto']} width={54} />
                       <Tooltip contentStyle={{ background: '#081628', border: '1px solid #1C3558', borderRadius: 6, fontSize: 11 }}
-                        formatter={(v: number) => [v?.toFixed(4)]} />
+                        formatter={((v: number) => [v?.toFixed(4)]) as any} />
                       <Legend iconSize={8} wrapperStyle={{ fontSize: 10 }} />
                       <Line type="monotone" dataKey="eurFixing" stroke="#D4AF37" strokeWidth={2} dot={{ r: 3, strokeWidth: 0 }} name="EUR/MAD BKAM" />
                       <Line type="monotone" dataKey="eurBasket" stroke="#D4AF37" strokeWidth={1} strokeDasharray="5 3" dot={false} name="EUR/MAD Panier" connectNulls opacity={0.6} />

@@ -51,6 +51,26 @@ const ISLAMIC_HOLIDAYS: IslamicCalendar = {
     '2027-06-06', // Awal Moharrem (approx)
     '2027-09-14', // Aid Al Mawlid (approx)
   ],
+  // P1.13 — Extend through 2030. Dates are best estimates based on the
+  // Umm al-Qura calendar; adjust when Hilal observations are confirmed.
+  2028: [
+    '2028-02-26', '2028-02-27', '2028-02-28', // Aid Al Fitr
+    '2028-05-05', '2028-05-06', '2028-05-07', // Aid Al Adha
+    '2028-05-25', // Awal Moharrem (Hijri 1449)
+    '2028-09-03', // Aid Al Mawlid
+  ],
+  2029: [
+    '2029-02-14', '2029-02-15', '2029-02-16', // Aid Al Fitr
+    '2029-04-24', '2029-04-25', '2029-04-26', // Aid Al Adha
+    '2029-05-14', // Awal Moharrem (Hijri 1450)
+    '2029-08-23', '2029-08-24', // Aid Al Mawlid
+  ],
+  2030: [
+    '2030-02-04', '2030-02-05', '2030-02-06', // Aid Al Fitr
+    '2030-04-13', '2030-04-14', '2030-04-15', // Aid Al Adha
+    '2030-05-03', // Awal Moharrem (Hijri 1451)
+    '2030-08-12', '2030-08-13', // Aid Al Mawlid
+  ],
 };
 
 // ─── Build holiday set for a given year ──────────────────────────────────────
@@ -100,6 +120,19 @@ export function nextBusinessDay(date: Date): Date {
   return d;
 }
 
+/** Return the previous business day strictly before `date` (skipping weekends + MA holidays). */
+export function previousBusinessDay(date: Date = new Date()): Date {
+  const d = new Date(date);
+  d.setDate(d.getDate() - 1);
+  while (!isBusinessDay(d)) d.setDate(d.getDate() - 1);
+  return d;
+}
+
+/** Convenience: previous business day as ISO date string (YYYY-MM-DD). */
+export function previousBusinessDayISO(date: Date = new Date()): string {
+  return isoDate(previousBusinessDay(date));
+}
+
 /**
  * Spot value date = T+2 business days (Moroccan calendar).
  * ON = T+1; TN = T+2.
@@ -135,7 +168,7 @@ export function settlementDateWithHolidays(
 
   // For standard tenors: add calendar months/days from spot, then adjust to next biz day
   const days = tenorToCalDays(tenor);
-  let settle = new Date(spot);
+  const settle = new Date(spot);
   settle.setDate(settle.getDate() + days);
 
   // Modified Following: if settlement falls on holiday/weekend, move to next biz day

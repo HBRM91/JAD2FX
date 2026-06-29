@@ -1,25 +1,30 @@
 import { BasketConfig, LiveRate, ChartDataPoint } from '../types';
 import { BKAM_CURRENCIES, GULF_USD_RATES } from '../constants';
 import { fetchBkamVirement, virementToMadPerUnit } from './bkamApi';
+import { previousBusinessDayISO } from './holidays';
+import { fetchIntradayTicks, IntradayResult, getYahooSymbol } from './intraday';
+import { LruCache } from '../utils/lruCache';
+
+export { fetchIntradayTicks, getYahooSymbol };
+export type { IntradayResult };
 
 const FRANKFURTER_BASE = 'https://api.frankfurter.app';
 const FRANKFURTER_URL = `${FRANKFURTER_BASE}/latest?from=EUR`;
 const CACHE_TTL_MS = 5 * 60 * 1000;
 
 // ─── Sanity filter: reject ticks that move > 2% in < 60 s ────────────────────
-interface RateSnap { rate: number; ts: number; }
-const _sanityCache: Record<string, RateSnap> = {};
+const _sanityCache = new LruCache<string, number>({ maxSize: 32, ttlMs: 60_000 });
 const SANITY_MAX_CHANGE = 0.02;
 const SANITY_WINDOW_MS  = 60_000;
 
 function sanityFilter(currency: string, newRate: number): number {
-  const prev = _sanityCache[currency];
+  const prev = _sanityCache.get(currency);
   const now  = Date.now();
-  if (prev && (now - prev.ts) < SANITY_WINDOW_MS) {
-    const delta = Math.abs(newRate - prev.rate) / prev.rate;
-    if (delta > SANITY_MAX_CHANGE) return prev.rate; // reject tick
+  if (prev != null) {
+    const delta = Math.abs(newRate - prev) / prev;
+    if (delta > SANITY_MAX_CHANGE) return prev; // reject tick
   }
-  _sanityCache[currency] = { rate: newRate, ts: now };
+  _sanityCache.set(currency, newRate);
   return newRate;
 }
 
@@ -34,14 +39,15 @@ function sanityFilter(currency: string, newRate: number): number {
 // Bug fixed: old code compared displayMid (×100 for JPY) against raw per-unit
 // reference — cage always fired for bkamUnit=100 currencies (JPY, INR, DZD).
 let _lastBkamMadRates: Record<string, number> = {};
-const _bkamCageRef:   Record<string, number> = {}; // currency → displayMid (bkamUnit applied)
+// P0.15: LRU-bounded cage reference cache (was unbounded object before)
+const _bkamCageRef = new LruCache<string, number>({ maxSize: 32, ttlMs: 24 * 60 * 60 * 1000 });
 
 const CAGE_BAND  = 0.05; // BKAM official ±5% fluctuation band
 const CAGE_INNER = 0.02; // 2% inner buffer (safe ceiling = 98% of limit)
 
 function applySafetyCage(currency: string, mid: number): { mid: number; isCapped: boolean } {
-  const ref = _bkamCageRef[currency]; // bkamUnit-scaled — apple-to-apple comparison
-  if (!ref) return { mid, isCapped: false };
+  const ref = _bkamCageRef.get(currency); // bkamUnit-scaled — apple-to-apple comparison
+  if (ref == null) return { mid, isCapped: false };
   const upper = ref * (1 + CAGE_BAND) * (1 - CAGE_INNER); // ref × 1.029
   const lower = ref * (1 - CAGE_BAND) * (1 + CAGE_INNER); // ref × 0.969
   if (mid > upper) return { mid: upper, isCapped: true };
@@ -55,6 +61,7 @@ interface EurRateCache {
   date: string;
 }
 
+// P0.15: simple TTL-based cache (single entry — ECB only has one rate per fetch)
 let rateCache: EurRateCache | null = null;
 
 // Cache for yesterday's EUR rates (for 24h change calc)
@@ -63,23 +70,16 @@ interface PrevRateCache {
   date: string;
   timestamp: number;
 }
+// P0.15: single-entry TTL cache (one day per fetch, bounded by date)
 let prevRateCache: PrevRateCache | null = null;
 const PREV_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
-
-function prevBizDay(): string {
-  const d = new Date();
-  // Go back to find the last weekday
-  d.setDate(d.getDate() - 1);
-  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() - 1);
-  return d.toISOString().slice(0, 10);
-}
 
 async function fetchPrevEurRates(): Promise<Record<string, number>> {
   if (prevRateCache && Date.now() - prevRateCache.timestamp < PREV_CACHE_TTL_MS) {
     return prevRateCache.rates;
   }
   try {
-    const date = prevBizDay();
+    const date = previousBusinessDayISO();
     const res = await fetch(`${FRANKFURTER_BASE}/${date}?from=EUR`, { signal: AbortSignal.timeout(8000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
@@ -158,6 +158,7 @@ interface BkamRateCache {
   madPerUnit: Record<string, number>;
   timestamp: number;
 }
+// P0.15: single-entry TTL cache for BKAM rates (replaces unbounded module var)
 let bkamCache: BkamRateCache | null = null;
 const BKAM_CACHE_MS = 10 * 60 * 1000;
 
@@ -182,7 +183,7 @@ function loadBkamYesterdayRates(): Record<string, number> | null {
     const raw = localStorage.getItem(LS_KEY);
     if (!raw) return null;
     const { madPerUnit, date } = JSON.parse(raw) as BkamStoredRates;
-    const yesterday = prevBizDay();
+    const yesterday = previousBusinessDayISO();
     if (date !== yesterday) return null; // stale or future — ignore
     return madPerUnit;
   } catch { return null; }
@@ -253,11 +254,34 @@ function computeChange24h(
  *   utilPct = (spot − lower) / (upper − lower) × 100
  *   where lower = central × 0.95, upper = central × 1.05
  */
+/**
+ * Band utilisation per BKAM Doc 1 §I methodology.
+ * Band = ±5% of the basket central parity (Doc 3, Art 3 & 10).
+ * Returns 0–100%: 50% = at central parity, <35% = lower zone, >65% = upper zone.
+ *
+ *   utilPct = (spot − lower) / (upper − lower) × 100
+ *   where lower = central × 0.95, upper = central × 1.05
+ *
+ * P0.10: This metric is only rigorously defined for USD/MAD. For other
+ * cross-rates, call vsUsdReferencePct() instead.
+ */
 function bandUtil(spot: number, central: number): number {
   if (!central || !spot) return 50;
   const lower = central * (1 - CAGE_BAND);
   const upper = central * (1 + CAGE_BAND);
   return Math.max(0, Math.min(100, ((spot - lower) / (upper - lower)) * 100));
+}
+
+/**
+ * P0.10 — For non-USD currencies, compute a deviation-from-USD-reference metric
+ * instead of a meaningless "band utilisation".
+ *   pct = (ccyMid − usdMid) / usdMid × 100
+ * This tells the user "CCY is X% above its USD-anchored parity" — a useful
+ * approximation of the cross-rate's behaviour.
+ */
+function vsUsdReferencePct(ccyMid: number, usdMid: number): number {
+  if (!ccyMid || !usdMid) return 0;
+  return +(((ccyMid - usdMid) / usdMid) * 100).toFixed(2);
 }
 
 function applySmartSpread(mid: number, code: string, config: BasketConfig, dealerSpreads?: Record<string, number>) {
@@ -277,8 +301,8 @@ function applySmartSpread(mid: number, code: string, config: BasketConfig, deale
   // This prevents the spread itself from pushing displayed prices outside the
   // legal limits — e.g. billet sell at +1.8% on top of a mid already at the
   // cage ceiling would otherwise breach the official 5% band.
-  const ref = _bkamCageRef[code];
-  if (ref) {
+  const ref = _bkamCageRef.get(code);
+  if (ref != null) {
     const safeMax = ref * (1 + CAGE_BAND) * (1 - CAGE_INNER);
     const safeMin = ref * (1 - CAGE_BAND) * (1 + CAGE_INNER);
     vBid = Math.max(vBid, safeMin);
@@ -348,7 +372,7 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
         const displayMid     = rawMid     * currency.bkamUnit;
         const displayCentral = rawCentral * currency.bkamUnit;
 
-        _bkamCageRef[currency.code] = displayMid;
+        _bkamCageRef.set(currency.code, displayMid);
 
         const filteredMid = sanityFilter(currency.code, displayMid);
         const spread = applySmartSpread(filteredMid, currency.code, config, dealerSpreads);
@@ -366,7 +390,9 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
           feedStatus: 'LIVE',
           timestamp: new Date().toISOString(),
           centralParity: +displayCentral.toFixed(4),
-          bandUtilPct:   +bandUtil(filteredMid, displayCentral).toFixed(1),
+          // P0.10: bandUtilPct is only meaningful for USD/MAD (the basket-defined pair)
+          bandUtilPct:   currency.code === 'USD' ? +bandUtil(filteredMid, displayCentral).toFixed(1) : undefined,
+          vsUsdReferencePct: currency.code === 'USD' ? undefined : vsUsdReferencePct(filteredMid, bkamMad['USD']! * currency.bkamUnit),
           umaConvention: currency.umaConvention,
         });
       }
@@ -423,7 +449,9 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
       timestamp: new Date().toISOString(),
       // ECB path: displayMid IS the basket central parity (K-formula)
       centralParity: +displayMid.toFixed(4),
-      bandUtilPct:   +bandUtil(filteredMid, displayMid).toFixed(1),
+      // P0.10: band util only for USD; reference deviation for the rest
+      bandUtilPct:   currency.code === 'USD' ? +bandUtil(filteredMid, displayMid).toFixed(1) : undefined,
+      vsUsdReferencePct: currency.code === 'USD' ? undefined : vsUsdReferencePct(filteredMid, usdMadMid * currency.bkamUnit),
       umaConvention: currency.umaConvention,
     });
   }
@@ -431,17 +459,44 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
   return { rates, ratesDate, lastFetch: new Date().toISOString() };
 }
 
-// Deterministic synthetic intraday chart data based on mid rate and currency pair
-export function generateIntradayData(mid: number, pair: string): ChartDataPoint[] {
-  const hours = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
-  const seed = pair.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  const volatility = mid * 0.0015;
+/**
+ * Backwards-compatible synchronous chart data.
+ *
+ * DEPRECATED: callers should migrate to `fetchIntradayTicks(corsProxy, pair)`
+ * which returns real Yahoo data. This helper now returns an empty array with
+ * a console warning — UI components should handle the empty state.
+ */
+export function generateIntradayData(_mid: number, _pair: string): ChartDataPoint[] {
+  if (typeof console !== 'undefined') {
+    console.warn(
+      '[fxRates] generateIntradayData() is deprecated. Use fetchIntradayTicks(corsProxy, pair) for real data.',
+    );
+  }
+  return [];
+}
 
-  let current = mid * 0.999;
-  return hours.map((time, i) => {
-    const wave = Math.sin((seed + i * 1.7) * 0.9) * volatility;
-    const trend = (i / hours.length) * volatility * 0.5;
-    current = mid * 0.999 + wave + trend;
-    return { time, value: +current.toFixed(4) };
-  });
+/**
+ * Async convenience: fetch real intraday ticks with a graceful fallback.
+ * If no ticks are available, returns a single-point chart anchored to `mid`
+ * so the UI can still render an empty-state placeholder.
+ */
+export async function fetchIntradayOrFallback(
+  corsProxy: string | undefined,
+  pair: string,
+  mid: number,
+): Promise<IntradayResult & { fallbackPoint: ChartDataPoint }> {
+  if (!corsProxy) {
+    return {
+      points: [],
+      dataSource: 'END_OF_DAY',
+      sourceTimestamp: null,
+      message: 'Proxy non configuré — affichage du fixing uniquement.',
+      fallbackPoint: { time: 'Maintenant', value: +mid.toFixed(4) },
+    };
+  }
+  const result = await fetchIntradayTicks(corsProxy, pair);
+  return {
+    ...result,
+    fallbackPoint: { time: 'Maintenant', value: +mid.toFixed(4) },
+  };
 }

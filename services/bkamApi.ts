@@ -32,13 +32,15 @@ export interface BkamBdtPoint {
   tauxMoyen: number;  // yield as percentage (3.25 = 3.25%)
 }
 
-// ─── Cache ────────────────────────────────────────────────────────────────────
+// ─── Cache (P0.15: LRU-bounded) ──────────────────────────────────────────────
+
+import { LruCache } from '../utils/lruCache';
 
 interface CacheEntry<T> { data: T; ts: number }
 
 let _virementToday: CacheEntry<BkamVirementRate[]> | null = null;
 let _bbeToday: CacheEntry<BkamBBERate[]> | null = null;
-const _virementByDate = new Map<string, CacheEntry<BkamVirementRate[]>>();
+const _virementByDate = new LruCache<string, BkamVirementRate[]>({ maxSize: 60, ttlMs: 24 * 60 * 60 * 1000 });
 
 const VIREMENT_CACHE_MS = 20 * 60 * 1000;  // 20 min — rates update at 12:30
 const BBE_CACHE_MS      = 60 * 60 * 1000;  // 60 min — BBE published at 08:30
@@ -108,12 +110,12 @@ export async function fetchBkamVirement(corsProxy: string): Promise<BkamVirement
 
 export async function fetchBkamVirementDate(corsProxy: string, date: string): Promise<BkamVirementRate[]> {
   const cached = _virementByDate.get(date);
-  if (cached && Date.now() - cached.ts < HIST_CACHE_MS) return cached.data;
+  if (cached) return cached;
 
   // Try KV database first (most reliable for historical dates)
   const fromDB = await fetchFromDB(corsProxy, date);
   if (fromDB?.length) {
-    _virementByDate.set(date, { data: fromDB, ts: Date.now() });
+    _virementByDate.set(date, fromDB);
     return fromDB;
   }
 
@@ -121,7 +123,7 @@ export async function fetchBkamVirementDate(corsProxy: string, date: string): Pr
   const data = await bkamGet<BkamVirementRate[]>(
     proxyPath(corsProxy, 'bkam', 'cours/Version1/api/CoursVirement', { date }),
   );
-  _virementByDate.set(date, { data, ts: Date.now() });
+  _virementByDate.set(date, data);
   return data;
 }
 
@@ -165,15 +167,15 @@ export async function fetchBkamBBE(corsProxy: string): Promise<BkamBBERate[]> {
 
 // ─── CoursBBE — specific date ─────────────────────────────────────────────────
 
-const _bbeByDate = new Map<string, CacheEntry<BkamBBERate[]>>();
+const _bbeByDate = new LruCache<string, BkamBBERate[]>({ maxSize: 60, ttlMs: 24 * 60 * 60 * 1000 });
 
 export async function fetchBkamBBEDate(corsProxy: string, date: string): Promise<BkamBBERate[]> {
   const cached = _bbeByDate.get(date);
-  if (cached && Date.now() - cached.ts < HIST_CACHE_MS) return cached.data;
+  if (cached) return cached;
   const data = await bkamGet<BkamBBERate[]>(
     proxyPath(corsProxy, 'bkam', 'cours/Version1/api/CoursBBE', { date }),
   );
-  _bbeByDate.set(date, { data, ts: Date.now() });
+  _bbeByDate.set(date, data);
   return data;
 }
 

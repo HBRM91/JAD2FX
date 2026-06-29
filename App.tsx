@@ -1,102 +1,67 @@
-import React, { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback, Suspense, lazy } from 'react';
 import { ViewState, LiveRate, LivePriceEntry } from './types';
 import { DEFAULT_BASKET_CONFIG, MARKET_NEWS, DISCLAIMER_TEXT, DISCLAIMER_SHORT, BKAM_CURRENCIES } from './constants';
 import { fetchAllMadRates } from './services/fxRates';
-import FxDashboard        from './components/FxDashboard';
-import MarketAnalysis     from './components/MarketAnalysis';
+
+// P0.14 — Code-split all route components for fast initial load.
+// Only shell components (nav, ticker, modals, charts used on home) stay eager.
 import RatesTicker        from './components/RatesTicker';
-import ForwardCalculator  from './components/ForwardCalculator';
-import SwapSimulator      from './components/SwapSimulator';
-import LivePricer         from './components/LivePricer';
-import AdminDashboard     from './components/AdminDashboard';
-import BkamFixing         from './components/BkamFixing';
-import BilletsPage        from './components/BilletsPage';
-import CommoditiesPage    from './components/CommoditiesPage';
-import MarketReportPage   from './components/MarketReport';
-import MorningBriefing   from './components/MorningBriefing';
-import RegulationsPage    from './components/RegulationsPage';
 import FloatingChat       from './components/FloatingChat';
-import Jad2Logo           from './components/Jad2Logo';
 import LogoJad2Fx         from './components/LogoJad2Fx';
 import MarketSessionsClock from './components/MarketSessionsClock';
 import DisclaimerModal    from './components/DisclaimerModal';
-import CurrencyHeatmap   from './components/CurrencyHeatmap';
-import BkamBandsVisualizer from './components/BkamBandsVisualizer';
-import ResourcesPage from './components/ResourcesPage';
-import ResearchHub from './components/ResearchHub';
-import DriftAlertChip from './components/DriftAlertChip';
-import AboutJad2 from './components/AboutJad2';
-import OcComplianceAssessment from './components/tools/OcComplianceAssessment';
-import CorridorCalculator from './components/tools/CorridorCalculator';
-import InvoiceImpactCalc from './components/tools/InvoiceImpactCalc';
-import ForwardExtension from './components/tools/ForwardExtension';
-import BkamParityMatrix from './components/BkamParityMatrix';
-import SectorLanding from './components/SectorLanding';
+import DriftAlertChip     from './components/DriftAlertChip';
 import ContactForm        from './components/ContactForm';
-import FxCrossMatrix      from './components/FxCrossMatrix';
-import MarketRadar        from './components/MarketRadar';
+import CommandPalette     from './components/CommandPalette';
+import NewsletterSignup   from './components/NewsletterSignup';
+
+const FxDashboard           = lazy(() => import('./components/FxDashboard'));
+const MarketAnalysis        = lazy(() => import('./components/MarketAnalysis'));
+const ForwardCalculator     = lazy(() => import('./components/ForwardCalculator'));
+const SwapSimulator         = lazy(() => import('./components/SwapSimulator'));
+const LivePricer            = lazy(() => import('./components/LivePricer'));
+const AdminDashboard        = lazy(() => import('./components/AdminDashboard'));
+const BkamFixing            = lazy(() => import('./components/BkamFixing'));
+const BilletsPage           = lazy(() => import('./components/BilletsPage'));
+const CommoditiesPage       = lazy(() => import('./components/CommoditiesPage'));
+const MarketReportPage      = lazy(() => import('./components/MarketReport'));
+const MorningBriefing       = lazy(() => import('./components/MorningBriefing'));
+const RegulationsPage       = lazy(() => import('./components/RegulationsPage'));
+const CurrencyHeatmap       = lazy(() => import('./components/CurrencyHeatmap'));
+const BkamBandsVisualizer   = lazy(() => import('./components/BkamBandsVisualizer'));
+const ResourcesPage         = lazy(() => import('./components/ResourcesPage'));
+const ResearchHub           = lazy(() => import('./components/ResearchHub'));
+const AboutJad2             = lazy(() => import('./components/AboutJad2'));
+const OcComplianceAssessment = lazy(() => import('./components/tools/OcComplianceAssessment'));
+const CorridorCalculator    = lazy(() => import('./components/tools/CorridorCalculator'));
+const InvoiceImpactCalc     = lazy(() => import('./components/tools/InvoiceImpactCalc'));
+const ForwardExtension      = lazy(() => import('./components/tools/ForwardExtension'));
+const BkamParityMatrix      = lazy(() => import('./components/BkamParityMatrix'));
+const SectorLanding         = lazy(() => import('./components/SectorLanding'));
+const FxCrossMatrix         = lazy(() => import('./components/FxCrossMatrix'));
+const MarketRadar           = lazy(() => import('./components/MarketRadar'));
+// P3 — Funnel tools
+const PmeDiagnostic         = lazy(() => import('./components/PmeDiagnostic'));
+const ImportCostCalc        = lazy(() => import('./components/ImportCostCalc'));
+const QuarterlyHedge        = lazy(() => import('./components/QuarterlyHedge'));
+const Watchlist             = lazy(() => import('./components/Watchlist'));
+
 import { AdminProvider, useAdmin } from './context/AdminContext';
 import { I18nProvider, useI18n, Locale } from './context/I18nContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import {
   Building2, FileText, LayoutDashboard, Menu,
   Globe, ChevronRight, TrendingUp, ArrowLeftRight, Activity,
   Lock, X, BarChart2, Banknote, PackageOpen, Newspaper, Scale,
   ChevronDown, ExternalLink, Zap, MessageSquare, BookOpen, Shield,
+  ClipboardCheck, Calculator, Calendar, Search,
 } from 'lucide-react';
 
-// ─── Nav data ─────────────────────────────────────────────────────────────────
+// ─── Nav data is in navConfig.tsx so other components (CommandPalette) can reuse it.
+import { NAV_GROUPS as _NAV_GROUPS, type NavGroup } from './navConfig';
 
-interface NavItem {
-  label: string;
-  view: ViewState;
-  icon: React.ElementType;
-  desc: string;
-}
-
-interface NavGroup {
-  id: string;
-  label: string;
-  items: NavItem[];
-}
-
-const NAV_GROUPS: NavGroup[] = [
-  {
-    id: 'marches',
-    label: 'Taux & Marchés',
-    items: [
-      { label: 'Live Pricer',          view: 'LIVE',        icon: Activity,        desc: 'Cours temps réel · 24 devises' },
-      { label: 'Tableau de Bord',      view: 'DASHBOARD',   icon: LayoutDashboard, desc: 'Virements, billets, global FX' },
-      { label: 'Fixing BKAM',          view: 'FIXING',      icon: BarChart2,       desc: 'Cours officiels Bank Al-Maghrib' },
-      { label: 'Matrice de Parité',     view: 'PARITY_MATRIX', icon: BarChart2,     desc: 'Dérive panier · 30 devises · Graphes' },
-      { label: 'Billets de Banque',    view: 'BILLETS',     icon: Banknote,        desc: 'Cours officiels billets BKAM' },
-      { label: 'Matières Premières',   view: 'COMMODITIES', icon: PackageOpen,     desc: 'Brent · Or · Blé · Cuivre' },
-    ],
-  },
-  {
-    id: 'simulateurs',
-    label: 'Simulateurs',
-    items: [
-      { label: 'Forward de Change',        view: 'FORWARDS',    icon: TrendingUp,     desc: 'Taux à terme CIP · T+2 ajusté' },
-      { label: 'Prorogation & Levée',      view: 'TOOL_FWD_EXT', icon: ArrowLeftRight, desc: 'Extension · Dénouement · Marge banque' },
-      { label: 'Swap de Change MAD',          view: 'SWAPS',       icon: ArrowLeftRight, desc: 'Points swap · Jambe proche / lointaine' },
-      { label: 'Impact Facture MAD',        view: 'TOOL_INVOICE', icon: BarChart2,      desc: 'Érosion marge / scénarios change' },
-      { label: 'Bandes BKAM ±5%',          view: 'BANDS',       icon: BarChart2,      desc: 'Cage réglementaire · Dérive · Modèle' },
-    ],
-  },
-  {
-    id: 'intelligence',
-    label: 'Intelligence',
-    items: [
-      { label: 'Morning Briefing',         view: 'REPORT',          icon: Newspaper,    desc: 'Briefing quotidien · Stratégiste en chef' },
-      { label: 'Analyse de Marché',        view: 'ANALYSIS',        icon: FileText,     desc: 'G10 FX · MAD · Macro · IA brief' },
-      { label: 'Research Hub',             view: 'RESEARCH',        icon: BookOpen,     desc: '7 piliers · Recherche institutionnelle' },
-      { label: 'Diagnostic OC',            view: 'TOOL_OC_ASSESS',  icon: Shield,       desc: 'Auto-évaluation Circ. OC 01/2024' },
-      { label: 'Réglementation OC',        view: 'REGULATIONS',     icon: Scale,        desc: 'Circulaires · Instructions · Guides' },
-      { label: 'À Propos JAD2',            view: 'ABOUT_JAD2',      icon: Building2,    desc: 'Statut · Services · Méthodologie' },
-    ],
-  },
-];
+const NAV_GROUPS: NavGroup[] = _NAV_GROUPS as unknown as { id: string; label: string; items: { label: string; view: ViewState; icon: React.ElementType; desc: string }[] }[];
 
 // ─── Expandable news card ─────────────────────────────────────────────────────
 
@@ -130,6 +95,21 @@ function NewsCard({ news }: { news: typeof MARKET_NEWS[0] }) {
 
 // ─── Inner app ─────────────────────────────────────────────────────────────────
 
+// P0.14 — Skeleton shown while a route chunk is loading.
+function RouteFallback() {
+  return (
+    <div className="space-y-4 animate-pulse">
+      <div className="h-8 w-1/3 bg-navy-800 rounded" />
+      <div className="h-64 bg-navy-900 border border-navy-800 rounded-2xl" />
+      <div className="grid grid-cols-3 gap-3">
+        <div className="h-24 bg-navy-900 border border-navy-800 rounded-xl" />
+        <div className="h-24 bg-navy-900 border border-navy-800 rounded-xl" />
+        <div className="h-24 bg-navy-900 border border-navy-800 rounded-xl" />
+      </div>
+    </div>
+  );
+}
+
 function AppInner() {
   const { config, setLivePrices, isAdmin } = useAdmin();
   const [contactDrawerOpen, setContactDrawerOpen] = React.useState(false);
@@ -138,8 +118,21 @@ function AppInner() {
   const [tickerRates, setTickerRates] = useState<LiveRate[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openGroup, setOpenGroup]   = useState<string | null>(null);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const { t, locale, setLocale, isRTL } = useI18n();
   const navDropdownRef = useRef<HTMLDivElement>(null);
+
+  // P2.3 — Global Cmd/Ctrl+K to open command palette
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setPaletteOpen((o) => !o);
+      }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, []);
 
   const refreshRates = useCallback(() => {
     fetchAllMadRates(DEFAULT_BASKET_CONFIG, config.corsProxyUrl, config.dealerSpreadPips)
@@ -187,6 +180,7 @@ function AppInner() {
     setView(v);
     setMobileOpen(false);
     setOpenGroup(null);
+    setPaletteOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -208,6 +202,11 @@ function AppInner() {
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       <DisclaimerModal />
+      <CommandPalette
+        isOpen={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        onNavigate={(v) => navTo(v as ViewState)}
+      />
 
       {/* ══ Navbar ══════════════════════════════════════════════════════════ */}
       <nav ref={navDropdownRef} className="bg-navy-900 sticky top-0 z-50 border-b border-navy-800">
@@ -250,7 +249,7 @@ function AppInner() {
                       {group.items.map(item => (
                         <button
                           key={item.view}
-                          onClick={() => navTo(item.view)}
+                          onClick={() => navTo(item.view as ViewState)}
                           className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors group ${
                             view === item.view
                               ? 'bg-gold-500/10 text-gold-400'
@@ -305,15 +304,15 @@ function AppInner() {
                 ))}
               </div>
 
-              <a
-                href="https://jad2advisory.com"
-                target="_blank"
-                rel="noopener noreferrer"
+              {/* P3.22 — external Advisory link removed from top nav (was bypassing funnel).
+                  In-domain primary CTAs: Audit Gratuit + Morning Briefing. */}
+              <button
+                onClick={() => setContactDrawerOpen(true)}
                 className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gold-500 text-navy-950 rounded hover:bg-gold-400 transition-colors shadow shadow-gold-900/30"
               >
-                <ExternalLink size={11} />
-                Advisory
-              </a>
+                <MessageSquare size={11} />
+                Audit Gratuit
+              </button>
               {isAdmin && (
                 <button
                   onClick={() => navTo('ADMIN')}
@@ -358,7 +357,7 @@ function AppInner() {
                 {group.items.map(item => (
                   <button
                     key={item.view}
-                    onClick={() => navTo(item.view)}
+                    onClick={() => navTo(item.view as ViewState)}
                     className={`w-full flex items-center gap-3 px-5 py-2.5 text-[13px] font-medium text-left transition-colors ${
                       view === item.view ? 'text-gold-400 bg-navy-800' : 'text-slate-300 hover:text-white hover:bg-navy-800/50'
                     }`}
@@ -464,6 +463,7 @@ function AppInner() {
 
       {/* ══ Main content ═════════════════════════════════════════════════════ */}
       <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 view-enter">
+        <Suspense fallback={<RouteFallback />}>
 
         {/* ─── HOME ──────────────────────────────────────────────────────── */}
         {view === 'HOME' && (
@@ -562,6 +562,33 @@ function AppInner() {
                     <span>{c.sector} · <em className="not-italic text-slate-700">{c.city}</em></span>
                   </div>
                 ))}
+              </div>
+            </div>
+
+            {/* ── P3 Funnel: Diagnostic FX PME (highest-intent tool) ───────── */}
+            <div className="bg-gradient-to-br from-navy-900 to-navy-950 border border-gold-700/30 rounded-2xl p-5 sm:p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
+                <div className="lg:col-span-1 space-y-2">
+                  <span className="inline-block text-[9px] font-bold text-gold-500 uppercase tracking-[0.2em] bg-gold-500/10 border border-gold-500/25 px-2 py-0.5 rounded">
+                    Outil PME
+                  </span>
+                  <h2 className="text-xl font-serif font-bold text-white leading-tight">
+                    Connaissez-vous vraiment votre exposition de change ?
+                  </h2>
+                  <p className="text-[12px] text-slate-400 leading-relaxed">
+                    5 questions · 90 secondes · score 0-100 avec recommandations
+                    personnalisées. Pour DAF, trésoriers, gérants PME.
+                  </p>
+                  <button
+                    onClick={() => navTo('TOOL_PME_DIAG')}
+                    className="flex items-center gap-2 bg-gold-500 text-navy-950 font-bold text-[13px] px-4 py-2 rounded-lg hover:bg-gold-400 transition-colors shadow-lg shadow-gold-900/30"
+                  >
+                    <ClipboardCheck size={14} /> Lancer le diagnostic
+                  </button>
+                </div>
+                <div className="lg:col-span-2">
+                  <PmeDiagnostic />
+                </div>
               </div>
             </div>
 
@@ -724,6 +751,12 @@ function AppInner() {
             {/* Market Radar — full width */}
             <MarketRadar tickerRates={tickerRates} />
 
+            {/* P2.4 — Watchlist (persistent, drag-to-reorder) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+              <Watchlist rates={tickerRates} isRTL={isRTL} />
+              <NewsletterSignup proxyUrl={config.corsProxyUrl} source="home_watchlist_card" variant="card" />
+            </div>
+
             {/* ── Advisory CTA strip ───────────────────────────────────── */}
             <div className="bg-navy-900 border border-navy-700 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
@@ -780,6 +813,9 @@ function AppInner() {
         {view === 'TOOL_INVOICE'   && <InvoiceImpactCalc />}
         {view === 'TOOL_FWD_EXT'  && <ForwardExtension />}
         {view === 'PARITY_MATRIX' && <BkamParityMatrix />}
+        {view === 'TOOL_PME_DIAG' && <PmeDiagnostic />}
+        {view === 'TOOL_IMPORT_COST' && <ImportCostCalc />}
+        {view === 'TOOL_QUARTERLY' && <QuarterlyHedge />}
         {view === 'SECTOR_AUTO'     && <SectorLanding sectorId="auto"     navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_TEXTILE'  && <SectorLanding sectorId="textile"  navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_NORDIQUE' && <SectorLanding sectorId="nordique" navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
@@ -890,6 +926,7 @@ function AppInner() {
             </div>
           </div>
         )}
+        </Suspense>
       </main>
 
       {/* ══ Floating chatbot ═════════════════════════════════════════════════ */}
@@ -978,12 +1015,14 @@ function AppInner() {
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <I18nProvider>
-        <AdminProvider>
-          <AppInner />
-        </AdminProvider>
-      </I18nProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <I18nProvider>
+          <AdminProvider>
+            <AppInner />
+          </AdminProvider>
+        </I18nProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }

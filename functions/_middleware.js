@@ -10,12 +10,24 @@
 
 const BOT_UA_RE =
   /Googlebot|Googlebot-Image|Googlebot-News|AdsBot-Google|DuplexWeb-Google|Bingbot|Slurp|DuckDuckBot|Baiduspider|YandexBot|Sogou|Exabot|ia_archiver|AhrefsBot|SemrushBot|facebot|LinkedInBot|LinkedInBot-Proxy|Twitterbot|WhatsApp|Slackbot|facebookexternalhit|Discordbot|TelegramBot|Applebot|Pinterest|Snapchat/i;
+// P1.24 — load shared constants from build-time JSON export (24 currencies).
+// Regenerate by running: npx tsx scripts/export-shared-constants.ts
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const SHARED = (() => {
+  try {
+    return require('../public/__shared_constants.json');
+  } catch {
+    return null;
+  }
+})();
 
-const K = 10.49;        // BKAM basket constant
-const EUR_W = 0.60;     // 60% EUR weight
-const USD_W = 0.40;     // 40% USD weight
+const BASKET = SHARED?.BASKET ?? { K: 10.49, EUR_W: 0.60, USD_W: 0.40 };
+const K = BASKET.K;
+const EUR_W = BASKET.EUR_W;
+const USD_W = BASKET.USD_W;
 
-const CURRENCIES = [
+const CURRENCIES = SHARED?.BKAM_CURRENCIES ?? [
+  // Fallback (only used if JSON not generated)
   { code: 'EUR', nameFr: 'Euro',                 flag: '🇪🇺', unit: 1   },
   { code: 'USD', nameFr: 'Dollar américain',     flag: '🇺🇸', unit: 1   },
   { code: 'GBP', nameFr: 'Livre sterling',       flag: '🇬🇧', unit: 1   },
@@ -28,12 +40,12 @@ const CURRENCIES = [
   { code: 'CNY', nameFr: 'Yuan renminbi',        flag: '🇨🇳', unit: 1   },
   { code: 'SAR', nameFr: 'Riyal saoudien',       flag: '🇸🇦', unit: 1   },
   { code: 'AED', nameFr: 'Dirham des Émirats',   flag: '🇦🇪', unit: 1   },
-  { code: 'QAR', nameFr: 'Riyal qatarien',       flag: '🇶🇦', unit: 1   },
+  { code: 'QAR', nameFr: 'Riyal qatarien',      flag: '🇶🇦', unit: 1   },
   { code: 'KWD', nameFr: 'Dinar koweïtien',      flag: '🇰🇼', unit: 1   },
 ];
 
 // Gulf pegs (USD equivalence per 1 unit of that currency)
-const GULF_USD = {
+const GULF_USD = SHARED?.GULF_USD_RATES ?? {
   SAR: 0.266667,
   AED: 0.272294,
   QAR: 0.274725,

@@ -42,8 +42,11 @@ export interface LiveRate {
   centralParity?: number;
   /** Band utilisation 0–100%: position of mid within the ±5% regulatory band.
    *  50% = at central parity; <35% = lower zone; >65% = upper zone.
-   *  Doc 3, Art 3: banks must apply rates within BKAM-published fluctuation bands. */
+   *  Doc 3, Art 3: banks must apply rates within BKAM-published fluctuation bands.
+   *  P0.10: Only set for USD. For other currencies, use vsUsdReferencePct. */
   bandUtilPct?: number;
+  /** P0.10: For non-USD currencies, % deviation from USD-anchored parity. */
+  vsUsdReferencePct?: number;
   /** True for TND/DZD/LYD: rates set by UMA bilateral convention, not ECB market.
    *  Doc 1 §I.1.b footnote. */
   umaConvention?: boolean;
@@ -92,9 +95,17 @@ export interface ForwardQuote {
   tenorLabel: string;
   tenorDays: number;
   tenorYears: number;
+  /** CIP forward rate (mid, no markup). The dealer's price the user actually sees is `ask` or `bid`. */
   forwardRate: number;
   forwardPointsRaw: number;  // F - S
-  forwardPointsPips: number; // (F - S) × 10000
+  /** (F − S) scaled by pip multiplier: ×10000 for most, ×100 for JPY. */
+  forwardPointsPips: number;
+  /** Bid (bank buys FCY from client) — only set when dealer markup > 0 */
+  bid?: number;
+  /** Ask (bank sells FCY to client) — only set when dealer markup > 0 */
+  ask?: number;
+  /** Half-spread in MAD per unit of FCY */
+  spread?: number;
   madRate: number;
   fcyRate: number;
   notional: number;
@@ -270,7 +281,7 @@ export interface AuditEntry {
 }
 
 // ─── Navigation ───────────────────────────────────────────────────────────────
-export type ViewState = 'HOME' | 'DASHBOARD' | 'ANALYSIS' | 'FIXING' | 'BILLETS' | 'COMMODITIES' | 'FORWARDS' | 'SWAPS' | 'LIVE' | 'ADMIN' | 'ABOUT' | 'REPORT' | 'REGULATIONS' | 'BANDS' | 'RESOURCES' | 'CONTACT' | 'RESEARCH' | 'ABOUT_JAD2' | 'TOOL_OC_ASSESS' | 'TOOL_CORRIDOR' | 'TOOL_INVOICE' | 'TOOL_FWD_EXT' | 'SECTOR_AUTO' | 'SECTOR_TEXTILE' | 'SECTOR_NORDIQUE' | 'SECTOR_AGRI' | 'PARITY_MATRIX';
+export type ViewState = 'HOME' | 'DASHBOARD' | 'ANALYSIS' | 'FIXING' | 'BILLETS' | 'COMMODITIES' | 'FORWARDS' | 'SWAPS' | 'LIVE' | 'ADMIN' | 'ABOUT' | 'REPORT' | 'REGULATIONS' | 'BANDS' | 'RESOURCES' | 'CONTACT' | 'RESEARCH' | 'ABOUT_JAD2' | 'TOOL_OC_ASSESS' | 'TOOL_CORRIDOR' | 'TOOL_INVOICE' | 'TOOL_FWD_EXT' | 'SECTOR_AUTO' | 'SECTOR_TEXTILE' | 'SECTOR_NORDIQUE' | 'SECTOR_AGRI' | 'PARITY_MATRIX' | 'TOOL_PME_DIAG' | 'TOOL_IMPORT_COST' | 'TOOL_QUARTERLY';
 export type DashboardTab = 'VIREMENTS' | 'BILLETS' | 'GLOBAL_FX';
 
 // ─── Market Reports ───────────────────────────────────────────────────────────

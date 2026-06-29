@@ -32,15 +32,22 @@ const ACTION_COLOR: Record<string, string> = {
 
 // ─── Login Gate ───────────────────────────────────────────────────────────────
 
-function LoginGate({ onLogin }: { onLogin: (pw: string) => boolean }) {
+function LoginGate({ onLogin }: { onLogin: (pw: string) => Promise<boolean> }) {
   const [pw, setPw] = useState('');
   const [show, setShow] = useState(false);
   const [err, setErr] = useState(false);
+  const [busy, setBusy] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (onLogin(pw)) { setErr(false); }
-    else { setErr(true); setPw(''); }
+    setBusy(true);
+    try {
+      const ok = await onLogin(pw);
+      if (ok) { setErr(false); }
+      else { setErr(true); setPw(''); }
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (

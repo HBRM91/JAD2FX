@@ -341,3 +341,16 @@ export function getCurveSnapshot(
 export function getDefaultCurve(currency: string): YieldCurvePoint[] {
   return DEFAULT_CURVES[currency] ?? [];
 }
+
+// P1.1 — Apply live BDT overrides to a base curve. Returns a NEW array.
+// Overrides are point-by-point (e.g. { '3M': 0.0325, '1Y': 0.0350 } as decimals).
+export function applyCurveOverrides(
+  base: YieldCurvePoint[],
+  overrides: Record<string, number> | undefined,
+): YieldCurvePoint[] {
+  if (!overrides) return base;
+  return base.map((p) => {
+    const o = overrides[p.tenor];
+    return o != null ? { ...p, rate: o } : p;
+  });
+}

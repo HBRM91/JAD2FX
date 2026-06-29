@@ -38,7 +38,7 @@ const FxChart: React.FC<FxChartProps> = ({ pair, data }) => {
           <Tooltip 
             contentStyle={{ backgroundColor: '#0F2645', border: 'none', borderRadius: '4px', color: '#fff' }}
             itemStyle={{ color: '#D4AF37' }}
-            formatter={(value: number) => [value.toFixed(4), pair]}
+            formatter={((value: number) => [value.toFixed(4), pair]) as any}
           />
           <Area type="monotone" dataKey="value" stroke="#0F2645" strokeWidth={2} fillOpacity={1} fill="url(#colorValue)" />
         </AreaChart>

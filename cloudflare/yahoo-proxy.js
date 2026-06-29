@@ -1901,6 +1901,156 @@ async function handleBkamRatesBackfill(request, env, origin) {
   return json({ ok, ecb_only: ecbOnly, skipped, no_bkam_data: noBkam, errors, total: dates.length, results }, 200, origin);
 }
 
+// ─── Intraday chart proxy (P0.8 — replace synthetic sine wave) ───────────────
+// Fetches 1h ticks from Yahoo Finance v8 chart API for a given symbol.
+// Returns { points: [{t, v}], timestamp } or 404 on no data.
+//
+// Whitelisted symbol pattern: ends with =X (Yahoo FX pairs), alphanumeric + =X.
+const INTRADAY_SYMBOL_RE = /^[A-Z]{6}=X$/;
+
+async function handleIntraday(request, env, origin, symbol) {
+  if (!INTRADAY_SYMBOL_RE.test(symbol)) {
+    return json({ error: 'Invalid symbol format. Expected e.g. EURMAD=X' }, 400, origin);
+  }
+  // Yahoo v8 chart API: range=1d, interval=1h
+  const yahooUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?range=1d&interval=1h`;
+  try {
+    const res = await fetch(yahooUrl, {
+      headers: { 'User-Agent': 'Mozilla/5.0 JAD2FX/1.0' },
+      signal: AbortSignal.timeout(8_000),
+    });
+    if (!res.ok) {
+      return json({ error: `Yahoo HTTP ${res.status}` }, 502, origin);
+    }
+    const data = await res.json();
+    const result = data?.chart?.result?.[0];
+    if (!result) {
+      return json({ points: [], timestamp: null, message: 'No data' }, 200, origin);
+    }
+    const timestamps = result.timestamp || [];
+    const closes = result.indicators?.quote?.[0]?.close || [];
+    const points = [];
+    for (let i = 0; i < timestamps.length; i++) {
+      const v = closes[i];
+      if (v == null || !Number.isFinite(v)) continue;
+      const d = new Date(timestamps[i] * 1000);
+      const hh = String(d.getUTCHours()).padStart(2, '0');
+      const mm = String(d.getUTCMinutes()).padStart(2, '0');
+      points.push({ t: `${hh}:${mm}`, v: +v.toFixed(6) });
+    }
+    const lastTs = timestamps.length > 0 ? new Date(timestamps[timestamps.length - 1] * 1000).toISOString() : null;
+    // Cache for 5 minutes to avoid hammering Yahoo
+    return new Response(JSON.stringify({ points, timestamp: lastTs }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        ...corsHeaders(origin),
+        'Cache-Control': 'public, max-age=300',
+      },
+    });
+  } catch (err) {
+    return json({ error: err.message || 'fetch failed' }, 502, origin);
+  }
+}
+
+// ─── Admin session (P0.11 — cookie-based, no passcode in client bundle) ───────
+// Three endpoints:
+//   POST /api/admin/login   { passcode } → sets HTTP-only cookie if valid
+//   POST /api/admin/logout  clears cookie
+//   GET  /api/admin/session → { ok: true } if cookie valid, else { ok: false }
+// The cookie is signed with HMAC so it can't be forged.
+// Session TTL: 8h.
+
+const SESSION_COOKIE_NAME = 'jad2_admin';
+const SESSION_TTL_SECONDS = 8 * 60 * 60; // 8 hours
+
+async function hmacSign(payload, secret) {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    'raw',
+    enc.encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const sig = await crypto.subtle.sign('HMAC', key, enc.encode(payload));
+  return Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function buildSessionCookie(env) {
+  const expires = Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS;
+  const payload = `admin.${expires}`;
+  const secret = env.ADMIN_PASSCODE || 'fallback-dev-secret';
+  const sig = await hmacSign(payload, secret);
+  const value = `${payload}.${sig}`;
+  return `${SESSION_COOKIE_NAME}=${value}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${SESSION_TTL_SECONDS}; Secure`;
+}
+
+function buildClearCookie() {
+  return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0; Secure`;
+}
+
+async function verifySessionCookie(request, env) {
+  const cookieHeader = request.headers.get('Cookie') ?? '';
+  const match = cookieHeader.match(new RegExp(`(?:^|; )${SESSION_COOKIE_NAME}=([^;]+)`));
+  if (!match) return false;
+  const [value] = match[1].split(';');
+  const parts = value.split('.');
+  if (parts.length !== 3) return false;
+  const [tag, expiresStr, sig] = parts;
+  if (tag !== 'admin') return false;
+  const expires = parseInt(expiresStr, 10);
+  if (!Number.isFinite(expires) || expires < Math.floor(Date.now() / 1000)) return false;
+  const payload = `${tag}.${expiresStr}`;
+  const secret = env.ADMIN_PASSCODE || 'fallback-dev-secret';
+  const expected = await hmacSign(payload, secret);
+  return expected === sig;
+}
+
+async function handleAdminLogin(request, env, origin) {
+  if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
+  const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
+  if (!checkAdminRateLimit(ip)) return json({ error: 'Too many requests' }, 429, origin);
+
+  let body;
+  try {
+    const raw = await readBodySafe(request);
+    body = JSON.parse(raw);
+  } catch {
+    return json({ error: 'Invalid JSON' }, 400, origin);
+  }
+
+  const supplied = typeof body.passcode === 'string' ? body.passcode : '';
+  if (!env.ADMIN_PASSCODE || supplied.length === 0) {
+    return json({ ok: false, error: 'Invalid passcode' }, 401, origin);
+  }
+  // Constant-time comparison to avoid timing attacks
+  const a = new TextEncoder().encode(supplied);
+  const b = new TextEncoder().encode(env.ADMIN_PASSCODE);
+  if (a.length !== b.length) return json({ ok: false, error: 'Invalid passcode' }, 401, origin);
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a[i] ^ b[i];
+  if (diff !== 0) return json({ ok: false, error: 'Invalid passcode' }, 401, origin);
+
+  const cookie = await buildSessionCookie(env);
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json', 'Set-Cookie': cookie, ...corsHeaders(origin) },
+  });
+}
+
+function handleAdminLogout(request, origin) {
+  return new Response(JSON.stringify({ ok: true }), {
+    status: 200,
+    headers: { 'Content-Type': 'application/json', 'Set-Cookie': buildClearCookie(), ...corsHeaders(origin) },
+  });
+}
+
+async function handleAdminSession(request, env, origin) {
+  const ok = await verifySessionCookie(request, env);
+  return json({ ok }, 200, origin);
+}
+
 // ─── Main fetch handler ───────────────────────────────────────────────────────
 
 export default {
@@ -2031,6 +2181,17 @@ export default {
       if (request.method === 'GET')  return handleTelemetryGet(request, env, origin);
       return json({ error: 'GET or POST only' }, 405, origin);
     }
+
+    // ── Intraday chart (P0.8) ───────────────────────────────────────────────
+    if (pathname.startsWith('/api/intraday/')) {
+      const symbol = pathname.slice('/api/intraday/'.length);
+      return handleIntraday(request, env, origin, symbol);
+    }
+
+    // ── Admin session (P0.11) ──────────────────────────────────────────────
+    if (pathname === '/api/admin/login')   return handleAdminLogin(request, env, origin);
+    if (pathname === '/api/admin/logout')  return handleAdminLogout(request, origin);
+    if (pathname === '/api/admin/session') return handleAdminSession(request, env, origin);
 
     // ── Yahoo Finance proxy ───────────────────────────────────────────────────
     if (request.method !== 'GET') return new Response('Method Not Allowed', { status: 405 });

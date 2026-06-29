@@ -39,7 +39,7 @@ export interface DriftHistoryResponse {
   phase: string;
 }
 
-let _historyCache: Map<number, { data: DriftHistoryResponse; ts: number }> = new Map();
+const _historyCache: Map<number, { data: DriftHistoryResponse; ts: number }> = new Map();
 const CACHE_TTL_MS = 15 * 60 * 1000; // 15 min — history doesn't change intraday
 
 export async function fetchDriftHistory(

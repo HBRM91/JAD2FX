@@ -59,46 +59,8 @@
     }
     </script>
 
-    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;600;700&family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              navy: {
-                50:  '#ECF3FA',
-                100: '#C9DDEF',
-                200: '#91B8D8',
-                300: '#62A0CC',
-                400: '#5090C0',
-                500: '#4E7EAC',
-                600: '#3A6490',
-                700: '#1E3E5C',
-                800: '#0E2336',
-                900: '#081628',
-                950: '#040C1C',
-              },
-              gold: {
-                300: '#F2DC8A',
-                400: '#E5C158',
-                500: '#D4AF37',
-                600: '#B5952F',
-                700: '#8A7024',
-                800: '#5E4D18',
-                900: '#33290D',
-              }
-            },
-            fontFamily: {
-              sans: ['Inter', 'Cairo', 'sans-serif'],
-              serif: ['Playfair Display', 'serif'],
-              arabic: ['Cairo', 'sans-serif'],
-              mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
-            }
-          }
-        }
-      }
-    </script>
+    <!-- P0.13: Tailwind moved to build-time. Config now in tailwind.config.ts; processed via PostCSS. -->
     <style>
       /* ── Deep Navy Terminal — dark mode only ──────────────────── */
       :root {
@@ -212,8 +174,8 @@
   <!-- LinkedIn Insight Tag — DEACTIVATED (pending Partner ID configuration) -->
 
   <!-- Plausible Analytics — cookieless, no consent banner needed.
-       Update data-domain to match your Plausible account domain once registered. -->
-  <script defer data-domain="jad2fx.pages.dev" src="https://plausible.io/js/script.js"></script>
+       P0.12: data-domain aligned to canonical fx.jad2advisory.com. -->
+  <script defer data-domain="fx.jad2advisory.com" src="https://plausible.io/js/script.js"></script>
 
   <script type="importmap">
 {

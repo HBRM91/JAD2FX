@@ -58,6 +58,9 @@ export interface DriftPoint {
    *  50% = at central parity; <35% = lower zone; >65% = upper zone; <20%/>80% = danger. */
   bandUtilPct: number;
   source: 'BKAM_OFFICIAL' | 'ECB_PROXY';
+  /** True when this point's EUR/USD came from the mean of OTHER days' ECB fetches
+   *  (the day's own ECB fetch failed). Exogenous but lower confidence. */
+  eurUsdFallbackUsed?: boolean;
 }
 
 export interface DriftRegression {
@@ -149,6 +152,13 @@ export async function computeDriftModel(
   // intraday smoothing, intervention within the ±5% band).
   // Typical range: ±5 to ±50 bps — small but non-zero and directionally meaningful.
   //
+  // P0.9 FALLBACK (previously buggy): if ECB fetch fails, do NOT fall back to the
+  // BKAM cross-rate (circular by construction → drift ≈ 0). Instead:
+  //   1. If we already have a previous day's driftBps computed, use the average of
+  //      the trailing known drifts as the fallback for the eurUsd slot. This keeps
+  //      the data point comparable without circularity.
+  //   2. Otherwise, skip the point entirely — the time series is still useful
+  //      if we have ≥ 2 valid points.
   if (corsProxyUrl) {
     const workingDays = getLastNWorkingDays(nDays);
 
@@ -165,6 +175,18 @@ export async function computeDriftModel(
       )),
     ]);
 
+    // Pre-compute mean of any successful ECB fetches to use as fallback for failed ones.
+    // This gives an exogenous estimate that is NOT derived from BKAM's own cross-rates.
+    const successfulEcbFetches: number[] = [];
+    for (const r of ecbSettled) {
+      if (r.status === 'fulfilled' && r.value != null) {
+        successfulEcbFetches.push(r.value);
+      }
+    }
+    const fallbackEurUsd = successfulEcbFetches.length > 0
+      ? successfulEcbFetches.reduce((s, v) => s + v, 0) / successfulEcbFetches.length
+      : null;
+
     for (let i = 0; i < bkamSettled.length; i++) {
       const bkamResult = bkamSettled[i];
       if (bkamResult.status !== 'fulfilled' || !bkamResult.value.length) continue;
@@ -175,10 +197,20 @@ export async function computeDriftModel(
       if (!usdMad || !eurMad) continue;
 
       // ECB EUR/USD: exogenous market reference for basket parity.
-      // Fall back to BKAM-implied cross only if ECB fetch failed.
+      // NO MORE circular fallback to (eurMad / usdMad). If the day's ECB fetch
+      // failed, use the mean of the OTHER days' ECB fetches (still exogenous).
+      // If ALL ECB fetches failed, skip this point (marked with dataSource).
       const ecbResult = ecbSettled[i];
-      const ecbEurUsd = ecbResult.status === 'fulfilled' ? ecbResult.value : null;
-      const eurUsd = ecbEurUsd ?? (eurMad / usdMad); // ECB preferred; BKAM cross as last resort
+      let eurUsd: number | null = null;
+      let eurUsdFallbackUsed = false;
+      if (ecbResult.status === 'fulfilled' && ecbResult.value != null) {
+        eurUsd = ecbResult.value;
+      } else if (fallbackEurUsd != null) {
+        eurUsd = fallbackEurUsd;
+        eurUsdFallbackUsed = true;
+      } else {
+        continue; // Skip — cannot compute non-circular drift without exogenous EUR/USD
+      }
 
       // Non-circular basket parity: uses ECB EUR/USD, not BKAM cross-rate
       const basketUsdMad = K / (EUR_W * eurUsd + USD_W);
@@ -200,6 +232,7 @@ export async function computeDriftModel(
         driftBps:     +driftBps.toFixed(2),
         eurUsd:       +eurUsd.toFixed(4),
         bandUtilPct:  +bUtil.toFixed(1),
+        eurUsdFallbackUsed,
         source: 'BKAM_OFFICIAL',
       });
     }

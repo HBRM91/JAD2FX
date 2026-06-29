@@ -793,7 +793,7 @@ export default function ForwardCalculator() {
                         contentStyle={{ background: '#0A1A30', border: '1px solid #1e3a5f', borderRadius: 6 }}
                         labelStyle={{ color: '#D4AF37', fontWeight: 'bold', fontSize: 11 }}
                         itemStyle={{ color: '#94a3b8', fontSize: 11 }}
-                        formatter={(v: number) => [`${v >= 0 ? '+' : ''}${v.toFixed(2)} pips`, 'Fwd Points']}
+                        formatter={((v: number) => [`${v >= 0 ? '+' : ''}${v.toFixed(2)} pips`, 'Fwd Points']) as any}
                       />
                       <ReferenceLine y={0} stroke="#4b5563" strokeDasharray="4 4" />
                       <Line type="monotone" dataKey="forwardPointsPips" stroke="#D4AF37" strokeWidth={2}

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { BKAM_CURRENCIES, CURRENCY_ORDER } from '../constants';
 import { useAdmin } from '../context/AdminContext';
 import { fetchBkamBBE, fetchBkamBBEDate, bbeToMadPerUnit, getLastNWorkingDays } from '../services/bkamApi';
+import { previousBusinessDayISO } from '../services/holidays';
 import { useI18n } from '../context/I18nContext';
 import { Banknote, RefreshCw, ExternalLink, Info, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import CurrencyFlag from './CurrencyFlag';
@@ -56,13 +57,6 @@ function saveBbeRates(map: Record<string, { bid: number; ask: number }>, date: s
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function prevBizDay(): string {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() - 1);
-  return d.toISOString().slice(0, 10);
-}
-
 function changeBps(curr: number, prev: number): number {
   if (!prev) return 0;
   return Math.round(((curr - prev) / prev) * 10_000);
@@ -112,7 +106,7 @@ const BilletsPage: React.FC = () => {
 
       // Previous day BBE — try API first, then localStorage
       let prevMap: Record<string, { bid: number; ask: number }> = {};
-      const yesterday = prevBizDay();
+      const yesterday = previousBusinessDayISO();
 
       if (proxy && isOfficial) {
         try {

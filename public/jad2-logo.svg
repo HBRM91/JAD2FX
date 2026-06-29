@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60" role="img" aria-label="JAD2FX">
+  <defs>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#B5952F"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#F2DC8A"/>
+    </linearGradient>
+  </defs>
+  <g font-family="'Playfair Display', serif" font-weight="700">
+    <text x="0" y="40" font-size="32" fill="url(#gold)" letter-spacing="2">JAD2</text>
+    <text x="86" y="40" font-size="32" fill="#ECF3FA" letter-spacing="2">FX</text>
+  </g>
+  <text x="0" y="55" font-family="Inter, sans-serif" font-size="8" fill="#91B8D8" letter-spacing="3">BY JAD2 ADVISORY</text>
+</svg>

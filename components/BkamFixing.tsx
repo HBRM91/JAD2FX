@@ -93,7 +93,7 @@ function exportCSV(row: FixingDayRow) {
           ? { nameFr: EXTRA_CURRENCY_META[r.libDevise].nameFr }
           : null);
       const name = (meta as { nameFr?: string } | null)?.nameFr ?? r.libDevise;
-      lines.push(`"${name}",${r.libDevise},${r.uniteDevise},${r.moyen.toFixed(4)},BKAM Officiel`);
+      lines.push(`"${name}",${r.libDevise},${r.uniteDevise},${r.moyen?.toFixed(4) ?? ''},BKAM Officiel`);
     }
   } else {
     // ECB proxy fallback
@@ -505,7 +505,7 @@ export default function BkamFixing() {
                     <YAxis tick={{ fill: '#3D6491', fontSize: 9 }} width={54} />
                     <Tooltip
                       contentStyle={{ background: '#081628', border: '1px solid #1C3558', borderRadius: 6, fontSize: 11 }}
-                      formatter={(v: number, name: string) => [v.toFixed(4), name]}
+                      formatter={((v: number, name: string) => [v.toFixed(4), name]) as any}
                     />
                     <Legend iconSize={8} wrapperStyle={{ fontSize: 10 }} />
                     <Line dataKey="EUR/MAD Fixing" stroke="#D4AF37" strokeWidth={2} dot={{ r: 3 }} />
@@ -527,7 +527,7 @@ export default function BkamFixing() {
                     <YAxis tick={{ fill: '#3D6491', fontSize: 9 }} unit=" pb" width={50} />
                     <Tooltip
                       contentStyle={{ background: '#081628', border: '1px solid #1C3558', borderRadius: 6, fontSize: 11 }}
-                      formatter={(v: number) => [`${v.toFixed(1)} bps`]}
+                      formatter={((v: number) => [`${v.toFixed(1)} bps`]) as any}
                     />
                     <ReferenceLine y={0} stroke="#D4AF37" strokeWidth={1} strokeDasharray="4 2" />
                     <Bar dataKey="EUR/MAD (bps)" shape={<DivBar />} />

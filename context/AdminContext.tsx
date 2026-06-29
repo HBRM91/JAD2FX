@@ -61,7 +61,6 @@ export const DEFAULT_ADMIN_CONFIG: AdminConfig = {
   corsProxyUrl: process.env.CORS_PROXY_URL ?? 'https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev',
 };
 
-const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE ?? '';
 const STORAGE_KEY    = 'jad2fx_admin_config';
 const ADMIN_KEY      = 'jad2fx_admin_unlocked';
 
@@ -73,8 +72,8 @@ interface AdminContextType {
   resetConfig: () => void;
 
   isAdmin: boolean;
-  login:   (passcode: string) => boolean;
-  logout:  () => void;
+  login:   (passcode: string) => Promise<boolean>;
+  logout:  () => Promise<void>;
 
   blotter:         BlotterEntry[];
   addBlotterEntry: (e: Omit<BlotterEntry, 'id' | 'time'>) => void;
@@ -109,8 +108,35 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch { return DEFAULT_ADMIN_CONFIG; }
   });
 
-  // Admin auth
+  // Admin auth — P0.11: verify the server-side session cookie on mount, do not trust localStorage alone
   const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem(ADMIN_KEY) === '1');
+  const configRef = useRef(config);
+  configRef.current = config;
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const base = (configRef.current.corsProxyUrl ?? '').replace(/\/$/, '');
+      if (!base) return;
+      try {
+        const res = await fetch(`${base}/api/admin/session`, {
+          method: 'GET',
+          credentials: 'include',
+          signal: AbortSignal.timeout(5_000),
+        });
+        if (cancelled) return;
+        const data = (await res.json()) as { ok?: boolean };
+        if (data.ok) {
+          setIsAdmin(true);
+          try { localStorage.setItem(ADMIN_KEY, '1'); } catch { /* ignore */ }
+        } else {
+          setIsAdmin(false);
+          try { localStorage.removeItem(ADMIN_KEY); } catch { /* ignore */ }
+        }
+      } catch { /* offline → keep localStorage hint */ }
+    })();
+    return () => { cancelled = true; };
+  }, []);
 
   // Blotter — circular buffer of 50 entries
   const [blotter, setBlotter] = useState<BlotterEntry[]>([]);
@@ -132,13 +158,16 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const updateConfig = useCallback((patch: Partial<AdminConfig>) => {
     setConfigState(prev => ({ ...prev, ...patch }));
     const keys = Object.keys(patch).join(', ');
-    setAuditLog(prev => [{
-      id: String(++auditIdRef.current),
-      time: new Date().toISOString(),
-      action: 'CONFIG_UPDATE',
-      detail: `Fields updated: ${keys}`,
-      user: 'ADMIN',
-    }, ...prev].slice(0, 200));
+    setAuditLog(prev => {
+      const entry: AuditEntry = {
+        id: String(++auditIdRef.current),
+        time: new Date().toISOString(),
+        action: 'CONFIG_UPDATE',
+        detail: `Fields updated: ${keys}`,
+        user: 'ADMIN',
+      };
+      return [entry, ...prev].slice(0, 200);
+    });
   }, []);
 
   const resetConfig = useCallback(() => {
@@ -146,19 +175,52 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.removeItem(STORAGE_KEY);
   }, []);
 
-  const login = useCallback((passcode: string): boolean => {
-    if (passcode === ADMIN_PASSCODE) {
-      setIsAdmin(true);
-      localStorage.setItem(ADMIN_KEY, '1');
-      return true;
+  const login = useCallback(async (passcode: string): Promise<boolean> => {
+    // P0.11: passcode is sent to the worker, which compares against the secret
+    // and returns an HTTP-only cookie. The passcode is never compared client-side
+    // and is no longer shipped in the bundle.
+    try {
+      const base = (config.corsProxyUrl ?? '').replace(/\/$/, '');
+      if (!base) {
+        if (typeof console !== 'undefined') console.error('login: corsProxyUrl not configured');
+        return false;
+      }
+      const res = await fetch(`${base}/api/admin/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode }),
+        credentials: 'include',
+        signal: AbortSignal.timeout(8_000),
+      });
+      if (!res.ok) return false;
+      const data = (await res.json()) as { ok?: boolean };
+      if (data.ok) {
+        setIsAdmin(true);
+        try { localStorage.setItem(ADMIN_KEY, '1'); } catch { /* ignore */ }
+        return true;
+      }
+      return false;
+    } catch (err) {
+      if (typeof console !== 'undefined') console.error('login failed:', err);
+      return false;
     }
-    return false;
-  }, []);
+  }, [config.corsProxyUrl]);
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    // P0.11: tell the worker to clear the HTTP-only cookie
+    try {
+      const base = (config.corsProxyUrl ?? '').replace(/\/$/, '');
+      if (base) {
+        await fetch(`${base}/api/admin/logout`, {
+          method: 'POST',
+          credentials: 'include',
+          signal: AbortSignal.timeout(5_000),
+        });
+      }
+    } catch { /* ignore */ }
     setIsAdmin(false);
-    localStorage.removeItem(ADMIN_KEY);
-  }, []);
+    try { localStorage.removeItem(ADMIN_KEY); } catch { /* ignore */ }
+  }, [config.corsProxyUrl]);
 
   const addBlotterEntry = useCallback((e: Omit<BlotterEntry, 'id' | 'time'>) => {
     const entry: BlotterEntry = {
@@ -172,13 +234,16 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const clearBlotter = useCallback(() => setBlotter([]), []);
 
   const addAuditEntry = useCallback((action: string, detail: string) => {
-    setAuditLog(prev => [{
-      id: String(++auditIdRef.current),
-      time: new Date().toISOString(),
-      action,
-      detail,
-      user: 'ADMIN',
-    }, ...prev].slice(0, 200));
+    setAuditLog(prev => {
+      const entry: AuditEntry = {
+        id: String(++auditIdRef.current),
+        time: new Date().toISOString(),
+        action,
+        detail,
+        user: 'ADMIN',
+      };
+      return [entry, ...prev].slice(0, 200);
+    });
   }, []);
 
   const clearAuditLog = useCallback(() => setAuditLog([]), []);

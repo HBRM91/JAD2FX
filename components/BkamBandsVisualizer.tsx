@@ -240,7 +240,7 @@ function DriftChart({ drift, loading }: { drift: DriftRegression | null; loading
             <YAxis tick={{ fill: '#3D6491', fontSize: 9 }} unit=" pb" width={48} />
             <Tooltip
               contentStyle={{ background: '#0A1628', border: '1px solid #1C3558', borderRadius: 6, fontSize: 11 }}
-              formatter={(v: number, name: string) => [`${v} pb`, name === 'drift' ? 'Dérive réelle' : 'Tendance OLS']}
+              formatter={((v: number, name: string) => [`${v} pb`, name === 'drift' ? 'Dérive réelle' : 'Tendance OLS']) as any}
             />
             <ReferenceLine y={0} stroke="#D4AF37" strokeWidth={1} strokeDasharray="4 2" />
             <Area dataKey="drift" fill="#D4AF37" fillOpacity={0.1} stroke="#D4AF37" strokeWidth={1.5} dot={{ r: 3, fill: '#D4AF37' }} name="drift" />
@@ -384,11 +384,11 @@ function HistoricalDriftChart({ corsProxyUrl }: { corsProxyUrl: string }) {
             <YAxis tick={{ fill: '#3D6491', fontSize: 8 }} unit=" pb" width={48} domain={yDomain} />
             <Tooltip
               contentStyle={{ background: '#0A1628', border: '1px solid #1C3558', borderRadius: 6, fontSize: 10 }}
-              formatter={(v: number, name: string) => [
+              formatter={((v: number, name: string) => [
                 name === 'drift' ? `${v} pb` : name === 'util' ? `${v}%` : v.toFixed(4),
                 name === 'drift' ? 'Dérive (pb)' : name === 'util' ? 'Util. bande %' : name,
-              ]}
-              labelFormatter={(l: string, payload) => payload?.[0]?.payload?.date ?? l}
+              ]) as any}
+              labelFormatter={((l: string, payload: any) => payload?.[0]?.payload?.date ?? l) as any}
             />
             {/* Zero line = at basket parity */}
             <ReferenceLine y={0} stroke="#D4AF37" strokeWidth={1} strokeDasharray="4 2" label={{ value: 'Parité', fill: '#8a6a20', fontSize: 8 }} />

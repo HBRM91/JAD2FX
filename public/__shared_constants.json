@@ -1,0 +1,166 @@
+{
+  "BKAM_CURRENCIES": [
+    {
+      "code": "EUR",
+      "nameFr": "Euro",
+      "flag": "🇪🇺",
+      "unit": 1
+    },
+    {
+      "code": "USD",
+      "nameFr": "Dollar américain",
+      "flag": "🇺🇸",
+      "unit": 1
+    },
+    {
+      "code": "GBP",
+      "nameFr": "Livre sterling",
+      "flag": "🇬🇧",
+      "unit": 1
+    },
+    {
+      "code": "CHF",
+      "nameFr": "Franc suisse",
+      "flag": "🇨🇭",
+      "unit": 1
+    },
+    {
+      "code": "JPY",
+      "nameFr": "Yen japonais",
+      "flag": "🇯🇵",
+      "unit": 100
+    },
+    {
+      "code": "CAD",
+      "nameFr": "Dollar canadien",
+      "flag": "🇨🇦",
+      "unit": 1
+    },
+    {
+      "code": "NOK",
+      "nameFr": "Couronne norvégienne",
+      "flag": "🇳🇴",
+      "unit": 1
+    },
+    {
+      "code": "SEK",
+      "nameFr": "Couronne suédoise",
+      "flag": "🇸🇪",
+      "unit": 1
+    },
+    {
+      "code": "DKK",
+      "nameFr": "Couronne danoise",
+      "flag": "🇩🇰",
+      "unit": 1
+    },
+    {
+      "code": "CNY",
+      "nameFr": "Yuan renminbi",
+      "flag": "🇨🇳",
+      "unit": 1
+    },
+    {
+      "code": "SAR",
+      "nameFr": "Riyal saoudien",
+      "flag": "🇸🇦",
+      "unit": 1
+    },
+    {
+      "code": "AED",
+      "nameFr": "Dirham des Émirats",
+      "flag": "🇦🇪",
+      "unit": 1
+    },
+    {
+      "code": "QAR",
+      "nameFr": "Riyal qatarien",
+      "flag": "🇶🇦",
+      "unit": 1
+    },
+    {
+      "code": "KWD",
+      "nameFr": "Dinar koweïtien",
+      "flag": "🇰🇼",
+      "unit": 1
+    },
+    {
+      "code": "OMR",
+      "nameFr": "Rial omanais",
+      "flag": "🇴🇲",
+      "unit": 1
+    },
+    {
+      "code": "BHD",
+      "nameFr": "Dinar bahreïni",
+      "flag": "🇧🇭",
+      "unit": 1
+    },
+    {
+      "code": "JOD",
+      "nameFr": "Dinar jordanien",
+      "flag": "🇯🇴",
+      "unit": 1
+    },
+    {
+      "code": "TND",
+      "nameFr": "Dinar tunisien",
+      "flag": "🇹🇳",
+      "unit": 1
+    },
+    {
+      "code": "DZD",
+      "nameFr": "Dinar algérien",
+      "flag": "🇩🇿",
+      "unit": 100
+    },
+    {
+      "code": "LYD",
+      "nameFr": "Dinar libyen",
+      "flag": "🇱🇾",
+      "unit": 1
+    },
+    {
+      "code": "ZAR",
+      "nameFr": "Rand sud-africain",
+      "flag": "🇿🇦",
+      "unit": 1
+    },
+    {
+      "code": "INR",
+      "nameFr": "Roupie indienne",
+      "flag": "🇮🇳",
+      "unit": 100
+    },
+    {
+      "code": "BRL",
+      "nameFr": "Réal brésilien",
+      "flag": "🇧🇷",
+      "unit": 1
+    },
+    {
+      "code": "TRY",
+      "nameFr": "Livre turque",
+      "flag": "🇹🇷",
+      "unit": 1
+    }
+  ],
+  "GULF_USD_RATES": {
+    "SAR": 0.266667,
+    "AED": 0.272294,
+    "QAR": 0.274725,
+    "KWD": 3.25,
+    "OMR": 2.60869,
+    "BHD": 2.65957,
+    "JOD": 1.41044,
+    "TND": 0.32258,
+    "DZD": 0.00743,
+    "LYD": 0.20833
+  },
+  "BASKET": {
+    "K": 10.49,
+    "EUR_W": 0.6,
+    "USD_W": 0.4
+  },
+  "generatedAt": "2026-06-29T14:36:29.768Z"
+}

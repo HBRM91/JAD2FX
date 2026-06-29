@@ -77,10 +77,12 @@ export default function ForwardExtension() {
     // Build forward quote for extension period
     try {
       const extQuote = buildForwardQuote(
-        currency, spot, extensionDays, direction,
+        currency, spot, extensionDays,
         parseFloat(notional) || 1,
-        config.curveOverrides ?? {},
-        DEFAULT_BASKET_CONFIG
+        direction,
+        0,
+        config.curveOverrides?.['MAD'],
+        config.curveOverrides?.[currency]
       );
       const extensionPoints = extQuote.forwardPointsPips; // pips
       const newForwardRate  = orig + extensionPoints / 10000;
@@ -112,7 +114,7 @@ export default function ForwardExtension() {
     // Remaining value of the forward (time value via CIP estimate)
     let remainingForwardRate: number | null = null;
     try {
-      const q = buildForwardQuote(currency, spot, daysLeft, direction, not, config.curveOverrides ?? {}, DEFAULT_BASKET_CONFIG);
+      const q = buildForwardQuote(currency, spot, daysLeft, not, direction, 0, config.curveOverrides?.['MAD'], config.curveOverrides?.[currency]);
       remainingForwardRate = q.forwardRate;
     } catch { /* ignore */ }
 
@@ -129,7 +131,7 @@ export default function ForwardExtension() {
 
     let theoreticalRate: number | null = null;
     try {
-      const q = buildForwardQuote(currency, spot, days, direction, 1, config.curveOverrides ?? {}, DEFAULT_BASKET_CONFIG);
+      const q = buildForwardQuote(currency, spot, days, 1, direction, 0, config.curveOverrides?.['MAD'], config.curveOverrides?.[currency]);
       theoreticalRate = q.forwardRate;
     } catch { /* ignore */ }
 

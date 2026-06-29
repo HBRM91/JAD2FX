@@ -31,6 +31,17 @@ export function getDayCountBasis(currency: string): 360 | 365 {
   return ACT_360_CURRENCIES.has(currency) ? 360 : 365;
 }
 
+/** Currencies where 1 pip = 0.01 (JPY convention). All others: 1 pip = 0.0001. */
+const PIP_DENOMINATOR_2 = new Set(['JPY']);
+
+export function pipMultiplier(currency: string): number {
+  return PIP_DENOMINATOR_2.has(currency) ? 100 : 10000;
+}
+
+export function isJpyPair(currency: string): boolean {
+  return PIP_DENOMINATOR_2.has(currency);
+}
+
 // ─── Tenor helpers ────────────────────────────────────────────────────────────
 
 export const STANDARD_TENORS = ['ON', 'TN', 'SW', '1M', '2M', '3M', '6M', '9M', '1Y', '2Y', '3Y', '5Y'] as const;
@@ -69,7 +80,10 @@ export function customDateToYears(isoDate: string, tradeDate = new Date()): numb
 
 /**
  * Compute a single forward rate via CIP.
- * Returns { forwardRate, forwardPointsRaw, forwardPointsPips }.
+ * Returns { forwardRate, forwardPointsRaw, forwardPointsPips } — pure CIP, no markup.
+ *
+ * The dealer markup is NOT applied here: it is added separately to bid/ask quotes
+ * via the applyForwardSpread() helper so the mid stays mathematically clean.
  *
  * tenorYears is always Act/365 (MAD domestic basis).
  * tenorYearsForeign overrides the foreign leg basis when provided (Act/360 currencies).
@@ -79,7 +93,7 @@ export function computeForward(
   rDomestic: number,
   rForeign: number,
   tenorYears: number,
-  markupBps = 0,
+  _markupBps = 0, // deprecated: kept for API compat; use applyForwardSpread() instead
   tenorYearsForeign?: number,
 ): {
   forwardRate: number;
@@ -91,13 +105,46 @@ export function computeForward(
   // CIP (simple interest, money-market convention)
   const fwd = spot * (1 + rDomestic * T_d) / (1 + rForeign * T_f);
 
-  // Dealer markup (adds bps to forward rate to widen spread slightly)
-  const markup = (markupBps / 10_000) * spot;
-  const forwardRate = +(fwd + markup).toFixed(4);
+  const forwardRate = +fwd.toFixed(4);
   const forwardPointsRaw = +(forwardRate - spot).toFixed(6);
-  const forwardPointsPips = +(forwardPointsRaw * 10_000).toFixed(2);
+  return { forwardRate, forwardPointsRaw, forwardPointsPips: 0 };
+}
 
-  return { forwardRate, forwardPointsRaw, forwardPointsPips };
+/**
+ * Apply dealer markup as a SPREAD around the CIP forward (not on the mid).
+ * This is the correct accounting: the mid stays at the clean CIP rate, the bank
+ * earns its margin by quoting bid/ask around it.
+ *
+ * Returns a clean quote with all standard forward metrics. Pip convention
+ * follows the currency (JPY pairs use 0.01 = 1 pip; all others use 0.0001).
+ */
+export function applyForwardSpread(
+  result: { forwardRate: number; forwardPointsRaw: number; forwardPointsPips: number },
+  spot: number,
+  currency: string,
+  direction: 'BUY' | 'SELL',
+  markupBps = 0,
+): {
+  mid: number;
+  bid: number;
+  ask: number;
+  spreadPips: number;
+  forwardPointsRaw: number;
+  forwardPointsPips: number;
+} {
+  const fwd = result.forwardRate;
+  const halfSpread = (markupBps / 10_000) * spot / 2;
+  const mid = +fwd.toFixed(4);
+  // For a BUY direction (you buy FCY, sell MAD), you pay the ask (= mid + half-spread)
+  // For SELL direction (you sell FCY, buy MAD), you receive the bid (= mid - half-spread)
+  const ask = +(fwd + halfSpread).toFixed(4);
+  const bid = +(fwd - halfSpread).toFixed(4);
+  const pipMult = pipMultiplier(currency);
+  const spreadPips = +((ask - bid) * pipMult).toFixed(2);
+  const forwardPointsPips = +(result.forwardPointsRaw * pipMult).toFixed(2);
+  const directionQuoted = direction === 'BUY' ? ask : bid;
+  void directionQuoted; // exposed for callers; mid/ask/bid are the canonical output
+  return { mid, bid, ask, spreadPips, forwardPointsRaw: result.forwardPointsRaw, forwardPointsPips };
 }
 
 // ─── Full forward quote ───────────────────────────────────────────────────────
@@ -105,16 +152,27 @@ export function computeForward(
 export function buildForwardQuote(
   currency: string,
   spot: number,
-  tenor: string,
+  tenor: string | number,
   notional: number,
   direction: 'BUY' | 'SELL',
   markupBps = 0,
   madOverrides?: Record<string, number>,
   fcyOverrides?: Record<string, number>,
 ): ForwardQuote {
-  const tenorYears = tenor === 'CUSTOM'
-    ? tenorToYears('3M')           // fallback if CUSTOM passed without years
-    : tenorToYears(tenor);
+  // Accept either a tenor label ('1M', '3M', '1Y', ...) or a day count (number).
+  // This lets callers pass extension days directly without converting to a tenor label.
+  let tenorYears: number;
+  let tenorLabel: string;
+  if (typeof tenor === 'number') {
+    tenorYears = tenor / 365;
+    tenorLabel = `${tenor}D`;
+  } else if (tenor === 'CUSTOM') {
+    tenorYears = tenorToYears('3M');
+    tenorLabel = '3M';
+  } else {
+    tenorYears = tenorToYears(tenor);
+    tenorLabel = tenor;
+  }
 
   const tenorDays = Math.round(tenorYears * 365);
   const tenorYearsForeign = tenorDays / getDayCountBasis(currency);
@@ -122,22 +180,26 @@ export function buildForwardQuote(
   const madRate = getRate('MAD', tenorYears, madOverrides);
   const fcyRate = getRate(currency, tenorYears, fcyOverrides);
 
-  const { forwardRate, forwardPointsRaw, forwardPointsPips } = computeForward(
-    spot, madRate, fcyRate, tenorYears, markupBps, tenorYearsForeign,
+  const fwd = computeForward(
+    spot, madRate, fcyRate, tenorYears, 0, tenorYearsForeign,
   );
+  const spread = applyForwardSpread(fwd, spot, currency, direction, markupBps);
 
-  const netCostMAD = +(Math.abs(forwardPointsRaw) * notional).toFixed(2);
+  const netCostMAD = +(Math.abs(fwd.forwardPointsRaw) * notional).toFixed(2);
 
   return {
     pair:             `${currency}/MAD`,
     currency,
     spot,
-    tenorLabel:       tenor,
+    tenorLabel,
     tenorDays,
     tenorYears,
-    forwardRate,
-    forwardPointsRaw,
-    forwardPointsPips,
+    forwardRate:      spread.mid,
+    forwardPointsRaw: spread.forwardPointsRaw,
+    forwardPointsPips: spread.forwardPointsPips,
+    bid:              spread.bid,
+    ask:              spread.ask,
+    spread:           spread.spreadPips,
     madRate,
     fcyRate,
     notional,
@@ -178,12 +240,13 @@ function isKnot(tenorYears: number, knots: Set<number>): boolean {
 export function buildForwardCurve(
   currency: string,
   spot: number,
-  markupBps = 0,
+  _markupBps = 0,
   madOverrides?: Record<string, number>,
   fcyOverrides?: Record<string, number>,
 ): ForwardCurvePoint[] {
   const madKnots = curveKnotYears('MAD');
   const fcyKnots = curveKnotYears(currency);
+  const pipMult = pipMultiplier(currency);
 
   return STANDARD_TENORS.map(tenor => {
     const tenorYears = tenorToYears(tenor);
@@ -192,9 +255,8 @@ export function buildForwardCurve(
     const madRate    = getRate('MAD', tenorYears, madOverrides);
     const fcyRate    = getRate(currency, tenorYears, fcyOverrides);
 
-    const { forwardRate, forwardPointsPips } = computeForward(
-      spot, madRate, fcyRate, tenorYears, markupBps, tenorYearsForeign,
-    );
+    const fwd = computeForward(spot, madRate, fcyRate, tenorYears, 0, tenorYearsForeign);
+    const forwardPointsPips = +(fwd.forwardPointsRaw * pipMult).toFixed(2);
 
     const premDisc: 'PREMIUM' | 'DISCOUNT' | 'PAR' =
       forwardPointsPips > 0.5  ? 'PREMIUM'  :
@@ -202,7 +264,7 @@ export function buildForwardCurve(
 
     const isInterpolated = !isKnot(tenorYears, madKnots) || !isKnot(tenorYears, fcyKnots);
 
-    return { tenor, tenorDays, tenorYears, spot, forwardRate, forwardPointsPips, madRate, fcyRate, premDisc, isInterpolated };
+    return { tenor, tenorDays, tenorYears, spot, forwardRate: fwd.forwardRate, forwardPointsPips, madRate, fcyRate, premDisc, isInterpolated };
   });
 }
 
@@ -224,11 +286,11 @@ function buildSwapLeg(
   const madRate    = getRate('MAD', tenorYears, madOvr);
   const fcyRate    = getRate(currency, tenorYears, fcyOvr);
 
-  const { forwardRate, forwardPointsPips } = computeForward(
-    spot, madRate, fcyRate, tenorYears, markupBps, tenorYearsForeign,
-  );
+  const fwd = computeForward(spot, madRate, fcyRate, tenorYears, 0, tenorYearsForeign);
+  const spread = applyForwardSpread(fwd, spot, currency, direction, markupBps);
+  const rate = direction === 'BUY' ? spread.ask : spread.bid;
 
-  return { label, tenorLabel: tenor, tenorDays, tenorYears, rate: forwardRate, forwardPointsPips, direction };
+  return { label, tenorLabel: tenor, tenorDays, tenorYears, rate, forwardPointsPips: spread.forwardPointsPips, direction };
 }
 
 export function buildFxSwap(
@@ -280,14 +342,17 @@ export function buildRollEvent(
   const fromYears = tenorToYears(fromTenor);
   const toYears   = tenorToYears(toTenor);
 
-  const { forwardRate: fromRate } = computeForward(
-    spot, getRate('MAD', fromYears, madOvr), getRate(currency, fromYears, fcyOvr), fromYears, markupBps,
+  const fromFwd = computeForward(
+    spot, getRate('MAD', fromYears, madOvr), getRate(currency, fromYears, fcyOvr), fromYears, 0,
   );
-  const { forwardRate: toRate } = computeForward(
-    spot, getRate('MAD', toYears, madOvr), getRate(currency, toYears, fcyOvr), toYears, markupBps,
+  const toFwd = computeForward(
+    spot, getRate('MAD', toYears, madOvr), getRate(currency, toYears, fcyOvr), toYears, 0,
   );
+  const fromRate = fromFwd.forwardRate;
+  const toRate = toFwd.forwardRate;
 
-  const rollCostPips = +((toRate - fromRate) * 10_000).toFixed(2);
+  const pipMult = pipMultiplier(currency);
+  const rollCostPips = +((toRate - fromRate) * pipMult).toFixed(2);
   const rollCostMAD  = +(Math.abs(toRate - fromRate) * notional).toFixed(2);
 
   return {
@@ -303,5 +368,112 @@ export function buildRollEvent(
     rollCostMAD,
     notional,
     timestamp: new Date().toISOString(),
+  };
+}
+
+// ─── Calendar spreads (P1.5) ───────────────────────────────────────────────────
+
+export interface CalendarSpreadResult {
+  pair: string;
+  nearTenor: string;
+  farTenor: string;
+  nearRate: number;
+  farRate: number;
+  spread: number;            // far - near (in price)
+  spreadPips: number;        // spread × pip multiplier
+  direction: 'CONTANGO' | 'BACKWARDATION' | 'FLAT';
+  interpretation: string;
+}
+
+/**
+ * Compute a calendar spread: e.g. 1M vs 3M EUR/MAD forward.
+ * If far > near → contango (positive carry); if far < near → backwardation.
+ */
+export function buildCalendarSpread(
+  currency: string,
+  spot: number,
+  nearTenor: string,
+  farTenor: string,
+  madOvr?: Record<string, number>,
+  fcyOvr?: Record<string, number>,
+): CalendarSpreadResult {
+  const nearQ = buildForwardQuote(currency, spot, nearTenor, 1, 'BUY', 0, madOvr, fcyOvr);
+  const farQ  = buildForwardQuote(currency, spot, farTenor,  1, 'BUY', 0, madOvr, fcyOvr);
+  const pipMult = pipMultiplier(currency);
+  const spread = +(farQ.forwardRate - nearQ.forwardRate).toFixed(6);
+  const spreadPips = +(spread * pipMult).toFixed(2);
+  const direction =
+    spreadPips >  1  ? 'CONTANGO' :
+    spreadPips < -1  ? 'BACKWARDATION' : 'FLAT';
+  const interpretation =
+    direction === 'CONTANGO'      ? `Carry positif: forward ${farTenor} > ${nearTenor} (rate differential favorable)` :
+    direction === 'BACKWARDATION' ? `Inversion: forward ${farTenor} < ${nearTenor} (taux domestique > étranger)` :
+                                    `Spread neutre entre ${nearTenor} et ${farTenor}`;
+  return {
+    pair: `${currency}/MAD`,
+    nearTenor,
+    farTenor,
+    nearRate: nearQ.forwardRate,
+    farRate: farQ.forwardRate,
+    spread,
+    spreadPips,
+    direction,
+    interpretation,
+  };
+}
+
+export interface ButterflyResult {
+  pair: string;
+  nearTenor: string;
+  middleTenor: string;
+  farTenor: string;
+  nearRate: number;
+  middleRate: number;
+  farRate: number;
+  /** Butterfly = near + far − 2 × middle. Positive → belly is cheap; negative → belly is rich. */
+  butterfly: number;
+  butterflyPips: number;
+  direction: 'BULL_STEEPENER' | 'BEAR_FLATTENER' | 'NEUTRAL';
+  interpretation: string;
+}
+
+/**
+ * Compute a butterfly: e.g. 1M × 3M × 6M (long 1M + 6M, short 2 × 3M).
+ * Used to isolate the belly of the forward curve.
+ */
+export function buildButterfly(
+  currency: string,
+  spot: number,
+  nearTenor: string,
+  middleTenor: string,
+  farTenor: string,
+  madOvr?: Record<string, number>,
+  fcyOvr?: Record<string, number>,
+): ButterflyResult {
+  const near = buildForwardQuote(currency, spot, nearTenor, 1, 'BUY', 0, madOvr, fcyOvr);
+  const mid  = buildForwardQuote(currency, spot, middleTenor, 1, 'BUY', 0, madOvr, fcyOvr);
+  const far  = buildForwardQuote(currency, spot, farTenor, 1, 'BUY', 0, madOvr, fcyOvr);
+  const pipMult = pipMultiplier(currency);
+  const butterfly = +((near.forwardRate + far.forwardRate) - 2 * mid.forwardRate).toFixed(6);
+  const butterflyPips = +(butterfly * pipMult).toFixed(2);
+  const direction =
+    butterflyPips >  1  ? 'BULL_STEEPENER' :
+    butterflyPips < -1  ? 'BEAR_FLATTENER'  : 'NEUTRAL';
+  const interpretation =
+    butterflyPips >  1 ? `Belly cheap: ${middleTenor} sous-évalué vs ${nearTenor} et ${farTenor} (positionnez-vous sur le steepening)` :
+    butterflyPips < -1 ? `Belly cher: ${middleTenor} surévalué vs ${nearTenor} et ${farTenor} (positionnez-vous sur le flattening)` :
+                         `Butterfly neutre: courbe plate autour de ${middleTenor}`;
+  return {
+    pair: `${currency}/MAD`,
+    nearTenor,
+    middleTenor,
+    farTenor,
+    nearRate: near.forwardRate,
+    middleRate: mid.forwardRate,
+    farRate: far.forwardRate,
+    butterfly,
+    butterflyPips,
+    direction,
+    interpretation,
   };
 }
