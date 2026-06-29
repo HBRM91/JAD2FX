@@ -202,6 +202,48 @@
       @media screen {
         .briefing-print-doc { display: none !important; }
       }
+
+      /* P2.24 — Print stylesheet for ALL modules.
+         When a user prints, hide nav/footer/buttons/charts, expand content
+         to a single column. Compatible with Chrome/Safari/Firefox print. */
+      @media print {
+        body { background: white !important; color: #0a0a0a !important; }
+        /* Hide non-essential chrome */
+        nav, footer, [data-no-print], .no-print, button:not(.print-allow), .sticky,
+        [class*="fixed"], .floating-chat, .lucide-external-link { display: none !important; }
+        /* Show only main content */
+        main { max-width: 100% !important; padding: 0 !important; }
+        /* Ensure dark-mode contrast doesn't break print */
+        .bg-navy-900, .bg-navy-950, .bg-navy-800 { background: white !important; border-color: #ddd !important; }
+        .text-white, .text-slate-100, .text-slate-200, .text-slate-300, .text-slate-400 { color: #0a0a0a !important; }
+        .text-slate-500, .text-slate-600 { color: #444 !important; }
+        .text-gold-400, .text-gold-500 { color: #b8860b !important; }
+        .text-blue-400 { color: #1d4ed8 !important; }
+        .text-emerald-400 { color: #047857 !important; }
+        .text-red-400 { color: #b91c1c !important; }
+        /* Show a print header at the top of every page */
+        main::before {
+          content: "JAD2FX — fx.jad2advisory.com — " attr(data-print-date);
+          display: block;
+          font-size: 9pt;
+          color: #666;
+          text-align: right;
+          border-bottom: 1px solid #ccc;
+          padding-bottom: 6pt;
+          margin-bottom: 12pt;
+        }
+        .print-only { display: block !important; }
+        /* Tables: print-friendly */
+        table { page-break-inside: avoid; }
+        tr { page-break-inside: avoid; }
+        h1, h2, h3 { page-break-after: avoid; color: #0a0a0a !important; }
+        a { color: #1d4ed8 !important; text-decoration: underline; }
+        /* Charts: render as static */
+        svg { max-height: 250pt !important; }
+      }
+      @media screen {
+        .print-only { display: none !important; }
+      }
     </style>
   <!-- LinkedIn Insight Tag — DEACTIVATED (pending Partner ID configuration) -->
 

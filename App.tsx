@@ -14,6 +14,8 @@ import DriftAlertChip     from './components/DriftAlertChip';
 import ContactForm        from './components/ContactForm';
 import CommandPalette     from './components/CommandPalette';
 import NewsletterSignup   from './components/NewsletterSignup';
+import { SkipToContent } from './utils/a11y';
+import Onboarding from './components/Onboarding';
 
 const FxDashboard           = lazy(() => import('./components/FxDashboard'));
 const MarketAnalysis        = lazy(() => import('./components/MarketAnalysis'));
@@ -70,6 +72,12 @@ const ExitIntentModal       = lazy(() => import('./components/ExitIntentModal'))
 const ContextualCTA         = lazy(() => import('./components/ContextualCTA'));
 const PriceAlerts           = lazy(() => import('./components/PriceAlerts'));
 const TimeWindowSelector    = lazy(() => import('./components/TimeWindowSelector'));
+const VolSurfacePage        = lazy(() => import('./components/VolSurfacePage'));
+const MoneyMarketPage       = lazy(() => import('./components/MoneyMarketPage'));
+const SovereignPage         = lazy(() => import('./components/SovereignPage'));
+const BankRatesPage         = lazy(() => import('./components/BankRatesPage'));
+const CorrelationHeatmap    = lazy(() => import('./components/CorrelationHeatmap'));
+const GlobalSearch          = lazy(() => import('./components/GlobalSearch'));
 const LiveCounterLazy       = lazy(() => import('./components/SocialProof').then(m => ({ default: m.LiveCounter })));
 
 import { AdminProvider, useAdmin } from './context/AdminContext';
@@ -228,6 +236,7 @@ function AppInner() {
       className="min-h-screen flex flex-col font-sans bg-navy-950 text-slate-300"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
+      <SkipToContent />
       <DisclaimerModal />
       <CommandPalette
         isOpen={paletteOpen}
@@ -236,6 +245,7 @@ function AppInner() {
       />
       <ExitIntentModal />
       <WhatsAppButton />
+      <Onboarding />
 
       {/* ══ Navbar ══════════════════════════════════════════════════════════ */}
       <nav ref={navDropdownRef} className="bg-navy-900 sticky top-0 z-50 border-b border-navy-800">
@@ -494,7 +504,7 @@ function AppInner() {
       )}
 
       {/* ══ Main content ═════════════════════════════════════════════════════ */}
-      <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 view-enter">
+      <main id="main-content" role="main" className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 view-enter">
         <Suspense fallback={<RouteFallback />}>
 
         {/* ─── HOME ──────────────────────────────────────────────────────── */}
@@ -535,37 +545,7 @@ function AppInner() {
                 </div>
               </div>
 
-              {/* European fintech persona */}
-              <div className="bg-navy-900 border border-blue-700/30 rounded-2xl p-6 flex flex-col gap-4 hover:border-blue-600/50 transition-colors">
-                <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.2em] bg-blue-500/10 border border-blue-500/25 px-2 py-0.5 rounded">
-                    European Fintech &amp; Tech
-                  </span>
-                </div>
-                <div>
-                  <h2 className="text-xl font-serif font-bold text-white leading-tight mb-2">
-                    Morocco FX corridor intelligence
-                  </h2>
-                  <p className="text-sm text-slate-400 leading-relaxed">
-                    Regulatory mapping, BKAM/OC compliance intelligence, and go-to-market advisory
-                    for operators entering the Morocco–Europe payment corridor.
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2 mt-auto">
-                  <button
-                    onClick={() => setContactDrawerOpen(true)}
-                    className="flex items-center gap-2 border border-blue-500/50 text-blue-300 font-bold text-sm px-5 py-2.5 rounded-lg hover:border-blue-400 hover:bg-blue-500/5 transition-colors"
-                  >
-                    <Globe size={14} /> Explore the corridor
-                  </button>
-                  <button
-                    onClick={() => navTo('ANALYSIS')}
-                    className="flex items-center gap-2 text-slate-400 border border-navy-700 font-medium text-sm px-4 py-2.5 rounded-lg hover:border-navy-500 hover:text-white hover:bg-navy-800/50 transition-colors"
-                  >
-                    <BarChart2 size={14} /> Market Analysis
-                  </button>
-                </div>
-              </div>
+              {/* P2.19 — Removed: European Fintech persona per plan (single PME hero) */}
             </div>
 
             {/* ── Drift alert chip (Task 2.3) ──────────────────────────────── */}
@@ -868,6 +848,11 @@ function AppInner() {
         {view === 'SERVICES' && <ServicesPage />}
         {view === 'AUDIT_LANDING' && <AuditLanding />}
         {view === 'TESTIMONIALS' && <SocialProofModule />}
+        {view === 'VOL_SURFACE' && <VolSurfacePage />}
+        {view === 'MONEY_MARKET' && <MoneyMarketPage />}
+        {view === 'SOVEREIGN' && <SovereignPage />}
+        {view === 'BANK_RATES' && <BankRatesPage />}
+        {view === 'CORRELATION' && <CorrelationHeatmap />}
         {view === 'SECTOR_AUTO'     && <SectorLanding sectorId="auto"     navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_TEXTILE'  && <SectorLanding sectorId="textile"  navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_NORDIQUE' && <SectorLanding sectorId="nordique" navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
