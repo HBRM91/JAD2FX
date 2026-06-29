@@ -219,6 +219,37 @@ function PrintQuoteModal({ quote, currency, tenor, notional, direction, settleme
               </div>
             </div>
 
+            {/* P3.6 — In-tool CTA after quote computed */}
+            <div className="bg-gradient-to-r from-gold-500/10 to-navy-900 border border-gold-700/30 rounded-lg p-4 mt-3 flex items-start gap-3">
+              <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-gold-500/15 border border-gold-500/30 flex items-center justify-center">
+                <TrendingUp size={16} className="text-gold-400" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[12px] font-bold text-white mb-1">
+                  {locale === 'en' ? 'Want a real bank rate for this forward?' : 'Vous voulez un taux ferme pour ce forward ?'}
+                </p>
+                <p className="text-[11px] text-slate-400 leading-snug mb-2">
+                  {locale === 'en'
+                    ? 'JAD2FX is pedagogical. For execution, your bank gives you a firm quote. We can help you structure the request and benchmark it.'
+                    : 'JAD2FX est pédagogique. Pour exécution, votre banque vous donne un cours ferme. On vous aide à structurer la demande et la benchmarker.'}
+                </p>
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={() => { if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('jad2:open-contact')); }}
+                    className="text-[10px] font-bold px-3 py-1.5 bg-gold-500 text-navy-950 rounded hover:bg-gold-400"
+                  >
+                    {locale === 'en' ? '15min with expert →' : '15 min avec un expert →'}
+                  </button>
+                  <button
+                    onClick={() => { if (typeof window !== 'undefined') window.location.hash = 'audit-gratuit'; }}
+                    className="text-[10px] font-bold px-3 py-1.5 border border-navy-600 text-slate-300 rounded hover:border-gold-500/50"
+                  >
+                    {locale === 'en' ? 'Free 30min audit' : 'Audit 30 min gratuit'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
             {/* Disclaimer */}
             <div className="border border-orange-200 bg-orange-50 rounded-lg p-4">
               <p className="text-[10px] text-orange-800 leading-relaxed">

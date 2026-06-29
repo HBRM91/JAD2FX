@@ -2594,6 +2594,124 @@ async function handleFunnelStats(request, env, origin) {
   }, 200, origin);
 }
 
+// ─── P4.4 Newsletter send (Resend) ─────────────────────────────────────────
+async function handleNewsletterSend(request, env, origin) {
+  const raw = await readBodySafe(request);
+  let body = {};
+  try { body = JSON.parse(raw); } catch { return json({ error: 'Invalid JSON' }, 400, origin); }
+  const subject = (body.subject || 'JAD2FX — Newsletter').toString().slice(0, 200);
+  const textBody = (body.body || '').toString().slice(0, 50_000);
+  const htmlBody = `<!DOCTYPE html><html><body style="font-family:system-ui;background:#040C1C;color:#cbd5e1;padding:20px;">
+    <div style="max-width:600px;margin:0 auto;background:#081628;padding:24px;border-radius:8px;">
+      <h1 style="color:#D4AF37;font-size:22px;margin:0 0 16px;">JAD2FX</h1>
+      <h2 style="color:#ECF3FA;font-size:18px;margin:0 0 16px;">${escapeHtml(subject)}</h2>
+      <div style="color:#cbd5e1;line-height:1.6;font-size:14px;white-space:pre-wrap;">${escapeHtml(textBody).replace(/\n/g, '<br>')}</div>
+      <p style="margin-top:24px;padding-top:16px;border-top:1px solid #1E3E5C;font-size:11px;color:#64748b;">
+        JAD2 Advisory · Casablanca · <a href="https://fx.jad2advisory.com" style="color:#D4AF37;">fx.jad2advisory.com</a><br>
+        Vous recevez cet email car vous êtes inscrit au Morning Briefing. <a href="https://fx.jad2advisory.com" style="color:#D4AF37;">Se désabonner</a>
+      </p>
+    </div>
+  </body></html>`;
+
+  if (!env.REPORTS_KV) return json({ error: 'KV not configured' }, 503, origin);
+  const subRaw = await env.REPORTS_KV.get('subscribers:confirmed');
+  const subs = subRaw ? JSON.parse(subRaw) : [];
+  if (subs.length === 0) return json({ sent: 0, failed: 0, total: 0 }, 200, origin);
+
+  const resendKey = env.RESEND_API_KEY;
+  if (!resendKey) return json({ error: 'RESEND_API_KEY not configured — queuing locally only' }, 503, origin);
+
+  const fromEmail = env.NEWSLETTER_FROM || 'JAD2FX <newsletter@jad2advisory.com>';
+  const audience = subs.map((s) => s.email);
+  let sent = 0, failed = 0;
+  for (const email of audience) {
+    try {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: fromEmail,
+          to: [email],
+          subject,
+          html: htmlBody,
+          text: textBody,
+        }),
+      });
+      if (res.ok) sent++; else failed++;
+    } catch { failed++; }
+  }
+  return json({ sent, failed, total: subs.length, subject }, 200, origin);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ─── P3.1 / P3.3 Lead magnet PDFs ────────────────────────────────────────────
+// Returns print-ready HTML. The browser's "Save as PDF" converts it to PDF.
+// For server-side PDF generation, we would use puppeteer or pdfkit; but
+// for a P0-MVP, "Print to PDF" via the browser is the cleanest path.
+function handleLeadMagnetPdf(pathname, origin) {
+  const isOC = pathname === '/press/guide-oc-2024';
+  const title = isOC
+    ? 'Guide Opérationnel — Circ. OC 01/2024'
+    : 'Forward Pricing Playbook — Maroc';
+  const subtitle = isOC
+    ? 'Comment mettre votre entreprise en conformité en 90 jours'
+    : 'Maîtriser la simulation de forward EUR/MAD comme un pro';
+  const sections = isOC ? [
+    { h: '1. Périmètre de la Circ. OC 01/2024', b: `La Circ. OC 01/2024 encadre l'utilisation des instruments de couverture de change par les entreprises résidentes marocaines. Elle s'applique aux personnes morales résidentes dont le CA annuel est supérieur à 500 000 MAD, ou dont l'exposition mensuelle au change dépasse 500 000 MAD. Les personnes physiques non-résidentes et les entreprises en-dessous de ces seuils ne sont pas soumises à l'obligation de déclaration.` },
+    { h: '2. Instruments autorisés', b: `Instruments financiers de couverture autorisés :\n- Contrats à terme fermes (forward) sur devises cotées par BAM\n- Swaps de change (FX swap)\n- Options vanilles d'achat et de vente (calls et puts)\n- Combinaisons d'options vanilles (risk reversals, straddles, strangles)\n\nInstruments INTERDITS :\n- Options exotiques (barrier, knock-out, lookback, digital)\n- Options binaires\n- Produits à effet de levier excessif\n- CFD (Contracts for Difference) sur forex` },
+    { h: '3. Obligations déclaratives', b: `Reporting mensuel obligatoire pour les entreprises dépassant les seuils. Contenu :\n1. Encours total par devise\n2. Échéances par mois (max 12 mois)\n3. Contreparties bancaires\n4. Justification économique de chaque couverture\n5. Écarts de valorisation (MTM) par instrument\n\nDélai : 20 du mois suivant.\nSanction : 0,5% du montant non déclaré par jour de retard.` },
+    { h: '4. Plan d\'action 90 jours', b: `Semaine 1-2 : Cartographier toutes les expositions (commerciale, économique, bilan)\nSemaine 3-4 : Inventorier les instruments existants vs Circ. 01/2024\nSemaine 5-8 : Former l'équipe finance (JAD2 Advisory propose une formation 2 jours)\nSemaine 9-10 : Mettre en place le reporting mensuel automatisé\nSemaine 11-12 : Audit interne + soumission OC\nSemaine 13 : Validation conformité\n\nContact : JAD2 Advisory · contact@jad2advisory.com · +212 5 22 XX XX XX` },
+  ] : [
+    { h: '1. La formule CIP', b: 'F = S × (1 + r_d × T) / (1 + r_f × T)\n\nOù S = spot, r_d = taux domestique, r_f = taux étranger, T = tenor en années. Pour MAD, on prend le Monia ou la courbe BDT.' },
+    { h: '2. Cas pratique: importateur 8M EUR/an', b: 'Vous importez 8M EUR/an de composants. Votre marge actuelle est 4.2% (338K EUR). Sans couverture, chaque mouvement de 1% EUR/MAD vous coûte 80K EUR. Forward 12M au pair: 0% de prime mais exposition totale. Forward 3M rollé 4 fois: 0.4% de prime (32K EUR) avec exposition limitée. Conclusion: forward rollé = sweet spot.' },
+    { h: '3. Outils JAD2FX', b: 'Calculateur forward (CIP + XCS + bid/ask)\nSimulateur trimestriel (4 stratégies)\nDiagnostic FX PME (5 questions)\nDiagnostic OC compliance\nSurface de volatilité\nGlossaire 60+ termes FX/MAD/OC' },
+    { h: '4. Check-list 5 min avant chaque fixing', b: '1. Encours de la semaine écoulée (factures émises, en cours)\n2. Forward roll cette semaine (sinon coût daily-forward)\n3. Événements ECO majeurs à venir (NFP, CPI, BCE, Fed)\n4. Volatilité implicite EUR/MAD (smile ATM)\n5. Calendrier BKAM (prochain fixing, fermetures MIC)' },
+  ];
+
+  const html = `<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>${escapeHtml(title)} — JAD2FX</title>
+<style>
+@page { size: A4; margin: 20mm; }
+body { font-family: Georgia, 'Times New Roman', serif; line-height: 1.55; color: #111; max-width: 800px; margin: 0 auto; padding: 40px; }
+h1 { font-size: 28px; color: #b8860b; border-bottom: 3px solid #b8860b; padding-bottom: 8px; margin-bottom: 4px; }
+.subtitle { color: #555; font-size: 14px; font-style: italic; margin-bottom: 24px; }
+h2 { font-size: 18px; color: #1a1a2e; margin-top: 32px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+p { margin: 0 0 12px 0; white-space: pre-wrap; }
+.footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #ccc; font-size: 10px; color: #777; }
+.brand { color: #b8860b; font-weight: bold; }
+</style>
+</head>
+<body>
+<h1>${escapeHtml(title)}</h1>
+<p class="subtitle">${escapeHtml(subtitle)} · JAD2FX — fx.jad2advisory.com</p>
+${sections.map((s) => `<h2>${escapeHtml(s.h)}</h2><p>${escapeHtml(s.b).replace(/\n/g, '<br>')}</p>`).join('\n')}
+<div class="footer">
+  <p><span class="brand">JAD2 Advisory</span> · Cabinet de conseil · Casablanca, Maroc</p>
+  <p>Document pédagogique — Conforme Circ. OC 01/2024 — Données indicatives uniquement</p>
+  <p>contact@jad2advisory.com · Pour vos opérations, contactez votre banque agréée par BAM</p>
+</div>
+</body>
+</html>`;
+  return new Response(html, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'X-Content-Type-Options': 'nosniff',
+      'Content-Disposition': `inline; filename="${pathname.split('/').pop()}.html"`,
+      ...corsHeaders(origin),
+    },
+  });
+}
+
 // ─── Main fetch handler ───────────────────────────────────────────────────────
 
 export default {
@@ -2795,6 +2913,17 @@ export default {
       const denied = adminGate(request, env, origin);
       if (denied) return denied;
       return handleFunnelStats(request, env, origin);
+    }
+    // ── P4.4 Weekly newsletter send (admin) ─────────────────────────────
+    if (pathname === '/api/admin/newsletter/send') {
+      const denied = adminGate(request, env, origin);
+      if (denied) return denied;
+      if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
+      return handleNewsletterSend(request, env, origin);
+    }
+    // ── P3.1 / P3.3 Lead magnet PDFs (HTML print-ready) ─────────────────
+    if (pathname === '/press/guide-oc-2024' || pathname === '/press/forward-playbook') {
+      return handleLeadMagnetPdf(pathname, origin);
     }
 
     // ── Yahoo Finance proxy ───────────────────────────────────────────────────

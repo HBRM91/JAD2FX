@@ -25,12 +25,14 @@ type SubmitStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export default function ContactForm() {
   const { config } = useAdmin();
-
   const [form, setForm] = useState<FormState>({
     name: '', email: '', company: '', service: '', message: '',
   });
-  const [status, setStatus]   = useState<SubmitStatus>('idle');
+  const [status, setStatus] = useState<SubmitStatus>('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  const [mode, setMode] = useState<'FORM' | 'CALENDLY'>(
+    (typeof process !== 'undefined' && (process as any)?.CALENDLY_URL) ? 'CALENDLY' : 'FORM',
+  );
 
   const set = (field: keyof FormState) => (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
@@ -155,8 +157,44 @@ export default function ContactForm() {
 
         {/* ── Right: form ──────────────────────────────────────────────── */}
         <div className="lg:col-span-3 bg-navy-900 border border-navy-700 rounded-2xl p-6">
+          {/* P3.7 — Mode toggle: form vs Calendly */}
+          {typeof process !== 'undefined' && (process as any).CALENDLY_URL && (
+            <div className="flex items-center gap-1 bg-navy-950 border border-navy-700 rounded-lg p-1 mb-4">
+              <button
+                onClick={() => setMode('FORM')}
+                className={`flex-1 px-3 py-1.5 text-[11px] font-bold rounded transition-colors ${
+                  mode === 'FORM' ? 'bg-gold-500 text-navy-950' : 'text-slate-400'
+                }`}
+              >
+                Formulaire
+              </button>
+              <button
+                onClick={() => setMode('CALENDLY')}
+                className={`flex-1 px-3 py-1.5 text-[11px] font-bold rounded transition-colors ${
+                  mode === 'CALENDLY' ? 'bg-gold-500 text-navy-950' : 'text-slate-400'
+                }`}
+              >
+                Réserver un créneau (30 min)
+              </button>
+            </div>
+          )}
 
-          {status === 'success' ? (
+          {mode === 'CALENDLY' && (process as any).CALENDLY_URL ? (
+            <div className="space-y-3">
+              <p className="text-[12px] text-slate-300 text-center">
+                Cliquez sur un créneau ci-dessous pour réserver votre session de 30 min
+                avec un expert JAD2 Advisory.
+              </p>
+              {/* Calendly inline embed */}
+              <div
+                className="calendly-inline-widget rounded-lg overflow-hidden border border-navy-700"
+                data-url={`${(process as any).CALENDLY_URL}?hide_gdpr_banner=1&background_color=081628&text_color=cbd5e1&primary_color=D4AF37`}
+                style={{ minWidth: '320px', height: '650px' }}
+              />
+              <link rel="preconnect" href="https://assets.calendly.com" />
+              <script async src="https://assets.calendly.com/assets/external/widget.js" />
+            </div>
+          ) : status === 'success' ? (
             <div className="flex flex-col items-center justify-center h-full py-12 text-center gap-4">
               <div className="w-14 h-14 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center">
                 <CheckCircle size={28} className="text-emerald-400" />

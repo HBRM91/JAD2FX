@@ -82,14 +82,16 @@ export default function QuarterlyOutlook() {
           Macroéconomie, panier BKAM, secteur par secteur, conformité OC, et perspectives à 90 jours.
           Réservé à nos abonnés (newsletter Morning Briefing).
         </p>
-        <div className="flex items-center gap-2 mt-3">
-          <button
-            disabled
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold bg-gold-500 text-navy-950 rounded disabled:opacity-50"
+        <div className="flex items-center gap-2 mt-3 flex-wrap">
+          <a
+            href="/press/quarterly-q2-2026"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold bg-gold-500 text-navy-950 rounded hover:bg-gold-400"
           >
-            <Download size={12} /> Télécharger Q2 2026 PDF
-          </button>
-          <span className="text-[10px] text-slate-500">Réservé aux abonnés</span>
+            <Download size={12} /> Ouvrir Q2 2026 (Imprimer → PDF)
+          </a>
+          <span className="text-[10px] text-slate-500">ou Ctrl+P → Enregistrer en PDF</span>
         </div>
       </div>
 

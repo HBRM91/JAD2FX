@@ -1,0 +1,60 @@
+/* P2.11 — Light theme overrides.
+   When `<html>` has the `.light` class, swap dark navy palette for light.
+   All components use the same Tailwind class names, so we just remap the
+   background/text classes by overriding specific elements that use
+   inline-style or hardcoded color tokens.
+*/
+
+html.light {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  color-scheme: light;
+}
+
+html.light body {
+  background: #f8fafc !important;
+  color: #1e293b !important;
+}
+
+html.light ::-webkit-scrollbar-track { background: #f1f5f9; }
+html.light ::-webkit-scrollbar-thumb { background: #94a3b8; }
+html.light ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* Override the hard-coded navy backgrounds used in components */
+html.light .bg-navy-950 { background: #f8fafc !important; }
+html.light .bg-navy-900 { background: #ffffff !important; }
+html.light .bg-navy-800 { background: #f1f5f9 !important; }
+html.light .border-navy-700 { border-color: #cbd5e1 !important; }
+html.light .border-navy-800 { border-color: #e2e8f0 !important; }
+html.light .text-slate-300 { color: #334155 !important; }
+html.light .text-slate-400 { color: #475569 !important; }
+html.light .text-slate-500 { color: #64748b !important; }
+html.light .text-slate-600 { color: #475569 !important; }
+html.light .text-slate-700 { color: #334155 !important; }
+html.light .text-navy-300 { color: #475569 !important; }
+html.light .text-navy-400 { color: #64748b !important; }
+html.light .text-navy-500 { color: #64748b !important; }
+html.light .text-navy-600 { color: #475569 !important; }
+
+/* Recharts backgrounds: tooltips, axes */
+html.light .recharts-cartesian-axis-line, html.light .recharts-cartesian-axis-tick-line { stroke: #cbd5e1; }
+html.light .recharts-cartesian-grid line { stroke: #e2e8f0; }
+html.light .recharts-tooltip-wrapper .recharts-default-tooltip { background: #ffffff !important; border-color: #cbd5e1 !important; }
+
+/* Cards: subtle border in light mode */
+html.light .recharts-cartesian-grid-horizontal line,
+html.light .recharts-cartesian-grid-vertical line { stroke: #e2e8f0; }
+
+/* Native elements (select, input) */
+html.light input, html.light select, html.light textarea {
+  background-color: #ffffff;
+  color: #1e293b;
+  border-color: #cbd5e1;
+}
+
+/* Top bar (nav) */
+html.light nav.bg-navy-900 { background: #ffffff !important; border-bottom: 1px solid #e2e8f0; }
+html.light footer.bg-navy-900 { background: #f1f5f9 !important; }
+
+/* Modal: keep dark for contrast (modals overlay everything) */
+html.light [class*="bg-navy-950/85"], html.light [class*="bg-navy-950/80"] { background-color: rgba(15, 23, 42, 0.85) !important; }

@@ -5,11 +5,14 @@
 
 import { useState, useMemo } from 'react';
 import { BookOpen, Calendar, Search, Tag, ArrowRight } from 'lucide-react';
-import { RESEARCH_ARTICLES, RESEARCH_CATEGORIES, type ResearchCategory } from '../services/research';
+import { RESEARCH_ARTICLES, RESEARCH_CATEGORIES, type ResearchArticle, type ResearchCategory } from '../services/research';
+import AutoLinkedText from './GlossaryTooltip';
+import BlogArticleView from './BlogArticleView';
 
 export default function Blog() {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<ResearchCategory | 'all'>('all');
+  const [openId, setOpenId] = useState<string | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase().trim();
@@ -19,6 +22,10 @@ export default function Blog() {
       return true;
     });
   }, [query, category]);
+
+  if (openId) {
+    return <BlogArticleView articleId={openId} onBack={() => setOpenId(null)} onShare={() => { /* hook */ }} />;
+  }
 
   return (
     <div className="space-y-4">
@@ -79,8 +86,12 @@ export default function Blog() {
                 <Calendar size={9} /> {a.date}
               </div>
             </div>
-            <h2 className="text-base font-serif font-bold text-white leading-tight mb-2">{a.title}</h2>
-            <p className="text-[12px] text-slate-400 leading-relaxed mb-3">{a.excerpt}</p>
+                <h2 className="text-base font-serif font-bold text-white leading-tight mb-2">{a.title}</h2>
+                <AutoLinkedText
+                  text={a.excerpt}
+                  className="text-[12px] text-slate-400 leading-relaxed mb-3 block"
+                  maxLinks={3}
+                />
             <div className="flex flex-wrap gap-1.5">
               {a.tags.map((t) => (
                 <span key={t} className="text-[9px] text-slate-500 bg-navy-800 px-1.5 py-0.5 rounded">
@@ -88,7 +99,10 @@ export default function Blog() {
                 </span>
               ))}
             </div>
-            <button className="mt-3 flex items-center gap-1 text-[11px] font-bold text-gold-400 hover:text-gold-300 transition-colors">
+            <button
+              onClick={() => setOpenId(a.id)}
+              className="mt-3 flex items-center gap-1 text-[11px] font-bold text-gold-400 hover:text-gold-300 transition-colors"
+            >
               Lire l'analyse <ArrowRight size={11} />
             </button>
           </article>

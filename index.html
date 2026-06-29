@@ -245,7 +245,17 @@
         .print-only { display: none !important; }
       }
     </style>
-  <!-- LinkedIn Insight Tag — DEACTIVATED (pending Partner ID configuration) -->
+  <!-- LinkedIn Insight Tag - P3.13: reactivated (set VITE_LINKEDIN_PARTNER_ID for production) -->
+  <script type="text/javascript">
+    _linkedin_partner_id = (typeof process !== 'undefined' && process.env && process.env.VITE_LINKEDIN_PARTNER_ID) || 'jad2-fx-placeholder';
+    if (_linkedin_partner_id === 'jad2-fx-placeholder') {
+      // Skip loading until configured
+    } else {
+      window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
+      window._linkedin_data_partner_ids.push(_linkedin_partner_id);
+    }
+  </script>
+  <script async src="https://snap.licdn.com/li.lms-analytics/insight.min.js"></script>
 
   <!-- Plausible Analytics — cookieless, no consent banner needed.
        P0.12: data-domain aligned to canonical fx.jad2advisory.com. -->

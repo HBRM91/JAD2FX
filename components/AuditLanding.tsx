@@ -55,6 +55,26 @@ export default function AuditLanding() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Left: benefits + agenda */}
         <div className="lg:col-span-2 space-y-5">
+          {/* Resources — P3.1 + P3.3 */}
+          <div className="bg-navy-900/50 border border-gold-700/30 rounded-2xl p-4 flex flex-wrap items-center gap-3">
+            <p className="text-[12px] text-slate-300 flex-1 min-w-0">Préparez l'audit avec nos guides :</p>
+            <a
+              href="/press/guide-oc-2024"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] font-bold text-gold-400 hover:text-gold-300 inline-flex items-center gap-1 px-2 py-1 bg-navy-950 border border-navy-800 rounded"
+            >
+              📘 Guide OC 01/2024
+            </a>
+            <a
+              href="/press/forward-playbook"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[11px] font-bold text-gold-400 hover:text-gold-300 inline-flex items-center gap-1 px-2 py-1 bg-navy-950 border border-navy-800 rounded"
+            >
+              📗 Forward Playbook
+            </a>
+          </div>
           {/* Benefits */}
           <div className="bg-navy-900 border border-gold-700/30 rounded-2xl p-5">
             <h2 className="text-base font-bold text-white mb-3 flex items-center gap-2">

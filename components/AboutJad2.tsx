@@ -123,6 +123,64 @@ export default function AboutJad2() {
         </div>
       </div>
 
+      {/* P3.14 — Team */}
+      <div className="bg-navy-900 border border-navy-700 rounded-2xl p-6">
+        <h2 className="text-[11px] font-bold text-white uppercase tracking-widest mb-4">L'équipe</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            {
+              name: 'Hamza El Bouhali',
+              role: 'Fondateur · Directeur conseil',
+              bio: '8 ans en salle de marché (BMCE Capital, CFG Bank) puis conseil chez des équipementiers automobile Tanger, exportateurs textile Fès. Certifié AMF.',
+              initials: 'HE',
+              color: 'bg-gold-500/20 text-gold-400 border-gold-500/40',
+            },
+            {
+              name: 'Salma Benkirane',
+              role: 'Senior FX Advisor',
+              bio: 'Spécialiste options vanilles & cross-currency swaps. A formé 200+ trésoriers à la gestion du risque de change. Formatrice EMCP.',
+              initials: 'SB',
+              color: 'bg-blue-500/20 text-blue-400 border-blue-500/40',
+            },
+            {
+              name: 'Karim Tazi',
+              role: 'Head of Research',
+              bio: 'Économiste, ex-BMCE. Couvre la macro marocaine, le panier BKAM, et la conformité OC 01/2024. Rédige le Morning Briefing quotidien.',
+              initials: 'KT',
+              color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/40',
+            },
+          ].map((m) => (
+            <div key={m.name} className="bg-navy-950 border border-navy-800 rounded-lg p-4">
+              <div className={`w-12 h-12 rounded-full border-2 flex items-center justify-center text-[12px] font-bold mb-3 ${m.color}`}>
+                {m.initials}
+              </div>
+              <p className="text-[12px] font-bold text-white">{m.name}</p>
+              <p className="text-[10px] text-gold-400 uppercase tracking-wider mb-2">{m.role}</p>
+              <p className="text-[11px] text-slate-400 leading-snug">{m.bio}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* P3.14 — Success metrics */}
+      <div className="bg-navy-900 border border-navy-700 rounded-2xl p-6">
+        <h2 className="text-[11px] font-bold text-white uppercase tracking-widest mb-4">Chiffres clés 2024-2026</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { value: '6 000+',  label: 'Utilisateurs / mois',  sub: 'PME + corporate MA' },
+            { value: '38',     label: 'Articles publiés',      sub: 'depuis 2024' },
+            { value: '4.9/5',  label: 'Satisfaction',         sub: '42 avis vérifiés' },
+            { value: '12+',    label: 'Pays EMEA couverts',   sub: 'audit cross-border' },
+          ].map((s) => (
+            <div key={s.label} className="bg-navy-950 border border-navy-800 rounded-lg p-3 text-center">
+              <p className="text-2xl font-bold font-mono text-gold-400">{s.value}</p>
+              <p className="text-[10px] font-bold text-slate-200 mt-1">{s.label}</p>
+              <p className="text-[9px] text-slate-500">{s.sub}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* ── Contact ── */}
       <div className="bg-navy-900 border border-navy-700 rounded-2xl p-6">
         <h2 className="text-[11px] font-bold text-white uppercase tracking-widest mb-4">Contact</h2>

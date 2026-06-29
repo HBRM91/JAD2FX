@@ -62,6 +62,7 @@ const NewsletterAdmin       = lazy(() => import('./components/admin/NewsletterAd
 const ApiKeyManagement      = lazy(() => import('./components/admin/ApiKeyManagement'));
 const BacklinkTracker       = lazy(() => import('./components/admin/BacklinkTracker'));
 const LeadsDashboard        = lazy(() => import('./components/admin/LeadsDashboard'));
+import ThemeToggle from './components/ThemeToggle';
 // P3 — Funnel + social proof
 const ServicesPage          = lazy(() => import('./components/ServicesPage'));
 const AuditLanding          = lazy(() => import('./components/AuditLanding'));
@@ -78,6 +79,7 @@ const SovereignPage         = lazy(() => import('./components/SovereignPage'));
 const BankRatesPage         = lazy(() => import('./components/BankRatesPage'));
 const CorrelationHeatmap    = lazy(() => import('./components/CorrelationHeatmap'));
 const GlobalSearch          = lazy(() => import('./components/GlobalSearch'));
+const MultiPane             = lazy(() => import('./components/MultiPane'));
 const LiveCounterLazy       = lazy(() => import('./components/SocialProof').then(m => ({ default: m.LiveCounter })));
 
 import { AdminProvider, useAdmin } from './context/AdminContext';
@@ -89,7 +91,7 @@ import {
   Globe, ChevronRight, TrendingUp, ArrowLeftRight, Activity,
   Lock, X, BarChart2, Banknote, PackageOpen, Newspaper, Scale,
   ChevronDown, ExternalLink, Zap, MessageSquare, BookOpen, Shield,
-  ClipboardCheck, Calculator, Calendar, Search,
+  ClipboardCheck, Calculator, Calendar, Search, Sun, Moon,
 } from 'lucide-react';
 
 // ─── Nav data is in navConfig.tsx so other components (CommandPalette) can reuse it.
@@ -345,13 +347,25 @@ function AppInner() {
 
               {/* P3.22 — external Advisory link removed from top nav (was bypassing funnel).
                   In-domain primary CTAs: Audit Gratuit + Morning Briefing. */}
-              <button
-                onClick={() => setContactDrawerOpen(true)}
-                className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gold-500 text-navy-950 rounded hover:bg-gold-400 transition-colors shadow shadow-gold-900/30"
-              >
-                <MessageSquare size={11} />
-                Audit Gratuit
-              </button>
+              <div className="hidden md:flex items-center gap-2">
+                <ThemeToggle />
+                <button
+                  onClick={() => setPaletteOpen(true)}
+                  className="hidden md:flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-medium border border-navy-700 rounded text-slate-400 hover:text-white hover:border-navy-600 transition-colors"
+                  aria-label="Recherche globale (Cmd+K)"
+                >
+                  <Search size={11} />
+                  <span>Rechercher…</span>
+                  <kbd className="hidden lg:flex items-center gap-0.5 ml-1 px-1 py-0.5 text-[8px] font-mono text-slate-500 bg-navy-800 border border-navy-700 rounded">⌘K</kbd>
+                </button>
+                <button
+                  onClick={() => setContactDrawerOpen(true)}
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-gold-500 text-navy-950 rounded hover:bg-gold-400 transition-colors shadow shadow-gold-900/30"
+                >
+                  <MessageSquare size={11} />
+                  Audit Gratuit
+                </button>
+              </div>
               {isAdmin && (
                 <button
                   onClick={() => navTo('ADMIN')}
@@ -853,6 +867,7 @@ function AppInner() {
         {view === 'SOVEREIGN' && <SovereignPage />}
         {view === 'BANK_RATES' && <BankRatesPage />}
         {view === 'CORRELATION' && <CorrelationHeatmap />}
+        {view === 'MULTIPANE' && <MultiPane />}
         {view === 'SECTOR_AUTO'     && <SectorLanding sectorId="auto"     navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_TEXTILE'  && <SectorLanding sectorId="textile"  navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_NORDIQUE' && <SectorLanding sectorId="nordique" navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}

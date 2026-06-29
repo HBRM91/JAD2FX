@@ -250,10 +250,11 @@ export function bdtToYieldCurveOverrides(points: BkamBdtPoint[]): Record<string,
  * Convert CoursVirement response to a map of currency → MAD per 1 unit.
  * (moyen is MAD per uniteDevise units, so divide to get per-1-unit)
  */
-export function virementToMadPerUnit(rates: BkamVirementRate[]): Record<string, number> {
+export function virementToMadPerUnit(rates: BkamVirementRate[] | null | undefined): Record<string, number> {
+  if (!rates || !Array.isArray(rates)) return {};
   const m: Record<string, number> = {};
   for (const r of rates) {
-    if (r.uniteDevise > 0) m[r.libDevise] = r.moyen / r.uniteDevise;
+    if (r && r.uniteDevise > 0) m[r.libDevise] = r.moyen / r.uniteDevise;
   }
   return m;
 }

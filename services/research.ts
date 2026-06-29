@@ -27,7 +27,18 @@ export interface ResearchArticle {
   tags: string[];
   readTimeMin: number;
   author: 'JAD2 Advisory' | 'JAD2FX Research' | 'Morning Briefing';
-  contentFr?: string; // optional long-form
+  /**
+   * Optional long-form content (P4.1). When present, the Blog detail view
+   * renders this as a multi-section article. Plain markdown (no MDX deps)
+   * with light formatting: ## heading, **bold**, *italic*, - list, code `inline`.
+   */
+  contentFr?: string;
+  /** Author photo initials + role for the article header */
+  authorRole?: string;
+}
+
+export function getArticleById(id: string): ResearchArticle | undefined {
+  return RESEARCH_ARTICLES.find((a) => a.id === id);
 }
 
 export const RESEARCH_ARTICLES: ResearchArticle[] = [
@@ -40,6 +51,40 @@ export const RESEARCH_ARTICLES: ResearchArticle[] = [
     tags: ['MAD', 'BKAM', 'drift', 'panier 60/40'],
     readTimeMin: 8,
     author: 'Morning Briefing',
+    authorRole: 'Karim Tazi, Head of Research',
+    contentFr: `## Contexte
+
+Au T2 2026, l'écart entre le cours spot du dirham et la parité théorique issue du panier BKAM s'est creusé à **-296 bps** en moyenne, contre **-112 bps** au T1 2026 et seulement **-45 bps** en 2025. Cette dérive structurelle reflète un désalignement persistant entre le fixing BAM et les fondamentaux macroéconomiques du Maroc.
+
+## Mécanique du panier 60/40
+
+Le panier de référence BAM est composé à 60% d'EUR et 40% d'USD, avec un coefficient K=10.49. La parité centrale théorique se calcule ainsi :
+
+\`\`\`
+USD/MAD_central = K / (0.60 × EUR/USD + 0.40)
+\`\`\`
+
+Pour EUR/USD = 1.085, la parité centrale s'établit à **9.84 MAD**, contre un spot moyen de 9.71 au T2 2026 — soit une dérive de **-296 bps**.
+
+## Sources de la dérive
+
+Trois facteurs expliquent cette déviation :
+
+1. **Sorties de capitaux étrangers** sur le marché obligataire marocain (estimées à 4.2 Mds MAD YTD)
+2. **Compte courant dégradé** à -3.4% du PIB, sous l'effet de la facture énergétique
+3. **Pression sur les réserves de change** BAM à 4.2 mois d'imports (cible FMI : 5+ mois)
+
+## Impact pour les trésoriers
+
+- **Importateurs** : exposition accrue, marge compressée
+- **Exportateurs** : opportunité (MAD plus faible) mais à verrouiller
+- **Volatilité** : dispersion accrue des fixing, exige des couvertures plus fines
+
+## Recommandations
+
+- Lock 60-80% de l'exposition à 3-6M forward (CIP typique)
+- Compléter avec options vanilles pour les scénarios extrêmes (Circ. OC 01/2024)
+- Stress tester les scénarios -5%/-10% EUR/USD`,
   },
   {
     id: 'r-002',
