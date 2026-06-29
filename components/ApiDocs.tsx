@@ -1,8 +1,8 @@
-import { Code, ExternalLink, Copy, Check, BookOpen } from 'lucide-react';
+﻿import { Code, ExternalLink, Copy, Check, BookOpen } from 'lucide-react';
 import { useState } from 'react';
 
 /**
- * P4.19 — Developer API documentation.
+ * P4.19 â€” Developer API documentation.
  * OpenAPI spec, code examples (curl, JS, Python), rate limits.
  */
 
@@ -20,49 +20,49 @@ const ENDPOINTS: Endpoint[] = [
     path: '/api/rates',
     description: '24 currency rates vs MAD with bid/ask, change, and source.',
     auth: 'public',
-    example: `curl https://api.jad2fx.com/v1/rates`,
+    example: `curl https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev/v1/rates`,
   },
   {
     method: 'GET',
     path: '/api/rates/{ccy}',
     description: 'Single currency pair (e.g. EUR) vs MAD.',
     auth: 'public',
-    example: `curl https://api.jad2fx.com/v1/rates/EUR`,
+    example: `curl https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev/v1/rates/EUR`,
   },
   {
     method: 'GET',
     path: '/api/forward',
     description: 'Forward quote for a pair. Query params: ccy, tenor, notional, direction, markup_bps.',
     auth: 'public',
-    example: `curl 'https://api.jad2fx.com/v1/forward?ccy=EUR&tenor=3M&notional=1000000&direction=BUY'`,
+    example: `curl 'https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev/v1/forward?ccy=EUR&tenor=3M&notional=1000000&direction=BUY'`,
   },
   {
     method: 'GET',
     path: '/api/intraday/{symbol}',
     description: '1h intraday ticks (Yahoo). 5-min cache.',
     auth: 'public',
-    example: `curl https://api.jad2fx.com/v1/intraday/EURMAD=X`,
+    example: `curl https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev/v1/intraday/EURMAD=X`,
   },
   {
     method: 'GET',
     path: '/api/fixing/history',
     description: 'BKAM fixing history. Up to 30 days back, 5-day forecast.',
     auth: 'public',
-    example: `curl https://api.jad2fx.com/v1/fixing/history?days=10`,
+    example: `curl https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev/v1/fixing/history?days=10`,
   },
   {
     method: 'GET',
     path: '/api/glossary',
     description: '200+ FX/MAD/OC terms. Optional ?q= search.',
     auth: 'public',
-    example: `curl 'https://api.jad2fx.com/v1/glossary?q=forward'`,
+    example: `curl 'https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev/v1/glossary?q=forward'`,
   },
   {
     method: 'GET',
     path: '/api/newsletter/subscribe',
     description: 'Subscribe an email. POST with body { email, name?, company? }.',
     auth: 'api-key',
-    example: `curl -X POST 'https://api.jad2fx.com/v1/newsletter/subscribe' \\
+    example: `curl -X POST 'https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev/v1/newsletter/subscribe' \\
   -H 'Content-Type: application/json' \\
   -H 'X-API-Key: jad2_xxx' \\
   -d '{"email": "treso@acme.ma", "company": "Acme"}'`,
@@ -74,11 +74,11 @@ const OPENAPI_SPEC = {
   info: {
     title: 'JAD2FX Public API',
     version: '1.0.0',
-    description: 'Taux de change MAD, simulations forward, données OC. Free tier 100 req/jour, paid 10k req/jour.',
+    description: 'Taux de change MAD, simulations forward, donnÃ©es OC. Free tier 100 req/jour, paid 10k req/jour.',
     contact: { email: 'api@jad2advisory.com', url: 'https://jad2advisory.com' },
     license: { name: 'Proprietary' },
   },
-  servers: [{ url: 'https://api.jad2fx.com/v1', description: 'Production' }],
+  servers: [{ url: 'https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev/v1', description: 'Production' }],
   paths: {
     '/rates': { get: { summary: 'List all 24 currency rates vs MAD', security: [] } },
     '/rates/{ccy}': {
@@ -115,32 +115,32 @@ export default function ApiDocs() {
       <div className="flex items-center gap-2">
         <Code size={14} className="text-gold-500" />
         <h1 className="text-base font-bold text-white uppercase tracking-wider">API Documentation</h1>
-        <span className="text-[10px] text-slate-500 ml-auto">v1.0 · OpenAPI 3.0</span>
+        <span className="text-[10px] text-slate-500 ml-auto">v1.0 Â· OpenAPI 3.0</span>
       </div>
 
       {/* Quickstart */}
       <div className="bg-navy-900 border border-navy-700 rounded-2xl p-6 space-y-3">
         <h2 className="text-sm font-bold text-white">Quickstart</h2>
         <p className="text-[12px] text-slate-300 leading-relaxed">
-          Base URL: <code className="text-gold-400 font-mono">https://api.jad2fx.com/v1</code>.
-          Toutes les requêtes sont <code className="font-mono">GET</code> sauf indication contraire.
-          Réponses en <code className="font-mono">application/json</code> avec charset UTF-8.
+          Base URL: <code className="text-gold-400 font-mono">https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev/v1</code>.
+          Toutes les requÃªtes sont <code className="font-mono">GET</code> sauf indication contraire.
+          RÃ©ponses en <code className="font-mono">application/json</code> avec charset UTF-8.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
           <div className="bg-navy-950 border border-navy-800 rounded-lg p-3">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">Free tier</p>
             <p className="text-sm font-bold text-emerald-400">100 req/jour</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">Endpoints publics · Pas d'auth</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Endpoints publics Â· Pas d'auth</p>
           </div>
           <div className="bg-navy-950 border border-navy-800 rounded-lg p-3">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">Pro tier</p>
             <p className="text-sm font-bold text-blue-400">10 000 req/jour</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">API key · 99.9% SLA</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">API key Â· 99.9% SLA</p>
           </div>
           <div className="bg-navy-950 border border-navy-800 rounded-lg p-3">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">Enterprise</p>
             <p className="text-sm font-bold text-gold-400">Sur devis</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">Volumétrie + SLA custom</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">VolumÃ©trie + SLA custom</p>
           </div>
         </div>
       </div>
@@ -183,19 +183,19 @@ export default function ApiDocs() {
       {/* Code examples */}
       <div className="bg-navy-900 border border-navy-700 rounded-2xl p-6 space-y-3">
         <h2 className="text-sm font-bold text-white flex items-center gap-2">
-          <BookOpen size={14} className="text-gold-500" /> Exemples d'intégration
+          <BookOpen size={14} className="text-gold-500" /> Exemples d'intÃ©gration
         </h2>
 
         <div>
           <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">JavaScript / TypeScript</h3>
           <pre className="bg-navy-950 border border-navy-800 rounded p-3 text-[11px] text-slate-300 font-mono overflow-x-auto">
 {`// Fetch EUR/MAD live rate
-const res = await fetch('https://api.jad2fx.com/v1/rates/EUR');
+const res = await fetch('https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev/v1/rates/EUR');
 const { mid, bid, ask, change24h } = await res.json();
 
 // Build a forward curve
 const fwd = await fetch(
-  'https://api.jad2fx.com/v1/forward?ccy=USD&tenor=3M&notional=500000&direction=BUY',
+  'https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev/v1/forward?ccy=USD&tenor=3M&notional=500000&direction=BUY',
   { headers: { 'X-API-Key': process.env.JAD2_API_KEY } }
 );`}
           </pre>
@@ -206,12 +206,12 @@ const fwd = await fetch(
           <pre className="bg-navy-950 border border-navy-800 rounded p-3 text-[11px] text-slate-300 font-mono overflow-x-auto">
 {`import requests
 
-r = requests.get('https://api.jad2fx.com/v1/rates/USD').json()
+r = requests.get('https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev/v1/rates/USD').json()
 print(f"USD/MAD = {r['mid']:.4f} (24h: {r['change24h']:+.2f}%)")
 
 # Forward pricing for hedge
 fwd = requests.get(
-    'https://api.jad2fx.com/v1/forward',
+    'https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev/v1/forward',
     params={'ccy': 'EUR', 'tenor': '6M', 'notional': 1_000_000, 'direction': 'SELL'},
     headers={'X-API-Key': os.environ['JAD2_API_KEY']}
 ).json()`}
@@ -231,7 +231,7 @@ fwd = requests.get(
             download="jad2fx-openapi.json"
             className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold bg-gold-500 text-navy-950 rounded hover:bg-gold-400 transition-colors"
           >
-            <Code size={12} /> Télécharger OpenAPI JSON
+            <Code size={12} /> TÃ©lÃ©charger OpenAPI JSON
           </a>
         </div>
       </div>
@@ -242,9 +242,9 @@ fwd = requests.get(
         <ul className="text-[12px] text-slate-300 space-y-1.5 list-disc list-inside">
           <li>Endpoints <strong>publics</strong>: pas d'auth, 100 req/jour par IP.</li>
           <li>Endpoints <strong>API key</strong>: header <code className="text-gold-400">X-API-Key: jad2_xxx</code>.</li>
-          <li>Rate limit: <strong>429</strong> si dépassé, avec <code className="font-mono">Retry-After</code>.</li>
+          <li>Rate limit: <strong>429</strong> si dÃ©passÃ©, avec <code className="font-mono">Retry-After</code>.</li>
           <li>Cache: 60s pour rates, 5min pour fixing, 1h pour glossary.</li>
-          <li>Uptime cible: 99.9% (Pro) · 99.99% (Enterprise).</li>
+          <li>Uptime cible: 99.9% (Pro) Â· 99.99% (Enterprise).</li>
         </ul>
       </div>
 
@@ -255,3 +255,4 @@ fwd = requests.get(
     </div>
   );
 }
+

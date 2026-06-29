@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { LiveRate } from '../types';
 import { BKAM_CURRENCIES } from '../constants';
 import CurrencyFlag from './CurrencyFlag';
+import { ArrowRight } from 'lucide-react';
 
 interface Props {
   rates: LiveRate[];
@@ -64,6 +65,21 @@ const RatesTicker: React.FC<Props> = ({ rates }) => {
                 </span>
               );
             })}
+            <a
+              href="?view=LIVE"
+              onClick={(e) => {
+                e.preventDefault();
+                if (typeof window !== 'undefined') {
+                  const url = new URL(window.location.href);
+                  url.searchParams.set('view', 'LIVE');
+                  window.history.pushState(null, '', url.toString());
+                  window.dispatchEvent(new PopStateEvent('popstate'));
+                }
+              }}
+              className="flex items-center gap-1 text-[10px] font-bold text-gold-400 hover:text-gold-300 uppercase tracking-wider"
+            >
+              Tous les 24 <ArrowRight size={10} />
+            </a>
           </div>
         </div>
       </div>

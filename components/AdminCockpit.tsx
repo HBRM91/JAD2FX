@@ -318,7 +318,7 @@ export default function AdminCockpit({ navTo }: { navTo?: (v: any) => void }) {
           {navTo && (
             <>
               <button
-                onClick={() => navTo('LEADS')}
+                onClick={() => navTo('ADMIN')}
                 className="px-2.5 py-1 bg-navy-900 border border-navy-700 hover:border-gold-500/50 rounded text-[10px] sm:text-xs text-slate-300 font-bold hidden md:flex items-center gap-1"
               >
                 <Target size={11} /> Leads
@@ -335,7 +335,7 @@ export default function AdminCockpit({ navTo }: { navTo?: (v: any) => void }) {
       </div>
 
       {/* KPI row */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
         <KPI
           label="P&L Jour"
           value={`${pnlUp ? '+' : ''}${(pnlDay / 1000).toFixed(1)}k MAD`}

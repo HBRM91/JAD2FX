@@ -66,6 +66,7 @@ const ApiKeyManagement      = lazy(() => import('./components/admin/ApiKeyManage
 const BacklinkTracker       = lazy(() => import('./components/admin/BacklinkTracker'));
 const LeadsDashboard        = lazy(() => import('./components/admin/LeadsDashboard'));
 import ThemeToggle from './components/ThemeToggle';
+import BottomNav from './components/BottomNav';
 // P3 — Funnel + social proof
 const ServicesPage          = lazy(() => import('./components/ServicesPage'));
 const AuditLanding          = lazy(() => import('./components/AuditLanding'));
@@ -79,6 +80,8 @@ const PriceAlerts           = lazy(() => import('./components/PriceAlerts'));
 const TimeWindowSelector    = lazy(() => import('./components/TimeWindowSelector'));
 const VolSurfacePage        = lazy(() => import('./components/VolSurfacePage'));
 const MoneyMarketPage       = lazy(() => import('./components/MoneyMarketPage'));
+const BlueChipsTable        = lazy(() => import('./components/BlueChipsTable'));
+const VaRCalculator         = lazy(() => import('./components/VaRCalculator'));
 const SovereignPage         = lazy(() => import('./components/SovereignPage'));
 const BankRatesPage         = lazy(() => import('./components/BankRatesPage'));
 const CorrelationHeatmap    = lazy(() => import('./components/CorrelationHeatmap'));
@@ -95,7 +98,8 @@ import {
   Globe, ChevronRight, TrendingUp, ArrowLeftRight, Activity,
   Lock, X, BarChart2, Banknote, PackageOpen, Newspaper, Scale,
   ChevronDown, ExternalLink, Zap, MessageSquare, BookOpen, Shield,
-  ClipboardCheck, Calculator, Calendar, Search, Sun, Moon,
+  ClipboardCheck, Calculator, Calendar, Search, Sun, Moon, Loader2,
+  ArrowRight,
 } from 'lucide-react';
 
 // ─── Nav data is in navConfig.tsx so other components (CommandPalette) can reuse it.
@@ -137,9 +141,15 @@ function NewsCard({ news }: { news: typeof MARKET_NEWS[0] }) {
 // ─── Inner app ─────────────────────────────────────────────────────────────────
 
 // P0.14 — Skeleton shown while a route chunk is loading.
-function RouteFallback() {
+function RouteFallback({ name }: { name?: string } = {}) {
   return (
     <div className="space-y-4 animate-pulse">
+      {name && (
+        <div className="flex items-center gap-2 text-[11px] text-slate-500">
+          <Loader2 size={12} className="animate-spin text-gold-500" />
+          <span>Chargement de {name}…</span>
+        </div>
+      )}
       <div className="h-8 w-1/3 bg-navy-800 rounded" />
       <div className="h-64 bg-navy-900 border border-navy-800 rounded-2xl" />
       <div className="grid grid-cols-3 gap-3">
@@ -216,6 +226,18 @@ function AppInner() {
   const { t, locale, setLocale, isRTL } = useI18n();
   const navDropdownRef = useRef<HTMLDivElement>(null);
 
+  // B1.3 — Deep link from ?view=... on mount + popstate for back/forward.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const apply = () => {
+      const v = new URLSearchParams(window.location.search).get('view');
+      if (v && /^[A-Z_]+$/.test(v)) setView(v as ViewState);
+    };
+    apply();
+    window.addEventListener('popstate', apply);
+    return () => window.removeEventListener('popstate', apply);
+  }, []);
+
   // P2.3 + P2.12 — Global keyboard shortcuts: Cmd+K (palette), ? (cheatsheet), h, etc.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -284,6 +306,11 @@ function AppInner() {
     setOpenGroup(null);
     setPaletteOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('view', v);
+      window.history.replaceState(null, '', url.toString());
+    }
   };
 
   const activeGroupId = NAV_GROUPS.find(g => g.items.some(i => i.view === view))?.id ?? null;
@@ -349,7 +376,9 @@ function AppInner() {
                   {/* Dropdown panel */}
                   {openGroup === group.id && (
                     <div
-                      className="absolute top-full left-0 bg-navy-900 border border-navy-800 border-t-0 rounded-b-xl shadow-2xl min-w-[230px] py-1.5 z-50"
+                      className={`absolute top-full left-0 bg-navy-900 border border-navy-800 border-t-0 rounded-b-xl shadow-2xl py-1.5 z-50 ${
+                        group.items.length > 4 ? 'grid grid-cols-2 gap-x-1 min-w-[460px]' : 'min-w-[230px]'
+                      }`}
                       onMouseEnter={() => setOpenGroup(group.id)}
                       onMouseLeave={() => setOpenGroup(null)}
                     >
@@ -537,23 +566,25 @@ function AppInner() {
         <p className="text-[11px] text-slate-500 tracking-wide text-center">{DISCLAIMER_SHORT}</p>
       </div>
 
-      {/* ══ Persistent non-executable rate notice (all tool views, all devices) ═ */}
-      {['FORWARDS', 'SWAPS', 'ANALYSIS', 'BANDS', 'LIVE', 'DASHBOARD', 'FIXING', 'BILLETS'].includes(view) && (
-        <div className="sticky top-14 z-40 border-b border-gold-600/20 bg-gold-500/5 px-4 py-1 text-center">
-          <p className="text-[9px] text-gold-600/80 font-medium">
-            Taux JAD2FX strictement indicatifs — non utilisables pour des opérations de change
-            (BKAM Méthodologie 2024, §II) · Pour un cours ferme : votre banque domiciliataire agréée BAM
-          </p>
-        </div>
-      )}
-      {/* ══ Mobile simulator banner — calc/simulation views only ══════════════ */}
-      {['FORWARDS', 'SWAPS', 'ANALYSIS', 'BANDS', 'REPORT', 'RESEARCH'].includes(view) && (
-        <div className="lg:hidden sticky top-[calc(56px+28px)] z-39 bg-amber-900/95 border-b border-amber-700/50 backdrop-blur-sm px-4 py-1 text-center">
-          <p className="text-[8px] font-bold text-amber-300 uppercase tracking-widest">
-            Mode Simulateur — Résultats Non-Exécutables · Usage Pédagogique Uniquement
-          </p>
-        </div>
-      )}
+      {/* ══ Single sticky notice banner (rate disclaimer + simulator on mobile) ═ */}
+      {(() => {
+        const isRateView = ['FORWARDS', 'SWAPS', 'ANALYSIS', 'BANDS', 'LIVE', 'DASHBOARD', 'FIXING', 'BILLETS'].includes(view);
+        const isSimView = ['FORWARDS', 'SWAPS', 'ANALYSIS', 'BANDS', 'REPORT', 'RESEARCH'].includes(view);
+        if (!isRateView && !isSimView) return null;
+        return (
+          <div className="sticky top-14 z-40 border-b border-gold-600/20 bg-gold-500/5 px-4 py-1 text-center">
+            <p className="text-[9px] text-gold-600/80 font-medium">
+              Taux JAD2FX strictement indicatifs — non utilisables pour des opérations de change
+              (BKAM Méthodologie 2024, §II) · Pour un cours ferme : votre banque domiciliataire agréée BAM
+            </p>
+            {isSimView && (
+              <p className="lg:hidden text-[8px] font-bold text-amber-300 uppercase tracking-widest mt-0.5">
+                Mode Simulateur — Résultats Non-Exécutables · Usage Pédagogique Uniquement
+              </p>
+            )}
+          </div>
+        );
+      })()}
 
       {/* ══ Ticker ═══════════════════════════════════════════════════════════ */}
       <RatesTicker rates={tickerRates} />
@@ -592,7 +623,7 @@ function AppInner() {
           <div className="space-y-6">
 
             {/* ── Persona split hero (Task 2.1) ───────────────────────────── */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4">
               {/* Corporate MAD persona */}
               <div className="bg-navy-900 border border-gold-700/30 rounded-2xl p-6 flex flex-col gap-4 hover:border-gold-600/50 transition-colors">
                 <div className="flex items-center gap-2">
@@ -611,7 +642,7 @@ function AppInner() {
                 </div>
                 <div className="flex flex-wrap gap-2 mt-auto">
                   <button
-                    onClick={() => navTo('RESEARCH')}
+                    onClick={() => navTo('TOOL_PME_DIAG')}
                     className="flex items-center gap-2 bg-gold-500 text-navy-950 font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-gold-400 transition-colors shadow-lg shadow-gold-900/30"
                   >
                     <Shield size={14} /> Diagnostiquer mon exposition
@@ -627,6 +658,44 @@ function AppInner() {
 
               {/* P2.19 — Removed: European Fintech persona per plan (single PME hero) */}
             </div>
+
+            {/* ── B4.4 — Dashboard summary: top 4 watched rates ─────────────── */}
+            {tickerRates.length > 0 && (
+              <div className="bg-navy-900 border border-navy-700 rounded-2xl p-4">
+                <div className="flex items-center justify-between mb-2.5">
+                  <h2 className="text-[11px] font-bold text-white uppercase tracking-wider flex items-center gap-2">
+                    <Activity size={11} className="text-gold-500" /> Marché · Snapshot
+                  </h2>
+                  <button
+                    onClick={() => navTo('LIVE')}
+                    className="text-[10px] font-bold text-gold-400 hover:text-gold-300 flex items-center gap-1"
+                  >
+                    Voir tout <ArrowRight size={10} />
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {tickerRates.slice(0, 4).map((r) => {
+                    const chg = r.change24h ?? 0;
+                    const isUp = chg > 0;
+                    const isDn = chg < 0;
+                    const chgColor = isUp ? 'text-emerald-400' : isDn ? 'text-red-400' : 'text-slate-500';
+                    return (
+                      <button
+                        key={r.currency}
+                        onClick={() => navTo('LIVE')}
+                        className="bg-navy-950 border border-navy-800 hover:border-gold-500/50 rounded-lg p-2.5 text-left transition-colors"
+                      >
+                        <p className="text-[9px] text-slate-500 uppercase tracking-wider">{r.pair}</p>
+                        <p className="text-sm font-bold text-white font-mono mt-0.5">{r.mid.toFixed(4)}</p>
+                        <p className={`text-[9px] font-mono mt-0.5 ${chgColor}`}>
+                          {isUp ? '▲' : isDn ? '▼' : '—'} {Math.abs(chg).toFixed(2)}%
+                        </p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* ── Drift alert chip (Task 2.3) ──────────────────────────────── */}
             {config.corsProxyUrl && (
@@ -925,12 +994,14 @@ function AppInner() {
         {view === 'CITED' && <PressWall />}
         {view === 'PODCAST' && <Podcast />}
         {view === 'QUARTERLY_OUTLOOK' && <QuarterlyOutlook />}
-        {view === 'SERVICES' && <ServicesPage />}
+        {view === 'SERVICES' && <ServicesPage navTo={navTo} />}
         {view === 'AUDIT_LANDING' && <AuditLanding />}
         {view === 'AUDIT_LOG' && <AuditLog />}
         {view === 'TESTIMONIALS' && <SocialProofModule />}
         {view === 'VOL_SURFACE' && <VolSurfacePage />}
         {view === 'MONEY_MARKET' && <MoneyMarketPage />}
+        {view === 'BLUE_CHIPS'    && <BlueChipsTable />}
+        {view === 'VAR_CALC'      && <VaRCalculator />}
         {view === 'SOVEREIGN' && <SovereignPage />}
         {view === 'BANK_RATES' && <BankRatesPage />}
         {view === 'CORRELATION' && <CorrelationHeatmap />}
@@ -1050,6 +1121,9 @@ function AppInner() {
         )}
         </Suspense>
       </main>
+
+      {/* ══ Mobile-only bottom tab nav (B3.5) ════════════════════════════════ */}
+      <BottomNav view={view} navTo={navTo} />
 
       {/* ══ Floating chatbot ═════════════════════════════════════════════════ */}
       <FloatingChat />

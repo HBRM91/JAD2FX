@@ -68,18 +68,16 @@ export default function PodcastPage() {
             <Rss size={12} /> RSS
           </a>
           <a
-            href="https://podcasts.apple.com/"
-            target="_blank" rel="noopener noreferrer"
+            href="mailto:podcast@jad2advisory.com?subject=MAD%20Talk%20%E2%80%94%20Lancement"
             className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold bg-navy-950 border border-navy-700 text-slate-300 rounded hover:border-gold-500/50"
           >
-            Apple Podcasts
+            Apple Podcasts (bientôt)
           </a>
           <a
-            href="https://open.spotify.com/"
-            target="_blank" rel="noopener noreferrer"
+            href="mailto:podcast@jad2advisory.com?subject=MAD%20Talk%20%E2%80%94%20Lancement"
             className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold bg-navy-950 border border-navy-700 text-slate-300 rounded hover:border-gold-500/50"
           >
-            Spotify
+            Spotify (bientôt)
           </a>
         </div>
       </div>

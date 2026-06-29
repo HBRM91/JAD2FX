@@ -4,6 +4,7 @@ import {
   ChevronDown, ChevronUp, Search, Mail, MessageSquare,
 } from 'lucide-react';
 import { ViewState } from '../types';
+import { useAdmin } from '../context/AdminContext';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Article {
@@ -454,6 +455,7 @@ function PillarCTA({ pillar, onAction }: {
 // ─── Newsletter signup ────────────────────────────────────────────────────────
 
 function NewsletterSignup() {
+  const { config } = useAdmin();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
@@ -462,7 +464,8 @@ function NewsletterSignup() {
     if (!email.trim()) return;
     setStatus('loading');
     try {
-      await fetch('/api/newsletter/subscribe', {
+      const base = (config.corsProxyUrl ?? '').replace(/\/$/, '');
+      await fetch(`${base}/api/newsletter/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: email.trim(), source: 'research-hub' }),

@@ -572,7 +572,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
           { href: 'https://www.oc.gov.ma', label: 'Office des Changes' },
           { href: 'https://api.frankfurter.app', label: 'Frankfurter / BCE' },
         ].map(({ href, label }) => (
-          <a key={label} href={href} target="_blank" rel="noreferrer"
+          <a key={label} href={href} target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-1 text-[10px] font-medium text-slate-600 hover:text-gold-400 transition">
             <ExternalLink size={9} /> {label}
           </a>

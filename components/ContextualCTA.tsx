@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { ArrowRight, Sparkles, Clock, Award, X } from 'lucide-react';
+import { ArrowRight, Sparkles, Clock, Award, X, Flame } from 'lucide-react';
 import { getLeadScore, getRecommendedCta, trackEvent } from '../utils/leadScoring';
 
 interface Props {
@@ -105,7 +105,7 @@ export default function ContextualCTA({ variant = 'banner', pageKey = 'home' }: 
           >
             <X size={12} />
           </button>
-          <p className="text-[11px] text-slate-500 mb-0.5">{state.level === 'BURNING' ? '🔥 Vous y êtes presque' : 'Pendant que vous explorez...'}</p>
+          <p className="text-[11px] text-slate-500 mb-0.5 flex items-center gap-1">{state.level === 'BURNING' ? (<><Flame size={11} className="text-amber-400" /> Vous y êtes presque</>) : 'Pendant que vous explorez...'}</p>
           <p className="text-[12px] font-bold text-white mb-1.5 leading-tight pr-3">{msg.title}</p>
           <button
             onClick={() => {

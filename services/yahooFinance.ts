@@ -43,6 +43,24 @@ export const COMMODITY_DEFINITIONS: CommodityDef[] = [
     moroccanRelevanceFr: 'Importations de GNL croissantes via Jorf Lasfar. Coût de production électrique.',
     moroccanRelevanceAr: 'واردات متنامية من الغاز المسال عبر جرف اليسفر. محرك تكاليف توليد الكهرباء.',
   },
+  {
+    symbol: 'JKM=F',
+    name: 'LNG Asia (JKM)', nameFr: 'GNL Asie (JKM)', nameAr: 'غاز مسال آسيوي',
+    category: 'ENERGY', unit: '/MMBtu', yfDivisor: 1,
+    fallbackPrice: 12.5,
+    moroccanRelevance: 'JKM benchmark for Morocco LNG tenders (Jorf Lasfar, Tahaddart).',
+    moroccanRelevanceFr: 'Indice JKM pour les appels d\'offres GNL Maroc (Jorf Lasfar, Tahaddart).',
+    moroccanRelevanceAr: 'مؤشر جكم لمناقصات الغاز المسال المغربي (جرف اليسفر، الحدارت).',
+  },
+  {
+    symbol: 'MOS',
+    name: 'Phosphate (Mosaic proxy)', nameFr: 'Phosphate (proxy Mosaic)', nameAr: 'فوسفات (مؤشر موزاييك)',
+    category: 'INDUSTRIAL_METALS', unit: '$/sh', yfDivisor: 1,
+    fallbackPrice: 28.0,
+    moroccanRelevance: 'Mosaic = largest US phosphate producer. Proxy for DAP/MAP/TSP global pricing. OCP dominates ~30% world trade.',
+    moroccanRelevanceFr: 'Mosaic = 1er producteur US de phosphate. Proxy pour DAP/MAP/TSP. OCP domine ~30% du commerce mondial.',
+    moroccanRelevanceAr: 'موزاييك = أكبر منتج فوسفات أمريكي. مؤشر لأسعار DAP/MAP/TSP. OCP يهيمن على ~30% من التجارة.',
+  },
   // ─── Precious Metals ─────────────────────────────────────────────────────────
   {
     symbol: 'GC=F',

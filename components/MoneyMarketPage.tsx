@@ -1,5 +1,6 @@
-import { DEFAULT_MONEY_MARKET, DEFAULT_INFLATION, computePppFairValue } from '../services/macroData';
-import { Activity, TrendingUp, Globe, BarChart3, Building2, FileText, Calendar } from 'lucide-react';
+import { DEFAULT_MONEY_MARKET, DEFAULT_INFLATION, computePppFairValue, MOROCCO_MACRO_KPIS } from '../services/macroData';
+import { DEFAULT_CURVES } from '../services/interestRates';
+import { Activity, TrendingUp, Globe, BarChart3, Building2, FileText, Calendar, TrendingDown, Minus, ArrowUp, ArrowDown } from 'lucide-react';
 import { useState, useMemo } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { BKAM_CURRENCIES } from '../constants';
@@ -35,6 +36,9 @@ export default function MoneyMarketPage() {
       <div className="flex items-center gap-2">
         <Activity size={14} className="text-gold-500" />
         <h1 className="text-base font-bold text-white uppercase tracking-wider">Marché Monétaire · BAM</h1>
+        <span className="text-[9px] font-bold text-amber-400 bg-amber-900/30 border border-amber-700/40 px-1.5 py-0.5 rounded uppercase tracking-wider">
+          Indicatif · Données synthétiques
+        </span>
         <span className="text-[10px] text-slate-500 ml-auto">P1.9 · Money market module</span>
       </div>
 
@@ -104,6 +108,72 @@ export default function MoneyMarketPage() {
                 })}
               </tbody>
             </table>
+          </div>
+
+          {/* A2.1 + A2.2 — Courbe des taux MAD (BDT + OAT) */}
+          <div className="bg-navy-900 border border-navy-700 rounded-xl p-4">
+            <h2 className="text-[11px] font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+              <FileText size={11} /> Courbe des taux MAD · BDT + OAT
+            </h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-[11px]">
+                <thead className="text-[9px] text-slate-500 uppercase tracking-wider">
+                  <tr>
+                    <th className="px-2 py-1 text-left">Tenor</th>
+                    <th className="px-2 py-1 text-left">Instrument</th>
+                    <th className="px-2 py-1 text-right">Taux</th>
+                    <th className="px-2 py-1 text-right">Spread vs BAM</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-navy-800">
+                  {DEFAULT_CURVES.MAD.map((p) => {
+                    const isShort = p.tenorYears <= 1;
+                    const instrument = isShort ? 'BDT (T-bill)' : 'OAT (gouv. bond)';
+                    const spreadBps = mad ? (p.rate - mad.policyRate) * 10000 : 0;
+                    return (
+                      <tr key={p.tenor} className="hover:bg-navy-800/30">
+                        <td className="px-2 py-1.5 font-bold text-slate-200 font-mono">{p.tenor}</td>
+                        <td className="px-2 py-1.5 text-slate-400 text-[10px]">{instrument}</td>
+                        <td className="px-2 py-1.5 text-right font-mono text-gold-400">{(p.rate * 100).toFixed(3)}%</td>
+                        <td className={`px-2 py-1.5 text-right font-mono text-[10px] ${spreadBps >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
+                          {spreadBps >= 0 ? '+' : ''}{spreadBps.toFixed(0)} bps
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-[9px] text-slate-500 mt-2 italic">
+              BDT = Bons du Trésor adjudicés chaque mardi par BAM · OAT = Obligations Assimilables du Trésor (10Y benchmark souverain MAD).
+            </p>
+          </div>
+
+          {/* A1.4–A1.8 — Maroc — Indicateurs structurels (BKAM, HCP, OC) */}
+          <div className="bg-navy-900 border border-gold-700/30 rounded-xl p-4">
+            <h2 className="text-[11px] font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
+              <Building2 size={11} /> Maroc · Indicateurs structurels
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
+              {MOROCCO_MACRO_KPIS.map((k) => {
+                const TrendIcon = k.trend === 'UP' ? ArrowUp : k.trend === 'DOWN' ? ArrowDown : Minus;
+                const trendColor = k.trend === 'UP' ? 'text-emerald-400' : k.trend === 'DOWN' ? 'text-red-400' : 'text-slate-400';
+                return (
+                  <div key={k.id} className="bg-navy-950 border border-navy-800 rounded-lg p-2.5">
+                    <p className="text-[9px] text-slate-500 uppercase tracking-wider leading-tight mb-1">{k.label}</p>
+                    <p className="text-base font-bold text-gold-400 font-mono">
+                      {k.unit === '%' ? `${k.value > 0 && k.value < 100 ? k.value.toFixed(1) : k.value}${k.unit}` : `${k.value} ${k.unit}`}
+                    </p>
+                    <p className={`text-[9px] mt-0.5 flex items-center gap-0.5 ${trendColor}`}>
+                      <TrendIcon size={9} /> {k.year} · {k.source}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="text-[9px] text-slate-500 mt-2 italic">
+              Sources: Bank Al-Maghrib (Rapport Annuel 2024), HCP, Office des Changes. Mis à jour annuellement.
+            </p>
           </div>
 
           {/* Inflation + PPP */}

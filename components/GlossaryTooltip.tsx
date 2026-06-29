@@ -117,7 +117,16 @@ export default function AutoLinkedText({ text, className = '', maxLinks = 8 }: A
             }}
           >
             <a
-              href={`/glossary#${seg.term.slug}`}
+              href={`?view=GLOSSARY#${seg.term.slug}`}
+              onClick={(e) => {
+                if (typeof window !== 'undefined') {
+                  const url = new URL(window.location.href);
+                  url.searchParams.set('view', 'GLOSSARY');
+                  url.hash = seg.term!.slug;
+                  window.history.pushState(null, '', url.toString());
+                  window.dispatchEvent(new PopStateEvent('popstate'));
+                }
+              }}
               className="text-gold-400 hover:text-gold-300 underline decoration-dotted underline-offset-2 cursor-pointer"
             >
               {seg.text}
@@ -146,7 +155,17 @@ export default function AutoLinkedText({ text, className = '', maxLinks = 8 }: A
           <p className="text-[12px] font-bold text-white mb-1">{tooltip.term.term}</p>
           <p className="text-[11px] text-slate-300 leading-snug">{tooltip.term.shortFr}</p>
           <a
-            href={`/glossary#${tooltip.term.slug}`}
+            href={`?view=GLOSSARY#${tooltip.term.slug}`}
+            onClick={(e) => {
+              e.preventDefault();
+              if (typeof window !== 'undefined') {
+                const url = new URL(window.location.href);
+                url.searchParams.set('view', 'GLOSSARY');
+                url.hash = tooltip.term.slug;
+                window.history.pushState(null, '', url.toString());
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }
+            }}
             className="text-[10px] text-gold-400 hover:text-gold-300 mt-2 inline-block"
           >
             Lire la définition complète →

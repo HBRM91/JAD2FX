@@ -11,7 +11,7 @@ import { useAdmin } from '../context/AdminContext';
 import { useI18n } from '../context/I18nContext';
 import {
   RefreshCw, AlertTriangle, Info, Database,
-  Download, Calendar, CheckCircle,
+  Download, Calendar, CheckCircle, ChevronDown,
 } from 'lucide-react';
 import CurrencyFlag from './CurrencyFlag';
 
@@ -133,6 +133,7 @@ export default function BkamFixing() {
   const [error,      setError]      = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState('');
   const [dateMode,   setDateMode]   = useState<'recent' | 'specific'>('recent');
+  const [showTrend,  setShowTrend]  = useState(false);
 
   const proxyUrl = config.corsProxyUrl || undefined;
 
@@ -496,13 +497,22 @@ export default function BkamFixing() {
             </div>
           </div>
 
-          {/* ── Trend chart (only in recent mode with multiple days) ── */}
+          {/* ── Trend chart (B4.2 collapsed by default) ── */}
           {rows.length >= 2 && dateMode === 'recent' && (
             <div className="bg-navy-900 border border-navy-700 rounded-2xl p-5 space-y-4">
-              <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">
-                Tendance 5 Jours — EUR/MAD & USD/MAD vs Parité Panier
-              </h3>
-              <div className="h-52">
+              <button
+                onClick={() => setShowTrend((s) => !s)}
+                className="w-full flex items-center justify-between text-left"
+                aria-expanded={showTrend}
+              >
+                <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">
+                  Tendance 5 Jours — EUR/MAD & USD/MAD vs Parité Panier
+                </h3>
+                <ChevronDown size={14} className={`text-slate-400 transition-transform ${showTrend ? 'rotate-180' : ''}`} />
+              </button>
+              {showTrend && (
+                <>
+                <div className="h-52">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={trendData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#1C3558" />
@@ -521,7 +531,7 @@ export default function BkamFixing() {
                 </ResponsiveContainer>
               </div>
 
-              <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">
+              <h3 className="text-[11px] font-bold text-white uppercase tracking-widest pt-2">
                 Dérive Fixing vs Panier (bps) — {isOfficial ? 'Données BKAM Officielles' : 'Proxy ECB'}
               </h3>
               <div className="h-40">
@@ -544,6 +554,8 @@ export default function BkamFixing() {
                 Dérive = (Fixing {isOfficial ? 'BKAM' : 'ECB'} − Parité panier) / Parité panier × 10 000 bps ·
                 K=10,49 · Panier 60% EUR / 40% USD · Bande réglementaire ±{BAND_PCT}% (500 bps)
               </p>
+                </>
+              )}
             </div>
           )}
         </>

@@ -704,9 +704,10 @@ export default function ForwardCalculator() {
           )}
         </div>
 
-        {/* Tab bar */}
-        <div className="flex gap-1 mt-4 border-b border-navy-700">
+        {/* Tab bar — B4.1 PRICER is primary; others grouped under "Avancé" label */}
+        <div className="flex items-center gap-1 mt-4 border-b border-navy-700">
           <TabButton active={activeTab === 'PRICER'} onClick={() => setActiveTab('PRICER')}>{tabPricer}</TabButton>
+          <span className="text-[9px] text-slate-600 uppercase tracking-wider px-2 ml-1">{locale === 'ar' ? 'متقدم' : 'Avancé'}</span>
           <TabButton active={activeTab === 'CURVE'}  onClick={() => setActiveTab('CURVE')}>{tabCurve}</TabButton>
           <TabButton active={activeTab === 'MTM'}    onClick={() => setActiveTab('MTM')}>{tabMtm}</TabButton>
           <TabButton active={activeTab === 'SPREADS' as any} onClick={() => setActiveTab('SPREADS' as any)}>{locale === 'ar' ? '??????' : locale === 'en' ? 'Spreads' : 'Spreads'}</TabButton>

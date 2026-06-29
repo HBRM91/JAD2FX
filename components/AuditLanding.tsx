@@ -25,14 +25,19 @@ export default function AuditLanding() {
   const [form, setForm] = useState({ name: '', email: '', company: '', volume: '', phone: '' });
   const [submitted, setSubmitted] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.company) return;
-    setSubmitted(true);
-    // Fire Plausible event
+    const base = (config.corsProxyUrl ?? '').replace(/\/$/, '');
+    await fetch(`${base}/api/leads`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...form, source: 'audit_request', leadScore: 70 }),
+    }).catch(() => {});
     if (typeof window !== 'undefined' && (window as any).plausible) {
       (window as any).plausible('audit_request', { props: { source: 'audit_landing' } });
     }
+    setSubmitted(true);
   };
 
   return (

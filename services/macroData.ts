@@ -35,6 +35,16 @@ export interface InflationPoint {
   lastUpdated: string;
 }
 
+export interface MoroccoMacroKpi {
+  id: string;
+  label: string;
+  value: number;
+  unit: string;             // 'USDbn', '%', 'Mds MAD'
+  year: number;             // reference year
+  trend?: 'UP' | 'DOWN' | 'FLAT';
+  source: 'BKAM' | 'HCP' | 'OC' | 'ONS' | 'Ministry of Tourism';
+}
+
 export interface FairValuePppResult {
   pair: string;
   spot: number;
@@ -65,6 +75,16 @@ export const DEFAULT_INFLATION: InflationPoint[] = [
   { country: 'Japon',         currency: 'JPY', cpiYoYPct: 1.5, cpiCoreYoYPct: 1.2, lastUpdated: '2026-06-26' },
   { country: 'Canada',        currency: 'CAD', cpiYoYPct: 1.9, cpiCoreYoYPct: 1.6, lastUpdated: '2026-06-26' },
   { country: 'Chine',         currency: 'CNY', cpiYoYPct: 0.3, cpiCoreYoYPct: 0.4, lastUpdated: '2026-06-26' },
+];
+
+// A1.4–A1.8 — Morocco structural macro indicators (BKAM / HCP / ONS, 2024 reference)
+// Source: BKAM Annual Report 2024, HCP, Office des Changes.
+export const MOROCCO_MACRO_KPIS: MoroccoMacroKpi[] = [
+  { id: 'gdp_growth',     label: 'PIB · Croissance réelle',          value: 3.4,    unit: '%',       year: 2024, trend: 'UP',   source: 'HCP' },
+  { id: 'unemployment',   label: 'Taux de chômage (15+)',             value: 13.3,   unit: '%',       year: 2024, trend: 'DOWN', source: 'HCP' },
+  { id: 'mre_remit',      label: 'Transferts MRE',                    value: 117.5,  unit: 'Mds MAD', year: 2024, trend: 'UP',   source: 'OC'  },
+  { id: 'tourism',        label: 'Recettes touristiques',             value: 96.5,   unit: 'Mds MAD', year: 2024, trend: 'UP',   source: 'Ministry of Tourism' },
+  { id: 'current_account',label: 'Solde courant (% PIB)',             value: -1.2,   unit: '%',       year: 2024, trend: 'UP',   source: 'OC'  },
 ];
 
 /**

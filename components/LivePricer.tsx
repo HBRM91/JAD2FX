@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Activity, RefreshCw, TrendingUp, TrendingDown, Minus, Wifi, WifiOff,
-  BarChart2, AlertCircle, Settings2,
+  BarChart2, AlertCircle, Settings2, Zap, Globe,
 } from 'lucide-react';
 import { BKAM_CURRENCIES, DEFAULT_BASKET_CONFIG, CURRENCY_ORDER } from '../constants';
 import CurrencyFlag from './CurrencyFlag';
@@ -196,9 +196,9 @@ function DriftPanel({ corsProxyUrl }: { corsProxyUrl?: string }) {
               ? 'border-amber-700 bg-amber-950/30 text-amber-400'
               : 'border-slate-700 bg-slate-900/30 text-slate-400'
           }`}>
-            {model.dataSource === 'BKAM_OFFICIAL' ? '✓ BKAM OFFICIAL'
-              : model.dataSource === 'MIXED' ? '⚡ MIXED'
-              : 'ECB PROXY'}
+            {model.dataSource === 'BKAM_OFFICIAL' ? (<><span className="text-emerald-400">✓</span> BKAM OFFICIAL</>)
+              : model.dataSource === 'MIXED' ? (<><Zap size={10} className="inline mr-0.5" />MIXED</>)
+              : (<><Globe size={10} className="inline mr-0.5" />ECB PROXY</>)}
           </span>
         )}
       </div>

@@ -4,6 +4,7 @@
  */
 
 import { GraduationCap, FileCheck, Building, Cog, Check, ArrowRight, Star } from 'lucide-react';
+import type { ViewState } from '../types';
 
 interface ServiceTier {
   icon: any;
@@ -103,7 +104,11 @@ const SERVICES: ServiceTier[] = [
   },
 ];
 
-export default function ServicesPage() {
+export default function ServicesPage({ navTo }: { navTo: (v: ViewState) => void }) {
+  const onCta = (action: ServiceTier['ctaAction']) => {
+    if (action === 'AUDIT') navTo('AUDIT_LANDING');
+    else navTo('CONTACT');
+  };
   return (
     <div className="space-y-5 max-w-5xl mx-auto">
       <div className="text-center">
@@ -159,7 +164,10 @@ export default function ServicesPage() {
                 ))}
               </ul>
 
-              <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gold-500 text-navy-950 text-sm font-bold rounded-lg hover:bg-gold-400 transition-colors">
+              <button
+                onClick={() => onCta(s.ctaAction)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-gold-500 text-navy-950 text-sm font-bold rounded-lg hover:bg-gold-400 transition-colors"
+              >
                 {s.cta} <ArrowRight size={13} />
               </button>
             </article>

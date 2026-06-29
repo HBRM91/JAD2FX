@@ -15,7 +15,7 @@ interface RadarQuote {
   change: number;
   changePercent: number;
   unit: string;
-  category: 'FX' | 'ENERGY' | 'METALS' | 'AGRICULTURE';
+  category: 'FX' | 'ENERGY' | 'METALS' | 'AGRICULTURE' | 'INDEX' | 'CRYPTO';
   flag?: string;
   countryCode?: string;
 }
@@ -59,6 +59,13 @@ const RADAR_ITEMS: Array<{
   { symbol: 'GC=F',  label: 'Gold',       labelFr: 'Or',          labelAr: 'ذهب',       unit: '$/oz',  category: 'METALS',       flag: '🥇', fallback: 2340, divisor: 1 },
   { symbol: 'SI=F',  label: 'Silver',     labelFr: 'Argent',      labelAr: 'فضة',       unit: '$/oz',  category: 'METALS',       flag: '🥈', fallback: 29.5, divisor: 1 },
   { symbol: 'SCOA.L', label: 'Iron (SGX)', labelFr: 'Fer (SGX)', labelAr: 'حديد',      unit: '$/t',   category: 'METALS',       flag: '⚙️', fallback: 115, divisor: 1 },
+  // A1.1-A1.3 — Global indices + crypto (Yahoo Finance symbols)
+  { symbol: '^MASI',   label: 'MASI',         labelFr: 'MASI',        labelAr: 'ماسي',        unit: 'pts',   category: 'INDEX',  countryCode: 'ma', fallback: 13800 },
+  { symbol: '^GSPC',   label: 'S&P 500',      labelFr: 'S&P 500',     labelAr: 'ستاندرد',     unit: 'pts',   category: 'INDEX',  countryCode: 'us', fallback: 5650 },
+  { symbol: '^STOXX',  label: 'STOXX 600',    labelFr: 'STOXX 600',   labelAr: 'ستوكس',       unit: 'pts',   category: 'INDEX',  countryCode: 'eu', fallback: 520 },
+  { symbol: '^FTSE',   label: 'FTSE 100',     labelFr: 'FTSE 100',    labelAr: 'فوتسي',       unit: 'pts',   category: 'INDEX',  countryCode: 'gb', fallback: 8200 },
+  { symbol: 'BTC-USD', label: 'Bitcoin',      labelFr: 'Bitcoin',     labelAr: 'بيتكوين',     unit: '$',     category: 'CRYPTO', fallback: 62000 },
+  { symbol: 'ETH-USD', label: 'Ethereum',     labelFr: 'Ethereum',    labelAr: 'إيثريوم',     unit: '$',     category: 'CRYPTO', fallback: 2400 },
 ];
 
 // Map from our FX pseudo-symbol to Frankfurter cross-rate computation
@@ -159,6 +166,8 @@ const CATEGORY_COLORS = {
   ENERGY:      'text-orange-400',
   METALS:      'text-yellow-400',
   AGRICULTURE: 'text-green-400',
+  INDEX:       'text-purple-400',
+  CRYPTO:      'text-amber-400',
 };
 
 export default function MarketRadar({ tickerRates }: Props) {

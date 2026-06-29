@@ -2134,11 +2134,11 @@ async function handleSitemap(request, env, origin) {
     { loc: `${BASE}/?view=TOOL_PME_DIAG`,  changefreq: 'monthly', priority: '0.8' },
     { loc: `${BASE}/?view=TOOL_IMPORT_COST`, changefreq: 'monthly', priority: '0.8' },
     { loc: `${BASE}/?view=TOOL_QUARTERLY`, changefreq: 'monthly', priority: '0.8' },
-    { loc: `${BASE}/glossary`,             changefreq: 'monthly', priority: '0.6' },
-    { loc: `${BASE}/blog`,                 changefreq: 'weekly',  priority: '0.7' },
-    { loc: `${BASE}/api-docs`,             changefreq: 'monthly', priority: '0.5' },
-    { loc: `${BASE}/press`,                changefreq: 'monthly', priority: '0.4' },
-    { loc: `${BASE}/changelog`,            changefreq: 'weekly',  priority: '0.5' },
+    { loc: `${BASE}/?view=GLOSSARY`,       changefreq: 'monthly', priority: '0.6' },
+    { loc: `${BASE}/?view=BLOG`,           changefreq: 'weekly',  priority: '0.7' },
+    { loc: `${BASE}/?view=API_DOCS`,       changefreq: 'monthly', priority: '0.5' },
+    { loc: `${BASE}/?view=PRESS`,          changefreq: 'monthly', priority: '0.4' },
+    { loc: `${BASE}/?view=CHANGELOG`,      changefreq: 'weekly',  priority: '0.5' },
   ];
   // Add per-currency live pages
   for (const code of ['EUR','USD','GBP','JPY','CHF','CAD','SAR','AED']) {

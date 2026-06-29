@@ -73,3 +73,44 @@ body {
   background: #D4AF37;
   color: #040C1C;
 }
+
+/* Print: hide chrome, keep only main content */
+@media print {
+  nav, aside, header, footer,
+  [class*="sticky"], [class*="fixed"][class*="bottom-0"],
+  [class*="ticker"], [class*="Banner"], [class*="Chat"] {
+    display: none !important;
+  }
+  body { background: white !important; color: black !important; }
+  main { padding: 0 !important; max-width: 100% !important; }
+  * { box-shadow: none !important; }
+}
+
+/* B5.2 — scrollable tables on mobile with right-edge fade indicator */
+.scroll-x { overflow-x: auto; -webkit-overflow-scrolling: touch; position: relative; }
+.scroll-x::after {
+  content: ''; position: sticky; right: 0; top: 0; bottom: 0; width: 24px;
+  background: linear-gradient(to right, transparent, var(--navy-900, #0F1F33));
+  pointer-events: none;
+}
+
+/* B5.4 — touch targets ≥ 40px on mobile */
+@media (max-width: 767px) {
+  button, a[role='button'], [role='button'] { min-height: 40px; }
+  .min-touch { min-height: 40px; min-width: 40px; }
+}
+
+/* B3.1 — Font size scale tokens.
+ * Use these utilities instead of arbitrary text-[Npx] for new code.
+ * Migration of all 80+ components is a future task; this just establishes the tokens.
+ */
+.text-eyebrow  { font-size: 10px; line-height: 1.3;  letter-spacing: 0.04em; }
+.text-data     { font-size: 12px; line-height: 1.35; }
+.text-h3       { font-size: 14px; line-height: 1.3;  font-weight: 600; }
+.text-h2       { font-size: 16px; line-height: 1.25; font-weight: 700; }
+.text-h1       { font-size: 20px; line-height: 1.2;  font-weight: 700; }
+
+/* B5.5 — Pull-to-refresh visual hint on mobile */
+@media (max-width: 767px) {
+  body { overscroll-behavior-y: contain; }
+}
