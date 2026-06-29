@@ -59,6 +59,18 @@ const QuarterlyOutlook      = lazy(() => import('./components/QuarterlyOutlook')
 const NewsletterAdmin       = lazy(() => import('./components/admin/NewsletterAdmin'));
 const ApiKeyManagement      = lazy(() => import('./components/admin/ApiKeyManagement'));
 const BacklinkTracker       = lazy(() => import('./components/admin/BacklinkTracker'));
+const LeadsDashboard        = lazy(() => import('./components/admin/LeadsDashboard'));
+// P3 — Funnel + social proof
+const ServicesPage          = lazy(() => import('./components/ServicesPage'));
+const AuditLanding          = lazy(() => import('./components/AuditLanding'));
+const SectorCaseStudy       = lazy(() => import('./components/SectorCaseStudy'));
+const SocialProofModule     = lazy(() => import('./components/SocialProof'));
+const WhatsAppButton        = lazy(() => import('./components/WhatsAppButton'));
+const ExitIntentModal       = lazy(() => import('./components/ExitIntentModal'));
+const ContextualCTA         = lazy(() => import('./components/ContextualCTA'));
+const PriceAlerts           = lazy(() => import('./components/PriceAlerts'));
+const TimeWindowSelector    = lazy(() => import('./components/TimeWindowSelector'));
+const LiveCounterLazy       = lazy(() => import('./components/SocialProof').then(m => ({ default: m.LiveCounter })));
 
 import { AdminProvider, useAdmin } from './context/AdminContext';
 import { I18nProvider, useI18n, Locale } from './context/I18nContext';
@@ -222,6 +234,8 @@ function AppInner() {
         onClose={() => setPaletteOpen(false)}
         onNavigate={(v) => navTo(v as ViewState)}
       />
+      <ExitIntentModal />
+      <WhatsAppButton />
 
       {/* ══ Navbar ══════════════════════════════════════════════════════════ */}
       <nav ref={navDropdownRef} className="bg-navy-900 sticky top-0 z-50 border-b border-navy-800">
@@ -453,6 +467,9 @@ function AppInner() {
 
       {/* ══ Ticker ═══════════════════════════════════════════════════════════ */}
       <RatesTicker rates={tickerRates} />
+      <div className="flex justify-end max-w-[1440px] mx-auto px-4 sm:px-6 -mt-1">
+        <LiveCounterLazy />
+      </div>
 
       {/* ══ Page breadcrumb (non-home views) ═════════════════════════════════ */}
       {view !== 'HOME' && activeItem && (
@@ -772,6 +789,12 @@ function AppInner() {
               <NewsletterSignup proxyUrl={config.corsProxyUrl} source="home_watchlist_card" variant="card" />
             </div>
 
+            {/* P3.8 — Social proof: Stats + Testimonials + LogoWall */}
+            <SocialProofModule />
+
+            {/* P3.5 — Contextual CTA (engagement-based) */}
+            <ContextualCTA variant="banner" pageKey="home" />
+
             {/* ── Advisory CTA strip ───────────────────────────────────── */}
             <div className="bg-navy-900 border border-navy-700 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
@@ -807,6 +830,7 @@ function AppInner() {
           <div className="space-y-6">
             <FxDashboard />
             <CurrencyHeatmap rates={tickerRates} />
+            <PriceAlerts rates={tickerRates} />
           </div>
         )}
 
@@ -841,6 +865,9 @@ function AppInner() {
         {view === 'CITED' && <PressWall />}
         {view === 'PODCAST' && <Podcast />}
         {view === 'QUARTERLY_OUTLOOK' && <QuarterlyOutlook />}
+        {view === 'SERVICES' && <ServicesPage />}
+        {view === 'AUDIT_LANDING' && <AuditLanding />}
+        {view === 'TESTIMONIALS' && <SocialProofModule />}
         {view === 'SECTOR_AUTO'     && <SectorLanding sectorId="auto"     navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_TEXTILE'  && <SectorLanding sectorId="textile"  navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_NORDIQUE' && <SectorLanding sectorId="nordique" navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}

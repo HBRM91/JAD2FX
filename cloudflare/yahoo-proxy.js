@@ -2415,6 +2415,185 @@ async function handleRevokeApiKey(id, request, env, origin) {
   return json({ ok: true, revoked: id }, 200, origin);
 }
 
+// ─── P3.19 Lead capture ──────────────────────────────────────────────────────
+// Captures leads from contact form / newsletter / audit request / wizard.
+// Sends to Resend if configured, else queues in KV for manual send.
+
+async function handleCreateLead(request, env, origin) {
+  if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
+  const raw = await readBodySafe(request);
+  let body = {};
+  try { body = JSON.parse(raw); } catch { return json({ error: 'Invalid JSON' }, 400, origin); }
+
+  // Validate
+  const email = (body.email || '').toString().trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return json({ ok: false, error: 'Email invalide' }, 400, origin);
+  }
+
+  const lead = {
+    id: crypto.randomUUID().slice(0, 8),
+    email,
+    name: (body.name || '').toString().trim().slice(0, 80),
+    company: (body.company || '').toString().trim().slice(0, 80),
+    phone: (body.phone || '').toString().trim().slice(0, 40),
+    volume: (body.volume || '').toString().trim().slice(0, 80),
+    source: (body.source || 'contact_form').toString().trim().slice(0, 80),
+    service: (body.service || '').toString().trim().slice(0, 80),
+    message: (body.message || '').toString().trim().slice(0, 2000),
+    leadScore: typeof body.leadScore === 'number' ? body.leadScore : 0,
+    status: 'NEW',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+
+  // Save to KV
+  if (env.REPORTS_KV) {
+    try {
+      await env.REPORTS_KV.put(`lead:${lead.id}`, JSON.stringify(lead), { expirationTtl: 365 * 24 * 3600 });
+      const idxRaw = await env.REPORTS_KV.get('leads:index');
+      const idx = idxRaw ? JSON.parse(idxRaw) : [];
+      idx.unshift({
+        id: lead.id,
+        email: lead.email,
+        name: lead.name,
+        company: lead.company,
+        source: lead.source,
+        service: lead.service,
+        leadScore: lead.leadScore,
+        status: lead.status,
+        createdAt: lead.createdAt,
+      });
+      // Cap index at 1000 entries
+      await env.REPORTS_KV.put('leads:index', JSON.stringify(idx.slice(0, 1000)));
+    } catch (e) {
+      console.error('KV save failed:', e);
+    }
+  }
+
+  // Send to Resend
+  const resendKey = env.RESEND_API_KEY;
+  const contactEmail = env.CONTACT_EMAIL || 'contact@jad2advisory.com';
+  if (resendKey) {
+    try {
+      const html = renderLeadEmailHtml(lead);
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${resendKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'JAD2FX <noreply@jad2advisory.com>',
+          to: [contactEmail],
+          reply_to: lead.email,
+          subject: `[Lead ${lead.source}] ${lead.name || lead.email} — ${lead.company || 'N/A'}`,
+          html,
+        }),
+      }).catch((e) => console.error('Resend send failed:', e));
+    } catch (e) {
+      console.error('Resend exception:', e);
+    }
+  }
+
+  return json({ ok: true, id: lead.id, message: 'Lead enregistré' }, 201, origin);
+}
+
+function renderLeadEmailHtml(lead) {
+  return `<!DOCTYPE html>
+<html><body style="font-family:system-ui;background:#f8fafc;padding:20px;">
+  <div style="max-width:600px;margin:0 auto;background:white;padding:24px;border-radius:8px;">
+    <h1 style="color:#0f172a;font-size:18px;margin:0 0 16px;">Nouveau lead JAD2FX · ${lead.source}</h1>
+    <table style="width:100%;font-size:14px;border-collapse:collapse;">
+      <tr><td style="padding:6px 0;color:#64748b;width:140px;">Nom</td><td>${lead.name || '—'}</td></tr>
+      <tr><td style="padding:6px 0;color:#64748b;">Email</td><td><a href="mailto:${lead.email}">${lead.email}</a></td></tr>
+      <tr><td style="padding:6px 0;color:#64748b;">Entreprise</td><td>${lead.company || '—'}</td></tr>
+      <tr><td style="padding:6px 0;color:#64748b;">Téléphone</td><td>${lead.phone || '—'}</td></tr>
+      <tr><td style="padding:6px 0;color:#64748b;">Service</td><td>${lead.service || '—'}</td></tr>
+      <tr><td style="padding:6px 0;color:#64748b;">Volume FX</td><td>${lead.volume || '—'}</td></tr>
+      <tr><td style="padding:6px 0;color:#64748b;">Score</td><td>${lead.leadScore}/100</td></tr>
+    </table>
+    ${lead.message ? `<div style="margin-top:16px;padding:12px;background:#f1f5f9;border-radius:6px;"><p style="font-size:12px;color:#64748b;margin:0 0 4px;">Message</p><p style="font-size:14px;margin:0;">${lead.message}</p></div>` : ''}
+    <p style="margin-top:16px;font-size:11px;color:#94a3b8;">Source: ${lead.source} · ${lead.createdAt}</p>
+  </div>
+</body></html>`;
+}
+
+async function handleListLeads(request, env, origin) {
+  if (!env.REPORTS_KV) return json({ leads: [] }, 200, origin);
+  const idxRaw = await env.REPORTS_KV.get('leads:index');
+  const idx = idxRaw ? JSON.parse(idxRaw) : [];
+  // Optional filter
+  const url = new URL(request.url);
+  const status = url.searchParams.get('status');
+  const filtered = status ? idx.filter((l) => l.status === status) : idx;
+  return json({ leads: filtered, total: filtered.length }, 200, origin);
+}
+
+async function handleUpdateLead(id, request, env, origin) {
+  if (!env.REPORTS_KV) return json({ error: 'KV not configured' }, 503, origin);
+  const raw = await env.REPORTS_KV.get(`lead:${id}`);
+  if (!raw) return json({ error: 'Lead not found' }, 404, origin);
+  const lead = JSON.parse(raw);
+  const bodyRaw = await readBodySafe(request);
+  let body = {};
+  try { body = JSON.parse(bodyRaw); } catch { /* ignore */ }
+  if (typeof body.status === 'string') lead.status = body.status;
+  if (typeof body.notes === 'string') lead.notes = body.notes;
+  lead.updatedAt = new Date().toISOString();
+  await env.REPORTS_KV.put(`lead:${id}`, JSON.stringify(lead));
+  // Update index
+  const idxRaw = await env.REPORTS_KV.get('leads:index');
+  if (idxRaw) {
+    const idx = JSON.parse(idxRaw);
+    const entry = idx.find((l) => l.id === id);
+    if (entry) { entry.status = lead.status; entry.updatedAt = lead.updatedAt; }
+    await env.REPORTS_KV.put('leads:index', JSON.stringify(idx));
+  }
+  return json({ ok: true, lead }, 200, origin);
+}
+
+async function handleFunnelStats(request, env, origin) {
+  if (!env.REPORTS_KV) return json({ stages: [] }, 200, origin);
+  const idxRaw = await env.REPORTS_KV.get('leads:index');
+  const leads = idxRaw ? JSON.parse(idxRaw) : [];
+  const bySource = {};
+  const byStatus = {};
+  const byService = {};
+  const byDay = {};
+  let totalScore = 0;
+  for (const l of leads) {
+    bySource[l.source || 'unknown'] = (bySource[l.source || 'unknown'] || 0) + 1;
+    byStatus[l.status || 'NEW'] = (byStatus[l.status || 'NEW'] || 0) + 1;
+    byService[l.service || 'unknown'] = (byService[l.service || 'unknown'] || 0) + 1;
+    const day = (l.createdAt || '').slice(0, 10);
+    byDay[day] = (byDay[day] || 0) + 1;
+    totalScore += l.leadScore || 0;
+  }
+  // Build funnel stages
+  const total = leads.length;
+  const hot = leads.filter((l) => l.leadScore >= 50).length;
+  const contacted = leads.filter((l) => l.status !== 'NEW').length;
+  const won = leads.filter((l) => l.status === 'WON').length;
+  return json({
+    total,
+    hot,
+    contacted,
+    won,
+    avgScore: total ? Math.round(totalScore / total) : 0,
+    bySource,
+    byStatus,
+    byService,
+    byDay,
+    funnel: [
+      { stage: 'Lead', count: total },
+      { stage: 'Hot (50+)', count: hot },
+      { stage: 'Contacted', count: contacted },
+      { stage: 'Won', count: won },
+    ],
+  }, 200, origin);
+}
+
 // ─── Main fetch handler ───────────────────────────────────────────────────────
 
 export default {
@@ -2595,6 +2774,27 @@ export default {
       if (denied) return denied;
       if (request.method === 'DELETE') return handleRevokeApiKey(apiKeyMatch[1], request, env, origin);
       return json({ error: 'DELETE only' }, 405, origin);
+    }
+
+    // ── P3.19 / P3.20 Lead capture + dashboard ────────────────────────────
+    if (pathname === '/api/leads') {
+      if (request.method === 'POST') return handleCreateLead(request, env, origin);
+      const denied = adminGate(request, env, origin);
+      if (denied) return denied;
+      if (request.method === 'GET') return handleListLeads(request, env, origin);
+      return json({ error: 'GET or POST only' }, 405, origin);
+    }
+    const leadIdMatch = pathname.match(/^\/api\/leads\/([^/]+)$/);
+    if (leadIdMatch) {
+      const denied = adminGate(request, env, origin);
+      if (denied) return denied;
+      if (request.method === 'PATCH') return handleUpdateLead(leadIdMatch[1], request, env, origin);
+      return json({ error: 'PATCH only' }, 405, origin);
+    }
+    if (pathname === '/api/admin/funnel-stats') {
+      const denied = adminGate(request, env, origin);
+      if (denied) return denied;
+      return handleFunnelStats(request, env, origin);
     }
 
     // ── Yahoo Finance proxy ───────────────────────────────────────────────────

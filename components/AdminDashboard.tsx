@@ -3,7 +3,7 @@ import {
   Shield, LogOut, Settings, Activity, BarChart2, TrendingUp,
   AlertTriangle, FileText, RefreshCw, Lock, Eye, EyeOff,
   ChevronDown, RotateCcw, Plus, Trash2, CheckCircle, XCircle,
-  ClipboardList, Bot, Send, Search, Mail, Key, Link2,
+  ClipboardList, Bot, Send, Search, Mail, Key, Link2, Users,
 } from 'lucide-react';
 import { BKAM_CURRENCIES } from '../constants';
 import { useAdmin, DEFAULT_TIER_COMMISSIONS } from '../context/AdminContext';
@@ -15,6 +15,7 @@ import ReportsAdmin from './admin/ReportsAdmin';
 import NewsletterAdmin from './admin/NewsletterAdmin';
 import ApiKeyManagement from './admin/ApiKeyManagement';
 import BacklinkTracker from './admin/BacklinkTracker';
+import LeadsDashboard from './admin/LeadsDashboard';
 import CurrencyFlag from './CurrencyFlag';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -1119,7 +1120,7 @@ function ConsultantTab() {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-type AdminTab = 'SYSTEM' | 'RATES' | 'CURVES' | 'FORWARDS' | 'SPREADS' | 'PRICING' | 'ALERTS' | 'BLOTTER' | 'AUDIT' | 'CONSULTANT' | 'REPORTS' | 'NEWSLETTER' | 'APIKEYS' | 'BACKLINKS';
+type AdminTab = 'SYSTEM' | 'RATES' | 'CURVES' | 'FORWARDS' | 'SPREADS' | 'PRICING' | 'ALERTS' | 'BLOTTER' | 'AUDIT' | 'CONSULTANT' | 'REPORTS' | 'NEWSLETTER' | 'APIKEYS' | 'BACKLINKS' | 'LEADS';
 
 const TABS: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: 'SYSTEM',     label: 'System',     icon: Activity },
@@ -1136,6 +1137,7 @@ const TABS: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: 'NEWSLETTER', label: 'Newsletter', icon: Mail },
   { id: 'APIKEYS',    label: 'API Keys',   icon: Key },
   { id: 'BACKLINKS',  label: 'SEO',        icon: Link2 },
+  { id: 'LEADS',      label: 'Leads',      icon: Users },
 ];
 
 export default function AdminDashboard() {
