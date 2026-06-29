@@ -29,5 +29,7 @@ playwright-report/
 cloudflare/.wrangler/
 .wrangler/
 docs/deploy-*.png
+docs/ship-final-*.png
 scripts/verify-deploy.mjs
 scripts/screenshot-deploy.mjs
+scripts/screenshot-final.mjs
