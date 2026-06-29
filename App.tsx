@@ -45,6 +45,20 @@ const PmeDiagnostic         = lazy(() => import('./components/PmeDiagnostic'));
 const ImportCostCalc        = lazy(() => import('./components/ImportCostCalc'));
 const QuarterlyHedge        = lazy(() => import('./components/QuarterlyHedge'));
 const Watchlist             = lazy(() => import('./components/Watchlist'));
+// P4 — Content authority
+const Glossary              = lazy(() => import('./components/Glossary'));
+const Blog                  = lazy(() => import('./components/Blog'));
+const BasketExplainer       = lazy(() => import('./components/BasketExplainer'));
+const PressKit              = lazy(() => import('./components/PressKit'));
+const ApiDocs               = lazy(() => import('./components/ApiDocs'));
+const Changelog             = lazy(() => import('./components/Changelog'));
+const Partnerships         = lazy(() => import('./components/Partnerships'));
+const PressWall             = lazy(() => import('./components/PressWall'));
+const Podcast               = lazy(() => import('./components/Podcast'));
+const QuarterlyOutlook      = lazy(() => import('./components/QuarterlyOutlook'));
+const NewsletterAdmin       = lazy(() => import('./components/admin/NewsletterAdmin'));
+const ApiKeyManagement      = lazy(() => import('./components/admin/ApiKeyManagement'));
+const BacklinkTracker       = lazy(() => import('./components/admin/BacklinkTracker'));
 
 import { AdminProvider, useAdmin } from './context/AdminContext';
 import { I18nProvider, useI18n, Locale } from './context/I18nContext';
@@ -62,6 +76,7 @@ import {
 import { NAV_GROUPS as _NAV_GROUPS, type NavGroup } from './navConfig';
 
 const NAV_GROUPS: NavGroup[] = _NAV_GROUPS as unknown as { id: string; label: string; items: { label: string; view: ViewState; icon: React.ElementType; desc: string }[] }[];
+void NAV_GROUPS; // referenced for completeness; command palette uses _NAV_GROUPS directly
 
 // ─── Expandable news card ─────────────────────────────────────────────────────
 
@@ -816,6 +831,16 @@ function AppInner() {
         {view === 'TOOL_PME_DIAG' && <PmeDiagnostic />}
         {view === 'TOOL_IMPORT_COST' && <ImportCostCalc />}
         {view === 'TOOL_QUARTERLY' && <QuarterlyHedge />}
+        {view === 'GLOSSARY' && <Glossary />}
+        {view === 'BLOG' && <Blog />}
+        {view === 'BASKET' && <BasketExplainer />}
+        {view === 'PRESS' && <PressKit />}
+        {view === 'API_DOCS' && <ApiDocs />}
+        {view === 'CHANGELOG' && <Changelog />}
+        {view === 'PARTNERSHIPS' && <Partnerships />}
+        {view === 'CITED' && <PressWall />}
+        {view === 'PODCAST' && <Podcast />}
+        {view === 'QUARTERLY_OUTLOOK' && <QuarterlyOutlook />}
         {view === 'SECTOR_AUTO'     && <SectorLanding sectorId="auto"     navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_TEXTILE'  && <SectorLanding sectorId="textile"  navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
         {view === 'SECTOR_NORDIQUE' && <SectorLanding sectorId="nordique" navTo={navTo} onContact={() => setContactDrawerOpen(true)} />}
@@ -979,10 +1004,52 @@ function AppInner() {
           </div>
         </div>
 
-        {/* Legal */}
-        <div className="py-5">
-          <div className="max-w-[1440px] mx-auto px-4 sm:px-6 text-center">
-            <p className="text-xs leading-relaxed max-w-3xl mx-auto text-slate-500">{DISCLAIMER_TEXT}</p>
+        {/* Legal + content links */}
+        <div className="py-6">
+          <div className="max-w-[1440px] mx-auto px-4 sm:px-6">
+            {/* P4 — Footer resource links (SEO internal linking) */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-6 pb-6 border-b border-navy-800">
+              <div className="col-span-2 sm:col-span-3 md:col-span-2">
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-2">Ressources</p>
+                <p className="text-[10px] text-slate-600 leading-relaxed">
+                  Outil pédagogique de JAD2 Advisory. Données BKAM, BCE, et Yahoo Finance. Conformité OC 01/2024.
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-2">Apprendre</p>
+                <ul className="space-y-1">
+                  <li><button onClick={() => navTo('GLOSSARY')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Glossaire FX</button></li>
+                  <li><button onClick={() => navTo('BLOG')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Research</button></li>
+                  <li><button onClick={() => navTo('BASKET')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Panier BKAM</button></li>
+                </ul>
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-2">Médias</p>
+                <ul className="space-y-1">
+                  <li><button onClick={() => navTo('PRESS')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Press Kit</button></li>
+                  <li><button onClick={() => navTo('CITED')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Cité par</button></li>
+                  <li><button onClick={() => navTo('PODCAST')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Podcast</button></li>
+                </ul>
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-2">Outils</p>
+                <ul className="space-y-1">
+                  <li><button onClick={() => navTo('API_DOCS')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">API</button></li>
+                  <li><button onClick={() => navTo('QUARTERLY_OUTLOOK')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Quarterly</button></li>
+                  <li><a href="/sitemap.xml" className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Sitemap</a></li>
+                </ul>
+              </div>
+              <div>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-2">Société</p>
+                <ul className="space-y-1">
+                  <li><button onClick={() => navTo('ABOUT_JAD2')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">À propos</button></li>
+                  <li><button onClick={() => navTo('PARTNERSHIPS')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Partenaires</button></li>
+                  <li><button onClick={() => navTo('CHANGELOG')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Changelog</button></li>
+                </ul>
+              </div>
+            </div>
+
+            <p className="text-xs leading-relaxed max-w-3xl mx-auto text-slate-500 text-center">{DISCLAIMER_TEXT}</p>
             <div className="flex flex-wrap justify-center gap-3 mt-3 text-xs text-slate-500">
               <span>ECB / Frankfurter</span>
               <span className="text-slate-700">·</span>

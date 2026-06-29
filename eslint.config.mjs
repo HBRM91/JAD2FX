@@ -10,6 +10,7 @@ export default [
       'node_modules/**',
       'cloudflare/**',  // Worker is CommonJS JS with own conventions (require, top-level await)
       'functions/**',  // Cloudflare Pages middleware is CJS
+      '.wrangler/**',  // Wrangler build artifacts
       '*.config.ts',
       '*.config.cjs',
       '*.config.js',

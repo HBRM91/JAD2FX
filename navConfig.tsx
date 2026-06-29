@@ -1,7 +1,7 @@
 // Shared nav data — extracted from App.tsx so other components (command palette, etc.)
 // can use it without re-importing the whole App.
 
-import { Activity, BarChart2, BookOpen, Building2, Calculator, Calendar, ClipboardCheck, FileText, LayoutDashboard, Newspaper, PackageOpen, Scale, Shield, TrendingUp, ArrowLeftRight, Banknote } from 'lucide-react';
+import { Activity, Award, BarChart2, BookOpen, Building2, Code, Calculator, Calendar, ClipboardCheck, FileText, Headphones, LayoutDashboard, Newspaper, PackageOpen, Scale, Shield, TrendingUp, ArrowLeftRight, Banknote } from 'lucide-react';
 
 export interface NavItem {
   label: string;
@@ -61,4 +61,28 @@ export const NAV_GROUPS: NavGroup[] = [
       { label: 'À Propos JAD2',            view: 'ABOUT_JAD2',      icon: Building2,    desc: 'Statut · Services · Méthodologie' },
     ],
   },
+];
+
+// P4 — Content authority pages (linked from home/footer, not in main nav for simplicity)
+export const CONTENT_NAV: NavItem[] = [
+  { label: 'Glossaire',         view: 'GLOSSARY',          icon: BookOpen,    desc: '60+ termes FX · MAD · OC' },
+  { label: 'Research',          view: 'BLOG',              icon: Newspaper,   desc: 'Analyses & rapports' },
+  { label: 'Panier BKAM',       view: 'BASKET',            icon: BarChart2,   desc: 'Simulateur interactif 60/40' },
+  { label: 'Press Kit',         view: 'PRESS',             icon: FileText,    desc: 'Logos · bios · assets' },
+  { label: 'API Docs',          view: 'API_DOCS',          icon: Code,        desc: 'REST API · OpenAPI 3.0' },
+  { label: 'Changelog',         view: 'CHANGELOG',         icon: FileText,    desc: 'Historique des versions' },
+  { label: 'Podcast',           view: 'PODCAST',           icon: Headphones,  desc: 'MAD Talk · interviews' },
+  { label: 'Quarterly',         view: 'QUARTERLY_OUTLOOK', icon: FileText,    desc: 'MAD Quarterly Outlook PDF' },
+  { label: 'Partenaires',       view: 'PARTNERSHIPS',      icon: Award,       desc: 'Académique · presse · institutions' },
+  { label: 'Cité par',          view: 'CITED',             icon: Award,       desc: 'Mentions presse de JAD2FX' },
+];
+
+// P4 — Footer links
+export const FOOTER_LINKS: NavItem[] = [
+  { label: 'Press Kit',   view: 'PRESS',      icon: FileText, desc: 'Logos & assets' },
+  { label: 'API',         view: 'API_DOCS',   icon: Code,     desc: 'Pour les développeurs' },
+  { label: 'Changelog',   view: 'CHANGELOG',  icon: FileText, desc: 'Historique' },
+  { label: 'Glossaire',   view: 'GLOSSARY',   icon: BookOpen, desc: 'Termes FX/MAD' },
+  { label: 'Recherche',   view: 'BLOG',       icon: Newspaper, desc: 'Articles' },
+  { label: 'Partenaires', view: 'PARTNERSHIPS', icon: Award,  desc: 'Nos partenaires' },
 ];

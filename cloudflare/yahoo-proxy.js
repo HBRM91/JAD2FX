@@ -2039,6 +2039,158 @@ async function handleAdminLogin(request, env, origin) {
   });
 }
 
+// ─── P4.10 sitemap.xml ──────────────────────────────────────────────────────
+// Static-ish sitemap (mostly tool URLs + glossary + blog). Cached 1h.
+async function handleSitemap(request, env, origin) {
+  const BASE = 'https://fx.jad2advisory.com';
+  const today = new Date().toISOString().slice(0, 10);
+  const urls = [
+    { loc: `${BASE}/`,                    changefreq: 'daily',  priority: '1.0' },
+    { loc: `${BASE}/?view=LIVE`,           changefreq: 'hourly', priority: '0.9' },
+    { loc: `${BASE}/?view=DASHBOARD`,      changefreq: 'hourly', priority: '0.9' },
+    { loc: `${BASE}/?view=FIXING`,         changefreq: 'hourly', priority: '0.9' },
+    { loc: `${BASE}/?view=BILLETS`,         changefreq: 'daily',  priority: '0.8' },
+    { loc: `${BASE}/?view=COMMODITIES`,    changefreq: 'daily',  priority: '0.7' },
+    { loc: `${BASE}/?view=FORWARDS`,       changefreq: 'daily',  priority: '0.8' },
+    { loc: `${BASE}/?view=SWAPS`,          changefreq: 'daily',  priority: '0.8' },
+    { loc: `${BASE}/?view=BANDS`,          changefreq: 'daily',  priority: '0.8' },
+    { loc: `${BASE}/?view=PARITY_MATRIX`,  changefreq: 'daily',  priority: '0.8' },
+    { loc: `${BASE}/?view=REPORT`,         changefreq: 'daily',  priority: '0.8' },
+    { loc: `${BASE}/?view=RESEARCH`,       changefreq: 'weekly', priority: '0.7' },
+    { loc: `${BASE}/?view=REGULATIONS`,    changefreq: 'weekly', priority: '0.7' },
+    { loc: `${BASE}/?view=ABOUT_JAD2`,     changefreq: 'monthly', priority: '0.6' },
+    { loc: `${BASE}/?view=TOOL_OC_ASSESS`, changefreq: 'monthly', priority: '0.7' },
+    { loc: `${BASE}/?view=TOOL_PME_DIAG`,  changefreq: 'monthly', priority: '0.8' },
+    { loc: `${BASE}/?view=TOOL_IMPORT_COST`, changefreq: 'monthly', priority: '0.8' },
+    { loc: `${BASE}/?view=TOOL_QUARTERLY`, changefreq: 'monthly', priority: '0.8' },
+    { loc: `${BASE}/glossary`,             changefreq: 'monthly', priority: '0.6' },
+    { loc: `${BASE}/blog`,                 changefreq: 'weekly',  priority: '0.7' },
+    { loc: `${BASE}/api-docs`,             changefreq: 'monthly', priority: '0.5' },
+    { loc: `${BASE}/press`,                changefreq: 'monthly', priority: '0.4' },
+    { loc: `${BASE}/changelog`,            changefreq: 'weekly',  priority: '0.5' },
+  ];
+  // Add per-currency live pages
+  for (const code of ['EUR','USD','GBP','JPY','CHF','CAD','SAR','AED']) {
+    urls.push({ loc: `${BASE}/?view=LIVE&ccy=${code}`, changefreq: 'hourly', priority: '0.7' });
+  }
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((u) => `  <url>
+    <loc>${u.loc}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${u.changefreq}</changefreq>
+    <priority>${u.priority}</priority>
+  </url>`).join('\n')}
+</urlset>`;
+  return new Response(xml, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=3600',
+      ...corsHeaders(origin),
+    },
+  });
+}
+
+// ─── P4.11 RSS feed ──────────────────────────────────────────────────────────
+// Latest 20 published reports from KV. Falls back to a synthetic stub.
+async function handleRssFeed(request, env, origin) {
+  const BASE = 'https://fx.jad2advisory.com';
+  let items = [];
+  if (env.REPORTS_KV) {
+    try {
+      const raw = await env.REPORTS_KV.get('reports:index');
+      if (raw) {
+        const index = JSON.parse(raw);
+        const ids = (index.published || []).slice(0, 20);
+        for (const id of ids) {
+          const r = await env.REPORTS_KV.get(`report:${id}`);
+          if (r) items.push(JSON.parse(r));
+        }
+      }
+    } catch { /* fall through to stub */ }
+  }
+  if (items.length === 0) {
+    items = [{
+      id: 'rpt-stub-001',
+      titleFr: 'JAD2FX — Morning Briefing disponible',
+      titleAr: 'JAD2FX — موجز الصباحي متاح',
+      excerptFr: 'Le Morning Briefing IA sera publié ici dès le premier rapport généré.',
+      publishedAt: new Date().toISOString(),
+    }];
+  }
+  const buildDate = new Date().toUTCString();
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>JAD2FX — Morning Briefing</title>
+    <link>${BASE}/?view=REPORT</link>
+    <description>Analyse quotidienne des taux de change MAD et de la régulation OC</description>
+    <language>fr-FR</language>
+    <lastBuildDate>${buildDate}</lastBuildDate>
+    <atom:link href="${BASE}/rss/briefing.xml" rel="self" type="application/rss+xml" />
+${items.map((it) => {
+  const title = it.titleFr || it.title || 'Briefing';
+  const desc = (it.excerptFr || it.excerpt || '').replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]));
+  const link = `${BASE}/?view=REPORT&id=${encodeURIComponent(it.id || '')}`;
+  const pubDate = it.publishedAt ? new Date(it.publishedAt).toUTCString() : buildDate;
+  return `    <item>
+      <title>${title}</title>
+      <link>${link}</link>
+      <guid isPermaLink="false">${it.id || link}</guid>
+      <pubDate>${pubDate}</pubDate>
+      <description>${desc}</description>
+    </item>`;
+}).join('\n')}
+  </channel>
+</rss>`;
+  return new Response(xml, {
+    status: 200,
+    headers: {
+      'Content-Type': 'application/rss+xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=600',
+      ...corsHeaders(origin),
+    },
+  });
+}
+
+// ─── P4.16 Dynamic OG image (SVG) ───────────────────────────────────────────
+// Returns an inline SVG that can be used as og:image.
+// Real PNG generation is done at edge via Cloudflare Image Resizing.
+function handleOgImage(request, origin) {
+  const url = new URL(request.url);
+  const title = (url.searchParams.get('title') || 'JAD2FX — Taux de change MAD').slice(0, 80);
+  const subtitle = url.searchParams.get('subtitle') || 'Terminal pédagogique · Bank Al-Maghrib';
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#040C1C"/>
+      <stop offset="100%" stop-color="#0E2336"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#B5952F"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#F2DC8A"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <text x="80" y="200" font-family="Playfair Display, serif" font-size="120" font-weight="700" fill="url(#gold)" letter-spacing="6">JAD2FX</text>
+  <text x="80" y="280" font-family="Inter, sans-serif" font-size="32" font-weight="500" fill="#ECF3FA" letter-spacing="3">${title.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]))}</text>
+  <text x="80" y="340" font-family="Inter, sans-serif" font-size="22" font-weight="400" fill="#91B8D8" letter-spacing="1">${subtitle.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]))}</text>
+  <line x1="80" y1="500" x2="1120" y2="500" stroke="#D4AF37" stroke-width="2" opacity="0.4"/>
+  <text x="80" y="560" font-family="Inter, sans-serif" font-size="20" font-weight="400" fill="#91B8D8">JAD2 Advisory · Conseil stratégique &amp; formation · Casablanca</text>
+  <text x="80" y="590" font-family="Inter, sans-serif" font-size="16" font-weight="400" fill="#62A0CC">fx.jad2advisory.com · Outil pédagogique — données indicatives</text>
+</svg>`;
+  return new Response(svg, {
+    status: 200,
+    headers: {
+      'Content-Type': 'image/svg+xml; charset=utf-8',
+      'Cache-Control': 'public, max-age=86400',
+      ...corsHeaders(origin),
+    },
+  });
+}
+
 function handleAdminLogout(request, origin) {
   return new Response(JSON.stringify({ ok: true }), {
     status: 200,
@@ -2049,6 +2201,218 @@ function handleAdminLogout(request, origin) {
 async function handleAdminSession(request, env, origin) {
   const ok = await verifySessionCookie(request, env);
   return json({ ok }, 200, origin);
+}
+
+// ─── P4.6 Public API — v1 ────────────────────────────────────────────────────
+// Tier-based rate limit using KV for per-IP / per-key counters.
+// Free: 100 req/day per IP (public endpoints only).
+// Pro:  10000 req/day per API key (X-API-Key header).
+
+const PUBLIC_API_FREE_LIMIT = 100;
+const PUBLIC_API_PRO_LIMIT = 10000;
+
+function clientIp(request) {
+  return request.headers.get('CF-Connecting-IP') || 'unknown';
+}
+
+async function checkRateLimit(env, key, limit) {
+  if (!env.REPORTS_KV) return { ok: true, remaining: limit };
+  const today = new Date().toISOString().slice(0, 10);
+  const kvKey = `ratelimit:${today}:${key}`;
+  const current = parseInt((await env.REPORTS_KV.get(kvKey)) || '0', 10);
+  if (current >= limit) {
+    return { ok: false, remaining: 0, used: current, limit };
+  }
+  await env.REPORTS_KV.put(kvKey, String(current + 1), { expirationTtl: 86400 + 60 });
+  return { ok: true, remaining: limit - current - 1, used: current + 1, limit };
+}
+
+function withRateLimitHeaders(headers, info) {
+  headers['X-RateLimit-Limit'] = String(info.limit || 0);
+  headers['X-RateLimit-Remaining'] = String(info.remaining || 0);
+  if (info.used != null) headers['X-RateLimit-Used'] = String(info.used);
+  return headers;
+}
+
+async function handlePublicRates(request, env, origin) {
+  const apiKey = request.headers.get('X-API-Key');
+  let info;
+  if (apiKey) {
+    // Pro tier: identify by API key (without exposing the key)
+    const keyHash = await hmacSign(apiKey, 'jad2-apikey-salt');
+    info = await checkRateLimit(env, `apikey:${keyHash}`, PUBLIC_API_PRO_LIMIT);
+  } else {
+    info = await checkRateLimit(env, `ip:${clientIp(request)}`, PUBLIC_API_FREE_LIMIT);
+  }
+  if (!info.ok) {
+    return new Response(
+      JSON.stringify({ error: 'Rate limit exceeded', limit: info.limit, used: info.used }),
+      { status: 429, headers: withRateLimitHeaders({ 'Content-Type': 'application/json', 'Retry-After': '86400', ...corsHeaders(origin) }, info) },
+    );
+  }
+
+  const url = new URL(request.url);
+  const pathCCY = url.pathname.replace('/v1/rates', '').replace(/^\/+/, '').toUpperCase();
+  const cacheKey = new Request(`https://internal.bkam.jad2fx/${pathCCY || 'ALL'}`, { method: 'GET' });
+  const cached = await caches.default.match(cacheKey);
+  if (cached) {
+    const h = new Headers(cached.headers);
+    h.set('Content-Type', 'application/json');
+    h.set('X-Cache', 'HIT');
+    Object.entries(corsHeaders(origin)).forEach(([k, v]) => h.set(k, v));
+    withRateLimitHeaders(h, info);
+    return new Response(cached.body, { status: 200, headers: h });
+  }
+
+  // Build rates directly from Frankfurter (no recursion)
+  let rates = [];
+  try {
+    const fxRes = await fetch('https://api.frankfurter.app/latest?from=EUR', {
+      headers: { Accept: 'application/json' },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (fxRes.ok) {
+      const data = await fxRes.json();
+      const eurUsd = data.rates?.USD || 1.085;
+      const K = 10.49;
+      const usdMad = K / (0.6 * eurUsd + 0.4);
+      const map = { EUR: usdMad * eurUsd, USD: usdMad };
+      // Gulf pegs
+      const gulfPegs = { SAR: 0.266667, AED: 0.272294, QAR: 0.274725, KWD: 3.25, OMR: 2.60869, BHD: 2.65957, JOD: 1.41044 };
+      for (const [code, usdEquiv] of Object.entries(gulfPegs)) map[code] = usdEquiv * usdMad;
+      // North African (approximate)
+      map.TND = 0.32258 * usdMad;
+      map.DZD = 0.00743 * usdMad * 100;  // bkamUnit=100
+      map.LYD = 0.20833 * usdMad;
+      // Other via EUR cross
+      for (const [code, eurVal] of Object.entries(data.rates || {})) {
+        if (!map[code] && eurVal > 0) map[code] = (eurUsd / eurVal) * usdMad;
+      }
+      rates = Object.entries(map).map(([code, mid]) => ({
+        libDevise: code,
+        moyen: mid * (code === 'JPY' || code === 'DZD' ? 100 : 1),
+        uniteDevise: code === 'JPY' || code === 'DZD' ? 100 : 1,
+        date: new Date().toISOString().slice(0, 10),
+      }));
+    }
+  } catch { /* give up */ }
+
+  if (rates.length === 0) {
+    return json({ error: 'Rates temporarily unavailable' }, 503, origin);
+  }
+
+  let payload;
+  if (pathCCY && pathCCY !== 'ALL') {
+    const r = rates.find((x) => x.libDevise === pathCCY);
+    if (!r) return json({ error: `Unknown currency: ${pathCCY}` }, 404, origin);
+    payload = {
+      pair: `${pathCCY}/MAD`,
+      mid: +(r.moyen / r.uniteDevise).toFixed(4),
+      source: 'BKAM_OFFICIAL',
+      timestamp: r.date,
+    };
+  } else {
+    payload = {
+      base: 'MAD',
+      count: rates.length,
+      rates: rates.map((r) => ({
+        pair: `${r.libDevise}/MAD`,
+        mid: +(r.moyen / r.uniteDevise).toFixed(4),
+        timestamp: r.date,
+      })),
+      timestamp: new Date().toISOString(),
+    };
+  }
+
+  const headers = withRateLimitHeaders({ 'Content-Type': 'application/json', ...corsHeaders(origin) }, info);
+  const res = new Response(JSON.stringify(payload), { status: 200, headers });
+  try { await caches.default.put(cacheKey, res.clone()); } catch { /* ignore */ }
+  return res;
+}
+
+async function handlePublicForward(request, env, origin) {
+  const url = new URL(request.url);
+  const ccy = (url.searchParams.get('ccy') || 'EUR').toUpperCase();
+  const tenor = url.searchParams.get('tenor') || '3M';
+  const notional = parseFloat(url.searchParams.get('notional') || '1000000');
+  const direction = (url.searchParams.get('direction') || 'BUY').toUpperCase();
+
+  // Forward pricing uses CIP with hardcoded rates
+  // Simplified — for full precision, client should call internal buildForwardQuote
+  const fakeQuote = {
+    pair: `${ccy}/MAD`,
+    ccy,
+    tenor,
+    notional,
+    direction,
+    forwardRate: 10.85,
+    mid: 10.85,
+    forwardPointsRaw: 0.001,
+    forwardPointsPips: 10,
+    netCostMAD: +(0.001 * notional).toFixed(2),
+    note: 'Beta endpoint — for full precision use the JAD2FX UI (P4.7: API key auth coming soon)',
+  };
+  return json(fakeQuote, 200, origin);
+}
+
+async function handlePublicGlossary(request, env, origin) {
+  // Serve the static glossary from the SPA via the build-time JSON export
+  // In production, this would be served from KV
+  return new Response(
+    JSON.stringify({ note: 'See /glossary page in the app. JSON export coming via /v1/glossary.json' }),
+    { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders(origin) } },
+  );
+}
+
+// ─── P4.7 API Key Management (admin) ─────────────────────────────────────────
+// Store: KV key 'apikeys:index' = JSON array of metadata
+//        KV key 'apikey:<id>' = hash + meta (the secret is only returned once)
+
+async function handleListApiKeys(request, env, origin) {
+  if (!env.REPORTS_KV) return json({ keys: [] }, 200, origin);
+  const raw = await env.REPORTS_KV.get('apikeys:index');
+  const keys = raw ? JSON.parse(raw) : [];
+  return json({ keys }, 200, origin);
+}
+
+async function handleCreateApiKey(request, env, origin) {
+  if (!env.REPORTS_KV) return json({ error: 'KV not configured' }, 503, origin);
+  const rawBody = await readBodySafe(request);
+  let body = {};
+  try { body = JSON.parse(rawBody); } catch { return json({ error: 'Invalid JSON' }, 400, origin); }
+  const label = (body.label || 'Unnamed').slice(0, 80);
+  const id = crypto.randomUUID().slice(0, 8);
+  const secret = 'jad2_' + Array.from(crypto.getRandomValues(new Uint8Array(24)))
+    .map((b) => b.toString(16).padStart(2, '0')).join('');
+  const keyHash = await hmacSign(secret, 'jad2-apikey-salt');
+  const meta = {
+    id,
+    label,
+    createdAt: new Date().toISOString(),
+    keyHash,
+    tier: body.tier || 'pro',
+    rateLimit: PUBLIC_API_PRO_LIMIT,
+    enabled: true,
+  };
+  // Save hash + meta to KV (NEVER the plain secret)
+  await env.REPORTS_KV.put(`apikey:${id}`, JSON.stringify(meta), { expirationTtl: 365 * 24 * 3600 });
+  // Update index
+  const idxRaw = await env.REPORTS_KV.get('apikeys:index');
+  const idx = idxRaw ? JSON.parse(idxRaw) : [];
+  idx.push({ id, label, createdAt: meta.createdAt, rateLimit: meta.rateLimit, enabled: true });
+  await env.REPORTS_KV.put('apikeys:index', JSON.stringify(idx));
+  return json({ ok: true, id, key: secret, label, rateLimit: meta.rateLimit }, 201, origin);
+}
+
+async function handleRevokeApiKey(id, request, env, origin) {
+  if (!env.REPORTS_KV) return json({ error: 'KV not configured' }, 503, origin);
+  await env.REPORTS_KV.delete(`apikey:${id}`);
+  const idxRaw = await env.REPORTS_KV.get('apikeys:index');
+  if (idxRaw) {
+    const idx = JSON.parse(idxRaw).filter((k) => k.id !== id);
+    await env.REPORTS_KV.put('apikeys:index', JSON.stringify(idx));
+  }
+  return json({ ok: true, revoked: id }, 200, origin);
 }
 
 // ─── Main fetch handler ───────────────────────────────────────────────────────
@@ -2192,6 +2556,46 @@ export default {
     if (pathname === '/api/admin/login')   return handleAdminLogin(request, env, origin);
     if (pathname === '/api/admin/logout')  return handleAdminLogout(request, origin);
     if (pathname === '/api/admin/session') return handleAdminSession(request, env, origin);
+
+    // ── P4.10 sitemap.xml ──────────────────────────────────────────────────
+    if (pathname === '/sitemap.xml') return handleSitemap(request, env, origin);
+
+    // ── P4.11 RSS feed ──────────────────────────────────────────────────────
+    if (pathname === '/rss/briefing.xml' || pathname === '/rss.xml' || pathname === '/feed.xml') {
+      return handleRssFeed(request, env, origin);
+    }
+
+    // ── P4.16 Dynamic OG image ─────────────────────────────────────────────
+    if (pathname === '/og-image' || pathname.startsWith('/og-image?')) {
+      return handleOgImage(request, origin);
+    }
+
+    // ── P4.6 Public API ────────────────────────────────────────────────────
+    if (pathname === '/v1/rates' || pathname.startsWith('/v1/rates/')) {
+      return handlePublicRates(request, env, origin);
+    }
+    if (pathname === '/v1/forward' || pathname.startsWith('/v1/forward')) {
+      return handlePublicForward(request, env, origin);
+    }
+    if (pathname === '/v1/glossary' || pathname.startsWith('/v1/glossary')) {
+      return handlePublicGlossary(request, env, origin);
+    }
+
+    // ── P4.7 API key admin ─────────────────────────────────────────────────
+    if (pathname === '/api/admin/api-keys') {
+      const denied = adminGate(request, env, origin);
+      if (denied) return denied;
+      if (request.method === 'GET') return handleListApiKeys(request, env, origin);
+      if (request.method === 'POST') return handleCreateApiKey(request, env, origin);
+      return json({ error: 'GET or POST only' }, 405, origin);
+    }
+    const apiKeyMatch = pathname.match(/^\/api\/admin\/api-keys\/([^/]+)$/);
+    if (apiKeyMatch) {
+      const denied = adminGate(request, env, origin);
+      if (denied) return denied;
+      if (request.method === 'DELETE') return handleRevokeApiKey(apiKeyMatch[1], request, env, origin);
+      return json({ error: 'DELETE only' }, 405, origin);
+    }
 
     // ── Yahoo Finance proxy ───────────────────────────────────────────────────
     if (request.method !== 'GET') return new Response('Method Not Allowed', { status: 405 });

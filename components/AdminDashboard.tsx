@@ -3,7 +3,7 @@ import {
   Shield, LogOut, Settings, Activity, BarChart2, TrendingUp,
   AlertTriangle, FileText, RefreshCw, Lock, Eye, EyeOff,
   ChevronDown, RotateCcw, Plus, Trash2, CheckCircle, XCircle,
-  ClipboardList, Bot, Send, Search,
+  ClipboardList, Bot, Send, Search, Mail, Key, Link2,
 } from 'lucide-react';
 import { BKAM_CURRENCIES } from '../constants';
 import { useAdmin, DEFAULT_TIER_COMMISSIONS } from '../context/AdminContext';
@@ -12,6 +12,9 @@ import { STANDARD_TENORS } from '../services/forwardEngine';
 import { BlotterEntry, ClientTier, TierConfig, AuditEntry } from '../types';
 import { routeQuery, getAvailableProviders, PROVIDER_LABELS, PROVIDER_COLORS } from '../services/llmRouter';
 import ReportsAdmin from './admin/ReportsAdmin';
+import NewsletterAdmin from './admin/NewsletterAdmin';
+import ApiKeyManagement from './admin/ApiKeyManagement';
+import BacklinkTracker from './admin/BacklinkTracker';
 import CurrencyFlag from './CurrencyFlag';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -1116,7 +1119,7 @@ function ConsultantTab() {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-type AdminTab = 'SYSTEM' | 'RATES' | 'CURVES' | 'FORWARDS' | 'SPREADS' | 'PRICING' | 'ALERTS' | 'BLOTTER' | 'AUDIT' | 'CONSULTANT' | 'REPORTS';
+type AdminTab = 'SYSTEM' | 'RATES' | 'CURVES' | 'FORWARDS' | 'SPREADS' | 'PRICING' | 'ALERTS' | 'BLOTTER' | 'AUDIT' | 'CONSULTANT' | 'REPORTS' | 'NEWSLETTER' | 'APIKEYS' | 'BACKLINKS';
 
 const TABS: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: 'SYSTEM',     label: 'System',     icon: Activity },
@@ -1130,6 +1133,9 @@ const TABS: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: 'AUDIT',      label: 'Audit',      icon: ClipboardList },
   { id: 'CONSULTANT', label: 'Consultant', icon: Bot },
   { id: 'REPORTS',    label: 'Rapports',   icon: FileText },
+  { id: 'NEWSLETTER', label: 'Newsletter', icon: Mail },
+  { id: 'APIKEYS',    label: 'API Keys',   icon: Key },
+  { id: 'BACKLINKS',  label: 'SEO',        icon: Link2 },
 ];
 
 export default function AdminDashboard() {
@@ -1208,7 +1214,10 @@ export default function AdminDashboard() {
           {activeTab === 'BLOTTER'    && <BlotterTab />}
           {activeTab === 'AUDIT'      && <AuditTab />}
           {activeTab === 'CONSULTANT' && <ConsultantTab />}
-          {activeTab === 'REPORTS'    && <ReportsAdmin />}
+           {activeTab === 'REPORTS'    && <ReportsAdmin />}
+           {activeTab === 'NEWSLETTER' && <NewsletterAdmin />}
+           {activeTab === 'APIKEYS'    && <ApiKeyManagement />}
+           {activeTab === 'BACKLINKS'  && <BacklinkTracker />}
         </div>
       </div>
     </div>

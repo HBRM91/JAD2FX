@@ -32,30 +32,62 @@
     <link rel="manifest" href="/manifest.json" />
     <link rel="canonical" href="https://fx.jad2advisory.com" />
 
+    <!-- P4.12 — hreflang for FR/EN/AR multilingual SEO -->
+    <link rel="alternate" hreflang="fr" href="https://fx.jad2advisory.com/" />
+    <link rel="alternate" hreflang="en" href="https://fx.jad2advisory.com/?lang=en" />
+    <link rel="alternate" hreflang="ar" href="https://fx.jad2advisory.com/?lang=ar" />
+    <link rel="alternate" hreflang="x-default" href="https://fx.jad2advisory.com/" />
+
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="preconnect" href="https://api.frankfurter.app" />
     <link rel="dns-prefetch" href="https://api.centralbankofmorocco.ma" />
 
-    <!-- Structured data -->
+    <!-- P4.9 — Schema.org structured data: WebSite + WebApplication + FAQPage + Organization -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "JAD2FX",
-      "url": "https://fx.jad2advisory.com",
-      "description": "Terminal de taux de change indicatifs du dirham marocain (MAD) — données Bank Al-Maghrib. Outil pédagogique de JAD2 Advisory.",
-      "publisher": {
-        "@type": "Organization",
-        "name": "JAD2 Advisory",
-        "url": "https://jad2advisory.com",
-        "address": {
-          "@type": "PostalAddress",
-          "addressLocality": "Casablanca",
-          "addressCountry": "MA"
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "name": "JAD2FX",
+          "alternateName": "JAD2FX — Terminal taux de change MAD",
+          "url": "https://fx.jad2advisory.com",
+          "description": "Terminal pédagogique des taux de change du dirham marocain (MAD) — 24 devises, simulations forward/swap, conformité OC.",
+          "inLanguage": ["fr-FR", "en-US", "ar-MA"],
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": "https://fx.jad2advisory.com/?q={search_term_string}",
+            "query-input": "required name=search_term_string"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "JAD2 Advisory",
+            "url": "https://jad2advisory.com",
+            "logo": { "@type": "ImageObject", "url": "https://fx.jad2advisory.com/jad2-logo.svg" },
+            "address": { "@type": "PostalAddress", "addressLocality": "Casablanca", "addressCountry": "MA" }
+          }
+        },
+        {
+          "@type": "WebApplication",
+          "name": "JAD2FX",
+          "url": "https://fx.jad2advisory.com",
+          "applicationCategory": "FinanceApplication",
+          "operatingSystem": "Any (web browser)",
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "MAD" },
+          "featureList": "Taux de change 24 devises, Simulateur forward CIP, Swap de change, Diagnostic OC 01/2024, Morning Briefing IA"
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {"@type": "Question", "name": "Les taux JAD2FX sont-ils officiels ?", "acceptedAnswer": {"@type": "Answer", "text": "Non. Outil pédagogique uniquement. Pour vos opérations, contactez votre banque agréée par Bank Al-Maghrib."}},
+            {"@type": "Question", "name": "JAD2FX exécute-t-il des transactions de change ?", "acceptedAnswer": {"@type": "Answer", "text": "Non. JAD2FX est un outil d'information. Il ne fournit pas de conseil en investissement et n'exécute aucune transaction."}},
+            {"@type": "Question", "name": "Comment fonctionne la simulation de forward ?", "acceptedAnswer": {"@type": "Answer", "text": "Formule CIP (Covered Interest Parity) avec courbes MONIA, EUR, USD, GBP, JPY. Pédagogique — peut différer du cours ferme de votre banque."}},
+            {"@type": "Question", "name": "Qu'est-ce que la Circ. OC 01/2024 ?", "acceptedAnswer": {"@type": "Answer", "text": "Circulaire Office des Changes 01/2024 : forwards, FX swaps, options vanilla autorisés. Options exotiques et produits à levier interdits."}}
+          ]
         }
-      }
+      ]
     }
     </script>
 
