@@ -7,7 +7,7 @@ export async function onRequestGet(context) {
   const workerBase = context.env.CORS_PROXY_URL
     || 'https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev';
 
-    const targets = ['/sitemap.xml', '/rss/briefing.xml', '/rss.xml', '/feed.xml', '/og-image', '/press/guide-oc-2024', '/press/forward-playbook'];
+    const targets = ['/sitemap.xml', '/rss/briefing.xml', '/rss.xml', '/feed.xml', '/og-image', '/press/guide-oc-2024', '/press/forward-playbook', '/press/quarterly-q2-2026', '/api/leads', '/api/forward', '/api/rates', '/api/og-image'];
   const matched = targets.find((t) => url.pathname === t || url.pathname.startsWith(t + '?') || (t === '/og-image' && url.pathname.startsWith(t + '?')));
 
   if (matched) {

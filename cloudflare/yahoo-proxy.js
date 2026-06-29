@@ -2447,6 +2447,10 @@ async function handleCreateLead(request, env, origin) {
     updatedAt: new Date().toISOString(),
   };
 
+  // Auto-classify status by lead score (P3.10 — wire scoring into pipeline)
+  if (lead.leadScore >= 75) lead.status = 'HOT';
+  else if (lead.leadScore >= 40) lead.status = 'QUALIFIED';
+
   // Save to KV
   if (env.REPORTS_KV) {
     try {
@@ -2487,7 +2491,7 @@ async function handleCreateLead(request, env, origin) {
           from: 'JAD2FX <noreply@jad2advisory.com>',
           to: [contactEmail],
           reply_to: lead.email,
-          subject: `[Lead ${lead.source}] ${lead.name || lead.email} — ${lead.company || 'N/A'}`,
+          subject: `[${lead.leadScore >= 75 ? '🔥 HOT' : 'Lead'} ${lead.source}] ${lead.name || lead.email} — ${lead.company || 'N/A'}`,
           html,
         }),
       }).catch((e) => console.error('Resend send failed:', e));
@@ -2496,7 +2500,7 @@ async function handleCreateLead(request, env, origin) {
     }
   }
 
-  return json({ ok: true, id: lead.id, message: 'Lead enregistré' }, 201, origin);
+  return json({ ok: true, id: lead.id, status: lead.status, message: 'Lead enregistré' }, 201, origin);
 }
 
 function renderLeadEmailHtml(lead) {
@@ -2656,22 +2660,35 @@ function escapeHtml(s) {
 // for a P0-MVP, "Print to PDF" via the browser is the cleanest path.
 function handleLeadMagnetPdf(pathname, origin) {
   const isOC = pathname === '/press/guide-oc-2024';
+  const isForward = pathname === '/press/forward-playbook';
+  const isQuarterly = pathname === '/press/quarterly-q2-2026';
   const title = isOC
     ? 'Guide Opérationnel — Circ. OC 01/2024'
-    : 'Forward Pricing Playbook — Maroc';
+    : isForward
+    ? 'Forward Pricing Playbook — Maroc'
+    : 'MAD Quarterly Outlook — Q2 2026';
   const subtitle = isOC
     ? 'Comment mettre votre entreprise en conformité en 90 jours'
-    : 'Maîtriser la simulation de forward EUR/MAD comme un pro';
+    : isForward
+    ? 'Maîtriser la simulation de forward EUR/MAD comme un pro'
+    : 'Analyse trimestrielle du panier 60/40, des spreads G10, et des implications sectorielles';
   const sections = isOC ? [
     { h: '1. Périmètre de la Circ. OC 01/2024', b: `La Circ. OC 01/2024 encadre l'utilisation des instruments de couverture de change par les entreprises résidentes marocaines. Elle s'applique aux personnes morales résidentes dont le CA annuel est supérieur à 500 000 MAD, ou dont l'exposition mensuelle au change dépasse 500 000 MAD. Les personnes physiques non-résidentes et les entreprises en-dessous de ces seuils ne sont pas soumises à l'obligation de déclaration.` },
     { h: '2. Instruments autorisés', b: `Instruments financiers de couverture autorisés :\n- Contrats à terme fermes (forward) sur devises cotées par BAM\n- Swaps de change (FX swap)\n- Options vanilles d'achat et de vente (calls et puts)\n- Combinaisons d'options vanilles (risk reversals, straddles, strangles)\n\nInstruments INTERDITS :\n- Options exotiques (barrier, knock-out, lookback, digital)\n- Options binaires\n- Produits à effet de levier excessif\n- CFD (Contracts for Difference) sur forex` },
     { h: '3. Obligations déclaratives', b: `Reporting mensuel obligatoire pour les entreprises dépassant les seuils. Contenu :\n1. Encours total par devise\n2. Échéances par mois (max 12 mois)\n3. Contreparties bancaires\n4. Justification économique de chaque couverture\n5. Écarts de valorisation (MTM) par instrument\n\nDélai : 20 du mois suivant.\nSanction : 0,5% du montant non déclaré par jour de retard.` },
     { h: '4. Plan d\'action 90 jours', b: `Semaine 1-2 : Cartographier toutes les expositions (commerciale, économique, bilan)\nSemaine 3-4 : Inventorier les instruments existants vs Circ. 01/2024\nSemaine 5-8 : Former l'équipe finance (JAD2 Advisory propose une formation 2 jours)\nSemaine 9-10 : Mettre en place le reporting mensuel automatisé\nSemaine 11-12 : Audit interne + soumission OC\nSemaine 13 : Validation conformité\n\nContact : JAD2 Advisory · contact@jad2advisory.com · +212 5 22 XX XX XX` },
-  ] : [
+  ] : isForward ? [
     { h: '1. La formule CIP', b: 'F = S × (1 + r_d × T) / (1 + r_f × T)\n\nOù S = spot, r_d = taux domestique, r_f = taux étranger, T = tenor en années. Pour MAD, on prend le Monia ou la courbe BDT.' },
     { h: '2. Cas pratique: importateur 8M EUR/an', b: 'Vous importez 8M EUR/an de composants. Votre marge actuelle est 4.2% (338K EUR). Sans couverture, chaque mouvement de 1% EUR/MAD vous coûte 80K EUR. Forward 12M au pair: 0% de prime mais exposition totale. Forward 3M rollé 4 fois: 0.4% de prime (32K EUR) avec exposition limitée. Conclusion: forward rollé = sweet spot.' },
     { h: '3. Outils JAD2FX', b: 'Calculateur forward (CIP + XCS + bid/ask)\nSimulateur trimestriel (4 stratégies)\nDiagnostic FX PME (5 questions)\nDiagnostic OC compliance\nSurface de volatilité\nGlossaire 60+ termes FX/MAD/OC' },
     { h: '4. Check-list 5 min avant chaque fixing', b: '1. Encours de la semaine écoulée (factures émises, en cours)\n2. Forward roll cette semaine (sinon coût daily-forward)\n3. Événements ECO majeurs à venir (NFP, CPI, BCE, Fed)\n4. Volatilité implicite EUR/MAD (smile ATM)\n5. Calendrier BKAM (prochain fixing, fermetures MIC)' },
+  ] : [
+    { h: '1. Macro Backdrop — Les Trois Piliers du MAD', b: 'Analyse des trois piliers structurels du dirham :\n(1) Pilier EUR (60% panier) — dynamique BCE/EUR/USD overnight\n(2) Pilier USD (40% panier) — trajectoire Fed, USD Index, données macro US\n(3) Pilier Maroc — BKAM, réserves, OCP/recettes phosphates, transferts MRE, facture pétrolière' },
+    { h: '2. Configuration Technique du MAD', b: 'Position exacte dans la bande ±5% BKAM (% d\'utilisation et zone). Dérive du cours vs parité panier théorique K=10.49 (en bps). Formule : USD/MAD central = K / (0.60×EUR/USD + 0.40). Niveaux techniques indicatifs : support/résistance naturels.' },
+    { h: '3. Banques Centrales — Signaux de Politique Monétaire', b: 'BCE : taux 2.25%, 9 baisses depuis 2023. Fed : 4.25-4.50%, statu quo attendu. BKAM : 2.75%, prochaine décision juillet 2026. Calendrier des prochains événements macro (J-X) : FOMC 30 juillet, BCE 31 juillet, BKAM Council 23 septembre 2026.' },
+    { h: '4. Thèmes Structurels de la Semaine', b: '1. Dérive MAD Q2 2026 : -296 bps (vs -45 bps 2025)\n2. Réserves de change BAM : 4.2 mois d\'imports (cible FMI : 5+)\n3. Compte courant : -3.4% du PIB\n4. Inflation MA : 2.1% YoY (vs BCE 1.9%, Fed 2.7%)\n5. Stress test : scénario EUR/USD 1.05 → MAD -0.6%' },
+    { h: '5. Contexte Corporate — Lecture des Flux (Éducatif)', b: 'IMPORTATEURS : contexte EUR/MAD et USD/MAD pour la lecture de leurs flux d\'approvisionnement.\nEXPORTATEURS : dynamique MAD pour l\'anticipation des recettes en devises.\nOCP/PHOSPHATES : impact prix phosphates sur flux USD.\nÉNERGIE : facture pétrolière et pression sur le compte courant.\n\nPour toute opération, adressez-vous à votre banque domiciliataire agréée BAM.' },
+    { h: '6. Moniteur de Risques Q2 2026', b: '1. Dérive basket -296 bps (CRITIQUE)\n2. Réserves change 4.2 mois (WARNING)\n3. Pression OCP sur flux USD (STABLE)\n4. Inflation core MA 1.8% (NEUTRE)\n5. Compte courant -3.4% PIB (WARNING)\n6. EUR/USD 1.085 vs panier 1.082 (NEUTRE)' },
   ];
 
   const html = `<!DOCTYPE html>
@@ -2706,7 +2723,9 @@ ${sections.map((s) => `<h2>${escapeHtml(s.h)}</h2><p>${escapeHtml(s.b).replace(/
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'X-Content-Type-Options': 'nosniff',
-      'Content-Disposition': `inline; filename="${pathname.split('/').pop()}.html"`,
+      'Content-Disposition': isQuarterly
+        ? `attachment; filename="jad2fx-quarterly-outlook-q2-2026.html"`
+        : `inline; filename="${pathname.split('/').pop()}.html"`,
       ...corsHeaders(origin),
     },
   });
@@ -2922,7 +2941,7 @@ export default {
       return handleNewsletterSend(request, env, origin);
     }
     // ── P3.1 / P3.3 Lead magnet PDFs (HTML print-ready) ─────────────────
-    if (pathname === '/press/guide-oc-2024' || pathname === '/press/forward-playbook') {
+    if (pathname === '/press/guide-oc-2024' || pathname === '/press/forward-playbook' || pathname === '/press/quarterly-q2-2026') {
       return handleLeadMagnetPdf(pathname, origin);
     }
 

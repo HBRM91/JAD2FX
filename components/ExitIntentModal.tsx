@@ -6,6 +6,7 @@
 import { useEffect, useState } from 'react';
 import { X, Download, Gift, Mail } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
+import PdfGate from './PdfGate';
 
 const STORAGE_KEY = 'jad2fx_exit_intent_v1';
 const SHOW_DELAY_MS = 30_000; // 30s minimum on site before triggering
@@ -63,6 +64,9 @@ export default function ExitIntentModal() {
     };
   }, []);
 
+  // P3.2 — PDF gate state
+  const [showPdfGate, setShowPdfGate] = useState(false);
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim()) return;
@@ -81,12 +85,25 @@ export default function ExitIntentModal() {
     }
   };
 
-  if (!show) return null;
+  if (!show && !showPdfGate) return null;
+
+  if (!show && showPdfGate) {
+    return (
+      <PdfGate
+        title="Guide Forward de Change"
+        description="25 pages sur le pricing CIP, le choix de la maturité, le roll-over, et les cas pratiques par secteur (PME)."
+        pdfUrl="/press/forward-playbook"
+        filename="jad2fx-forward-playbook.html"
+        source="exit_intent"
+        onClose={() => setShowPdfGate(false)}
+      />
+    );
+  }
 
   return (
     <div
-      className="fixed inset-0 z-[9997] flex items-center justify-center p-4 bg-navy-950/80 backdrop-blur-sm"
-      onClick={(e) => { if (e.target === e.currentTarget) setShow(false); }}
+      className="fixed inset-0 z-[9997] flex items-center justify-center p-4 bg-navy-950/85 backdrop-blur-sm"
+      onClick={(e) => { if (e.target === e.currentTarget) close(); }}
     >
       <div className="bg-navy-900 border-2 border-gold-500/50 rounded-2xl shadow-2xl shadow-gold-900/30 max-w-md w-full overflow-hidden">
         <div className="px-5 py-3 bg-gradient-to-r from-gold-500/15 to-transparent border-b border-navy-800 flex items-center justify-between">
@@ -101,15 +118,21 @@ export default function ExitIntentModal() {
 
         {submitted ? (
           <div className="p-6 text-center">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500/40 flex items-center justify-center mx-auto mb-3">
+            <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500/40 flex items-center justify-center mx-auto">
               <Mail size={28} className="text-emerald-400" />
             </div>
             <h2 className="text-lg font-bold text-white mb-2">Merci ✓</h2>
             <p className="text-[12px] text-slate-300 leading-relaxed">
               Le guide vous a été envoyé par email. Vérifiez votre boîte mail (et le spam).
             </p>
-            <button onClick={() => setShow(false)} className="mt-4 text-[11px] text-gold-400 hover:text-gold-300">
-              Fermer →
+            <button
+              onClick={() => setShowPdfGate(true)}
+              className="mt-4 flex items-center gap-1 mx-auto text-[11px] font-bold text-gold-400 hover:text-gold-300"
+            >
+              <Download size={12} /> Télécharger le PDF maintenant →
+            </button>
+            <button onClick={close} className="mt-2 text-[11px] text-slate-500 hover:text-slate-300">
+              Fermer
             </button>
           </div>
         ) : (
@@ -117,9 +140,9 @@ export default function ExitIntentModal() {
             <h2 className="text-base font-serif font-bold text-white leading-tight">
               Recevez notre <span className="text-gold-400">Guide Forward de Change</span> (PDF, 25p)
             </h2>
-            <p className="text-[11px] text-slate-300 leading-relaxed">
-              Tout ce qu'un trésorier marocain doit savoir : CIP, conventions OC 01/2024, cas pratiques par secteur.
-              Pas de spam, désabonnement en 1 clic.
+            <p className="text-[12px] text-slate-300 leading-relaxed">
+              Notre équipe FX est disponible pour répondre à vos questions en direct.
+              Posez votre question par écrit — on revient vers vous dans l'heure.
             </p>
             <input
               type="email"
@@ -127,7 +150,7 @@ export default function ExitIntentModal() {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="email@entreprise.ma"
               required
-              className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2 text-[13px] text-slate-200 placeholder-slate-500 focus:outline-none focus:border-gold-500"
+              className="w-full bg-navy-950 border border-navy-700 rounded px-3 py-2 text-[13px] text-slate-200 placeholder-slate-500 focus:outline-none focus:border-gold-500"
             />
             <button
               type="submit"

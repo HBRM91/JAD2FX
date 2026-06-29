@@ -21,9 +21,11 @@ import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine, Area, ComposedChart,
 } from 'recharts';
-import { AlertTriangle, TrendingUp, TrendingDown, Minus, RefreshCw, Info } from 'lucide-react';
+import { AlertTriangle, TrendingUp, TrendingDown, Minus, RefreshCw, Info, Printer } from 'lucide-react';
 import { DEFAULT_BASKET_CONFIG } from '../constants';
 import { useAdmin } from '../context/AdminContext';
+import FixingCalendar from './FixingCalendar';
+import ProvenanceChip from './ProvenanceChip';
 import { computeDriftModel, DriftRegression, DriftPoint } from '../services/driftModel';
 import { fetchDriftHistory, fetchBandConfig, driftStats, DriftHistoryPoint, BandAlert } from '../services/driftHistory';
 import CurrencyFlag from './CurrencyFlag';
@@ -581,6 +583,22 @@ export default function BkamBandsVisualizer({ compact = false }: { compact?: boo
             )}
           </>
         )}
+
+        {/* P1.19 — Fixing calendar */}
+        <FixingCalendar />
+
+        {/* P2.24 — Print CTA */}
+        <div className="flex items-center justify-end gap-2">
+          <button
+            onClick={() => {
+              if (typeof window !== 'undefined') window.print();
+            }}
+            className="text-[10px] flex items-center gap-1 px-2 py-1 text-gold-400 hover:text-gold-300 transition-colors"
+          >
+            <Printer size={11} /> Imprimer / PDF
+          </button>
+          <ProvenanceChip rate={{ currency: 'EUR', source: 'CALCULATED', timestamp: new Date().toISOString() } as any} />
+        </div>
 
         {/* Compliance note */}
         <div className="flex items-start gap-2 bg-navy-950/50 border border-navy-800/60 rounded-lg px-3 py-2">

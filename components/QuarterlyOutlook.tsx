@@ -91,7 +91,7 @@ export default function QuarterlyOutlook() {
           >
             <Download size={12} /> Ouvrir Q2 2026 (Imprimer → PDF)
           </a>
-          <span className="text-[10px] text-slate-500">ou Ctrl+P → Enregistrer en PDF</span>
+          <span className="text-[10px] text-slate-500">Ctrl+P → Enregistrer en PDF</span>
         </div>
       </div>
 

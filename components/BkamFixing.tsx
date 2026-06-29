@@ -3,6 +3,7 @@ import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine,
 } from 'recharts';
+import { SkeletonTable } from './Skeleton';
 import { FixingDayRow } from '../types';
 import { BKAM_CURRENCIES } from '../constants';
 import { fetchFixingHistory, EXTRA_CURRENCY_META, formatDateLabel } from '../services/bkamFixing';
@@ -376,6 +377,9 @@ export default function BkamFixing() {
               </div>
             </div>
             <div className="overflow-x-auto">
+              {loading && rows.length === 0 ? (
+                <div className="p-4"><SkeletonTable rows={6} cols={7} /></div>
+              ) : (
               <table className="w-full text-xs min-w-[600px]">
                 <thead>
                   <tr className="bg-navy-800/40 text-[9px] text-slate-500 uppercase tracking-wider border-b border-navy-800">
@@ -476,6 +480,7 @@ export default function BkamFixing() {
                   })}
                 </tbody>
               </table>
+              )}
             </div>
             <div className="px-5 py-2.5 border-t border-navy-800 flex flex-wrap items-center gap-3">
               <p className="text-[9px] text-slate-600">

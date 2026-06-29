@@ -11,12 +11,12 @@ import { DriftRegression } from '../services/driftModel';
  * derived from the historical drift regression.
  */
 export default function FixingFanChart({ regression, currentSpot, daysAhead = 10 }: {
-  regression: DriftRegression;
+  regression: DriftRegression | null;
   currentSpot: number;
   daysAhead?: number;
 }) {
   const fanData = useMemo(() => {
-    if (!regression.points.length) return [];
+    if (!regression || regression.points.length === 0) return [];
     // Use last drift value as starting point and the regression beta to trend forward
     const lastDrift = regression.latestDriftBps;
     const stdErrBps = regression.stdErrBps;
@@ -54,7 +54,9 @@ export default function FixingFanChart({ regression, currentSpot, daysAhead = 10
         <TrendingUp size={14} className="text-gold-500" />
         <h3 className="text-sm font-bold text-white uppercase tracking-wider">Fan Chart Fixing — {daysAhead}j</h3>
         <span className="text-[10px] text-slate-500 ml-auto">
-          β = {regression.beta > 0 ? '+' : ''}{regression.beta.toFixed(2)} bps/j · σ = {regression.stdErrBps.toFixed(1)} bps
+          {regression
+            ? `β = ${regression.beta > 0 ? '+' : ''}${regression.beta.toFixed(2)} bps/j · σ = ${regression.stdErrBps.toFixed(1)} bps`
+            : 'Modèle de dérive indisponible (cron non exécuté)'}
         </span>
       </div>
 

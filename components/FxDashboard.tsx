@@ -6,6 +6,9 @@ import { fetchAllMadRates, generateIntradayData } from '../services/fxRates';
 import { isJumuahReducedLiquidity } from '../services/holidays';
 import { Download, RefreshCw, Search, ArrowUpDown, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import CurrencyFlag from './CurrencyFlag';
+import ProvenanceChip from './ProvenanceChip';
+import FixingFanChart from './FixingFanChart';
+import FixingCalendar from './FixingCalendar';
 import { useI18n } from '../context/I18nContext';
 
 const SPREAD_TOOLTIP = "Marges simulées sur base des moyennes mondiales marchés émergents. Sources : Banque Mondiale (Remittance Prices 2024) / BIS (Triennial Survey 2022). Non contractuelles.";
@@ -386,6 +389,12 @@ const FxDashboard: React.FC = () => {
               {isLoading && rates.length > 0 && <RefreshCw size={12} className="animate-spin text-navy-500" />}
             </div>
             {renderRatesTable()}
+          </div>
+
+          {/* P1.7 + P1.19 — Auxiliary widgets: fan chart + fixing calendar */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+            <FixingFanChart regression={null} currentSpot={selectedRate?.mid || 10.85} />
+            <FixingCalendar />
           </div>
 
           {/* Side panel */}

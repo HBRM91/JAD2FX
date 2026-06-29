@@ -3,6 +3,7 @@ import { BKAM_CURRENCIES, GULF_USD_RATES } from '../constants';
 import { fetchBkamVirement, virementToMadPerUnit } from './bkamApi';
 import { previousBusinessDayISO } from './holidays';
 import { fetchIntradayTicks, IntradayResult, getYahooSymbol } from './intraday';
+import { assertBidAskInvariant } from '../utils/pricingInvariant';
 import { LruCache } from '../utils/lruCache';
 
 export { fetchIntradayTicks, getYahooSymbol };
@@ -376,6 +377,16 @@ export async function fetchAllMadRates(config: BasketConfig, corsProxyUrl?: stri
 
         const filteredMid = sanityFilter(currency.code, displayMid);
         const spread = applySmartSpread(filteredMid, currency.code, config, dealerSpreads);
+
+        // P1.20 — Invariant guard (asserts and clamps if violated, no-op in dev)
+        const invariant = assertBidAskInvariant(
+          spread.virementBuy, +filteredMid.toFixed(4), spread.virementSell,
+        );
+        // invariant is {bid, mid, ask} — only override if clamped
+        if (invariant.bid !== spread.virementBuy || invariant.ask !== spread.virementSell) {
+          spread.virementBuy = invariant.bid;
+          spread.virementSell = invariant.ask;
+        }
 
         rates.push({
           currency: currency.code,
