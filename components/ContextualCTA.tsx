@@ -7,13 +7,15 @@
 import { useState, useEffect } from 'react';
 import { ArrowRight, Sparkles, Clock, Award, X, Flame } from 'lucide-react';
 import { getLeadScore, getRecommendedCta, trackEvent } from '../utils/leadScoring';
+import type { ViewState } from '../types';
 
 interface Props {
   variant?: 'banner' | 'inline' | 'corner';
   pageKey?: string;
+  navTo?: (v: ViewState) => void;
 }
 
-export default function ContextualCTA({ variant = 'banner', pageKey = 'home' }: Props) {
+export default function ContextualCTA({ variant = 'banner', pageKey = 'home', navTo }: Props) {
   const [state, setState] = useState(() => getLeadScore());
   const [dismissed, setDismissed] = useState(false);
 
@@ -30,6 +32,16 @@ export default function ContextualCTA({ variant = 'banner', pageKey = 'home' }: 
 
   if (dismissed && variant === 'corner') return null;
   if (state.score < 5 && variant === 'inline') return null;
+
+  // P0-3 FIX: replace dead `window.location.hash` (no listener reads it)
+  // and unused CustomEvents (no listener subscribed) with real SPA navigation.
+  const handleCtaClick = () => {
+    trackEvent('contact', `${variant}_cta_${cta}`);
+    if (cta === 'AUDIT' && navTo) navTo('AUDIT_LANDING');
+    else if (cta === 'NEWSLETTER' && navTo) navTo('RESEARCH');
+    else if (cta === 'TOOLS' && navTo) navTo('DASHBOARD');
+    else if (cta === 'CONTACT' && navTo) navTo('CONTACT');
+  };
 
   const cta = getRecommendedCta(state);
   const isBurning = state.level === 'BURNING' || state.level === 'HOT';
@@ -79,12 +91,7 @@ export default function ContextualCTA({ variant = 'banner', pageKey = 'home' }: 
             <p className="text-[11px] text-slate-400">{msg.sub}</p>
           </div>
           <button
-            onClick={() => {
-              trackEvent('contact', `cta_${cta}`);
-              if (cta === 'AUDIT') window.location.hash = 'audit-gratuit';
-              else if (cta === 'CONTACT') window.dispatchEvent(new CustomEvent('jad2:open-contact'));
-              else if (cta === 'NEWSLETTER') window.dispatchEvent(new CustomEvent('jad2:open-newsletter'));
-            }}
+            onClick={handleCtaClick}
             className={`flex items-center gap-1.5 px-4 py-2 bg-${msg.color}-500 text-navy-950 text-[12px] font-bold rounded-lg hover:opacity-90 transition-opacity`}
           >
             {msg.cta} <ArrowRight size={12} />
@@ -108,11 +115,7 @@ export default function ContextualCTA({ variant = 'banner', pageKey = 'home' }: 
           <p className="text-[11px] text-slate-500 mb-0.5 flex items-center gap-1">{state.level === 'BURNING' ? (<><Flame size={11} className="text-amber-400" /> Vous y êtes presque</>) : 'Pendant que vous explorez...'}</p>
           <p className="text-[12px] font-bold text-white mb-1.5 leading-tight pr-3">{msg.title}</p>
           <button
-            onClick={() => {
-              trackEvent('contact', `corner_cta_${cta}`);
-              if (cta === 'AUDIT') window.location.hash = 'audit-gratuit';
-              else if (cta === 'CONTACT') window.dispatchEvent(new CustomEvent('jad2:open-contact'));
-            }}
+            onClick={handleCtaClick}
             className="w-full text-[11px] font-bold text-gold-400 hover:text-gold-300 transition-colors flex items-center justify-center gap-1"
           >
             {msg.cta} <ArrowRight size={11} />

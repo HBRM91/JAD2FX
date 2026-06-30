@@ -297,7 +297,16 @@ function PrintQuoteModal({ quote, currency, tenor, notional, direction, settleme
                     {locale === 'en' ? '15min with expert →' : '15 min avec un expert →'}
                   </button>
                   <button
-                    onClick={() => { if (typeof window !== 'undefined') window.location.hash = 'audit-gratuit'; }}
+                    onClick={() => {
+                      // P0-3 FIX: replace dead hash. Dispatch a custom event that
+                      // App.tsx catches and routes via the real navTo.
+                      if (typeof window !== 'undefined') {
+                        const url = new URL(window.location.href);
+                        url.searchParams.set('view', 'AUDIT_LANDING');
+                        window.history.pushState(null, '', url.toString());
+                        window.dispatchEvent(new PopStateEvent('popstate'));
+                      }
+                    }}
                     className="text-[10px] font-bold px-3 py-1.5 border border-navy-600 text-slate-300 rounded hover:border-gold-500/50"
                   >
                     {locale === 'en' ? 'Free 30min audit' : 'Audit 30 min gratuit'}

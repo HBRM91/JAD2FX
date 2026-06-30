@@ -1,17 +1,17 @@
-/**
- * Cloudflare Worker — JAD2FX Multi-source API Proxy
+﻿/**
+ * Cloudflare Worker â€” JAD2FX Multi-source API Proxy
  *
  * Routes:
- *   /{encoded-yahoo-url}            → Yahoo Finance (no auth)
- *   /bkam/{path}?{qs}               → BKAM FX API   (BKAM_FX_KEY secret)
- *   /bkam-bdt/{path}?{qs}           → BKAM BDT API  (BKAM_MONIA_KEY secret)
- *   POST /api/tavily/search         → Tavily web search (TAVILY_KEY secret)
- *   POST /api/llm/chat              → LLM proxy: Groq → Gemini fallback (no client-side keys)
- *   GET  /api/reports/published     → Current published report (public)
- *   GET  /api/reports               → List all reports (admin auth)
- *   POST /api/reports               → Save report draft (admin auth)
- *   POST /api/reports/:id/publish   → Publish a report (admin auth)
- *   DELETE /api/reports/:id         → Delete a report (admin auth)
+ *   /{encoded-yahoo-url}            â†’ Yahoo Finance (no auth)
+ *   /bkam/{path}?{qs}               â†’ BKAM FX API   (BKAM_FX_KEY secret)
+ *   /bkam-bdt/{path}?{qs}           â†’ BKAM BDT API  (BKAM_MONIA_KEY secret)
+ *   POST /api/tavily/search         â†’ Tavily web search (TAVILY_KEY secret)
+ *   POST /api/llm/chat              â†’ LLM proxy: Groq â†’ Gemini fallback (no client-side keys)
+ *   GET  /api/reports/published     â†’ Current published report (public)
+ *   GET  /api/reports               â†’ List all reports (admin auth)
+ *   POST /api/reports               â†’ Save report draft (admin auth)
+ *   POST /api/reports/:id/publish   â†’ Publish a report (admin auth)
+ *   DELETE /api/reports/:id         â†’ Delete a report (admin auth)
  *
  * Required Worker secrets (wrangler secret put <NAME>):
  *   BKAM_FX_KEY, BKAM_MONIA_KEY, TAVILY_KEY, ADMIN_PASSCODE, GROQ_API_KEY, GEMINI_API_KEY
@@ -53,12 +53,12 @@ function json(data, status = 200, origin = '') {
   });
 }
 
-// ─── Report ID validation ─────────────────────────────────────────────────────
+// â”€â”€â”€ Report ID validation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function isValidReportId(id) {
   return typeof id === 'string' && /^rpt-[0-9]{1,20}$/.test(id);
 }
 
-// ─── Safe body reader with size limit ────────────────────────────────────────
+// â”€â”€â”€ Safe body reader with size limit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function readBodySafe(request) {
   if (!request.body) return null;
   const reader = request.body.getReader();
@@ -84,7 +84,7 @@ async function readBodySafe(request) {
   return new TextDecoder().decode(all);
 }
 
-// ─── Simple in-memory admin rate limiter (60 req / min per IP) ───────────────
+// â”€â”€â”€ Simple in-memory admin rate limiter (60 req / min per IP) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const _adminRateLimit = new Map();
 function checkAdminRateLimit(ip) {
   const now = Date.now();
@@ -100,7 +100,7 @@ function checkAdminRateLimit(ip) {
   return entry.count <= 60;
 }
 
-// ─── Admin auth check ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Admin auth check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function isAdmin(request, env) {
   if (!env.ADMIN_PASSCODE) return false;
   const auth = request.headers.get('Authorization') ?? '';
@@ -108,21 +108,25 @@ function isAdmin(request, env) {
   return token === env.ADMIN_PASSCODE;
 }
 
-// ─── Admin auth + rate limit gate ────────────────────────────────────────────
-function adminGate(request, env, origin) {
+// â”€â”€â”€ Admin auth + rate limit gate â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// P0-1 FIX: honor the session cookie set by /api/admin/login as a fallback to
+// the Bearer token. Without this, every admin sub-panel (Leads, Reports,
+// Newsletter, ApiKeys, Backlinks) returns 401 after a real cookie login.
+async function adminGate(request, env, origin) {
   const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
   if (!checkAdminRateLimit(ip)) return json({ error: 'Too many requests' }, 429, origin);
-  if (!isAdmin(request, env)) return json({ error: 'Unauthorized' }, 401, origin);
-  return null; // allowed
+  if (isAdmin(request, env)) return null; // Bearer token path
+  if (await verifySessionCookie(request, env)) return null; // Session cookie path
+  return json({ error: 'Unauthorized' }, 401, origin);
 }
 
-// ─── BKAM proxy ───────────────────────────────────────────────────────────────
+// â”€â”€â”€ BKAM proxy â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function handleBkam(bkamPath, queryString, apiKey, origin) {
   if (!apiKey) return json({ error: 'BKAM key not configured' }, 503, origin);
   const qs = queryString ? `?${queryString}` : '';
   const targetUrl = `${BKAM_BASE}/${bkamPath}${qs}`;
 
-  // ── Cloudflare Cache API — edge caching for BKAM rate responses ───────────
+  // â”€â”€ Cloudflare Cache API â€” edge caching for BKAM rate responses â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Reduces upstream API calls by ~95%. BKAM rates update at 12:30/16:15 Casablanca.
   // 20-min TTL safely serves cached rates between fixings without staleness risk.
   const cacheKey = new Request(`https://cache.bkam.internal/${bkamPath}${qs}`, { method: 'GET' });
@@ -159,9 +163,9 @@ async function handleBkam(bkamPath, queryString, apiKey, origin) {
   }
 }
 
-// ─── Tavily search proxy ──────────────────────────────────────────────────────
+// â”€â”€â”€ Tavily search proxy â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function handleTavilySearch(request, env, origin) {
-  const denied = adminGate(request, env, origin);
+  const denied = await adminGate(request, env, origin);
   if (denied) return denied;
   if (!env.TAVILY_KEY) return json({ error: 'TAVILY_KEY not configured' }, 503, origin);
 
@@ -173,7 +177,7 @@ async function handleTavilySearch(request, env, origin) {
   catch { return json({ error: 'Invalid JSON body' }, 400, origin); }
 
   if (!body.query || typeof body.query !== 'string' || body.query.length > 500) {
-    return json({ error: 'query must be a non-empty string ≤500 chars' }, 400, origin);
+    return json({ error: 'query must be a non-empty string â‰¤500 chars' }, 400, origin);
   }
 
   // Only forward safe, expected fields
@@ -198,7 +202,7 @@ async function handleTavilySearch(request, env, origin) {
   }
 }
 
-// ─── KV Report storage ────────────────────────────────────────────────────────
+// â”€â”€â”€ KV Report storage â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 async function getIndex(kv) {
   try {
@@ -211,7 +215,7 @@ async function setIndex(kv, index) {
   await kv.put('index', JSON.stringify(index));
 }
 
-// GET /api/reports/published — public
+// GET /api/reports/published â€” public
 async function handleGetPublished(env, origin) {
   if (!env.REPORTS_KV) return json({ error: 'KV not configured' }, 503, origin);
   try {
@@ -225,18 +229,18 @@ async function handleGetPublished(env, origin) {
   }
 }
 
-// GET /api/reports — admin: list all
+// GET /api/reports â€” admin: list all
 async function handleListReports(request, env, origin) {
-  const denied = adminGate(request, env, origin);
+  const denied = await adminGate(request, env, origin);
   if (denied) return denied;
   if (!env.REPORTS_KV) return json([], 200, origin);
   const index = await getIndex(env.REPORTS_KV);
   return json(index, 200, origin);
 }
 
-// POST /api/reports — admin: save new report
+// POST /api/reports â€” admin: save new report
 async function handleSaveReport(request, env, origin) {
-  const denied = adminGate(request, env, origin);
+  const denied = await adminGate(request, env, origin);
   if (denied) return denied;
   if (!env.REPORTS_KV) return json({ error: 'KV not configured' }, 503, origin);
 
@@ -264,9 +268,9 @@ async function handleSaveReport(request, env, origin) {
   return json({ ok: true, id }, 200, origin);
 }
 
-// POST /api/reports/:id/publish — admin: publish/unpublish
+// POST /api/reports/:id/publish â€” admin: publish/unpublish
 async function handlePublishReport(reportId, request, env, origin) {
-  const denied = adminGate(request, env, origin);
+  const denied = await adminGate(request, env, origin);
   if (denied) return denied;
   if (!isValidReportId(reportId)) return json({ error: 'Invalid report ID' }, 400, origin);
   if (!env.REPORTS_KV) return json({ error: 'KV not configured' }, 503, origin);
@@ -301,9 +305,9 @@ async function handlePublishReport(reportId, request, env, origin) {
   return json({ ok: true, isPublished: publish }, 200, origin);
 }
 
-// DELETE /api/reports/:id — admin: delete
+// DELETE /api/reports/:id â€” admin: delete
 async function handleDeleteReport(reportId, request, env, origin) {
-  const denied = adminGate(request, env, origin);
+  const denied = await adminGate(request, env, origin);
   if (denied) return denied;
   if (!isValidReportId(reportId)) return json({ error: 'Invalid report ID' }, 400, origin);
   if (!env.REPORTS_KV) return json({ error: 'KV not configured' }, 503, origin);
@@ -318,7 +322,7 @@ async function handleDeleteReport(reportId, request, env, origin) {
   return json({ ok: true }, 200, origin);
 }
 
-// ─── LLM chat proxy (Groq → Gemini fallback, keys never leave server) ────────
+// â”€â”€â”€ LLM chat proxy (Groq â†’ Gemini fallback, keys never leave server) â”€â”€â”€â”€â”€â”€â”€â”€
 
 const _llmRateLimit = new Map();
 function checkLlmRateLimit(ip) {
@@ -336,7 +340,7 @@ function checkLlmRateLimit(ip) {
 
 async function handleLlmChat(request, env, origin) {
   const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
-  if (!checkLlmRateLimit(ip)) return json({ error: 'Rate limit exceeded — try again in a minute' }, 429, origin);
+  if (!checkLlmRateLimit(ip)) return json({ error: 'Rate limit exceeded â€” try again in a minute' }, 429, origin);
 
   const rawBody = await readBodySafe(request);
   if (!rawBody || typeof rawBody !== 'string') return json({ error: 'Empty body' }, 400, origin);
@@ -405,7 +409,7 @@ async function handleLlmChat(request, env, origin) {
   return json({ error: 'All LLM providers unavailable' }, 503, origin);
 }
 
-// ─── Twelve Data EUR cross-rates (Yahoo Finance failover) ─────────────────────
+// â”€â”€â”€ Twelve Data EUR cross-rates (Yahoo Finance failover) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Called when Yahoo Finance is unavailable. Returns EUR-cross rates in the same
 // format as ECB Frankfurter: { rates: { USD: 1.085, GBP: 0.86, ... }, date: "..." }
 const TWELVE_DATA_PAIRS = 'EUR/USD,EUR/GBP,EUR/CHF,EUR/JPY,EUR/CAD,EUR/NOK,EUR/SEK,EUR/DKK,EUR/CNY';
@@ -420,7 +424,7 @@ async function handleTwelveDataRates(env, origin) {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
-    // Normalise to { currency: rate } — same shape as ECB Frankfurter response
+    // Normalise to { currency: rate } â€” same shape as ECB Frankfurter response
     const rates = {};
     for (const [pair, val] of Object.entries(data)) {
       const parts = pair.split('/');
@@ -435,8 +439,8 @@ async function handleTwelveDataRates(env, origin) {
   }
 }
 
-// ─── Anonymous simulation telemetry (NO PII) ─────────────────────────────────
-// POST /api/telemetry/sim — fire-and-forget from client
+// â”€â”€â”€ Anonymous simulation telemetry (NO PII) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// POST /api/telemetry/sim â€” fire-and-forget from client
 async function handleTelemetryPost(request, env, origin) {
   if (!env.REPORTS_KV) return json({ ok: true }, 200, origin);
 
@@ -447,7 +451,7 @@ async function handleTelemetryPost(request, env, origin) {
   try { body = JSON.parse(rawBody); }
   catch { return json({ ok: true }, 200, origin); }
 
-  // Strict allow-list — no free-form strings that could embed PII
+  // Strict allow-list â€” no free-form strings that could embed PII
   const pair = typeof body.pair === 'string' && /^[A-Z]{3}\/MAD$/.test(body.pair) ? body.pair : null;
   const scenario = typeof body.scenario === 'string' ? body.scenario.slice(0, 32).replace(/[^A-Z_]/g, '') : null;
   const gapDays  = typeof body.gapDays === 'number' && Number.isFinite(body.gapDays) ? Math.round(body.gapDays) : null;
@@ -464,9 +468,9 @@ async function handleTelemetryPost(request, env, origin) {
   return json({ ok: true }, 200, origin);
 }
 
-// GET /api/telemetry/sim — admin: aggregate counts for last 7 days
+// GET /api/telemetry/sim â€” admin: aggregate counts for last 7 days
 async function handleTelemetryGet(request, env, origin) {
-  const denied = adminGate(request, env, origin);
+  const denied = await adminGate(request, env, origin);
   if (denied) return denied;
   if (!env.REPORTS_KV) return json({ dates: [] }, 200, origin);
 
@@ -491,8 +495,8 @@ async function handleTelemetryGet(request, env, origin) {
   return json(result, 200, origin);
 }
 
-// ─── Contact form → Resend email ─────────────────────────────────────────────
-// POST /api/contact  — public (rate-limited by IP)
+// â”€â”€â”€ Contact form â†’ Resend email â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// POST /api/contact  â€” public (rate-limited by IP)
 
 const _contactRateLimit = new Map();
 function checkContactRateLimit(ip) {
@@ -507,15 +511,15 @@ function checkContactRateLimit(ip) {
   return entry.count <= 5; // 5 contact submissions per minute per IP
 }
 
-// Allowed service types — no investment advice language
+// Allowed service types â€” no investment advice language
 const ALLOWED_SERVICES = new Set([
-  'Formation', 'Conseil marché', 'Analyse', 'Accompagnement réglementaire',
+  'Formation', 'Conseil marchÃ©', 'Analyse', 'Accompagnement rÃ©glementaire',
   'Automatisation', 'Autre',
 ]);
 
 async function handleContact(request, env, origin) {
   const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
-  if (!checkContactRateLimit(ip)) return json({ error: 'Trop de requêtes — réessayez dans une minute' }, 429, origin);
+  if (!checkContactRateLimit(ip)) return json({ error: 'Trop de requÃªtes â€” rÃ©essayez dans une minute' }, 429, origin);
 
   const rawBody = await readBodySafe(request);
   if (!rawBody || rawBody.error) return json({ error: rawBody?.error ?? 'Corps vide' }, 400, origin);
@@ -530,14 +534,14 @@ async function handleContact(request, env, origin) {
   const service = typeof body.service === 'string' ? body.service.slice(0, 60).trim()  : '';
   const message = typeof body.message === 'string' ? body.message.slice(0, 2000).trim(): '';
 
-  if (!name || name.length < 2)   return json({ error: 'Nom requis (2 caractères minimum)' }, 400, origin);
+  if (!name || name.length < 2)   return json({ error: 'Nom requis (2 caractÃ¨res minimum)' }, 400, origin);
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return json({ error: 'Email invalide' }, 400, origin);
   if (!ALLOWED_SERVICES.has(service)) return json({ error: 'Type de service invalide' }, 400, origin);
 
-  if (!env.RESEND_API_KEY) return json({ error: 'Service email non configuré' }, 503, origin);
+  if (!env.RESEND_API_KEY) return json({ error: 'Service email non configurÃ©' }, 503, origin);
 
   const to = env.CONTACT_EMAIL ?? 'contact@jad2advisory.com';
-  const subject = `[JAD2FX] Nouveau contact — ${service} — ${name}`;
+  const subject = `[JAD2FX] Nouveau contact â€” ${service} â€” ${name}`;
   const html = `
 <h2>Nouveau message JAD2FX</h2>
 <table cellpadding="8" style="border-collapse:collapse;font-family:sans-serif;font-size:14px">
@@ -548,7 +552,7 @@ async function handleContact(request, env, origin) {
   ${message ? `<tr><td style="font-weight:600;color:#555;vertical-align:top">Message</td><td>${escHtml(message).replace(/\n/g, '<br/>')}</td></tr>` : ''}
 </table>
 <hr/>
-<p style="font-size:12px;color:#888">Envoyé depuis JAD2FX · jad2fx.pages.dev</p>
+<p style="font-size:12px;color:#888">EnvoyÃ© depuis JAD2FX Â· jad2fx.pages.dev</p>
 `;
 
   try {
@@ -561,11 +565,11 @@ async function handleContact(request, env, origin) {
     if (!res.ok) {
       const err = await res.text();
       console.error('[Contact] Resend error:', res.status, err);
-      return json({ error: 'Erreur envoi email — réessayez plus tard' }, 502, origin);
+      return json({ error: 'Erreur envoi email â€” rÃ©essayez plus tard' }, 502, origin);
     }
   } catch (err) {
     console.error('[Contact] fetch failed:', err);
-    return json({ error: 'Erreur réseau — réessayez plus tard' }, 502, origin);
+    return json({ error: 'Erreur rÃ©seau â€” rÃ©essayez plus tard' }, 502, origin);
   }
 
   return json({ ok: true }, 200, origin);
@@ -579,7 +583,7 @@ function escHtml(str) {
     .replace(/"/g, '&quot;');
 }
 
-// ─── Newsletter — subscribe / unsubscribe / admin list ───────────────────────
+// â”€â”€â”€ Newsletter â€” subscribe / unsubscribe / admin list â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const _nlRateLimit = new Map();
 function checkNlRateLimit(ip) {
@@ -610,28 +614,28 @@ async function sendWelcomeEmail(email, env, siteUrl) {
   const unsubUrl = `${siteUrl}/api/newsletter/unsubscribe?email=${encodeURIComponent(email)}&token=${nlToken(email)}`;
   const html = buildNewsletterHtml({
     subject: 'Bienvenue au Morning Briefing JAD2FX',
-    preheader: 'Vous recevrez désormais le briefing FX quotidien chaque matin à 09h00 Casablanca.',
-    title: 'Inscription confirmée — Morning Briefing FX',
+    preheader: 'Vous recevrez dÃ©sormais le briefing FX quotidien chaque matin Ã  09h00 Casablanca.',
+    title: 'Inscription confirmÃ©e â€” Morning Briefing FX',
     bodyHtml: `
       <p style="font-size:14px;color:#334155;margin:0 0 16px">Bonjour,</p>
       <p style="font-size:14px;color:#334155;margin:0 0 16px">
-        Vous êtes maintenant inscrit(e) au <strong>Morning Briefing FX quotidien de JAD2FX</strong>.<br/>
-        Chaque matin ouvrable à 09h00 heure de Casablanca, vous recevrez une analyse contextuelle
-        des marchés des changes MAD : données BKAM, dynamiques EUR et USD, et faits macro du jour.
+        Vous Ãªtes maintenant inscrit(e) au <strong>Morning Briefing FX quotidien de JAD2FX</strong>.<br/>
+        Chaque matin ouvrable Ã  09h00 heure de Casablanca, vous recevrez une analyse contextuelle
+        des marchÃ©s des changes MAD : donnÃ©es BKAM, dynamiques EUR et USD, et faits macro du jour.
       </p>
       <p style="font-size:13px;color:#64748b;margin:0 0 16px">
-        <strong>Ce briefing est strictement informatif et éducatif.</strong><br/>
+        <strong>Ce briefing est strictement informatif et Ã©ducatif.</strong><br/>
         Il ne constitue pas un conseil en investissement ni une recommandation de transaction de change.
-        Pour toute opération, adressez-vous à votre établissement bancaire agréé par Bank Al-Maghrib.
+        Pour toute opÃ©ration, adressez-vous Ã  votre Ã©tablissement bancaire agrÃ©Ã© par Bank Al-Maghrib.
       </p>
       <div style="background:#fefce8;border:1px solid #fde68a;border-radius:8px;padding:16px;margin:16px 0">
         <p style="font-size:12px;color:#92400e;margin:0 0 6px;font-weight:600">
-          Vous souhaitez approfondir votre compréhension des marchés de change ?
+          Vous souhaitez approfondir votre comprÃ©hension des marchÃ©s de change ?
         </p>
         <p style="font-size:12px;color:#b45309;margin:0">
-          JAD2 Advisory accompagne les entreprises marocaines dans la formation et la compréhension
-          des dynamiques de change et de la réglementation Office des Changes.
-          <a href="https://jad2advisory.com" style="color:#b45309;font-weight:700">→ jad2advisory.com</a>
+          JAD2 Advisory accompagne les entreprises marocaines dans la formation et la comprÃ©hension
+          des dynamiques de change et de la rÃ©glementation Office des Changes.
+          <a href="https://jad2advisory.com" style="color:#b45309;font-weight:700">â†’ jad2advisory.com</a>
         </p>
       </div>`,
     unsubUrl,
@@ -643,7 +647,7 @@ async function sendWelcomeEmail(email, env, siteUrl) {
     body: JSON.stringify({
       from: 'JAD2FX Morning Briefing <briefing@jad2advisory.com>',
       to: email,
-      subject: '✅ Inscription confirmée — Morning Briefing FX quotidien',
+      subject: 'âœ… Inscription confirmÃ©e â€” Morning Briefing FX quotidien',
       html,
     }),
     signal: AbortSignal.timeout(10_000),
@@ -662,9 +666,9 @@ function buildNewsletterHtml({ subject, preheader, title, bodyHtml, ratesTable =
   <!-- Header -->
   <div style="background:#040C1C;border-radius:10px 10px 0 0;padding:24px 28px">
     <p style="margin:0 0 4px;font-size:22px;font-weight:700;letter-spacing:0.15em;color:#D4AF37">JAD2FX</p>
-    <p style="margin:0;font-size:11px;letter-spacing:0.1em;color:#5090C0;text-transform:uppercase">Morning Briefing · by JAD2 Advisory</p>
+    <p style="margin:0;font-size:11px;letter-spacing:0.1em;color:#5090C0;text-transform:uppercase">Morning Briefing Â· by JAD2 Advisory</p>
   </div>
-  ${date ? `<div style="background:#081628;padding:8px 28px"><p style="margin:0;font-size:11px;color:#4E7EAC;letter-spacing:0.05em">${escHtml(date)} · Casablanca · Données indicatives</p></div>` : ''}
+  ${date ? `<div style="background:#081628;padding:8px 28px"><p style="margin:0;font-size:11px;color:#4E7EAC;letter-spacing:0.05em">${escHtml(date)} Â· Casablanca Â· DonnÃ©es indicatives</p></div>` : ''}
   <!-- Body -->
   <div style="background:#ffffff;padding:28px">
     ${title ? `<h1 style="margin:0 0 16px;font-size:18px;color:#0f172a;font-weight:700;line-height:1.3">${escHtml(title)}</h1>` : ''}
@@ -673,29 +677,29 @@ function buildNewsletterHtml({ subject, preheader, title, bodyHtml, ratesTable =
     ${ratesTable}
     <div style="text-align:center;margin:24px 0">
       <a href="${siteUrl}" style="display:inline-block;background:#D4AF37;color:#040C1C;padding:12px 28px;border-radius:6px;font-weight:700;font-size:13px;text-decoration:none;letter-spacing:0.05em">
-        Lire l'analyse complète →
+        Lire l'analyse complÃ¨te â†’
       </a>
     </div>
     <!-- Advisory soft CTA -->
     <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:16px;margin-top:20px">
-      <p style="margin:0 0 6px;font-size:12px;color:#92400e;font-weight:600">Formation & Accompagnement en marchés des changes</p>
+      <p style="margin:0 0 6px;font-size:12px;color:#92400e;font-weight:600">Formation & Accompagnement en marchÃ©s des changes</p>
       <p style="margin:0 0 8px;font-size:12px;color:#b45309;line-height:1.5">
-        JAD2 Advisory accompagne les équipes financières des entreprises marocaines dans la
-        compréhension des dynamiques de change et de la réglementation Office des Changes.
+        JAD2 Advisory accompagne les Ã©quipes financiÃ¨res des entreprises marocaines dans la
+        comprÃ©hension des dynamiques de change et de la rÃ©glementation Office des Changes.
       </p>
-      <a href="https://jad2advisory.com" style="font-size:12px;color:#92400e;font-weight:700;text-decoration:none">jad2advisory.com →</a>
+      <a href="https://jad2advisory.com" style="font-size:12px;color:#92400e;font-weight:700;text-decoration:none">jad2advisory.com â†’</a>
     </div>
   </div>
   <!-- Footer -->
   <div style="background:#f8fafc;border-radius:0 0 10px 10px;padding:16px 28px;border-top:1px solid #e2e8f0">
     <p style="margin:0 0 6px;font-size:10px;color:#94a3b8;line-height:1.5">
-      Données indicatives à titre éducatif uniquement · Non contractuelles · JAD2 Advisory ne fournit pas de conseil en investissement.
-      Pour toute opération de change, adressez-vous à un établissement de crédit agréé par Bank Al-Maghrib.
+      DonnÃ©es indicatives Ã  titre Ã©ducatif uniquement Â· Non contractuelles Â· JAD2 Advisory ne fournit pas de conseil en investissement.
+      Pour toute opÃ©ration de change, adressez-vous Ã  un Ã©tablissement de crÃ©dit agrÃ©Ã© par Bank Al-Maghrib.
     </p>
     <p style="margin:0;font-size:10px;color:#94a3b8">
-      © ${year} JAD2 Advisory, Casablanca ·
+      Â© ${year} JAD2 Advisory, Casablanca Â·
       <a href="https://jad2advisory.com" style="color:#94a3b8">jad2advisory.com</a>
-      ${unsubUrl ? ` · <a href="${escHtml(unsubUrl)}" style="color:#94a3b8">Se désinscrire</a>` : ''}
+      ${unsubUrl ? ` Â· <a href="${escHtml(unsubUrl)}" style="color:#94a3b8">Se dÃ©sinscrire</a>` : ''}
     </p>
   </div>
 </div>
@@ -705,7 +709,7 @@ function buildNewsletterHtml({ subject, preheader, title, bodyHtml, ratesTable =
 
 async function handleNewsletterSubscribe(request, env, origin) {
   const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown';
-  if (!checkNlRateLimit(ip)) return json({ error: 'Trop de tentatives — réessayez plus tard' }, 429, origin);
+  if (!checkNlRateLimit(ip)) return json({ error: 'Trop de tentatives â€” rÃ©essayez plus tard' }, 429, origin);
   if (!env.REPORTS_KV) return json({ error: 'Service indisponible' }, 503, origin);
 
   const rawBody = await readBodySafe(request);
@@ -763,13 +767,13 @@ async function handleNewsletterUnsubscribe(request, env, origin) {
   const index = await getNlIndex(env.REPORTS_KV);
   await setNlIndex(env.REPORTS_KV, index.filter(e => e !== email));
 
-  return new Response('Désinscription confirmée. Vous ne recevrez plus le Morning Briefing JAD2FX.', {
+  return new Response('DÃ©sinscription confirmÃ©e. Vous ne recevrez plus le Morning Briefing JAD2FX.', {
     status: 200, headers: { 'Content-Type': 'text/plain; charset=utf-8' },
   });
 }
 
 async function handleNewsletterAdmin(request, env, origin) {
-  const denied = adminGate(request, env, origin);
+  const denied = await adminGate(request, env, origin);
   if (denied) return denied;
   if (!env.REPORTS_KV) return json({ count: 0, emails: [] }, 200, origin);
   const index = await getNlIndex(env.REPORTS_KV);
@@ -809,7 +813,7 @@ async function sendDailyNewsletter(report, todayRates, env) {
         </tr></thead>
         <tbody>${rateRows}</tbody>
       </table>
-      <p style="font-size:10px;color:#94a3b8;margin:6px 0 0">Taux indicatifs à titre éducatif uniquement · Non contractuels · Source: BKAM / ECB Frankfurter</p>
+      <p style="font-size:10px;color:#94a3b8;margin:6px 0 0">Taux indicatifs Ã  titre Ã©ducatif uniquement Â· Non contractuels Â· Source: BKAM / ECB Frankfurter</p>
     </div>` : '';
 
   const html = buildNewsletterHtml({
@@ -817,14 +821,14 @@ async function sendDailyNewsletter(report, todayRates, env) {
     preheader: report.excerptFr,
     title: report.titleFr,
     excerptFr: report.excerptFr,
-    bodyHtml: `<p style="font-size:13px;color:#64748b;margin:0 0 4px">Briefing quotidien · Données indicatives</p>`,
+    bodyHtml: `<p style="font-size:13px;color:#64748b;margin:0 0 4px">Briefing quotidien Â· DonnÃ©es indicatives</p>`,
     ratesTable,
     siteUrl,
     date: dateStr,
-    // unsubUrl per recipient — added in loop below
+    // unsubUrl per recipient â€” added in loop below
   });
 
-  const subject = `JAD2FX · ${report.titleFr} · ${new Date().toLocaleDateString('fr-MA', { day: 'numeric', month: 'short', timeZone: 'Africa/Casablanca' })}`;
+  const subject = `JAD2FX Â· ${report.titleFr} Â· ${new Date().toLocaleDateString('fr-MA', { day: 'numeric', month: 'short', timeZone: 'Africa/Casablanca' })}`;
 
   // Send in small batches to respect Resend rate limits
   let sent = 0;
@@ -837,7 +841,7 @@ async function sendDailyNewsletter(report, todayRates, env) {
     const personalHtml = html.replace('</body>', `
       <div style="max-width:600px;margin:4px auto;text-align:center">
         <p style="font-size:10px;color:#94a3b8">
-          <a href="${escHtml(unsubUrl)}" style="color:#94a3b8">Se désinscrire</a>
+          <a href="${escHtml(unsubUrl)}" style="color:#94a3b8">Se dÃ©sinscrire</a>
         </p>
       </div></body>`);
 
@@ -854,8 +858,8 @@ async function sendDailyNewsletter(report, todayRates, env) {
   console.log(`[CRON][NL] Sent ${sent}/${index.length} emails`);
 }
 
-// ─── BKAM rate fetch (used in scheduled handler) ──────────────────────────────
-// ─── BKAM raw fetch — returns full array with moyen + uniteDevise ─────────────
+// â”€â”€â”€ BKAM rate fetch (used in scheduled handler) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// â”€â”€â”€ BKAM raw fetch â€” returns full array with moyen + uniteDevise â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Use ISO datetime for maximum compatibility per BKAM OpenAPI spec.
 async function fetchBkamRatesRaw(apiKey, dateStr) {
   if (!apiKey) return null;
@@ -878,7 +882,7 @@ async function fetchBkamRatesRaw(apiKey, dateStr) {
   }
 }
 
-// Legacy helper (returns { CURRENCY: madPerUnit } map — used by cron report logic)
+// Legacy helper (returns { CURRENCY: madPerUnit } map â€” used by cron report logic)
 async function fetchBkamRates(apiKey, dateStr) {
   const arr = await fetchBkamRatesRaw(apiKey, dateStr);
   if (!arr) return null;
@@ -891,9 +895,9 @@ async function fetchBkamRates(apiKey, dateStr) {
   return Object.keys(map).length > 0 ? map : null;
 }
 
-// ─── BKAM Rates KV Database ────────────────────────────────────────────────────
-// Key:   bkam:virement:YYYY-MM-DD → { date, rates:[{libDevise,moyen,uniteDevise}], fetchedAt }
-// Index: bkam:virement:index      → sorted string[] of available dates (max 500)
+// â”€â”€â”€ BKAM Rates KV Database â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Key:   bkam:virement:YYYY-MM-DD â†’ { date, rates:[{libDevise,moyen,uniteDevise}], fetchedAt }
+// Index: bkam:virement:index      â†’ sorted string[] of available dates (max 500)
 //
 // This creates a persistent historical database of BKAM official rates.
 // The cron populates it daily; the /api/bkam-rates endpoint serves from it.
@@ -907,17 +911,17 @@ async function setBkamRatesIndex(kv, idx) {
   await kv.put('bkam:virement:index', JSON.stringify(idx));
 }
 
-// ─── Basket parity + cross-rate enrichment ────────────────────────────────────
+// â”€â”€â”€ Basket parity + cross-rate enrichment â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Computes, for every BKAM-published currency:
-//   basketParity = USD/MAD_basket × (CCY/USD cross-rate)
-//   driftBps     = (BKAM_fixing − basket) / basket × 10 000
-//   bandUtilPct  = position in ±5% band around basket parity (0–100%)
+//   basketParity = USD/MAD_basket Ã— (CCY/USD cross-rate)
+//   driftBps     = (BKAM_fixing âˆ’ basket) / basket Ã— 10 000
+//   bandUtilPct  = position in Â±5% band around basket parity (0â€“100%)
 //
 // USD cross-rate sources (priority):
-//   EUR/USD  → ECB Frankfurter (exogenous, non-circular for USD/EUR)
-//   G10/EM   → ECB Frankfurter EUR/CCY cross  →  CCY/USD = EUR/USD / EUR/CCY
-//   Gulf     → Official USD pegs (SAR/USD, AED/USD, etc.)
-//   Others   → BKAM implied cross = BKAM_CCY / BKAM_USD
+//   EUR/USD  â†’ ECB Frankfurter (exogenous, non-circular for USD/EUR)
+//   G10/EM   â†’ ECB Frankfurter EUR/CCY cross  â†’  CCY/USD = EUR/USD / EUR/CCY
+//   Gulf     â†’ Official USD pegs (SAR/USD, AED/USD, etc.)
+//   Others   â†’ BKAM implied cross = BKAM_CCY / BKAM_USD
 
 const GULF_PEGS = {           // CCY per 1 USD (official pegs)
   SAR: 3.75000, AED: 3.67250, QAR: 3.64000,
@@ -948,11 +952,11 @@ function enrichBkamRates(rawRates, ecbEurUsd, ecbRates) {
     } else if (r.libDevise === 'EUR') {
       basketPerUnit = usdMadBasket * ecbEurUsd;
     } else if (GULF_PEGS[r.libDevise]) {
-      // Gulf peg: CCY/USD = 1 / (USD per CCY) → invert since peg is CCY per USD
+      // Gulf peg: CCY/USD = 1 / (USD per CCY) â†’ invert since peg is CCY per USD
       const ccyPerUsd = 1 / GULF_PEGS[r.libDevise];
       basketPerUnit = usdMadBasket * ccyPerUsd;
     } else if (ecbRates && ecbRates[r.libDevise]) {
-      // ECB gives EUR/CCY rate → CCY/USD = EUR/USD / EUR/CCY
+      // ECB gives EUR/CCY rate â†’ CCY/USD = EUR/USD / EUR/CCY
       const eurPerCcy = ecbRates[r.libDevise];
       basketPerUnit = usdMadBasket * (ecbEurUsd / eurPerCcy);
     } else {
@@ -1021,24 +1025,24 @@ async function fetchEcbRatesForDate(date) {
   } catch { return null; }
 }
 
-// GET /api/bkam-rates?date=YYYY-MM-DD — serves from KV (enriched), fetches+enriches on miss
+// GET /api/bkam-rates?date=YYYY-MM-DD â€” serves from KV (enriched), fetches+enriches on miss
 async function handleGetBkamRates(request, env, origin) {
   if (!env.REPORTS_KV) return json({ error: 'KV not configured' }, 503, origin);
   const url   = new URL(request.url);
   const date  = url.searchParams.get('date') ?? new Date().toISOString().slice(0, 10);
   const force = url.searchParams.get('force') === 'true'; // bypass cache for re-enrichment
 
-  // 1. Try KV cache (always check, even when force=true — we can enrich in-place)
+  // 1. Try KV cache (always check, even when force=true â€” we can enrich in-place)
   const cachedStr = await env.REPORTS_KV.get(`bkam:virement:${date}`);
   if (cachedStr) {
     const parsed = JSON.parse(cachedStr);
-    // Already fully enriched → serve immediately
+    // Already fully enriched â†’ serve immediately
     if (!force && parsed.rates?.[0]?.basketParity !== undefined) {
       return new Response(cachedStr, {
         headers: { 'Content-Type': 'application/json', 'X-Cache': 'HIT', 'X-Source': 'KV', ...corsHeaders(origin) },
       });
     }
-    // Has BKAM data but not enriched → enrich from ECB cross-rates (no BKAM re-fetch needed)
+    // Has BKAM data but not enriched â†’ enrich from ECB cross-rates (no BKAM re-fetch needed)
     const rawFromKV = parsed.rawRates ?? parsed.rates;
     if (rawFromKV?.length) {
       const ecbRates = await fetchEcbRatesForDate(date);
@@ -1056,7 +1060,7 @@ async function handleGetBkamRates(request, env, origin) {
     }
   }
 
-  // 2. No KV data at all → fetch from BKAM API (only works during API window)
+  // 2. No KV data at all â†’ fetch from BKAM API (only works during API window)
   if (!env.BKAM_FX_KEY) return json({ error: 'BKAM_FX_KEY not configured', date }, 503, origin);
 
   const [rawRates, ecbRates] = await Promise.all([
@@ -1081,7 +1085,7 @@ async function handleGetBkamRates(request, env, origin) {
   });
 }
 
-// GET /api/bkam-rates/history?days=N — returns N days of stored BKAM rates from KV
+// GET /api/bkam-rates/history?days=N â€” returns N days of stored BKAM rates from KV
 async function handleGetBkamRatesHistory(request, env, origin) {
   if (!env.REPORTS_KV) return json({ dates: [], points: [] }, 200, origin);
   const url  = new URL(request.url);
@@ -1101,21 +1105,21 @@ async function handleGetBkamRatesHistory(request, env, origin) {
   return json({ dates: targets, points, totalDatesInDB: idx.length }, 200, origin);
 }
 
-// ─── Drift history — store/serve daily drift from BKAM fixing vs basket ──────
+// â”€â”€â”€ Drift history â€” store/serve daily drift from BKAM fixing vs basket â”€â”€â”€â”€â”€â”€
 //
-// CORRECT METHODOLOGY (per BKAM Doc 1 §I and user specification):
+// CORRECT METHODOLOGY (per BKAM Doc 1 Â§I and user specification):
 //   1. Get ECB EUR/USD at the time BKAM calculates its fixing (MIC closes 15:30
 //      Casablanca = ~14:30 UTC). ECB publishes its official daily rate at ~16:00 CET
-//      (≈15:00 UTC) via Frankfurter — close enough given T-day ECB publication.
-//   2. Compute theoretical basket parity: USD/MAD_théorique = K/(0.60×EUR/USD_ECB+0.40)
-//   3. Drift = (USD/MAD_BKAM_published − USD/MAD_théorique) / USD/MAD_théorique × 10 000 bps
+//      (â‰ˆ15:00 UTC) via Frankfurter â€” close enough given T-day ECB publication.
+//   2. Compute theoretical basket parity: USD/MAD_thÃ©orique = K/(0.60Ã—EUR/USD_ECB+0.40)
+//   3. Drift = (USD/MAD_BKAM_published âˆ’ USD/MAD_thÃ©orique) / USD/MAD_thÃ©orique Ã— 10 000 bps
 //      Positive = MAD weaker than basket implies; Negative = MAD stronger.
 //   This is non-circular: ECB EUR/USD is exogenous (not derived from BKAM's own cross).
 //
 // Band detection heuristic: if the last BAND_ALERT_WINDOW days show avg band
 // utilisation >90% or <10%, a band change may have occurred. We flag it in KV.
 
-const BAND_DEFAULT    = 0.05;  // BKAM Phase II ±5% (current since Mar 2020)
+const BAND_DEFAULT    = 0.05;  // BKAM Phase II Â±5% (current since Mar 2020)
 const BAND_ALERT_WINDOW = 10;  // days to look back for band change detection
 const DRIFT_HISTORY_TTL = 60 * 60 * 24 * 400; // 400-day KV TTL
 
@@ -1140,7 +1144,7 @@ async function setDriftIndex(kv, idx) {
 async function storeDailyDrift(env, date, todayRates) {
   if (!env.REPORTS_KV || !todayRates?.['USD']) return;
 
-  // Step 1 — ECB EUR/USD for the fixing date (closest to 15:30 Casablanca session close)
+  // Step 1 â€” ECB EUR/USD for the fixing date (closest to 15:30 Casablanca session close)
   let ecbEurUsd = null;
   try {
     const ecbRes = await fetch(
@@ -1153,13 +1157,13 @@ async function storeDailyDrift(env, date, todayRates) {
     }
   } catch (e) { console.warn('[DRIFT] ECB fetch failed:', e); }
 
-  if (!ecbEurUsd) { console.warn('[DRIFT] No ECB EUR/USD — skipping drift storage'); return; }
+  if (!ecbEurUsd) { console.warn('[DRIFT] No ECB EUR/USD â€” skipping drift storage'); return; }
 
   const K = 10.49, wEUR = 0.60, wUSD = 0.40;
   const bkamUsdMad  = todayRates['USD'];
-  // Step 2 — Theoretical basket parity using ECB EUR/USD (non-circular)
+  // Step 2 â€” Theoretical basket parity using ECB EUR/USD (non-circular)
   const basketUsdMad = K / (wEUR * ecbEurUsd + wUSD);
-  // Step 3 — Drift
+  // Step 3 â€” Drift
   const driftBps = ((bkamUsdMad - basketUsdMad) / basketUsdMad) * 10_000;
 
   const bandPct = await getBandPct(env.REPORTS_KV);
@@ -1190,7 +1194,7 @@ async function storeDailyDrift(env, date, todayRates) {
     await setDriftIndex(env.REPORTS_KV, idx);
   }
 
-  // ── Dynamic band change detection ────────────────────────────────────────
+  // â”€â”€ Dynamic band change detection â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Heuristic: if recent fixings are consistently at the band extremes,
   // BKAM may have widened the band. We can't confirm without official data
   // so we flag it for admin review.
@@ -1212,7 +1216,7 @@ async function storeDailyDrift(env, date, todayRates) {
           maxAbsDriftBps: +maxDrift.toFixed(1),
           currentBandPct: bandPct,
           severity: avgUtil > 95 || avgUtil < 5 ? 'HIGH' : 'MEDIUM',
-          message: `Band change detection: avg utilisation ${avgUtil.toFixed(1)}% over last ${BAND_ALERT_WINDOW} days. Current assumed band ±${(bandPct * 100).toFixed(1)}%. Verify on bkam.ma.`,
+          message: `Band change detection: avg utilisation ${avgUtil.toFixed(1)}% over last ${BAND_ALERT_WINDOW} days. Current assumed band Â±${(bandPct * 100).toFixed(1)}%. Verify on bkam.ma.`,
         };
         await env.REPORTS_KV.put('drift:band_alert', JSON.stringify(alert), { expirationTtl: 60 * 60 * 24 * 30 });
         console.warn('[DRIFT][BAND] Potential band change:', alert.message);
@@ -1223,10 +1227,10 @@ async function storeDailyDrift(env, date, todayRates) {
     }
   }
 
-  console.log(`[DRIFT] ${date}: drift=${driftBps.toFixed(1)}bps util=${bandUtilPct.toFixed(1)}% band=±${(bandPct*100).toFixed(1)}%`);
+  console.log(`[DRIFT] ${date}: drift=${driftBps.toFixed(1)}bps util=${bandUtilPct.toFixed(1)}% band=Â±${(bandPct*100).toFixed(1)}%`);
 }
 
-// ─── Drift backfill — process historical dates in batches ────────────────────
+// â”€â”€â”€ Drift backfill â€” process historical dates in batches â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Triggered by setting KV key 'drift:backfill_trigger' = N (number of days).
 // The scheduled handler detects the key, runs the backfill, then deletes the key.
 
@@ -1238,7 +1242,7 @@ async function runDriftBackfill(env, days) {
   const t0 = Date.now();
   console.log(`[BACKFILL] Starting ${days}-day drift backfill...`);
 
-  // Build list of working days (Mon–Fri), oldest first
+  // Build list of working days (Monâ€“Fri), oldest first
   const dates = [];
   const d = new Date();
   d.setUTCHours(12, 0, 0, 0);
@@ -1251,7 +1255,7 @@ async function runDriftBackfill(env, days) {
   // Skip dates already stored in KV
   const idx = await getDriftIndex(env.REPORTS_KV);
   const toProcess = dates.filter(dt => !idx.includes(dt));
-  console.log(`[BACKFILL] ${dates.length} working days, ${idx.length} already stored → ${toProcess.length} to fetch`);
+  console.log(`[BACKFILL] ${dates.length} working days, ${idx.length} already stored â†’ ${toProcess.length} to fetch`);
 
   if (!toProcess.length) {
     console.log('[BACKFILL] Nothing to do.');
@@ -1279,14 +1283,14 @@ async function runDriftBackfill(env, days) {
     });
     const batchNum = Math.floor(i / BATCH) + 1;
     const totalBatches = Math.ceil(toProcess.length / BATCH);
-    console.log(`[BACKFILL] Batch ${batchNum}/${totalBatches} → processed=${processed} failed=${failed}`);
+    console.log(`[BACKFILL] Batch ${batchNum}/${totalBatches} â†’ processed=${processed} failed=${failed}`);
   }
 
   console.log(`[BACKFILL] Complete: ${processed} stored, ${failed} failed in ${Date.now() - t0}ms`);
   return { processed, failed, total: toProcess.length };
 }
 
-// GET /api/drift/history?days=30 — public, serves historical drift from KV
+// GET /api/drift/history?days=30 â€” public, serves historical drift from KV
 async function handleGetDriftHistory(request, env, origin) {
   if (!env.REPORTS_KV) return json({ points: [], bandPct: BAND_DEFAULT }, 200, origin);
   const url = new URL(request.url);
@@ -1309,7 +1313,7 @@ async function handleGetDriftHistory(request, env, origin) {
   return json({ points, bandPct, alert }, 200, origin);
 }
 
-// GET /api/band-config — public, returns current band config + alert
+// GET /api/band-config â€” public, returns current band config + alert
 async function handleGetBandConfig(env, origin) {
   const bandPct  = await getBandPct(env.REPORTS_KV);
   const updatedAt = env.REPORTS_KV ? await env.REPORTS_KV.get('config:band_updated_at').catch(() => null) : null;
@@ -1317,11 +1321,11 @@ async function handleGetBandConfig(env, origin) {
   return json({ bandPct, updatedAt, alert, phase: bandPct <= 0.025 ? 'Phase I' : bandPct <= 0.05 ? 'Phase II' : 'Phase III+' }, 200, origin);
 }
 
-// POST /api/admin/band — admin only, update band assumption in KV
+// POST /api/admin/band â€” admin only, update band assumption in KV
 async function handleUpdateBand(request, env, origin) {
-  const denied = adminGate(request, env, origin);
+  const denied = await adminGate(request, env, origin);
   if (denied) return denied;
-  if (!env.REPORTS_KV) return json({ error: 'KV non configuré' }, 503, origin);
+  if (!env.REPORTS_KV) return json({ error: 'KV non configurÃ©' }, 503, origin);
 
   const rawBody = await readBodySafe(request);
   let body;
@@ -1329,7 +1333,7 @@ async function handleUpdateBand(request, env, origin) {
 
   const bandPct = typeof body.bandPct === 'number' ? body.bandPct : null;
   if (!bandPct || bandPct < 0.01 || bandPct > 0.20) {
-    return json({ error: 'bandPct must be 0.01–0.20 (1%–20%)' }, 400, origin);
+    return json({ error: 'bandPct must be 0.01â€“0.20 (1%â€“20%)' }, 400, origin);
   }
 
   await env.REPORTS_KV.put('config:band_pct', String(bandPct));
@@ -1337,12 +1341,12 @@ async function handleUpdateBand(request, env, origin) {
   // Clear any stale alert when admin manually updates the band
   await env.REPORTS_KV.delete('drift:band_alert').catch(() => {});
 
-  return json({ ok: true, bandPct, message: `Band mis à jour: ±${(bandPct * 100).toFixed(1)}%` }, 200, origin);
+  return json({ ok: true, bandPct, message: `Band mis Ã  jour: Â±${(bandPct * 100).toFixed(1)}%` }, 200, origin);
 }
 
-// ─── BKAM BDT yield curve (KV-cached, refreshed by cron) ─────────────────────
+// â”€â”€â”€ BKAM BDT yield curve (KV-cached, refreshed by cron) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// GET /api/bdt/curve — public; serves cached BDT data from KV
+// GET /api/bdt/curve â€” public; serves cached BDT data from KV
 async function handleBdtCurve(env, origin) {
   if (!env.REPORTS_KV) return json({ points: [], stale: true, error: 'KV not configured' }, 503, origin);
   try {
@@ -1369,7 +1373,7 @@ async function fetchAndStoreBdt(env) {
       await env.REPORTS_KV.put(
         'bdt:latest',
         JSON.stringify({ points: arr, fetchedAt: new Date().toISOString() }),
-        { expirationTtl: 60 * 60 * 25 }, // 25h — survives one missed cron
+        { expirationTtl: 60 * 60 * 25 }, // 25h â€” survives one missed cron
       );
       console.log(`[CRON] BDT stored: ${arr.length} points`);
     }
@@ -1378,14 +1382,14 @@ async function fetchAndStoreBdt(env) {
   }
 }
 
-// ─── Scheduled handler — 9h00 Casablanca, auto market report ─────────────────
+// â”€â”€â”€ Scheduled handler â€” 9h00 Casablanca, auto market report â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function handleScheduled(env) {
   if (!env.REPORTS_KV) {
     console.error('[CRON] REPORTS_KV not configured');
     return;
   }
 
-  // ── Backfill trigger check ─────────────────────────────────────────────────
+  // â”€â”€ Backfill trigger check â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // Set KV key 'drift:backfill_trigger' = '90' (or any N) to trigger a one-shot
   // historical drift backfill on the next cron run. Key is deleted after execution.
   try {
@@ -1400,14 +1404,14 @@ async function handleScheduled(env) {
   }
 
   if (!env.GROQ_API_KEY) {
-    console.error('[CRON] GROQ_API_KEY not configured — skipping report generation');
+    console.error('[CRON] GROQ_API_KEY not configured â€” skipping report generation');
     return;
   }
 
   const t0 = Date.now();
   console.log('[CRON] Starting 09h00 Casablanca market report generation');
 
-  // ── 1. Fetch today's BKAM rates (raw array) and populate KV database ─────
+  // â”€â”€ 1. Fetch today's BKAM rates (raw array) and populate KV database â”€â”€â”€â”€â”€
   const todayStr  = new Date().toISOString().slice(0, 10);
   // Fetch BKAM rates + ECB cross-rates in parallel for complete enrichment
   const [rawToday, ecbTodayRates] = await Promise.all([
@@ -1424,17 +1428,17 @@ async function handleScheduled(env) {
     rawToday.filter(r => r.uniteDevise > 0).map(r => [r.libDevise, r.moyen / r.uniteDevise])
   ) : null;
 
-  // ── 2. Fetch last week's BKAM rates (same weekday, -7 days) for drift calc ─
+  // â”€â”€ 2. Fetch last week's BKAM rates (same weekday, -7 days) for drift calc â”€
   const lastWeekDate = new Date();
   lastWeekDate.setUTCDate(lastWeekDate.getUTCDate() - 7);
   // Ensure it's a weekday
   const dow = lastWeekDate.getUTCDay();
-  if (dow === 0) lastWeekDate.setUTCDate(lastWeekDate.getUTCDate() - 2); // Sun → Fri
-  if (dow === 6) lastWeekDate.setUTCDate(lastWeekDate.getUTCDate() - 1); // Sat → Fri
+  if (dow === 0) lastWeekDate.setUTCDate(lastWeekDate.getUTCDate() - 2); // Sun â†’ Fri
+  if (dow === 6) lastWeekDate.setUTCDate(lastWeekDate.getUTCDate() - 1); // Sat â†’ Fri
   const lastWeekStr = lastWeekDate.toISOString().slice(0, 10);
   const lastWeekRates = await fetchBkamRates(env.BKAM_FX_KEY, lastWeekStr);
 
-  // ── 3. Compute weekly drift in bps per currency ──────────────────────────
+  // â”€â”€ 3. Compute weekly drift in bps per currency â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function weeklyChangeBps(currency, today, lastWeek) {
     const t = today?.[currency];
     const l = lastWeek?.[currency];
@@ -1442,14 +1446,14 @@ async function handleScheduled(env) {
     return Math.round(((t - l) / l) * 10_000);
   }
 
-  // ── 4. Build live rates context ──────────────────────────────────────────
+  // â”€â”€ 4. Build live rates context â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const RADAR_CURRENCIES = [
-    { code: 'EUR', flag: '🇪🇺', nameFr: 'Euro' },
-    { code: 'USD', flag: '🇺🇸', nameFr: 'Dollar américain' },
-    { code: 'GBP', flag: '🇬🇧', nameFr: 'Livre sterling' },
-    { code: 'SAR', flag: '🇸🇦', nameFr: 'Riyal saoudien' },
-    { code: 'AED', flag: '🇦🇪', nameFr: 'Dirham des Émirats' },
-    { code: 'QAR', flag: '🇶🇦', nameFr: 'Riyal qatarien' },
+    { code: 'EUR', flag: 'ðŸ‡ªðŸ‡º', nameFr: 'Euro' },
+    { code: 'USD', flag: 'ðŸ‡ºðŸ‡¸', nameFr: 'Dollar amÃ©ricain' },
+    { code: 'GBP', flag: 'ðŸ‡¬ðŸ‡§', nameFr: 'Livre sterling' },
+    { code: 'SAR', flag: 'ðŸ‡¸ðŸ‡¦', nameFr: 'Riyal saoudien' },
+    { code: 'AED', flag: 'ðŸ‡¦ðŸ‡ª', nameFr: 'Dirham des Ã‰mirats' },
+    { code: 'QAR', flag: 'ðŸ‡¶ðŸ‡¦', nameFr: 'Riyal qatarien' },
   ];
 
   const ratesCtx = todayRates
@@ -1460,9 +1464,9 @@ async function handleScheduled(env) {
           return `${c.code}/MAD: ${rate ? rate.toFixed(4) : 'N/A'} (7j: ${bps > 0 ? '+' : ''}${bps} bps)`;
         })
         .join(' | ')
-    : 'Taux BKAM indisponibles — utiliser estimations ECB.';
+    : 'Taux BKAM indisponibles â€” utiliser estimations ECB.';
 
-  // ── 5. Tavily web searches ────────────────────────────────────────────────
+  // â”€â”€ 5. Tavily web searches â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const SEARCH_QUERIES = [
     'EUR USD exchange rate overnight move Federal Reserve ECB policy',
     'Bank Al-Maghrib BKAM Morocco monetary policy dirham reserves',
@@ -1483,7 +1487,7 @@ async function handleScheduled(env) {
         });
         if (res.ok) {
           const data = await res.json();
-          const snippets = (data.results ?? []).slice(0, 3).map(r => `• ${r.title}: ${(r.content ?? '').slice(0, 220)}`);
+          const snippets = (data.results ?? []).slice(0, 3).map(r => `â€¢ ${r.title}: ${(r.content ?? '').slice(0, 220)}`);
           searchResults.push({ query, snippets });
         }
       } catch (e) {
@@ -1494,9 +1498,9 @@ async function handleScheduled(env) {
 
   const searchCtx = searchResults.length > 0
     ? searchResults.map(s => `### "${s.query}"\n${s.snippets.join('\n')}`).join('\n\n')
-    : 'Aucune donnée de veille disponible.';
+    : 'Aucune donnÃ©e de veille disponible.';
 
-  // ── 6. Build prompt for Groq ─────────────────────────────────────────────
+  // â”€â”€ 6. Build prompt for Groq â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const today = new Date().toLocaleDateString('fr-MA', {
     weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Africa/Casablanca',
   });
@@ -1515,77 +1519,77 @@ async function handleScheduled(env) {
     const eurZone = eurBand < 35 ? 'ZONE NEUTRE BAS' : eurBand > 65 ? 'ZONE ATTENTION HAUT' : 'ZONE NEUTRE';
     const usdZone = usdBand < 35 ? 'ZONE NEUTRE BAS' : usdBand > 65 ? 'ZONE ATTENTION HAUT' : 'ZONE NEUTRE';
     bandCtx = [
-      `EUR/MAD: parité centrale ${centralEur.toFixed(4)} | cours ${todayRates['EUR'].toFixed(4)} | dérive ${driftEurBps > 0 ? '+' : ''}${driftEurBps} bps | utilisation bande ${eurBand.toFixed(0)}% (${eurZone})`,
-      `USD/MAD: parité centrale ${centralUsd.toFixed(4)} | cours ${todayRates['USD'].toFixed(4)} | dérive ${driftUsdBps > 0 ? '+' : ''}${driftUsdBps} bps | utilisation bande ${usdBand.toFixed(0)}% (${usdZone})`,
+      `EUR/MAD: paritÃ© centrale ${centralEur.toFixed(4)} | cours ${todayRates['EUR'].toFixed(4)} | dÃ©rive ${driftEurBps > 0 ? '+' : ''}${driftEurBps} bps | utilisation bande ${eurBand.toFixed(0)}% (${eurZone})`,
+      `USD/MAD: paritÃ© centrale ${centralUsd.toFixed(4)} | cours ${todayRates['USD'].toFixed(4)} | dÃ©rive ${driftUsdBps > 0 ? '+' : ''}${driftUsdBps} bps | utilisation bande ${usdBand.toFixed(0)}% (${usdZone})`,
     ].join('\n');
   }
 
   const systemPrompt = [
-    'Tu es le Stratégiste FX en Chef d\'une banque d\'investissement de premier rang (standard Goldman Sachs GIR / JPMorgan FX Strategy).',
-    'Tu rédiges le Morning Briefing MAD quotidien pour des Directeurs Financiers et Trésoriers d\'entreprises marocaines d\'envergure.',
+    'Tu es le StratÃ©giste FX en Chef d\'une banque d\'investissement de premier rang (standard Goldman Sachs GIR / JPMorgan FX Strategy).',
+    'Tu rÃ©diges le Morning Briefing MAD quotidien pour des Directeurs Financiers et TrÃ©soriers d\'entreprises marocaines d\'envergure.',
     '',
-    'TON STANDARD ÉDITORIAL :',
-    '- Niveau : Goldman Sachs Global Investment Research — dense, précis, quantitatif',
-    '- Aucune platitude générique : chaque phrase contient une donnée chiffrée ou un raisonnement analytique',
-    '- Utilise systématiquement : bps (basis points), band utilization, CIP, panier 60/40, dérive, K=10.49',
-    '- Cite les données concrètes fournies (taux BKAM, veille web) — ne les invente pas',
-    '- Prose fluide professionnelle — pas de listes à puces sauf pour les risques',
+    'TON STANDARD Ã‰DITORIAL :',
+    '- Niveau : Goldman Sachs Global Investment Research â€” dense, prÃ©cis, quantitatif',
+    '- Aucune platitude gÃ©nÃ©rique : chaque phrase contient une donnÃ©e chiffrÃ©e ou un raisonnement analytique',
+    '- Utilise systÃ©matiquement : bps (basis points), band utilization, CIP, panier 60/40, dÃ©rive, K=10.49',
+    '- Cite les donnÃ©es concrÃ¨tes fournies (taux BKAM, veille web) â€” ne les invente pas',
+    '- Prose fluide professionnelle â€” pas de listes Ã  puces sauf pour les risques',
     '- Longueur contentFr : 800-1200 mots, sections denses',
     '',
-    '⚠️ CONTRAINTES LÉGALES STRICTES (violation = rapport invalide) :',
-    '- JAMAIS : "couvrir", "hedger", "conseil", "recommandation", "acheter", "vendre", "contrat à terme", "prendre position"',
-    '- JAMAIS : impératif transactionnel ("il faut", "vous devriez", "profitez de")',
-    '- TOUJOURS : "niveau de référence", "données indicatives", "contexte de marché", "dynamique à surveiller"',
-    '- Pour les opérations : "votre banque domiciliataire agréée par Bank Al-Maghrib"',
+    'âš ï¸ CONTRAINTES LÃ‰GALES STRICTES (violation = rapport invalide) :',
+    '- JAMAIS : "couvrir", "hedger", "conseil", "recommandation", "acheter", "vendre", "contrat Ã  terme", "prendre position"',
+    '- JAMAIS : impÃ©ratif transactionnel ("il faut", "vous devriez", "profitez de")',
+    '- TOUJOURS : "niveau de rÃ©fÃ©rence", "donnÃ©es indicatives", "contexte de marchÃ©", "dynamique Ã  surveiller"',
+    '- Pour les opÃ©rations : "votre banque domiciliataire agrÃ©Ã©e par Bank Al-Maghrib"',
     '',
     'STRUCTURE OBLIGATOIRE contentFr (6 sections en markdown) :',
     '',
-    '## Macro Backdrop — Les Trois Piliers du MAD',
-    'Analyse les trois piliers structurels du dirham : (1) Pilier EUR (60% panier) — dynamique BCE/EUR/USD overnight ;',
-    '(2) Pilier USD (40% panier) — trajectoire Fed, USD Index, données macro US ; (3) Pilier Maroc — BKAM, réserves,',
-    'OCP/recettes phosphates, transferts MRE, facture pétrolière. Cite les mouvements overnight en bps.',
+    '## Macro Backdrop â€” Les Trois Piliers du MAD',
+    'Analyse les trois piliers structurels du dirham : (1) Pilier EUR (60% panier) â€” dynamique BCE/EUR/USD overnight ;',
+    '(2) Pilier USD (40% panier) â€” trajectoire Fed, USD Index, donnÃ©es macro US ; (3) Pilier Maroc â€” BKAM, rÃ©serves,',
+    'OCP/recettes phosphates, transferts MRE, facture pÃ©troliÃ¨re. Cite les mouvements overnight en bps.',
     '',
     '## Configuration Technique du MAD',
-    'Position exacte dans la bande ±5% BKAM (en % d\'utilisation et zone). Dérive du cours vs parité panier',
-    'théorique K=10.49 (en bps). Formule : USD/MAD central = K / (0.60×EUR/USD + 0.40). Niveaux techniques',
-    'indicatifs : support/résistance naturels dérivés de la cage et de la parité. Conclusion sur le biais directionnel.',
+    'Position exacte dans la bande Â±5% BKAM (en % d\'utilisation et zone). DÃ©rive du cours vs paritÃ© panier',
+    'thÃ©orique K=10.49 (en bps). Formule : USD/MAD central = K / (0.60Ã—EUR/USD + 0.40). Niveaux techniques',
+    'indicatifs : support/rÃ©sistance naturels dÃ©rivÃ©s de la cage et de la paritÃ©. Conclusion sur le biais directionnel.',
     '',
-    '## Banques Centrales — Signaux de Politique Monétaire',
-    'BCE : posture actuelle, dernières déclarations, impact EUR/USD → EUR/MAD (60% basket). Fed : trajectoire FOMC,',
-    'dot plot, impact USD/MAD (40% basket). BKAM : taux directeur 2.75%, prochain Conseil de Politique Monétaire,',
-    'stance vis-à-vis de la flexibilité du régime de change. Calendrier des prochains événements macro (J-X).',
+    '## Banques Centrales â€” Signaux de Politique MonÃ©taire',
+    'BCE : posture actuelle, derniÃ¨res dÃ©clarations, impact EUR/USD â†’ EUR/MAD (60% basket). Fed : trajectoire FOMC,',
+    'dot plot, impact USD/MAD (40% basket). BKAM : taux directeur 2.75%, prochain Conseil de Politique MonÃ©taire,',
+    'stance vis-Ã -vis de la flexibilitÃ© du rÃ©gime de change. Calendrier des prochains Ã©vÃ©nements macro (J-X).',
     '',
-    '## Thèmes Structurels de la Semaine',
-    'Trois thèmes analytiques majeurs affectant le MAD cette semaine. Chaque thème : une analyse causale',
-    'complète (driver → transmission → impact MAD en bps/%) avec données quantitatives. Niveau d\'urgence.',
+    '## ThÃ¨mes Structurels de la Semaine',
+    'Trois thÃ¨mes analytiques majeurs affectant le MAD cette semaine. Chaque thÃ¨me : une analyse causale',
+    'complÃ¨te (driver â†’ transmission â†’ impact MAD en bps/%) avec donnÃ©es quantitatives. Niveau d\'urgence.',
     '',
-    '## Contexte Corporate — Lecture des Flux (Éducatif)',
-    'Analyse des implications pour les entreprises marocaines à vocation internationale. IMPORTATEURS : contexte',
+    '## Contexte Corporate â€” Lecture des Flux (Ã‰ducatif)',
+    'Analyse des implications pour les entreprises marocaines Ã  vocation internationale. IMPORTATEURS : contexte',
     'EUR/MAD et USD/MAD pour la lecture de leurs flux d\'approvisionnement. EXPORTATEURS : dynamique MAD',
     'pour l\'anticipation des recettes en devises. OCP/PHOSPHATES : impact prix phosphates sur flux USD.',
-    'ÉNERGIE : facture pétrolière et pression sur le compte courant. Toujours conclure :',
-    '"Pour toute opération de change, adressez-vous à votre banque domiciliataire agréée par Bank Al-Maghrib."',
+    'Ã‰NERGIE : facture pÃ©troliÃ¨re et pression sur le compte courant. Toujours conclure :',
+    '"Pour toute opÃ©ration de change, adressez-vous Ã  votre banque domiciliataire agrÃ©Ã©e par Bank Al-Maghrib."',
     '',
     '## Moniteur de Risques',
-    'Cinq risques quantifiés pour le MAD, classés par probabilité/impact. Format : [RISQUE] — [MÉCANISME',
-    'DE TRANSMISSION] — [IMPACT ESTIMÉ EN BPS]. Couvre : géopolitique, macro global, technique marché,',
-    'politique monétaire, spécifique Maroc.',
+    'Cinq risques quantifiÃ©s pour le MAD, classÃ©s par probabilitÃ©/impact. Format : [RISQUE] â€” [MÃ‰CANISME',
+    'DE TRANSMISSION] â€” [IMPACT ESTIMÃ‰ EN BPS]. Couvre : gÃ©opolitique, macro global, technique marchÃ©,',
+    'politique monÃ©taire, spÃ©cifique Maroc.',
     '',
-    'VERSION ARABE contentAr : Mêmes sections, même niveau analytique, en arabe professionnel financier.',
+    'VERSION ARABE contentAr : MÃªmes sections, mÃªme niveau analytique, en arabe professionnel financier.',
     '',
-    'RADAR DATA : Pour chaque devise, sentiment BULLISH = pression baissière MAD, BEARISH = soutien MAD,',
-    'NEUTRAL = stabilité. Les weeklyChangeBps DOIVENT refléter exactement les données fournies.',
+    'RADAR DATA : Pour chaque devise, sentiment BULLISH = pression baissiÃ¨re MAD, BEARISH = soutien MAD,',
+    'NEUTRAL = stabilitÃ©. Les weeklyChangeBps DOIVENT reflÃ©ter exactement les donnÃ©es fournies.',
     '',
-    'Réponds UNIQUEMENT avec un objet JSON valide (pas de markdown autour) :',
+    'RÃ©ponds UNIQUEMENT avec un objet JSON valide (pas de markdown autour) :',
     '{',
-    '  "titleFr": "Titre court (≤80 cars)",',
-    '  "titleAr": "العنوان بالعربية",',
-    '  "excerptFr": "Résumé en 2 phrases",',
-    '  "excerptAr": "ملخص في جملتين",',
-    '  "contentFr": "Rapport markdown FR avec sections ## Synthèse, ## Paires MAD, ## Impact PME, ## Perspectives",',
-    '  "contentAr": "التقرير بالعربية مع الأقسام نفسها",',
+    '  "titleFr": "Titre court (â‰¤80 cars)",',
+    '  "titleAr": "Ø§Ù„Ø¹Ù†ÙˆØ§Ù† Ø¨Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©",',
+    '  "excerptFr": "RÃ©sumÃ© en 2 phrases",',
+    '  "excerptAr": "Ù…Ù„Ø®Øµ ÙÙŠ Ø¬Ù…Ù„ØªÙŠÙ†",',
+    '  "contentFr": "Rapport markdown FR avec sections ## SynthÃ¨se, ## Paires MAD, ## Impact PME, ## Perspectives",',
+    '  "contentAr": "Ø§Ù„ØªÙ‚Ø±ÙŠØ± Ø¨Ø§Ù„Ø¹Ø±Ø¨ÙŠØ© Ù…Ø¹ Ø§Ù„Ø£Ù‚Ø³Ø§Ù… Ù†ÙØ³Ù‡Ø§",',
     '  "radarData": [',
-    '    { "currency":"EUR","currentRate":0,"weeklyChangeBps":0,"headline":"one sentence FR","headlineAr":"جملة واحدة","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"one sentence FR","expectationAr":"جملة واحدة" },',
+    '    { "currency":"EUR","currentRate":0,"weeklyChangeBps":0,"headline":"one sentence FR","headlineAr":"Ø¬Ù…Ù„Ø© ÙˆØ§Ø­Ø¯Ø©","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"one sentence FR","expectationAr":"Ø¬Ù…Ù„Ø© ÙˆØ§Ø­Ø¯Ø©" },',
     '    { "currency":"USD","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"...","expectationAr":"..." },',
     '    { "currency":"GBP","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"...","expectationAr":"..." },',
     '    { "currency":"SAR","currentRate":0,"weeklyChangeBps":0,"headline":"...","headlineAr":"...","sentiment":"BULLISH|BEARISH|NEUTRAL","expectation":"...","expectationAr":"..." },',
@@ -1596,36 +1600,36 @@ async function handleScheduled(env) {
   ].join('\n');
 
   const userMessage = [
-    `═══ MORNING BRIEFING — ${today} ═══`,
+    `â•â•â• MORNING BRIEFING â€” ${today} â•â•â•`,
     '',
-    '── TAUX BKAM LIVE (MAD par unité, source officielle) ──',
+    'â”€â”€ TAUX BKAM LIVE (MAD par unitÃ©, source officielle) â”€â”€',
     ratesCtx,
     '',
-    '── ANALYSE DE BANDE (calculée sur données BKAM ci-dessus) ──',
-    bandCtx || 'Données BKAM indisponibles — utiliser références ECB approximées.',
+    'â”€â”€ ANALYSE DE BANDE (calculÃ©e sur donnÃ©es BKAM ci-dessus) â”€â”€',
+    bandCtx || 'DonnÃ©es BKAM indisponibles â€” utiliser rÃ©fÃ©rences ECB approximÃ©es.',
     '',
-    `── DÉRIVE HEBDOMADAIRE (vs ${lastWeekStr}) ──`,
+    `â”€â”€ DÃ‰RIVE HEBDOMADAIRE (vs ${lastWeekStr}) â”€â”€`,
     RADAR_CURRENCIES.map(c => {
       const bps = weeklyChangeBps(c.code, todayRates, lastWeekRates);
       const t = todayRates?.[c.code];
       const l = lastWeekRates?.[c.code];
-      return `${c.code}/MAD: ${t ? t.toFixed(4) : 'N/A'} (7j: ${bps > 0 ? '+' : ''}${bps} bps${l ? ` | semaine précédente: ${l.toFixed(4)}` : ''})`;
+      return `${c.code}/MAD: ${t ? t.toFixed(4) : 'N/A'} (7j: ${bps > 0 ? '+' : ''}${bps} bps${l ? ` | semaine prÃ©cÃ©dente: ${l.toFixed(4)}` : ''})`;
     }).join(' | '),
     '',
-    '── VEILLE MARCHÉ OVERNIGHT (sources web) ──',
+    'â”€â”€ VEILLE MARCHÃ‰ OVERNIGHT (sources web) â”€â”€',
     searchCtx,
     '',
-    '── INSTRUCTIONS RÉDACTIONNELLES ──',
+    'â”€â”€ INSTRUCTIONS RÃ‰DACTIONNELLES â”€â”€',
     'Standard: Goldman Sachs GIR. Dense, quantitatif, institutionnel.',
-    'Utilise les données chiffrées ci-dessus dans le rapport (ne pas inventer les taux).',
-    'Calcule et cite l\'utilisation des bandes BKAM ±5% dans la section technique.',
-    'Mentionne le prochain événement macro le plus proche parmi: FOMC, BCE, BKAM CPM, NFP, CPI.',
-    'Rappel légal obligatoire en fin de section Corporate: "Pour toute opération de change, adressez-vous à votre banque domiciliataire agréée par Bank Al-Maghrib."',
+    'Utilise les donnÃ©es chiffrÃ©es ci-dessus dans le rapport (ne pas inventer les taux).',
+    'Calcule et cite l\'utilisation des bandes BKAM Â±5% dans la section technique.',
+    'Mentionne le prochain Ã©vÃ©nement macro le plus proche parmi: FOMC, BCE, BKAM CPM, NFP, CPI.',
+    'Rappel lÃ©gal obligatoire en fin de section Corporate: "Pour toute opÃ©ration de change, adressez-vous Ã  votre banque domiciliataire agrÃ©Ã©e par Bank Al-Maghrib."',
     '',
-    'Génère maintenant le briefing JSON complet. Les weeklyChangeBps dans radarData DOIVENT refléter les chiffres exacts ci-dessus.',
+    'GÃ©nÃ¨re maintenant le briefing JSON complet. Les weeklyChangeBps dans radarData DOIVENT reflÃ©ter les chiffres exacts ci-dessus.',
   ].join('\n');
 
-  // ── 7. Groq API call ──────────────────────────────────────────────────────
+  // â”€â”€ 7. Groq API call â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let groqText = '';
   try {
     const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -1657,7 +1661,7 @@ async function handleScheduled(env) {
     return;
   }
 
-  // ── 8. Parse JSON ─────────────────────────────────────────────────────────
+  // â”€â”€ 8. Parse JSON â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   let parsed = {};
   try {
     const block = groqText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
@@ -1668,9 +1672,9 @@ async function handleScheduled(env) {
     return;
   }
 
-  // ── 9. Overlay real BKAM rates and drift on radar ────────────────────────
-  // Emoji flag lookup (LLM must never generate these — we inject them server-side)
-  const RADAR_FLAGS = { EUR:'🇪🇺', USD:'🇺🇸', GBP:'🇬🇧', SAR:'🇸🇦', AED:'🇦🇪', QAR:'🇶🇦' };
+  // â”€â”€ 9. Overlay real BKAM rates and drift on radar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // Emoji flag lookup (LLM must never generate these â€” we inject them server-side)
+  const RADAR_FLAGS = { EUR:'ðŸ‡ªðŸ‡º', USD:'ðŸ‡ºðŸ‡¸', GBP:'ðŸ‡¬ðŸ‡§', SAR:'ðŸ‡¸ðŸ‡¦', AED:'ðŸ‡¦ðŸ‡ª', QAR:'ðŸ‡¶ðŸ‡¦' };
 
   const radarData = (parsed.radarData && Array.isArray(parsed.radarData) && parsed.radarData.length >= 3)
     ? parsed.radarData.map(r => ({
@@ -1684,14 +1688,14 @@ async function handleScheduled(env) {
         flag: c.flag,
         currentRate: todayRates?.[c.code] ?? 0,
         weeklyChangeBps: weeklyChangeBps(c.code, todayRates, lastWeekRates),
-        headline: 'Données indicatives — rapport auto-généré.',
-        headlineAr: 'بيانات استرشادية.',
+        headline: 'DonnÃ©es indicatives â€” rapport auto-gÃ©nÃ©rÃ©.',
+        headlineAr: 'Ø¨ÙŠØ§Ù†Ø§Øª Ø§Ø³ØªØ±Ø´Ø§Ø¯ÙŠØ©.',
         sentiment: 'NEUTRAL',
-        expectation: 'Stabilité attendue',
-        expectationAr: 'استقرار متوقع',
+        expectation: 'StabilitÃ© attendue',
+        expectationAr: 'Ø§Ø³ØªÙ‚Ø±Ø§Ø± Ù…ØªÙˆÙ‚Ø¹',
       }));
 
-  // ── 10. Build and publish report ──────────────────────────────────────────
+  // â”€â”€ 10. Build and publish report â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const now = new Date().toISOString();
   const reportId = `rpt-${Date.now()}`;
   const report = {
@@ -1699,7 +1703,7 @@ async function handleScheduled(env) {
     createdAt: now,
     publishedAt: now,
     titleFr: parsed.titleFr ?? 'Rapport FX Maroc',
-    titleAr: parsed.titleAr ?? 'تقرير سوق الصرف المغربي',
+    titleAr: parsed.titleAr ?? 'ØªÙ‚Ø±ÙŠØ± Ø³ÙˆÙ‚ Ø§Ù„ØµØ±Ù Ø§Ù„Ù…ØºØ±Ø¨ÙŠ',
     excerptFr: parsed.excerptFr ?? '',
     excerptAr: parsed.excerptAr ?? '',
     contentFr: parsed.contentFr ?? '',
@@ -1707,7 +1711,7 @@ async function handleScheduled(env) {
     radarData,
     llmModel: 'groq/llama-3.3-70b-versatile',
     tavilyQueries: SEARCH_QUERIES,
-    adminNotes: `Auto-généré à 09h00 Casablanca · Taux BKAM ${todayRates ? 'live' : 'indisponibles'} · Veille ${searchResults.length} requêtes · Dérive hebdomadaire calculée sur ${lastWeekStr}`,
+    adminNotes: `Auto-gÃ©nÃ©rÃ© Ã  09h00 Casablanca Â· Taux BKAM ${todayRates ? 'live' : 'indisponibles'} Â· Veille ${searchResults.length} requÃªtes Â· DÃ©rive hebdomadaire calculÃ©e sur ${lastWeekStr}`,
     isPublished: true,
     generation: {
       durationMs: Date.now() - t0,
@@ -1730,14 +1734,14 @@ async function handleScheduled(env) {
   await sendDailyNewsletter(report, todayRates, env);
 
   // Store daily drift point with correct methodology:
-  // theoretical = K/(0.60×ECB_EUR/USD+0.40) vs BKAM published fixing
+  // theoretical = K/(0.60Ã—ECB_EUR/USD+0.40) vs BKAM published fixing
   const driftDate = new Date().toISOString().slice(0, 10);
   await storeDailyDrift(env, driftDate, todayRates);
 
   // Refresh BDT yield curve in KV for forward pricing
   await fetchAndStoreBdt(env);
 
-  // P1.12 — Seed/refresh RAG corpus (Office des Changes docs). Idempotent.
+  // P1.12 â€” Seed/refresh RAG corpus (Office des Changes docs). Idempotent.
   try {
     const rag = await env.REPORTS_KV.get('rag:index');
     if (!rag) {
@@ -1746,7 +1750,7 @@ async function handleScheduled(env) {
     }
   } catch (e) { console.warn('[CRON] RAG seed failed:', e); }
 
-  // P1.3 / P1.8 — Refresh vol surface + bank quotes (deterministic daily)
+  // P1.3 / P1.8 â€” Refresh vol surface + bank quotes (deterministic daily)
   try {
     const seed = Math.floor(Date.now() / 86400000);
     const volPayload = { surface: synthVolSurface(seed), generatedAt: new Date().toISOString(), source: 'computed', stale: false };
@@ -1756,7 +1760,7 @@ async function handleScheduled(env) {
     console.log(`[CRON] Vol surface + bank quotes refreshed (seed=${seed})`);
   } catch (e) { console.warn('[CRON] Vol/bank refresh failed:', e); }
 
-  // P4.4 — L'Edito weekly send (Fridays 16:01 UTC, i.e. after the 16:00 cron)
+  // P4.4 â€” L'Edito weekly send (Fridays 16:01 UTC, i.e. after the 16:00 cron)
   // Cron is 0 16 * * 1-5 (Mon-Fri 16h00 UTC). Detect Friday: 4 = Friday in UTC.
   // To avoid duplicate sends, we use a day-of-week + week-of-year key.
   const cronDate = new Date();
@@ -1771,10 +1775,10 @@ async function handleScheduled(env) {
         const idx = idxRaw ? JSON.parse(idxRaw) : [];
         const confirmed = idx.slice(0, 500);
         const html = EDITO_TEMPLATE(wk, [
-          'EUR/MAD oscille dans la bande 10.78-10.92 autour de la parité centrale du panier',
+          'EUR/MAD oscille dans la bande 10.78-10.92 autour de la paritÃ© centrale du panier',
           'OC 01/2024: le reporting PME entre en vigueur pour les flux > 500K MAD/mois',
-          'BDT 13W en hausse de 5 bps à 2.45% — signal de tension sur la liquidité court terme',
-        ], 'Couverture trimestrielle: étudier une structure 25D risk-reversal EUR/MAD pour le Q3.');
+          'BDT 13W en hausse de 5 bps Ã  2.45% â€” signal de tension sur la liquiditÃ© court terme',
+        ], 'Couverture trimestrielle: Ã©tudier une structure 25D risk-reversal EUR/MAD pour le Q3.');
         let sent = 0, errors = 0;
         for (let i = 0; i < confirmed.length; i += 50) {
           const chunk = confirmed.slice(i, i + 50);
@@ -1786,7 +1790,7 @@ async function handleScheduled(env) {
                 body: JSON.stringify({
                   from: 'JAD2FX Edito <edito@jad2advisory.com>',
                   to: [email],
-                  subject: `L'Edito JAD2 — Semaine ${wk} · Marchés FX Maroc`,
+                  subject: `L'Edito JAD2 â€” Semaine ${wk} Â· MarchÃ©s FX Maroc`,
                   html,
                 }),
               });
@@ -1809,11 +1813,11 @@ function getISOWeek(d) {
   return 1 + Math.round(((date - week1) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
 }
 
-// ─── BKAM bulk backfill — admin endpoint to seed historical KV data ──────────
+// â”€â”€â”€ BKAM bulk backfill â€” admin endpoint to seed historical KV data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // GET /api/bkam-rates/backfill?from=YYYY-MM-DD&to=YYYY-MM-DD&force=false
 // Protected by ?key=BKAM_FX_KEY (avoids exposing ADMIN_PASSCODE in scripts).
 // Processes all weekdays in range, batch of 6 in parallel per iteration.
-// For each date: fetches BKAM + ECB → stores enriched rates + drift point.
+// For each date: fetches BKAM + ECB â†’ stores enriched rates + drift point.
 
 // Build ECB-only synthetic rate entries when BKAM data unavailable.
 // Currencies sourced from ECB cross-rates; moyen/driftBps left null.
@@ -1824,11 +1828,11 @@ function buildEcbOnlyRates(ecbEurUsd, ecbRates) {
 
   const rows = [];
 
-  // EUR and USD — derived directly from basket formula
+  // EUR and USD â€” derived directly from basket formula
   rows.push({ libDevise: 'EUR', moyen: null, uniteDevise: 1, basketParity: +(usdMadBasket * ecbEurUsd).toFixed(4), driftBps: null, bandUtilPct: null, source: 'ECB_ONLY' });
   rows.push({ libDevise: 'USD', moyen: null, uniteDevise: 1, basketParity: +usdMadBasket.toFixed(4), driftBps: null, bandUtilPct: null, source: 'ECB_ONLY' });
 
-  // G10 / EM from ECB cross-rates (EUR/CCY → CCY/USD = EUR/USD / EUR/CCY)
+  // G10 / EM from ECB cross-rates (EUR/CCY â†’ CCY/USD = EUR/USD / EUR/CCY)
   const ECB_CCY_UNITS = { GBP:1, CHF:1, JPY:100, CAD:1, NOK:100, SEK:100, DKK:100, CNY:1, TRY:1, ZAR:1, INR:1, BRL:1, AUD:1, EGP:1 };
   for (const [ccy, unit] of Object.entries(ECB_CCY_UNITS)) {
     const eurPerCcy = ecbRates?.[ccy];
@@ -1863,7 +1867,7 @@ async function handleBkamRatesBackfill(request, env, origin) {
     return json({ error: 'from=YYYY-MM-DD required' }, 400, origin);
   }
 
-  // Build list of weekdays in range (Mon–Fri)
+  // Build list of weekdays in range (Monâ€“Fri)
   const dates = [];
   const d = new Date(fromStr + 'T12:00:00Z');
   const end = new Date(toStr + 'T12:00:00Z');
@@ -1972,7 +1976,7 @@ async function handleBkamRatesBackfill(request, env, origin) {
   return json({ ok, ecb_only: ecbOnly, skipped, no_bkam_data: noBkam, errors, total: dates.length, results }, 200, origin);
 }
 
-// ─── Intraday chart proxy (P0.8 — replace synthetic sine wave) ───────────────
+// â”€â”€â”€ Intraday chart proxy (P0.8 â€” replace synthetic sine wave) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Fetches 1h ticks from Yahoo Finance v8 chart API for a given symbol.
 // Returns { points: [{t, v}], timestamp } or 404 on no data.
 //
@@ -2024,11 +2028,11 @@ async function handleIntraday(request, env, origin, symbol) {
   }
 }
 
-// ─── Admin session (P0.11 — cookie-based, no passcode in client bundle) ───────
+// â”€â”€â”€ Admin session (P0.11 â€” cookie-based, no passcode in client bundle) â”€â”€â”€â”€â”€â”€â”€
 // Three endpoints:
-//   POST /api/admin/login   { passcode } → sets HTTP-only cookie if valid
+//   POST /api/admin/login   { passcode } â†’ sets HTTP-only cookie if valid
 //   POST /api/admin/logout  clears cookie
-//   GET  /api/admin/session → { ok: true } if cookie valid, else { ok: false }
+//   GET  /api/admin/session â†’ { ok: true } if cookie valid, else { ok: false }
 // The cookie is signed with HMAC so it can't be forged.
 // Session TTL: 8h.
 
@@ -2110,7 +2114,7 @@ async function handleAdminLogin(request, env, origin) {
   });
 }
 
-// ─── P4.10 sitemap.xml ──────────────────────────────────────────────────────
+// â”€â”€â”€ P4.10 sitemap.xml â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Static-ish sitemap (mostly tool URLs + glossary + blog). Cached 1h.
 async function handleSitemap(request, env, origin) {
   const BASE = 'https://fx.jad2advisory.com';
@@ -2163,7 +2167,7 @@ ${urls.map((u) => `  <url>
   });
 }
 
-// ─── P4.11 RSS feed ──────────────────────────────────────────────────────────
+// â”€â”€â”€ P4.11 RSS feed â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Latest 20 published reports from KV. Falls back to a synthetic stub.
 async function handleRssFeed(request, env, origin) {
   const BASE = 'https://fx.jad2advisory.com';
@@ -2184,9 +2188,9 @@ async function handleRssFeed(request, env, origin) {
   if (items.length === 0) {
     items = [{
       id: 'rpt-stub-001',
-      titleFr: 'JAD2FX — Morning Briefing disponible',
-      titleAr: 'JAD2FX — موجز الصباحي متاح',
-      excerptFr: 'Le Morning Briefing IA sera publié ici dès le premier rapport généré.',
+      titleFr: 'JAD2FX â€” Morning Briefing disponible',
+      titleAr: 'JAD2FX â€” Ù…ÙˆØ¬Ø² Ø§Ù„ØµØ¨Ø§Ø­ÙŠ Ù…ØªØ§Ø­',
+      excerptFr: 'Le Morning Briefing IA sera publiÃ© ici dÃ¨s le premier rapport gÃ©nÃ©rÃ©.',
       publishedAt: new Date().toISOString(),
     }];
   }
@@ -2194,9 +2198,9 @@ async function handleRssFeed(request, env, origin) {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>JAD2FX — Morning Briefing</title>
+    <title>JAD2FX â€” Morning Briefing</title>
     <link>${BASE}/?view=REPORT</link>
-    <description>Analyse quotidienne des taux de change MAD et de la régulation OC</description>
+    <description>Analyse quotidienne des taux de change MAD et de la rÃ©gulation OC</description>
     <language>fr-FR</language>
     <lastBuildDate>${buildDate}</lastBuildDate>
     <atom:link href="${BASE}/rss/briefing.xml" rel="self" type="application/rss+xml" />
@@ -2225,13 +2229,13 @@ ${items.map((it) => {
   });
 }
 
-// ─── P4.16 Dynamic OG image (SVG) ───────────────────────────────────────────
+// â”€â”€â”€ P4.16 Dynamic OG image (SVG) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Returns an inline SVG that can be used as og:image.
 // Real PNG generation is done at edge via Cloudflare Image Resizing.
 function handleOgImage(request, origin) {
   const url = new URL(request.url);
-  const title = (url.searchParams.get('title') || 'JAD2FX — Taux de change MAD').slice(0, 80);
-  const subtitle = url.searchParams.get('subtitle') || 'Terminal pédagogique · Bank Al-Maghrib';
+  const title = (url.searchParams.get('title') || 'JAD2FX â€” Taux de change MAD').slice(0, 80);
+  const subtitle = url.searchParams.get('subtitle') || 'Terminal pÃ©dagogique Â· Bank Al-Maghrib';
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
@@ -2249,8 +2253,8 @@ function handleOgImage(request, origin) {
   <text x="80" y="280" font-family="Inter, sans-serif" font-size="32" font-weight="500" fill="#ECF3FA" letter-spacing="3">${title.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]))}</text>
   <text x="80" y="340" font-family="Inter, sans-serif" font-size="22" font-weight="400" fill="#91B8D8" letter-spacing="1">${subtitle.replace(/[<>&]/g, (c) => ({ '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c]))}</text>
   <line x1="80" y1="500" x2="1120" y2="500" stroke="#D4AF37" stroke-width="2" opacity="0.4"/>
-  <text x="80" y="560" font-family="Inter, sans-serif" font-size="20" font-weight="400" fill="#91B8D8">JAD2 Advisory · Conseil stratégique &amp; formation · Casablanca</text>
-  <text x="80" y="590" font-family="Inter, sans-serif" font-size="16" font-weight="400" fill="#62A0CC">fx.jad2advisory.com · Outil pédagogique — données indicatives</text>
+  <text x="80" y="560" font-family="Inter, sans-serif" font-size="20" font-weight="400" fill="#91B8D8">JAD2 Advisory Â· Conseil stratÃ©gique &amp; formation Â· Casablanca</text>
+  <text x="80" y="590" font-family="Inter, sans-serif" font-size="16" font-weight="400" fill="#62A0CC">fx.jad2advisory.com Â· Outil pÃ©dagogique â€” donnÃ©es indicatives</text>
 </svg>`;
   return new Response(svg, {
     status: 200,
@@ -2274,7 +2278,7 @@ async function handleAdminSession(request, env, origin) {
   return json({ ok }, 200, origin);
 }
 
-// ─── P4.6 Public API — v1 ────────────────────────────────────────────────────
+// â”€â”€â”€ P4.6 Public API â€” v1 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Tier-based rate limit using KV for per-IP / per-key counters.
 // Free: 100 req/day per IP (public endpoints only).
 // Pro:  10000 req/day per API key (X-API-Key header).
@@ -2409,7 +2413,7 @@ async function handlePublicForward(request, env, origin) {
   const direction = (url.searchParams.get('direction') || 'BUY').toUpperCase();
 
   // Forward pricing uses CIP with hardcoded rates
-  // Simplified — for full precision, client should call internal buildForwardQuote
+  // Simplified â€” for full precision, client should call internal buildForwardQuote
   const fakeQuote = {
     pair: `${ccy}/MAD`,
     ccy,
@@ -2421,7 +2425,7 @@ async function handlePublicForward(request, env, origin) {
     forwardPointsRaw: 0.001,
     forwardPointsPips: 10,
     netCostMAD: +(0.001 * notional).toFixed(2),
-    note: 'Beta endpoint — for full precision use the JAD2FX UI (P4.7: API key auth coming soon)',
+    note: 'Beta endpoint â€” for full precision use the JAD2FX UI (P4.7: API key auth coming soon)',
   };
   return json(fakeQuote, 200, origin);
 }
@@ -2435,7 +2439,7 @@ async function handlePublicGlossary(request, env, origin) {
   );
 }
 
-// ─── P4.7 API Key Management (admin) ─────────────────────────────────────────
+// â”€â”€â”€ P4.7 API Key Management (admin) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Store: KV key 'apikeys:index' = JSON array of metadata
 //        KV key 'apikey:<id>' = hash + meta (the secret is only returned once)
 
@@ -2486,7 +2490,7 @@ async function handleRevokeApiKey(id, request, env, origin) {
   return json({ ok: true, revoked: id }, 200, origin);
 }
 
-// ─── P3.19 Lead capture ──────────────────────────────────────────────────────
+// â”€â”€â”€ P3.19 Lead capture â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Captures leads from contact form / newsletter / audit request / wizard.
 // Sends to Resend if configured, else queues in KV for manual send.
 
@@ -2518,7 +2522,7 @@ async function handleCreateLead(request, env, origin) {
     updatedAt: new Date().toISOString(),
   };
 
-  // Auto-classify status by lead score (P3.10 — wire scoring into pipeline)
+  // Auto-classify status by lead score (P3.10 â€” wire scoring into pipeline)
   if (lead.leadScore >= 75) lead.status = 'HOT';
   else if (lead.leadScore >= 40) lead.status = 'QUALIFIED';
 
@@ -2562,7 +2566,7 @@ async function handleCreateLead(request, env, origin) {
           from: 'JAD2FX <noreply@jad2advisory.com>',
           to: [contactEmail],
           reply_to: lead.email,
-          subject: `[${lead.leadScore >= 75 ? '🔥 HOT' : 'Lead'} ${lead.source}] ${lead.name || lead.email} — ${lead.company || 'N/A'}`,
+          subject: `[${lead.leadScore >= 75 ? 'ðŸ”¥ HOT' : 'Lead'} ${lead.source}] ${lead.name || lead.email} â€” ${lead.company || 'N/A'}`,
           html,
         }),
       }).catch((e) => console.error('Resend send failed:', e));
@@ -2571,25 +2575,25 @@ async function handleCreateLead(request, env, origin) {
     }
   }
 
-  return json({ ok: true, id: lead.id, status: lead.status, message: 'Lead enregistré' }, 201, origin);
+  return json({ ok: true, id: lead.id, status: lead.status, message: 'Lead enregistrÃ©' }, 201, origin);
 }
 
 function renderLeadEmailHtml(lead) {
   return `<!DOCTYPE html>
 <html><body style="font-family:system-ui;background:#f8fafc;padding:20px;">
   <div style="max-width:600px;margin:0 auto;background:white;padding:24px;border-radius:8px;">
-    <h1 style="color:#0f172a;font-size:18px;margin:0 0 16px;">Nouveau lead JAD2FX · ${lead.source}</h1>
+    <h1 style="color:#0f172a;font-size:18px;margin:0 0 16px;">Nouveau lead JAD2FX Â· ${lead.source}</h1>
     <table style="width:100%;font-size:14px;border-collapse:collapse;">
-      <tr><td style="padding:6px 0;color:#64748b;width:140px;">Nom</td><td>${lead.name || '—'}</td></tr>
+      <tr><td style="padding:6px 0;color:#64748b;width:140px;">Nom</td><td>${lead.name || 'â€”'}</td></tr>
       <tr><td style="padding:6px 0;color:#64748b;">Email</td><td><a href="mailto:${lead.email}">${lead.email}</a></td></tr>
-      <tr><td style="padding:6px 0;color:#64748b;">Entreprise</td><td>${lead.company || '—'}</td></tr>
-      <tr><td style="padding:6px 0;color:#64748b;">Téléphone</td><td>${lead.phone || '—'}</td></tr>
-      <tr><td style="padding:6px 0;color:#64748b;">Service</td><td>${lead.service || '—'}</td></tr>
-      <tr><td style="padding:6px 0;color:#64748b;">Volume FX</td><td>${lead.volume || '—'}</td></tr>
+      <tr><td style="padding:6px 0;color:#64748b;">Entreprise</td><td>${lead.company || 'â€”'}</td></tr>
+      <tr><td style="padding:6px 0;color:#64748b;">TÃ©lÃ©phone</td><td>${lead.phone || 'â€”'}</td></tr>
+      <tr><td style="padding:6px 0;color:#64748b;">Service</td><td>${lead.service || 'â€”'}</td></tr>
+      <tr><td style="padding:6px 0;color:#64748b;">Volume FX</td><td>${lead.volume || 'â€”'}</td></tr>
       <tr><td style="padding:6px 0;color:#64748b;">Score</td><td>${lead.leadScore}/100</td></tr>
     </table>
     ${lead.message ? `<div style="margin-top:16px;padding:12px;background:#f1f5f9;border-radius:6px;"><p style="font-size:12px;color:#64748b;margin:0 0 4px;">Message</p><p style="font-size:14px;margin:0;">${lead.message}</p></div>` : ''}
-    <p style="margin-top:16px;font-size:11px;color:#94a3b8;">Source: ${lead.source} · ${lead.createdAt}</p>
+    <p style="margin-top:16px;font-size:11px;color:#94a3b8;">Source: ${lead.source} Â· ${lead.createdAt}</p>
   </div>
 </body></html>`;
 }
@@ -2669,7 +2673,7 @@ async function handleFunnelStats(request, env, origin) {
   }, 200, origin);
 }
 
-// ─── P1.3 Volatility surface (KV-cached, refreshed by cron) ────────────────
+// â”€â”€â”€ P1.3 Volatility surface (KV-cached, refreshed by cron) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Cached synthetic/indicative vol surface for G10-MAD pairs. In production,
 // this would source from a Bloomberg/Reuters license. Cache TTL 24h.
 
@@ -2714,7 +2718,7 @@ async function handleVolSurface(request, env, origin) {
   return json(payload, 200, origin);
 }
 
-// ─── P1.8 Bank quotes (5 Moroccan banks, KV-cached) ────────────────────────
+// â”€â”€â”€ P1.8 Bank quotes (5 Moroccan banks, KV-cached) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Synthetic but persistent. In production: scraper to a licensed aggregator.
 
 const BANK_LIST = [
@@ -2722,7 +2726,7 @@ const BANK_LIST = [
   { id: 'bp',           name: 'Banque Populaire',      premium: 0.0012 },
   { id: 'bmce',         name: 'BMCE (Bank of Africa)', premium: 0.0015 },
   { id: 'cih',          name: 'CIH Bank',              premium: 0.0018 },
-  { id: 'sg',           name: 'Société Générale Maroc', premium: 0.0008 },
+  { id: 'sg',           name: 'SociÃ©tÃ© GÃ©nÃ©rale Maroc', premium: 0.0008 },
 ];
 
 const BANK_PAIRS = ['EUR/MAD', 'USD/MAD', 'GBP/MAD', 'JPY/MAD', 'CHF/MAD', 'CAD/MAD'];
@@ -2739,7 +2743,7 @@ function synthBankQuotes(seed) {
     const mid = BANK_MID_FALLBACK[pair];
     out[pair] = { mid, banks: [] };
     for (const b of BANK_LIST) {
-      // Small seed-driven jitter ±10% around mid
+      // Small seed-driven jitter Â±10% around mid
       const j = (Math.sin(seed + b.id.charCodeAt(0) + pair.charCodeAt(0)) * 0.05);
       const adjusted = mid * (1 + j);
       const half = (adjusted * b.premium) / 2;
@@ -2773,7 +2777,7 @@ async function handleBankQuotes(request, env, origin) {
   return json({ pair, quotes: quotes[pair] || null, generatedAt: payload.generatedAt, stale: false }, 200, origin);
 }
 
-// ─── P1.12 RAG retrieval over Office des Changes docs (KV-cached) ───────────
+// â”€â”€â”€ P1.12 RAG retrieval over Office des Changes docs (KV-cached) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Documents are pre-scraped by cron and stored as `rag:doc:<id>`. Index in
 // `rag:index`. Retrieval: term-frequency match. Augmented by Tavily for live.
 
@@ -2809,7 +2813,7 @@ async function handleRagRetrieve(request, env, origin) {
     if (score > 0) {
       scored.push({
         id: meta.id, title: d.title, source: d.source, tags: d.tags,
-        excerpt: d.body.slice(0, 300) + (d.body.length > 300 ? '…' : ''),
+        excerpt: d.body.slice(0, 300) + (d.body.length > 300 ? 'â€¦' : ''),
         score,
         url: d.url || null,
       });
@@ -2823,56 +2827,56 @@ async function handleRagRetrieve(request, env, origin) {
 const RAG_SEED_DOCS = [
   {
     id: 'circ-oc-01-2024',
-    title: 'Circulaire OC 01/2024 — Reporting mensuel PME',
-    body: 'Les entreprises importatrices et exportatrices dont le chiffre d\'affaires mensuel en devises dépasse 500 000 MAD doivent transmettre à Bank Al-Maghrib un reporting mensuel détaillé des flux de change, contreparties, délais de règlement et instruments de couverture utilisés. La déclaration se fait via le portail IGOC sous format XML. Délai de transmission: 10 jours ouvrables après la fin du mois. Sanction en cas de retard: 5% par mois de retard plafonné à 50% du flux concerné.',
+    title: 'Circulaire OC 01/2024 â€” Reporting mensuel PME',
+    body: 'Les entreprises importatrices et exportatrices dont le chiffre d\'affaires mensuel en devises dÃ©passe 500 000 MAD doivent transmettre Ã  Bank Al-Maghrib un reporting mensuel dÃ©taillÃ© des flux de change, contreparties, dÃ©lais de rÃ¨glement et instruments de couverture utilisÃ©s. La dÃ©claration se fait via le portail IGOC sous format XML. DÃ©lai de transmission: 10 jours ouvrables aprÃ¨s la fin du mois. Sanction en cas de retard: 5% par mois de retard plafonnÃ© Ã  50% du flux concernÃ©.',
     source: 'Office des Changes',
     tags: ['OC', 'reporting', 'PME', 'compliance'],
     url: 'https://www.oc.gov.ma',
   },
   {
     id: 'circ-3-2019',
-    title: 'Circulaire 3/2019 — Rapatriement des recettes d\'exportation',
-    body: 'Les exportateurs marocains doivent rapatrier leurs recettes de change dans un délai maximum de 150 jours suivant l\'expédition de la marchandise (90 jours pour les hydrocarbures, 60 jours pour les services). 30% des recettes doivent être cédées à Bank Al-Maghrib dans les 30 jours suivant le rapatriement. Les 70% restants peuvent être conservés en CDE/CPEC pour couvrir les besoins d\'importation. Pénalité: 5% par mois de retard.',
+    title: 'Circulaire 3/2019 â€” Rapatriement des recettes d\'exportation',
+    body: 'Les exportateurs marocains doivent rapatrier leurs recettes de change dans un dÃ©lai maximum de 150 jours suivant l\'expÃ©dition de la marchandise (90 jours pour les hydrocarbures, 60 jours pour les services). 30% des recettes doivent Ãªtre cÃ©dÃ©es Ã  Bank Al-Maghrib dans les 30 jours suivant le rapatriement. Les 70% restants peuvent Ãªtre conservÃ©s en CDE/CPEC pour couvrir les besoins d\'importation. PÃ©nalitÃ©: 5% par mois de retard.',
     source: 'Office des Changes',
     tags: ['OC', 'export', 'rapatriement', 'CDE', 'CPEC'],
     url: 'https://www.oc.gov.ma',
   },
   {
     id: 'cdecpec-2015',
-    title: 'CDE / CPEC — Comptes en devises',
-    body: 'Le Compte en Devises Étrangères (CDE) permet à toute personne physique résidente de détenir jusqu\'à 100% de ses revenus en devises. Le Compte Professionnel en Devises (CPEC) est réservé aux exportateurs (CA export > 5M MAD/an) et permet de conserver jusqu\'à 70% des recettes export en devises pour couvrir les importations, frais et charges à l\'étranger. Les deux comptes sont plafonnés à 200 000 MAD/an pour les particuliers et ouverts auprès des banques agréées.',
+    title: 'CDE / CPEC â€” Comptes en devises',
+    body: 'Le Compte en Devises Ã‰trangÃ¨res (CDE) permet Ã  toute personne physique rÃ©sidente de dÃ©tenir jusqu\'Ã  100% de ses revenus en devises. Le Compte Professionnel en Devises (CPEC) est rÃ©servÃ© aux exportateurs (CA export > 5M MAD/an) et permet de conserver jusqu\'Ã  70% des recettes export en devises pour couvrir les importations, frais et charges Ã  l\'Ã©tranger. Les deux comptes sont plafonnÃ©s Ã  200 000 MAD/an pour les particuliers et ouverts auprÃ¨s des banques agrÃ©Ã©es.',
     source: 'Office des Changes',
-    tags: ['OC', 'CDE', 'CPEC', 'devises', 'résidents'],
+    tags: ['OC', 'CDE', 'CPEC', 'devises', 'rÃ©sidents'],
     url: 'https://www.oc.gov.ma',
   },
   {
     id: 'igoc-2024',
-    title: 'IGOC 2024 — Nouveau portail de télédéclaration',
-    body: 'L\'IGOC 2024 (Interface de Gestion des Opérations de Change) remplace l\'ancien système SID. Il intègre désormais la déclaration en temps réel des opérations > 200 000 MAD, le reporting PME mensuel, la gestion des CDE/CPEC, et l\'envoi automatique des attestations de rapatriement. Authentification via certificat électronique eIDAS ou CIE. Délai de mise en conformité: 31 décembre 2024.',
+    title: 'IGOC 2024 â€” Nouveau portail de tÃ©lÃ©dÃ©claration',
+    body: 'L\'IGOC 2024 (Interface de Gestion des OpÃ©rations de Change) remplace l\'ancien systÃ¨me SID. Il intÃ¨gre dÃ©sormais la dÃ©claration en temps rÃ©el des opÃ©rations > 200 000 MAD, le reporting PME mensuel, la gestion des CDE/CPEC, et l\'envoi automatique des attestations de rapatriement. Authentification via certificat Ã©lectronique eIDAS ou CIE. DÃ©lai de mise en conformitÃ©: 31 dÃ©cembre 2024.',
     source: 'Bank Al-Maghrib',
-    tags: ['IGOC', 'télédéclaration', 'PME', 'digital'],
+    tags: ['IGOC', 'tÃ©lÃ©dÃ©claration', 'PME', 'digital'],
     url: 'https://www.bkam.ma',
   },
   {
     id: 'coverts-investissements-2023',
-    title: 'Circulaire 2/2023 — Couverture des investissements directs',
-    body: 'Les investisseurs étrangers peuvent couvrir leur investissement direct au Maroc (IDE) contre le risque de change via des instruments forwards, options et swaps, sans plafond de montant, sous réserve de déclaration préalable à l\'OC. La couverture peut aller jusqu\'à 10 ans (15 ans pour les secteurs prioritaires: énergie, mines, infrastructure). Le coût de la couverture est déductible du résultat fiscal.',
+    title: 'Circulaire 2/2023 â€” Couverture des investissements directs',
+    body: 'Les investisseurs Ã©trangers peuvent couvrir leur investissement direct au Maroc (IDE) contre le risque de change via des instruments forwards, options et swaps, sans plafond de montant, sous rÃ©serve de dÃ©claration prÃ©alable Ã  l\'OC. La couverture peut aller jusqu\'Ã  10 ans (15 ans pour les secteurs prioritaires: Ã©nergie, mines, infrastructure). Le coÃ»t de la couverture est dÃ©ductible du rÃ©sultat fiscal.',
     source: 'Office des Changes',
     tags: ['OC', 'IDE', 'couverture', 'investissement'],
     url: 'https://www.oc.gov.ma',
   },
   {
     id: 'repart-tourisme-2022',
-    title: 'Circulaire 1/2022 — Rapatriement des recettes tourisme',
-    body: 'Les opérateurs touristiques (hôtels, voyagistes, plateformes) doivent rapatrier leurs recettes en devises dans un délai de 60 jours pour les services rendus. Le plafond de non-rapatriement est de 30% des recettes pour couvrir les frais à l\'étranger. Le reliquat doit être cédé ou logé en compte devises. Exception: les TO basés en zone franche Tanger Med.',
+    title: 'Circulaire 1/2022 â€” Rapatriement des recettes tourisme',
+    body: 'Les opÃ©rateurs touristiques (hÃ´tels, voyagistes, plateformes) doivent rapatrier leurs recettes en devises dans un dÃ©lai de 60 jours pour les services rendus. Le plafond de non-rapatriement est de 30% des recettes pour couvrir les frais Ã  l\'Ã©tranger. Le reliquat doit Ãªtre cÃ©dÃ© ou logÃ© en compte devises. Exception: les TO basÃ©s en zone franche Tanger Med.',
     source: 'Office des Changes',
-    tags: ['OC', 'tourisme', 'rapatriement', 'hôtellerie'],
+    tags: ['OC', 'tourisme', 'rapatriement', 'hÃ´tellerie'],
     url: 'https://www.oc.gov.ma',
   },
   {
     id: 'circ-douane-2023',
-    title: 'Note Douane 2023 — Valeur en douane et taux de change',
-    body: 'La valeur en douane est convertie en MAD au taux de change BKAM (fixing virement) en vigueur le jour du dépôt de la déclaration en douane. Pour les importations, c\'est le taux acheteur (ask) qui s\'applique; pour les exportations, le taux vendeur (bid). Les taux sont consultables sur bkam.ma et reproduits en page Réglementations de JAD2FX.',
+    title: 'Note Douane 2023 â€” Valeur en douane et taux de change',
+    body: 'La valeur en douane est convertie en MAD au taux de change BKAM (fixing virement) en vigueur le jour du dÃ©pÃ´t de la dÃ©claration en douane. Pour les importations, c\'est le taux acheteur (ask) qui s\'applique; pour les exportations, le taux vendeur (bid). Les taux sont consultables sur bkam.ma et reproduits en page RÃ©glementations de JAD2FX.',
     source: 'Administration des Douanes',
     tags: ['douane', 'valeur', 'change', 'BKAM'],
     url: 'https://www.douane.gov.ma',
@@ -2880,25 +2884,25 @@ const RAG_SEED_DOCS = [
   {
     id: 'fatca-crs-2019',
     title: 'Convention FATCA/CRS Maroc-USA 2019',
-    body: 'Depuis 2019, les banques marocaines transmettent automatiquement au fisc US (IRS) les comptes détenus par des contribuables américains (FATCA) et échangent avec 100+ juridictions les comptes étrangers (CRS). Tout compte > 50 000 USD est reporté. Les banques appliquent une retenue de 30% sur les paiements de source US à des comptes non-conformes.',
+    body: 'Depuis 2019, les banques marocaines transmettent automatiquement au fisc US (IRS) les comptes dÃ©tenus par des contribuables amÃ©ricains (FATCA) et Ã©changent avec 100+ juridictions les comptes Ã©trangers (CRS). Tout compte > 50 000 USD est reportÃ©. Les banques appliquent une retenue de 30% sur les paiements de source US Ã  des comptes non-conformes.',
     source: 'DGI / IRS',
-    tags: ['FATCA', 'CRS', 'fiscalité', 'banque'],
+    tags: ['FATCA', 'CRS', 'fiscalitÃ©', 'banque'],
     url: 'https://www.tax.gov.ma',
   },
   {
     id: 'bam-circulaire-monet-2024',
-    title: 'Circulaire BAM 2024 — Politique monétaire et forward points',
-    body: 'Bank Al-Maghrib publie quotidiennement la courbe BDT (Bons du Trésor) utilisée comme référence pour le calcul des forward points par les banques. La politique monétaire 2024 maintient le taux directeur à 2.75%. La bande de fluctuation du MAD est de ±5% autour de la parité centrale du panier USD 60% / EUR 40%.',
+    title: 'Circulaire BAM 2024 â€” Politique monÃ©taire et forward points',
+    body: 'Bank Al-Maghrib publie quotidiennement la courbe BDT (Bons du TrÃ©sor) utilisÃ©e comme rÃ©fÃ©rence pour le calcul des forward points par les banques. La politique monÃ©taire 2024 maintient le taux directeur Ã  2.75%. La bande de fluctuation du MAD est de Â±5% autour de la paritÃ© centrale du panier USD 60% / EUR 40%.',
     source: 'Bank Al-Maghrib',
-    tags: ['BAM', 'BDT', 'forward', 'politique monétaire'],
+    tags: ['BAM', 'BDT', 'forward', 'politique monÃ©taire'],
     url: 'https://www.bkam.ma',
   },
   {
     id: 'charfia-conventions-2020',
-    title: 'Conventions de non-double imposition (CNDM) — Liste 2020',
-    body: 'Le Maroc a signé 67 conventions de non-double imposition dont 51 sont en vigueur. Le taux de retenue à la source sur les dividendes varie de 5% (France, Belgique) à 15% (Émirats, Turquie). Le Maroc applique également des rulings fiscaux (rescrits) sur les prix de transfert depuis 2020. La Direction Générale des Impôts (DGI) publie annuellement la liste mise à jour.',
+    title: 'Conventions de non-double imposition (CNDM) â€” Liste 2020',
+    body: 'Le Maroc a signÃ© 67 conventions de non-double imposition dont 51 sont en vigueur. Le taux de retenue Ã  la source sur les dividendes varie de 5% (France, Belgique) Ã  15% (Ã‰mirats, Turquie). Le Maroc applique Ã©galement des rulings fiscaux (rescrits) sur les prix de transfert depuis 2020. La Direction GÃ©nÃ©rale des ImpÃ´ts (DGI) publie annuellement la liste mise Ã  jour.',
     source: 'DGI',
-    tags: ['fiscalité', 'CNDM', 'retenue', 'dividendes'],
+    tags: ['fiscalitÃ©', 'CNDM', 'retenue', 'dividendes'],
     url: 'https://www.tax.gov.ma',
   },
 ];
@@ -2920,18 +2924,18 @@ async function handleRagAdmin(request, env, origin) {
   return json({ ok: true, indexed: n }, 200, origin);
 }
 
-// ─── P4.4 L'Edito weekly newsletter (admin POST trigger) ────────────────────
+// â”€â”€â”€ P4.4 L'Edito weekly newsletter (admin POST trigger) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const EDITO_TEMPLATE = (week, highlights, cta) => `
 <!DOCTYPE html>
 <html lang="fr">
-<head><meta charset="utf-8"><title>L'Edito JAD2 — Semaine ${week}</title></head>
+<head><meta charset="utf-8"><title>L'Edito JAD2 â€” Semaine ${week}</title></head>
 <body style="font-family:-apple-system,Segoe UI,sans-serif;max-width:640px;margin:0 auto;background:#0a1228;color:#e2e8f0;padding:24px">
   <div style="background:linear-gradient(135deg,#d4af37,#b8860b);padding:16px;border-radius:12px;text-align:center;color:#0a1228">
     <h1 style="margin:0;font-size:24px">L'Edito JAD2</h1>
-    <p style="margin:4px 0 0;font-size:12px;opacity:.8">Semaine ${week} · Conseil FX & Stratégie Maroc</p>
+    <p style="margin:4px 0 0;font-size:12px;opacity:.8">Semaine ${week} Â· Conseil FX & StratÃ©gie Maroc</p>
   </div>
   <div style="background:#0f1a3a;padding:24px;margin-top:16px;border-radius:12px;border:1px solid #1e3a8a">
-    <h2 style="color:#d4af37;margin:0 0 16px;font-size:18px">Cette semaine sur le marché</h2>
+    <h2 style="color:#d4af37;margin:0 0 16px;font-size:18px">Cette semaine sur le marchÃ©</h2>
     <ul style="line-height:1.8;color:#cbd5e1;font-size:14px;padding-left:20px">
       ${highlights.map(h => `<li>${h}</li>`).join('')}
     </ul>
@@ -2939,9 +2943,9 @@ const EDITO_TEMPLATE = (week, highlights, cta) => `
   <div style="background:#0f1a3a;padding:24px;margin-top:16px;border-radius:12px;border:1px solid #1e3a8a;text-align:center">
     <h2 style="color:#d4af37;margin:0 0 12px;font-size:16px">Notre conseil de la semaine</h2>
     <p style="color:#cbd5e1;font-size:14px;line-height:1.6">${cta}</p>
-    <a href="https://fx.jad2advisory.com/?view=ADVISORY" style="display:inline-block;margin-top:12px;padding:12px 24px;background:#d4af37;color:#0a1228;text-decoration:none;border-radius:8px;font-weight:bold">Prendre RDV 15min →</a>
+    <a href="https://fx.jad2advisory.com/?view=ADVISORY" style="display:inline-block;margin-top:12px;padding:12px 24px;background:#d4af37;color:#0a1228;text-decoration:none;border-radius:8px;font-weight:bold">Prendre RDV 15min â†’</a>
   </div>
-  <p style="color:#64748b;font-size:11px;text-align:center;margin-top:24px">JAD2FX · fx.jad2advisory.com · Conformité OC 01/2024</p>
+  <p style="color:#64748b;font-size:11px;text-align:center;margin-top:24px">JAD2FX Â· fx.jad2advisory.com Â· ConformitÃ© OC 01/2024</p>
 </body>
 </html>`;
 
@@ -2955,12 +2959,12 @@ async function handleEditoSend(request, env, origin) {
 
   const week    = parseInt(body.week) || (new Date().getWeek ? new Date().getWeek() : Math.ceil((Date.now() - new Date(new Date().getFullYear(), 0, 1)) / (7 * 86400000)));
   const hl      = Array.isArray(body.highlights) && body.highlights.length ? body.highlights : [
-    'EUR/MAD oscille dans la bande 10.78-10.92 autour de la parité centrale du panier',
+    'EUR/MAD oscille dans la bande 10.78-10.92 autour de la paritÃ© centrale du panier',
     'OC 01/2024: le reporting PME entre en vigueur pour les flux > 500K MAD/mois',
-    'BDT 13W en hausse de 5 bps à 2.45% — signal de tension sur la liquidité court terme',
+    'BDT 13W en hausse de 5 bps Ã  2.45% â€” signal de tension sur la liquiditÃ© court terme',
   ];
-  const cta     = body.cta || 'Couverture trimestrielle: étudier une structure 25D risk-reversal EUR/MAD pour le Q3.';
-  const subject = body.subject || `L'Edito JAD2 — Semaine ${week} · Marchés FX Maroc`;
+  const cta     = body.cta || 'Couverture trimestrielle: Ã©tudier une structure 25D risk-reversal EUR/MAD pour le Q3.';
+  const subject = body.subject || `L'Edito JAD2 â€” Semaine ${week} Â· MarchÃ©s FX Maroc`;
 
   // Get confirmed subscribers
   const idxRaw = await env.REPORTS_KV.get('newsletter:index');
@@ -2996,12 +3000,12 @@ async function handleEditoSend(request, env, origin) {
   return json({ ok: true, week, sent, errors, total: confirmed.length }, 200, origin);
 }
 
-// ─── P4.4 Newsletter send (Resend) ─────────────────────────────────────────
+// â”€â”€â”€ P4.4 Newsletter send (Resend) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 async function handleNewsletterSend(request, env, origin) {
   const raw = await readBodySafe(request);
   let body = {};
   try { body = JSON.parse(raw); } catch { return json({ error: 'Invalid JSON' }, 400, origin); }
-  const subject = (body.subject || 'JAD2FX — Newsletter').toString().slice(0, 200);
+  const subject = (body.subject || 'JAD2FX â€” Newsletter').toString().slice(0, 200);
   const textBody = (body.body || '').toString().slice(0, 50_000);
   const htmlBody = `<!DOCTYPE html><html><body style="font-family:system-ui;background:#040C1C;color:#cbd5e1;padding:20px;">
     <div style="max-width:600px;margin:0 auto;background:#081628;padding:24px;border-radius:8px;">
@@ -3009,8 +3013,8 @@ async function handleNewsletterSend(request, env, origin) {
       <h2 style="color:#ECF3FA;font-size:18px;margin:0 0 16px;">${escapeHtml(subject)}</h2>
       <div style="color:#cbd5e1;line-height:1.6;font-size:14px;white-space:pre-wrap;">${escapeHtml(textBody).replace(/\n/g, '<br>')}</div>
       <p style="margin-top:24px;padding-top:16px;border-top:1px solid #1E3E5C;font-size:11px;color:#64748b;">
-        JAD2 Advisory · Casablanca · <a href="https://fx.jad2advisory.com" style="color:#D4AF37;">fx.jad2advisory.com</a><br>
-        Vous recevez cet email car vous êtes inscrit au Morning Briefing. <a href="https://fx.jad2advisory.com" style="color:#D4AF37;">Se désabonner</a>
+        JAD2 Advisory Â· Casablanca Â· <a href="https://fx.jad2advisory.com" style="color:#D4AF37;">fx.jad2advisory.com</a><br>
+        Vous recevez cet email car vous Ãªtes inscrit au Morning Briefing. <a href="https://fx.jad2advisory.com" style="color:#D4AF37;">Se dÃ©sabonner</a>
       </p>
     </div>
   </body></html>`;
@@ -3021,7 +3025,7 @@ async function handleNewsletterSend(request, env, origin) {
   if (subs.length === 0) return json({ sent: 0, failed: 0, total: 0 }, 200, origin);
 
   const resendKey = env.RESEND_API_KEY;
-  if (!resendKey) return json({ error: 'RESEND_API_KEY not configured — queuing locally only' }, 503, origin);
+  if (!resendKey) return json({ error: 'RESEND_API_KEY not configured â€” queuing locally only' }, 503, origin);
 
   const fromEmail = env.NEWSLETTER_FROM || 'JAD2FX <newsletter@jad2advisory.com>';
   const audience = subs.map((s) => s.email);
@@ -3052,7 +3056,7 @@ function escapeHtml(s) {
   return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
-// ─── P3.1 / P3.3 Lead magnet PDFs ────────────────────────────────────────────
+// â”€â”€â”€ P3.1 / P3.3 Lead magnet PDFs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Returns print-ready HTML. The browser's "Save as PDF" converts it to PDF.
 // For server-side PDF generation, we would use puppeteer or pdfkit; but
 // for a P0-MVP, "Print to PDF" via the browser is the cleanest path.
@@ -3061,39 +3065,39 @@ function handleLeadMagnetPdf(pathname, origin) {
   const isForward = pathname === '/press/forward-playbook';
   const isQuarterly = pathname === '/press/quarterly-q2-2026';
   const title = isOC
-    ? 'Guide Opérationnel — Circ. OC 01/2024'
+    ? 'Guide OpÃ©rationnel â€” Circ. OC 01/2024'
     : isForward
-    ? 'Forward Pricing Playbook — Maroc'
-    : 'MAD Quarterly Outlook — Q2 2026';
+    ? 'Forward Pricing Playbook â€” Maroc'
+    : 'MAD Quarterly Outlook â€” Q2 2026';
   const subtitle = isOC
-    ? 'Comment mettre votre entreprise en conformité en 90 jours'
+    ? 'Comment mettre votre entreprise en conformitÃ© en 90 jours'
     : isForward
-    ? 'Maîtriser la simulation de forward EUR/MAD comme un pro'
+    ? 'MaÃ®triser la simulation de forward EUR/MAD comme un pro'
     : 'Analyse trimestrielle du panier 60/40, des spreads G10, et des implications sectorielles';
   const sections = isOC ? [
-    { h: '1. Périmètre de la Circ. OC 01/2024', b: `La Circ. OC 01/2024 encadre l'utilisation des instruments de couverture de change par les entreprises résidentes marocaines. Elle s'applique aux personnes morales résidentes dont le CA annuel est supérieur à 500 000 MAD, ou dont l'exposition mensuelle au change dépasse 500 000 MAD. Les personnes physiques non-résidentes et les entreprises en-dessous de ces seuils ne sont pas soumises à l'obligation de déclaration.` },
-    { h: '2. Instruments autorisés', b: `Instruments financiers de couverture autorisés :\n- Contrats à terme fermes (forward) sur devises cotées par BAM\n- Swaps de change (FX swap)\n- Options vanilles d'achat et de vente (calls et puts)\n- Combinaisons d'options vanilles (risk reversals, straddles, strangles)\n\nInstruments INTERDITS :\n- Options exotiques (barrier, knock-out, lookback, digital)\n- Options binaires\n- Produits à effet de levier excessif\n- CFD (Contracts for Difference) sur forex` },
-    { h: '3. Obligations déclaratives', b: `Reporting mensuel obligatoire pour les entreprises dépassant les seuils. Contenu :\n1. Encours total par devise\n2. Échéances par mois (max 12 mois)\n3. Contreparties bancaires\n4. Justification économique de chaque couverture\n5. Écarts de valorisation (MTM) par instrument\n\nDélai : 20 du mois suivant.\nSanction : 0,5% du montant non déclaré par jour de retard.` },
-    { h: '4. Plan d\'action 90 jours', b: `Semaine 1-2 : Cartographier toutes les expositions (commerciale, économique, bilan)\nSemaine 3-4 : Inventorier les instruments existants vs Circ. 01/2024\nSemaine 5-8 : Former l'équipe finance (JAD2 Advisory propose une formation 2 jours)\nSemaine 9-10 : Mettre en place le reporting mensuel automatisé\nSemaine 11-12 : Audit interne + soumission OC\nSemaine 13 : Validation conformité\n\nContact : JAD2 Advisory · contact@jad2advisory.com · +212 5 22 XX XX XX` },
+    { h: '1. PÃ©rimÃ¨tre de la Circ. OC 01/2024', b: `La Circ. OC 01/2024 encadre l'utilisation des instruments de couverture de change par les entreprises rÃ©sidentes marocaines. Elle s'applique aux personnes morales rÃ©sidentes dont le CA annuel est supÃ©rieur Ã  500 000 MAD, ou dont l'exposition mensuelle au change dÃ©passe 500 000 MAD. Les personnes physiques non-rÃ©sidentes et les entreprises en-dessous de ces seuils ne sont pas soumises Ã  l'obligation de dÃ©claration.` },
+    { h: '2. Instruments autorisÃ©s', b: `Instruments financiers de couverture autorisÃ©s :\n- Contrats Ã  terme fermes (forward) sur devises cotÃ©es par BAM\n- Swaps de change (FX swap)\n- Options vanilles d'achat et de vente (calls et puts)\n- Combinaisons d'options vanilles (risk reversals, straddles, strangles)\n\nInstruments INTERDITS :\n- Options exotiques (barrier, knock-out, lookback, digital)\n- Options binaires\n- Produits Ã  effet de levier excessif\n- CFD (Contracts for Difference) sur forex` },
+    { h: '3. Obligations dÃ©claratives', b: `Reporting mensuel obligatoire pour les entreprises dÃ©passant les seuils. Contenu :\n1. Encours total par devise\n2. Ã‰chÃ©ances par mois (max 12 mois)\n3. Contreparties bancaires\n4. Justification Ã©conomique de chaque couverture\n5. Ã‰carts de valorisation (MTM) par instrument\n\nDÃ©lai : 20 du mois suivant.\nSanction : 0,5% du montant non dÃ©clarÃ© par jour de retard.` },
+    { h: '4. Plan d\'action 90 jours', b: `Semaine 1-2 : Cartographier toutes les expositions (commerciale, Ã©conomique, bilan)\nSemaine 3-4 : Inventorier les instruments existants vs Circ. 01/2024\nSemaine 5-8 : Former l'Ã©quipe finance (JAD2 Advisory propose une formation 2 jours)\nSemaine 9-10 : Mettre en place le reporting mensuel automatisÃ©\nSemaine 11-12 : Audit interne + soumission OC\nSemaine 13 : Validation conformitÃ©\n\nContact : JAD2 Advisory Â· contact@jad2advisory.com Â· +212 5 22 XX XX XX` },
   ] : isForward ? [
-    { h: '1. La formule CIP', b: 'F = S × (1 + r_d × T) / (1 + r_f × T)\n\nOù S = spot, r_d = taux domestique, r_f = taux étranger, T = tenor en années. Pour MAD, on prend le Monia ou la courbe BDT.' },
-    { h: '2. Cas pratique: importateur 8M EUR/an', b: 'Vous importez 8M EUR/an de composants. Votre marge actuelle est 4.2% (338K EUR). Sans couverture, chaque mouvement de 1% EUR/MAD vous coûte 80K EUR. Forward 12M au pair: 0% de prime mais exposition totale. Forward 3M rollé 4 fois: 0.4% de prime (32K EUR) avec exposition limitée. Conclusion: forward rollé = sweet spot.' },
-    { h: '3. Outils JAD2FX', b: 'Calculateur forward (CIP + XCS + bid/ask)\nSimulateur trimestriel (4 stratégies)\nDiagnostic FX PME (5 questions)\nDiagnostic OC compliance\nSurface de volatilité\nGlossaire 60+ termes FX/MAD/OC' },
-    { h: '4. Check-list 5 min avant chaque fixing', b: '1. Encours de la semaine écoulée (factures émises, en cours)\n2. Forward roll cette semaine (sinon coût daily-forward)\n3. Événements ECO majeurs à venir (NFP, CPI, BCE, Fed)\n4. Volatilité implicite EUR/MAD (smile ATM)\n5. Calendrier BKAM (prochain fixing, fermetures MIC)' },
+    { h: '1. La formule CIP', b: 'F = S Ã— (1 + r_d Ã— T) / (1 + r_f Ã— T)\n\nOÃ¹ S = spot, r_d = taux domestique, r_f = taux Ã©tranger, T = tenor en annÃ©es. Pour MAD, on prend le Monia ou la courbe BDT.' },
+    { h: '2. Cas pratique: importateur 8M EUR/an', b: 'Vous importez 8M EUR/an de composants. Votre marge actuelle est 4.2% (338K EUR). Sans couverture, chaque mouvement de 1% EUR/MAD vous coÃ»te 80K EUR. Forward 12M au pair: 0% de prime mais exposition totale. Forward 3M rollÃ© 4 fois: 0.4% de prime (32K EUR) avec exposition limitÃ©e. Conclusion: forward rollÃ© = sweet spot.' },
+    { h: '3. Outils JAD2FX', b: 'Calculateur forward (CIP + XCS + bid/ask)\nSimulateur trimestriel (4 stratÃ©gies)\nDiagnostic FX PME (5 questions)\nDiagnostic OC compliance\nSurface de volatilitÃ©\nGlossaire 60+ termes FX/MAD/OC' },
+    { h: '4. Check-list 5 min avant chaque fixing', b: '1. Encours de la semaine Ã©coulÃ©e (factures Ã©mises, en cours)\n2. Forward roll cette semaine (sinon coÃ»t daily-forward)\n3. Ã‰vÃ©nements ECO majeurs Ã  venir (NFP, CPI, BCE, Fed)\n4. VolatilitÃ© implicite EUR/MAD (smile ATM)\n5. Calendrier BKAM (prochain fixing, fermetures MIC)' },
   ] : [
-    { h: '1. Macro Backdrop — Les Trois Piliers du MAD', b: 'Analyse des trois piliers structurels du dirham :\n(1) Pilier EUR (60% panier) — dynamique BCE/EUR/USD overnight\n(2) Pilier USD (40% panier) — trajectoire Fed, USD Index, données macro US\n(3) Pilier Maroc — BKAM, réserves, OCP/recettes phosphates, transferts MRE, facture pétrolière' },
-    { h: '2. Configuration Technique du MAD', b: 'Position exacte dans la bande ±5% BKAM (% d\'utilisation et zone). Dérive du cours vs parité panier théorique K=10.49 (en bps). Formule : USD/MAD central = K / (0.60×EUR/USD + 0.40). Niveaux techniques indicatifs : support/résistance naturels.' },
-    { h: '3. Banques Centrales — Signaux de Politique Monétaire', b: 'BCE : taux 2.25%, 9 baisses depuis 2023. Fed : 4.25-4.50%, statu quo attendu. BKAM : 2.75%, prochaine décision juillet 2026. Calendrier des prochains événements macro (J-X) : FOMC 30 juillet, BCE 31 juillet, BKAM Council 23 septembre 2026.' },
-    { h: '4. Thèmes Structurels de la Semaine', b: '1. Dérive MAD Q2 2026 : -296 bps (vs -45 bps 2025)\n2. Réserves de change BAM : 4.2 mois d\'imports (cible FMI : 5+)\n3. Compte courant : -3.4% du PIB\n4. Inflation MA : 2.1% YoY (vs BCE 1.9%, Fed 2.7%)\n5. Stress test : scénario EUR/USD 1.05 → MAD -0.6%' },
-    { h: '5. Contexte Corporate — Lecture des Flux (Éducatif)', b: 'IMPORTATEURS : contexte EUR/MAD et USD/MAD pour la lecture de leurs flux d\'approvisionnement.\nEXPORTATEURS : dynamique MAD pour l\'anticipation des recettes en devises.\nOCP/PHOSPHATES : impact prix phosphates sur flux USD.\nÉNERGIE : facture pétrolière et pression sur le compte courant.\n\nPour toute opération, adressez-vous à votre banque domiciliataire agréée BAM.' },
-    { h: '6. Moniteur de Risques Q2 2026', b: '1. Dérive basket -296 bps (CRITIQUE)\n2. Réserves change 4.2 mois (WARNING)\n3. Pression OCP sur flux USD (STABLE)\n4. Inflation core MA 1.8% (NEUTRE)\n5. Compte courant -3.4% PIB (WARNING)\n6. EUR/USD 1.085 vs panier 1.082 (NEUTRE)' },
+    { h: '1. Macro Backdrop â€” Les Trois Piliers du MAD', b: 'Analyse des trois piliers structurels du dirham :\n(1) Pilier EUR (60% panier) â€” dynamique BCE/EUR/USD overnight\n(2) Pilier USD (40% panier) â€” trajectoire Fed, USD Index, donnÃ©es macro US\n(3) Pilier Maroc â€” BKAM, rÃ©serves, OCP/recettes phosphates, transferts MRE, facture pÃ©troliÃ¨re' },
+    { h: '2. Configuration Technique du MAD', b: 'Position exacte dans la bande Â±5% BKAM (% d\'utilisation et zone). DÃ©rive du cours vs paritÃ© panier thÃ©orique K=10.49 (en bps). Formule : USD/MAD central = K / (0.60Ã—EUR/USD + 0.40). Niveaux techniques indicatifs : support/rÃ©sistance naturels.' },
+    { h: '3. Banques Centrales â€” Signaux de Politique MonÃ©taire', b: 'BCE : taux 2.25%, 9 baisses depuis 2023. Fed : 4.25-4.50%, statu quo attendu. BKAM : 2.75%, prochaine dÃ©cision juillet 2026. Calendrier des prochains Ã©vÃ©nements macro (J-X) : FOMC 30 juillet, BCE 31 juillet, BKAM Council 23 septembre 2026.' },
+    { h: '4. ThÃ¨mes Structurels de la Semaine', b: '1. DÃ©rive MAD Q2 2026 : -296 bps (vs -45 bps 2025)\n2. RÃ©serves de change BAM : 4.2 mois d\'imports (cible FMI : 5+)\n3. Compte courant : -3.4% du PIB\n4. Inflation MA : 2.1% YoY (vs BCE 1.9%, Fed 2.7%)\n5. Stress test : scÃ©nario EUR/USD 1.05 â†’ MAD -0.6%' },
+    { h: '5. Contexte Corporate â€” Lecture des Flux (Ã‰ducatif)', b: 'IMPORTATEURS : contexte EUR/MAD et USD/MAD pour la lecture de leurs flux d\'approvisionnement.\nEXPORTATEURS : dynamique MAD pour l\'anticipation des recettes en devises.\nOCP/PHOSPHATES : impact prix phosphates sur flux USD.\nÃ‰NERGIE : facture pÃ©troliÃ¨re et pression sur le compte courant.\n\nPour toute opÃ©ration, adressez-vous Ã  votre banque domiciliataire agrÃ©Ã©e BAM.' },
+    { h: '6. Moniteur de Risques Q2 2026', b: '1. DÃ©rive basket -296 bps (CRITIQUE)\n2. RÃ©serves change 4.2 mois (WARNING)\n3. Pression OCP sur flux USD (STABLE)\n4. Inflation core MA 1.8% (NEUTRE)\n5. Compte courant -3.4% PIB (WARNING)\n6. EUR/USD 1.085 vs panier 1.082 (NEUTRE)' },
   ];
 
   const html = `<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="utf-8">
-<title>${escapeHtml(title)} — JAD2FX</title>
+<title>${escapeHtml(title)} â€” JAD2FX</title>
 <style>
 @page { size: A4; margin: 20mm; }
 body { font-family: Georgia, 'Times New Roman', serif; line-height: 1.55; color: #111; max-width: 800px; margin: 0 auto; padding: 40px; }
@@ -3107,12 +3111,12 @@ p { margin: 0 0 12px 0; white-space: pre-wrap; }
 </head>
 <body>
 <h1>${escapeHtml(title)}</h1>
-<p class="subtitle">${escapeHtml(subtitle)} · JAD2FX — fx.jad2advisory.com</p>
+<p class="subtitle">${escapeHtml(subtitle)} Â· JAD2FX â€” fx.jad2advisory.com</p>
 ${sections.map((s) => `<h2>${escapeHtml(s.h)}</h2><p>${escapeHtml(s.b).replace(/\n/g, '<br>')}</p>`).join('\n')}
 <div class="footer">
-  <p><span class="brand">JAD2 Advisory</span> · Cabinet de conseil · Casablanca, Maroc</p>
-  <p>Document pédagogique — Conforme Circ. OC 01/2024 — Données indicatives uniquement</p>
-  <p>contact@jad2advisory.com · Pour vos opérations, contactez votre banque agréée par BAM</p>
+  <p><span class="brand">JAD2 Advisory</span> Â· Cabinet de conseil Â· Casablanca, Maroc</p>
+  <p>Document pÃ©dagogique â€” Conforme Circ. OC 01/2024 â€” DonnÃ©es indicatives uniquement</p>
+  <p>contact@jad2advisory.com Â· Pour vos opÃ©rations, contactez votre banque agrÃ©Ã©e par BAM</p>
 </div>
 </body>
 </html>`;
@@ -3129,15 +3133,15 @@ ${sections.map((s) => `<h2>${escapeHtml(s.h)}</h2><p>${escapeHtml(s.b).replace(/
   });
 }
 
-// ─── P1.13 Hijri holidays (aladhan.com, KV-cached) ───────────────────────────
+// â”€â”€â”€ P1.13 Hijri holidays (aladhan.com, KV-cached) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const HIJRI_HOLIDAYS = [
-  { name: "Ras l'Am (Nouvel an hégirien)", month: 1, day: 1 },
+  { name: "Ras l'Am (Nouvel an hÃ©girien)", month: 1, day: 1 },
   { name: 'Achoura',                         month: 1, day: 10 },
-  { name: 'Mawlid (Naissance du Prophète)',  month: 3, day: 12 },
+  { name: 'Mawlid (Naissance du ProphÃ¨te)',  month: 3, day: 12 },
   { name: 'Lailat al-Miraj',                 month: 7, day: 27 },
   { name: "Lailat al-Bara'a",                month: 8, day: 15 },
-  { name: "Aïd al-Fitr (1er jour)",          month: 10, day: 1 },
-  { name: "Aïd al-Adha (1er jour)",          month: 12, day: 10 },
+  { name: "AÃ¯d al-Fitr (1er jour)",          month: 10, day: 1 },
+  { name: "AÃ¯d al-Adha (1er jour)",          month: 12, day: 10 },
 ];
 
 async function fetchHijriYear(year) {
@@ -3186,7 +3190,7 @@ async function handleHijri(request, env, origin) {
   return json(payload, 200, origin);
 }
 
-// ─── Main fetch handler ───────────────────────────────────────────────────────
+// â”€â”€â”€ Main fetch handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default {
   async fetch(request, env) {
@@ -3199,31 +3203,31 @@ export default {
     const url = new URL(request.url);
     const pathname = url.pathname;
 
-    // ── BKAM BDT/obligataire proxy (MONIA subscription) ──────────────────────
+    // â”€â”€ BKAM BDT/obligataire proxy (MONIA subscription) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname.startsWith('/bkam-bdt/')) {
       if (request.method !== 'GET') return new Response('Method Not Allowed', { status: 405 });
       return handleBkam(pathname.slice('/bkam-bdt/'.length), url.searchParams.toString(), env.BKAM_MONIA_KEY, origin);
     }
 
-    // ── BKAM FX proxy ─────────────────────────────────────────────────────────
+    // â”€â”€ BKAM FX proxy â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname.startsWith('/bkam/')) {
       if (request.method !== 'GET') return new Response('Method Not Allowed', { status: 405 });
       return handleBkam(pathname.slice('/bkam/'.length), url.searchParams.toString(), env.BKAM_FX_KEY, origin);
     }
 
-    // ── Tavily search ─────────────────────────────────────────────────────────
+    // â”€â”€ Tavily search â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/tavily/search') {
       if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
       return handleTavilySearch(request, env, origin);
     }
 
-    // ── LLM chat proxy ────────────────────────────────────────────────────────
+    // â”€â”€ LLM chat proxy â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/llm/chat') {
       if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
       return handleLlmChat(request, env, origin);
     }
 
-    // ── Report API ────────────────────────────────────────────────────────────
+    // â”€â”€ Report API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/reports/published') {
       if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
       return handleGetPublished(env, origin);
@@ -3250,19 +3254,19 @@ export default {
       return json({ error: 'Method not allowed' }, 405, origin);
     }
 
-    // ── Twelve Data EUR cross-rates (Yahoo failover) ─────────────────────────
+    // â”€â”€ Twelve Data EUR cross-rates (Yahoo failover) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/forex/rates') {
       if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
       return handleTwelveDataRates(env, origin);
     }
 
-    // ── BKAM BDT yield curve (KV cache) ──────────────────────────────────────
+    // â”€â”€ BKAM BDT yield curve (KV cache) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/bdt/curve') {
       if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
       return handleBdtCurve(env, origin);
     }
 
-    // ── BKAM Rates KV Database ────────────────────────────────────────────────
+    // â”€â”€ BKAM Rates KV Database â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/bkam-rates') {
       if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
       return handleGetBkamRates(request, env, origin);
@@ -3276,7 +3280,7 @@ export default {
       return handleBkamRatesBackfill(request, env, origin);
     }
 
-    // ── Drift history & band config ───────────────────────────────────────────
+    // â”€â”€ Drift history & band config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/drift/history') {
       if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
       return handleGetDriftHistory(request, env, origin);
@@ -3290,7 +3294,7 @@ export default {
       return handleUpdateBand(request, env, origin);
     }
 
-    // ── Newsletter ────────────────────────────────────────────────────────────
+    // â”€â”€ Newsletter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/newsletter/subscribe') {
       if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
       return handleNewsletterSubscribe(request, env, origin);
@@ -3304,44 +3308,44 @@ export default {
       return handleNewsletterAdmin(request, env, origin);
     }
 
-    // ── Contact form → Resend ─────────────────────────────────────────────────
+    // â”€â”€ Contact form â†’ Resend â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/contact') {
       if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
       return handleContact(request, env, origin);
     }
 
-    // ── Anonymous sim telemetry ───────────────────────────────────────────────
+    // â”€â”€ Anonymous sim telemetry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/telemetry/sim') {
       if (request.method === 'POST') return handleTelemetryPost(request, env, origin);
       if (request.method === 'GET')  return handleTelemetryGet(request, env, origin);
       return json({ error: 'GET or POST only' }, 405, origin);
     }
 
-    // ── Intraday chart (P0.8) ───────────────────────────────────────────────
+    // â”€â”€ Intraday chart (P0.8) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname.startsWith('/api/intraday/')) {
       const symbol = pathname.slice('/api/intraday/'.length);
       return handleIntraday(request, env, origin, symbol);
     }
 
-    // ── Admin session (P0.11) ──────────────────────────────────────────────
+    // â”€â”€ Admin session (P0.11) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/admin/login')   return handleAdminLogin(request, env, origin);
     if (pathname === '/api/admin/logout')  return handleAdminLogout(request, origin);
     if (pathname === '/api/admin/session') return handleAdminSession(request, env, origin);
 
-    // ── P4.10 sitemap.xml ──────────────────────────────────────────────────
+    // â”€â”€ P4.10 sitemap.xml â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/sitemap.xml') return handleSitemap(request, env, origin);
 
-    // ── P4.11 RSS feed ──────────────────────────────────────────────────────
+    // â”€â”€ P4.11 RSS feed â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/rss/briefing.xml' || pathname === '/rss.xml' || pathname === '/feed.xml') {
       return handleRssFeed(request, env, origin);
     }
 
-    // ── P4.16 Dynamic OG image ─────────────────────────────────────────────
+    // â”€â”€ P4.16 Dynamic OG image â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/og-image' || pathname.startsWith('/og-image?')) {
       return handleOgImage(request, origin);
     }
 
-    // ── P4.6 Public API ────────────────────────────────────────────────────
+    // â”€â”€ P4.6 Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/v1/rates' || pathname.startsWith('/v1/rates/')) {
       return handlePublicRates(request, env, origin);
     }
@@ -3364,9 +3368,9 @@ export default {
       return handlePublicGlossary(request, env, origin);
     }
 
-    // ── P4.7 API key admin ─────────────────────────────────────────────────
+    // â”€â”€ P4.7 API key admin â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/admin/api-keys') {
-      const denied = adminGate(request, env, origin);
+      const denied = await adminGate(request, env, origin);
       if (denied) return denied;
       if (request.method === 'GET') return handleListApiKeys(request, env, origin);
       if (request.method === 'POST') return handleCreateApiKey(request, env, origin);
@@ -3374,53 +3378,53 @@ export default {
     }
     const apiKeyMatch = pathname.match(/^\/api\/admin\/api-keys\/([^/]+)$/);
     if (apiKeyMatch) {
-      const denied = adminGate(request, env, origin);
+      const denied = await adminGate(request, env, origin);
       if (denied) return denied;
       if (request.method === 'DELETE') return handleRevokeApiKey(apiKeyMatch[1], request, env, origin);
       return json({ error: 'DELETE only' }, 405, origin);
     }
 
-    // ── P3.19 / P3.20 Lead capture + dashboard ────────────────────────────
+    // â”€â”€ P3.19 / P3.20 Lead capture + dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/leads') {
       if (request.method === 'POST') return handleCreateLead(request, env, origin);
-      const denied = adminGate(request, env, origin);
+      const denied = await adminGate(request, env, origin);
       if (denied) return denied;
       if (request.method === 'GET') return handleListLeads(request, env, origin);
       return json({ error: 'GET or POST only' }, 405, origin);
     }
     const leadIdMatch = pathname.match(/^\/api\/leads\/([^/]+)$/);
     if (leadIdMatch) {
-      const denied = adminGate(request, env, origin);
+      const denied = await adminGate(request, env, origin);
       if (denied) return denied;
       if (request.method === 'PATCH') return handleUpdateLead(leadIdMatch[1], request, env, origin);
       return json({ error: 'PATCH only' }, 405, origin);
     }
     if (pathname === '/api/admin/funnel-stats') {
-      const denied = adminGate(request, env, origin);
+      const denied = await adminGate(request, env, origin);
       if (denied) return denied;
       return handleFunnelStats(request, env, origin);
     }
-    // ── P4.4 Weekly newsletter send (admin) ─────────────────────────────
+    // â”€â”€ P4.4 Weekly newsletter send (admin) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/admin/newsletter/send') {
-      const denied = adminGate(request, env, origin);
+      const denied = await adminGate(request, env, origin);
       if (denied) return denied;
       if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
       return handleNewsletterSend(request, env, origin);
     }
-    // ── P4.4 L'Edito weekly send (admin) ─────────────────────────────────
+    // â”€â”€ P4.4 L'Edito weekly send (admin) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/admin/edito/send') {
-      const denied = adminGate(request, env, origin);
+      const denied = await adminGate(request, env, origin);
       if (denied) return denied;
       if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
       return handleEditoSend(request, env, origin);
     }
-    // ── P1.12 RAG seed (admin) ───────────────────────────────────────────
+    // â”€â”€ P1.12 RAG seed (admin) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/api/admin/rag/seed') {
-      const denied = adminGate(request, env, origin);
+      const denied = await adminGate(request, env, origin);
       if (denied) return denied;
       return handleRagAdmin(request, env, origin);
     }
-    // ── P1.12 RAG seed (env-protected init, no admin token required) ─────
+    // â”€â”€ P1.12 RAG seed (env-protected init, no admin token required) â”€â”€â”€â”€â”€
     if (pathname === '/api/init/seed' && request.method === 'POST') {
       const key = url.searchParams.get('key') ?? '';
       if (!env.BKAM_FX_KEY || key !== env.BKAM_FX_KEY) {
@@ -3441,12 +3445,12 @@ export default {
       }
       return json({ ok: true, rag: ragN, vol: true, bank: true, hijri: hijriSeeded }, 200, origin);
     }
-    // ── P3.1 / P3.3 Lead magnet PDFs (HTML print-ready) ─────────────────
+    // â”€â”€ P3.1 / P3.3 Lead magnet PDFs (HTML print-ready) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (pathname === '/press/guide-oc-2024' || pathname === '/press/forward-playbook' || pathname === '/press/quarterly-q2-2026') {
       return handleLeadMagnetPdf(pathname, origin);
     }
 
-    // ── Yahoo Finance proxy ───────────────────────────────────────────────────
+    // â”€â”€ Yahoo Finance proxy â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     if (request.method !== 'GET') return new Response('Method Not Allowed', { status: 405 });
 
     const encodedTarget = pathname.slice(1);
@@ -3480,3 +3484,4 @@ export default {
     ctx.waitUntil(handleScheduled(env));
   },
 };
+

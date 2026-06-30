@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useI18n } from '../context/I18nContext';
+import { useAdmin } from '../context/AdminContext';
 import { TrendingUp, TrendingDown, Minus, RefreshCw, Zap } from 'lucide-react';
 import { LiveRate } from '../types';
 import CurrencyFlag from './CurrencyFlag';
@@ -172,13 +173,16 @@ const CATEGORY_COLORS = {
 
 export default function MarketRadar({ tickerRates }: Props) {
   const { locale, isRTL } = useI18n();
+  const { config } = useAdmin();
   const [quotes, setQuotes] = useState<RadarQuote[]>([]);
   const [loading, setLoading] = useState(true);
   const [lastUpdate, setLastUpdate] = useState<string>('');
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
-    const corsProxy: string = process.env.CORS_PROXY_URL ?? '';
+    // P0-2 FIX: use admin-configured proxy URL, not build-time env.
+    // Falls back to env at build time only if admin has nothing configured.
+    const corsProxy: string = config.corsProxyUrl || process.env.CORS_PROXY_URL || '';
     try {
       const fxRates = await fetchFxRadarRates();
       const commoditySymbols = RADAR_ITEMS.filter(i => !FX_SYMBOLS.has(i.symbol));

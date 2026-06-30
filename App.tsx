@@ -238,6 +238,21 @@ function AppInner() {
     return () => window.removeEventListener('popstate', apply);
   }, []);
 
+  // P0-5 FIX: Escape closes the contact drawer + scroll-lock body when open
+  useEffect(() => {
+    if (typeof window === 'undefined' || !contactDrawerOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setContactDrawerOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [contactDrawerOpen]);
+
   // P2.3 + P2.12 — Global keyboard shortcuts: Cmd+K (palette), ? (cheatsheet), h, etc.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -922,7 +937,7 @@ function AppInner() {
             <SocialProofModule />
 
             {/* P3.5 — Contextual CTA (engagement-based) */}
-            <ContextualCTA variant="banner" pageKey="home" />
+            <ContextualCTA variant="banner" pageKey="home" navTo={navTo} />
 
             {/* ── Advisory CTA strip ───────────────────────────────────── */}
             <div className="bg-navy-900 border border-navy-700 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">

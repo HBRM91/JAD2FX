@@ -1219,7 +1219,8 @@ export default function AdminDashboard() {
            {activeTab === 'REPORTS'    && <ReportsAdmin />}
            {activeTab === 'NEWSLETTER' && <NewsletterAdmin />}
            {activeTab === 'APIKEYS'    && <ApiKeyManagement />}
-           {activeTab === 'BACKLINKS'  && <BacklinkTracker />}
+            {activeTab === 'BACKLINKS'  && <BacklinkTracker />}
+            {activeTab === 'LEADS'      && <LeadsDashboard />}
         </div>
       </div>
     </div>
