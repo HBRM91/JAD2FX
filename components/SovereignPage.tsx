@@ -37,14 +37,14 @@ export default function SovereignPage() {
     <div className="space-y-4 max-w-4xl mx-auto">
       <div className="flex items-center gap-2">
         <Globe size={14} className="text-gold-500" />
-        <h1 className="text-base font-bold text-white uppercase tracking-wider">Spreads Souverains Â· Maroc</h1>
-        <span className="text-[10px] text-slate-500 ml-auto">P1.10 Â· CDS / EMBI / OAT-Bund</span>
+        <h1 className="text-base font-bold text-white uppercase tracking-wider">Spreads Souverains · Maroc</h1>
+        <span className="text-[10px] text-slate-500 ml-auto">P1.10 · CDS / EMBI / OAT-Bund</span>
       </div>
 
       <div className="flex items-start gap-2 p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
-        <span className="text-amber-400 text-xs">â„¹ï¸</span>
+        <span className="text-amber-400 text-xs">ℹï¸</span>
         <p className="text-[10px] text-amber-200/80 leading-relaxed">
-          <strong>DonnÃ©es synthÃ©tiques indicatives.</strong> En production: souscription Reuters Eikon / Bloomberg pour les CDS 5Y, EMBI+ JP Morgan, OAT via BAM.
+          <strong>Données synthétiques indicatives.</strong> En production: souscription Reuters Eikon / Bloomberg pour les CDS 5Y, EMBI+ JP Morgan, OAT via BAM.
         </p>
       </div>
 
@@ -60,7 +60,7 @@ export default function SovereignPage() {
               <th className="px-2 py-1 text-right">Spread</th>
               <th className="px-2 py-1 text-right">Î” 1j</th>
               <th className="px-2 py-1 text-right">Î” %</th>
-              <th className="px-2 py-1 text-left">InterprÃ©tation</th>
+              <th className="px-2 py-1 text-left">Interprétation</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-navy-800">
@@ -153,7 +153,7 @@ export default function SovereignPage() {
           </div>
         </div>
         <p className="text-[10px] text-slate-500 mt-3 italic">
-          Le spread OAT-Bund mesure la prime de risque souverain Maroc vs rÃ©fÃ©rence europÃ©enne (Bund = Â« risk-free Â»). Niveau 142 bps = Maroc investment grade cross-over.
+          Le spread OAT-Bund mesure la prime de risque souverain Maroc vs référence européenne (Bund = « risk-free »). Niveau 142 bps = Maroc investment grade cross-over.
         </p>
       </div>
 

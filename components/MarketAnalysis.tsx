@@ -146,22 +146,22 @@ const MarketAnalysis: React.FC = () => {
         strategy: 'quality-first',
         proxyUrl: config.corsProxyUrl || undefined,
         systemPrompt: `You are the chief FX strategist at a Tier-1 MENA investment bank. Write terse, data-dense institutional commentary. Strict rules:
-â€” Anchor EVERY claim to the live numbers provided. Do not state generic facts (e.g. "the band is Â±5%" or "EUR has 60% weight") â€” those are known to the reader.
+â€” Anchor EVERY claim to the live numbers provided. Do not state generic facts (e.g. "the band is ±5%" or "EUR has 60% weight") â€” those are known to the reader.
 â€” Quantify every observation: use basis-point moves, percentage changes, level vs prior range.
 â€” Do NOT give investment advice, price targets, or "you should hedge."
 â€” Write in the same language as the user message (French unless specified).`,
-        userMessage: `RÃ©dige un brief institutionnel (3 paragraphes, max 300 mots) Ã  partir de ce snapshot temps rÃ©el:
+        userMessage: `Rédige un brief institutionnel (3 paragraphes, max 300 mots) Ã  partir de ce snapshot temps réel:
 
 G10 FX: EUR/USD ${freshEu.toFixed(4)} | GBP/USD ${gbpUsd.toFixed(4)} | USD/JPY ${usdJpy.toFixed(2)} | USD/CHF ${usdChf.toFixed(4)} | USD/CAD ${usdCad.toFixed(4)} | USD/TRY ${usdTry.toFixed(2)}
 Nordiques (EUR-cross): EUR/NOK ${(todayRates['NOK'] ?? 11.60).toFixed(2)} | EUR/SEK ${(todayRates['SEK'] ?? 11.40).toFixed(2)} | EUR/DKK ${(todayRates['DKK'] ?? 7.460).toFixed(3)}
 MAD: USD/MAD ${freshUsdMad.toFixed(4)} | EUR/MAD ${freshEurMad.toFixed(4)} | NOK/MAD ${nokMad.toFixed(4)} | SEK/MAD ${sekMad.toFixed(4)} | DKK/MAD ${dkkMad.toFixed(4)} | SAR/MAD ${sarMad.toFixed(4)} | AED/MAD ${aedMad.toFixed(4)}
-PANIER: K=${BASKET_K} Â· EUR/MAD_central thÃ©orique â‰ˆ ${(BASKET_K * freshEu).toFixed(4)} vs actuel ${freshEurMad.toFixed(4)}
+PANIER: K=${BASKET_K} · EUR/MAD_central théorique â‰ˆ ${(BASKET_K * freshEu).toFixed(4)} vs actuel ${freshEurMad.toFixed(4)}
 
-Â§1 â€” DRIVERS G10 ACTUELS: Quels mouvements G10 spÃ©cifiques expliquent la configuration EUR/USD aujourd'hui ? Divergences de politique monÃ©taire BCE/Fed quantifiÃ©es. Impact mÃ©canique calculÃ© sur la paritÃ© USD/MAD.
-Â§2 â€” MARCHÃ‰ MAD: Position du dirham dans la bande (utilisation calculÃ©e). Flux structurels dominants cette semaine (MRE saisonnalitÃ©, recettes OCP, facture pÃ©troliÃ¨re) et leur sens sur la pression de change.
-Â§3 â€” POINTS DE VIGILANCE CORPORATE: 2-3 thÃ¨mes concrets pour les trÃ©soriers marocains â€” asymÃ©trie de risque EUR vs USD sur le panier, exposition NOK/SEK des importateurs de bois-papier-Ã©quipements nordiques (NOK liÃ©e au Brent = double exposition), opportunitÃ©s de refacturation Gulf (AED/SAR stables).
+§1 â€” DRIVERS G10 ACTUELS: Quels mouvements G10 spécifiques expliquent la configuration EUR/USD aujourd'hui ? Divergences de politique monétaire BCE/Fed quantifiées. Impact mécanique calculé sur la parité USD/MAD.
+§2 â€” MARCHÉ MAD: Position du dirham dans la bande (utilisation calculée). Flux structurels dominants cette semaine (MRE saisonnalité, recettes OCP, facture pétrolière) et leur sens sur la pression de change.
+§3 â€” POINTS DE VIGILANCE CORPORATE: 2-3 thèmes concrets pour les trésoriers marocains â€” asymétrie de risque EUR vs USD sur le panier, exposition NOK/SEK des importateurs de bois-papier-équipements nordiques (NOK liée au Brent = double exposition), opportunités de refacturation Gulf (AED/SAR stables).
 
-Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â€” pas de conseil en investissement (Loi nÂ° 43-12 / Dahir nÂ° 1-13-21). Conseil: jad2advisory.com"`,
+Terminer obligatoirement par: "âš ï¸ Données indicatives uniquement â€” pas de conseil en investissement (Loi n° 43-12 / Dahir n° 1-13-21). Conseil: jad2advisory.com"`,
         maxTokens: 800,
         temperature: 0.25,
       });
@@ -226,9 +226,9 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
 
   // NOK/SEK/DKK: critical for Moroccan importers of wood, paper, pharma, equipment
   const nordCrosses = [
-    { countryCode: 'no', label: 'NOK / MAD', rate: eurMad / (rates['NOK'] ?? 11.60), note: 'LiÃ© au Brent â€” corr EUR ~70%' },
+    { countryCode: 'no', label: 'NOK / MAD', rate: eurMad / (rates['NOK'] ?? 11.60), note: 'Lié au Brent â€” corr EUR ~70%' },
     { countryCode: 'se', label: 'SEK / MAD', rate: eurMad / (rates['SEK'] ?? 11.40), note: 'Riksbank â€” corr EUR ~75%' },
-    { countryCode: 'dk', label: 'DKK / MAD', rate: eurMad / (rates['DKK'] ?? 7.460), note: 'Peg EUR quasi-fixe (Â±2.25%)' },
+    { countryCode: 'dk', label: 'DKK / MAD', rate: eurMad / (rates['DKK'] ?? 7.460), note: 'Peg EUR quasi-fixe (±2.25%)' },
   ];
 
   const emPeers = [
@@ -242,39 +242,39 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
   const corpWatchpoints = [
     {
       icon: <Zap size={13} className="text-amber-400 shrink-0 mt-0.5" />,
-      title: 'Importateurs Ã©nergie',
+      title: 'Importateurs énergie',
       sub: 'Brent & WTI',
-      body: `Brent actuel ${comms['BZ=F'] ? `$${comms['BZ=F']!.price.toFixed(2)}/bbl â‰ˆ ${comms['BZ=F']!.madEquiv.toFixed(0)} MAD/bbl` : 'â€”'}. Toute apprÃ©ciation USD/MAD amplifie la facture Ã©nergÃ©tique. Couverture forward recommandÃ©e (Circ. OC 01/2024).`,
+      body: `Brent actuel ${comms['BZ=F'] ? `$${comms['BZ=F']!.price.toFixed(2)}/bbl â‰ˆ ${comms['BZ=F']!.madEquiv.toFixed(0)} MAD/bbl` : 'â€”'}. Toute appréciation USD/MAD amplifie la facture énergétique. Couverture forward recommandée (Circ. OC 01/2024).`,
     },
     {
       icon: <Wheat size={13} className="text-lime-400 shrink-0 mt-0.5" />,
       title: 'Import alimentaire',
-      sub: 'BlÃ© & MaÃ¯s',
-      body: `BlÃ© ${comms['ZW=F'] ? `$${comms['ZW=F']!.price.toFixed(2)}/bu â‰ˆ ${(comms['ZW=F']!.madEquiv).toFixed(2)} MAD/bu` : 'â€”'}. COSUMAR, minoteries et Ã©leveurs exposÃ©s aux fluctuations USD et aux subventions OC.`,
+      sub: 'Blé & Maïs',
+      body: `Blé ${comms['ZW=F'] ? `$${comms['ZW=F']!.price.toFixed(2)}/bu â‰ˆ ${(comms['ZW=F']!.madEquiv).toFixed(2)} MAD/bu` : 'â€”'}. COSUMAR, minoteries et éleveurs exposés aux fluctuations USD et aux subventions OC.`,
     },
     {
       icon: <Truck size={13} className="text-blue-400 shrink-0 mt-0.5" />,
       title: 'Export OCP / Phosphates',
       sub: 'Revenus USD/EUR',
-      body: `OCP facture principalement en USD. Un USD/MAD Ã©levÃ© (${usdMad.toFixed(4)}) amÃ©liore les revenus en MAD. Risque de retournement Ã  surveiller sur les Ã©chÃ©ances Q3-Q4.`,
+      body: `OCP facture principalement en USD. Un USD/MAD élevé (${usdMad.toFixed(4)}) améliore les revenus en MAD. Risque de retournement Ã  surveiller sur les échéances Q3-Q4.`,
     },
     {
       icon: <Building2 size={13} className="text-purple-400 shrink-0 mt-0.5" />,
       title: 'PME Gulf (AED/SAR)',
       sub: 'Prestataires & sous-traitants',
-      body: `AED/MAD ${(0.272294 * usdMad).toFixed(4)} â€” SAR/MAD ${(0.266667 * usdMad).toFixed(4)}. Facturation Gulf en AED ou SAR expose Ã  la variation USD/MAD (pÃ©gs stables mais MAD peut varier). Instruments de couverture disponibles via intermÃ©diaires agrÃ©Ã©s BAM.`,
+      body: `AED/MAD ${(0.272294 * usdMad).toFixed(4)} â€” SAR/MAD ${(0.266667 * usdMad).toFixed(4)}. Facturation Gulf en AED ou SAR expose Ã  la variation USD/MAD (pégs stables mais MAD peut varier). Instruments de couverture disponibles via intermédiaires agréés BAM.`,
     },
     {
       icon: <ShieldAlert size={13} className="text-rose-400 shrink-0 mt-0.5" />,
       title: 'Risque EUR/USD',
       sub: 'Panier BKAM 60% EUR',
-      body: `EUR/USD ${eu.toFixed(4)}. Le panier MAD pondÃ¨re l'EUR Ã  60% : chaque 1% de variation EUR/USD dÃ©place USD/MAD d'env. 0.6%. Impact direct sur les contrats import libellÃ©s en EUR.`,
+      body: `EUR/USD ${eu.toFixed(4)}. Le panier MAD pondère l'EUR Ã  60% : chaque 1% de variation EUR/USD déplace USD/MAD d'env. 0.6%. Impact direct sur les contrats import libellés en EUR.`,
     },
     {
       icon: <BarChart3 size={13} className="text-gold-400 shrink-0 mt-0.5" />,
-      title: 'Couverture rÃ©glementaire',
+      title: 'Couverture réglementaire',
       sub: 'Circulaire OC 01/2024',
-      body: 'Les PME peuvent couvrir jusqu\'Ã  100% de la valeur sous-jacente import/export en forwards. DurÃ©e max 12 mois. Seuls les intermÃ©diaires agrÃ©Ã©s BAM peuvent exÃ©cuter ces opÃ©rations.',
+      body: 'Les PME peuvent couvrir jusqu\'Ã  100% de la valeur sous-jacente import/export en forwards. Durée max 12 mois. Seuls les intermédiaires agréés BAM peuvent exécuter ces opérations.',
     },
   ];
 
@@ -291,14 +291,14 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
             Global Market Intelligence
           </h2>
           <p className="text-slate-400 text-sm mt-0.5">
-            G10 FX Â· MAD Crosses Â· MatiÃ¨res PremiÃ¨res Â· Guide Corporates &amp; PME
+            G10 FX · MAD Crosses · Matières Premières · Guide Corporates &amp; PME
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           {fetchedAt && (
             <div className="text-right">
               <p className="text-[10px] text-slate-500 font-mono">{new Date(fetchedAt).toLocaleTimeString()}</p>
-              <p className="text-[9px] text-slate-600">{todayStr} Â· ECB/Frankfurter</p>
+              <p className="text-[9px] text-slate-600">{todayStr} · ECB/Frankfurter</p>
             </div>
           )}
           <button
@@ -324,7 +324,7 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
         <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
           <Globe size={11} className="text-gold-400" />
           <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">G10 FX Monitor</span>
-          <span className="text-[9px] text-slate-600 ml-auto">ECB Indicatif Â· {todayStr}</span>
+          <span className="text-[9px] text-slate-600 ml-auto">ECB Indicatif · {todayStr}</span>
         </div>
         <div className="overflow-x-auto">
           <div className="flex gap-px min-w-max bg-navy-800/20">
@@ -355,7 +355,7 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
           <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
             <BarChart3 size={11} className="text-gold-400" />
             <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">Cours MAD (Dirham)</span>
-            <span className="text-[9px] text-slate-600 ml-auto">Panier K={BASKET_K} Â· {EUR_WEIGHT*100}%EUR+{USD_WEIGHT*100}%USD</span>
+            <span className="text-[9px] text-slate-600 ml-auto">Panier K={BASKET_K} · {EUR_WEIGHT*100}%EUR+{USD_WEIGHT*100}%USD</span>
           </div>
           <div className="divide-y divide-navy-800/40">
             {madCrosses.map(({ label, rate, prev, primary }) => {
@@ -379,7 +379,7 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
             })}
           </div>
           <div className="px-4 py-2.5 bg-navy-800/20 border-t border-navy-700/40">
-            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mb-1.5">Composition Panier BKAM Â· Bande Â±5%</p>
+            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mb-1.5">Composition Panier BKAM · Bande ±5%</p>
             <div className="flex rounded-full overflow-hidden h-1.5 w-full">
               <div className="bg-blue-500 h-full" style={{ width: '60%' }} />
               <div className="bg-emerald-500 h-full" style={{ width: '40%' }} />
@@ -397,7 +397,7 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
             <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
               <Globe size={11} className="text-gold-400" />
               <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">Gulf MAD</span>
-              <span className="text-[9px] text-slate-600 ml-auto">ParitÃ©s USD fixes</span>
+              <span className="text-[9px] text-slate-600 ml-auto">Parités USD fixes</span>
             </div>
             <div className="grid grid-cols-2 gap-px bg-navy-800/30">
               {gulfCrosses.map(({ countryCode, label, rate, note }) => (
@@ -410,12 +410,12 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
             </div>
           </div>
 
-          {/* Scandinavian MAD crosses â€” bois, papier, Ã©quipements */}
+          {/* Scandinavian MAD crosses â€” bois, papier, équipements */}
           <div className="bg-[#0b1a30] border border-navy-700/50 rounded-xl overflow-hidden">
             <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
               <Globe size={11} className="text-blue-400" />
               <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Nordiques MAD</span>
-              <span className="text-[9px] text-slate-600 ml-auto">Bois Â· Papier Â· Pharma</span>
+              <span className="text-[9px] text-slate-600 ml-auto">Bois · Papier · Pharma</span>
             </div>
             <div className="grid grid-cols-1 gap-px bg-navy-800/30">
               {nordCrosses.map(({ countryCode, label, rate, note }) => (
@@ -455,17 +455,17 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
       <div className="bg-[#0b1a30] border border-navy-700/50 rounded-xl overflow-hidden">
         <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
           <BarChart3 size={11} className="text-gold-400" />
-          <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">MatiÃ¨res PremiÃ¨res â€” Indicateurs Macro Maroc</span>
-          <span className="text-[9px] text-slate-600 ml-auto">Yahoo Finance Â· CORS proxy</span>
+          <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">Matières Premières â€” Indicateurs Macro Maroc</span>
+          <span className="text-[9px] text-slate-600 ml-auto">Yahoo Finance · CORS proxy</span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-navy-800/30">
           {[
-            { sym: 'BZ=F', label: 'Brent',   flag: 'âš¡', unit: '/bbl', note: 'Import Ã©nergie ~100%' },
-            { sym: 'GC=F', label: 'Or',       flag: 'ðŸ¥‡', unit: '/oz',  note: 'RÃ©serves BAM' },
-            { sym: 'HG=F', label: 'Cuivre',   flag: 'ðŸ”§', unit: '/lb',  note: 'Nexans Â· cÃ¢bliers' },
-            { sym: 'ZW=F', label: 'BlÃ©',      flag: 'ðŸŒ¾', unit: '/bu',  note: 'MENA top-5 import' },
-            { sym: 'ZC=F', label: 'MaÃ¯s',     flag: 'ðŸŒ½', unit: '/bu',  note: 'Aliment bÃ©tail' },
-            { sym: 'SB=F', label: 'Sucre',    flag: 'ðŸ¬', unit: '/lb',  note: 'COSUMAR Â· subvention' },
+            { sym: 'BZ=F', label: 'Brent',   flag: 'âš¡', unit: '/bbl', note: 'Import énergie ~100%' },
+            { sym: 'GC=F', label: 'Or',       flag: 'ðŸ¥‡', unit: '/oz',  note: 'Réserves BAM' },
+            { sym: 'HG=F', label: 'Cuivre',   flag: 'ðŸ”§', unit: '/lb',  note: 'Nexans · câbliers' },
+            { sym: 'ZW=F', label: 'Blé',      flag: 'ðŸŒ¾', unit: '/bu',  note: 'MENA top-5 import' },
+            { sym: 'ZC=F', label: 'Maïs',     flag: 'ðŸŒ½', unit: '/bu',  note: 'Aliment bétail' },
+            { sym: 'SB=F', label: 'Sucre',    flag: 'ðŸ¬', unit: '/lb',  note: 'COSUMAR · subvention' },
           ].map(({ sym, label, flag, unit, note }) => {
             const d = comms[sym];
             return (
@@ -520,8 +520,8 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
         </div>
         <div className="px-4 py-2.5 border-t border-navy-700/40 bg-navy-800/10">
           <p className="text-[9px] text-slate-600">
-            Circ. OC nÂ° 01/2024 Â· IGOC 2024 Â· DonnÃ©es indicatives uniquement â€” pour toute opÃ©ration,
-            adressez-vous Ã  un <span className="text-gold-600">Ã©tablissement de crÃ©dit agrÃ©Ã© par Bank Al-Maghrib</span>
+            Circ. OC n° 01/2024 · IGOC 2024 · Données indicatives uniquement â€” pour toute opération,
+            adressez-vous Ã  un <span className="text-gold-600">établissement de crédit agréé par Bank Al-Maghrib</span>
           </p>
         </div>
       </div>
@@ -533,13 +533,13 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
           className="w-full px-4 py-3 border-b border-navy-700/40 flex items-center gap-2 hover:bg-navy-800/30 transition text-left"
         >
           <Cpu size={11} className="text-gold-400" />
-          <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">SynthÃ¨se IA â€” Market Brief</span>
+          <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">Synthèse IA â€” Market Brief</span>
           {briefProv && (
             <span className={`ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded border ${PROVIDER_COLORS[briefProv]}`}>
               {PROVIDER_LABELS[briefProv]}
             </span>
           )}
-          <span className="text-[9px] text-slate-600 ml-1">Synth�se IA</span>
+          <span className="text-[9px] text-slate-600 ml-1">Synth�se IA</span>
           <span className="ml-auto text-slate-500">
             {briefOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </span>
@@ -549,7 +549,7 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
             {briefLoading ? (
               <div className="flex items-center gap-3">
                 <Cpu size={13} className="animate-pulse text-gold-400" />
-                <span className="text-slate-400 text-sm">GÃ©nÃ©ration du brief institutionnel en cours...</span>
+                <span className="text-slate-400 text-sm">Génération du brief institutionnel en cours...</span>
               </div>
             ) : aiBrief ? (
               <div className="space-y-3">
@@ -559,7 +559,7 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
               </div>
             ) : (
               <p className="text-slate-600 text-sm">
-                Configurez une clÃ© API (Groq, Gemini, OpenRouter) dans Admin â†’ SystÃ¨me pour activer les briefs IA.
+                Configurez une clé API (Groq, Gemini, OpenRouter) dans Admin â†’ Système pour activer les briefs IA.
               </p>
             )}
           </div>
@@ -579,7 +579,7 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
           </a>
         ))}
         <span className="text-[9px] text-slate-700 ml-auto">
-          Taux indicatifs uniquement Â· Pas de conseil en investissement Â· Non agrÃ©Ã© AMMC/BAM Â·{' '}
+          Taux indicatifs uniquement · Pas de conseil en investissement · Non agréé AMMC/BAM ·{' '}
           <span className="text-gold-700">jad2advisory.com</span>
         </span>
       </div>

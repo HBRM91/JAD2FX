@@ -43,7 +43,7 @@ function divBg(bps: number): string {
 // â”€â”€â”€ Band gauge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function BandGauge({ bps, bandUtilPct }: { bps: number; bandUtilPct?: number }) {
-  // bandUtilPct: 0â€“100% position in Â±5% band (pre-computed by Worker); fallback from bps
+  // bandUtilPct: 0â€“100% position in ±5% band (pre-computed by Worker); fallback from bps
   const pct   = bandUtilPct != null
     ? Math.min(Math.max(bandUtilPct, 1), 99)
     : Math.min(Math.max((bps / BAND_BPS) * 50 + 50, 1), 99);
@@ -60,7 +60,7 @@ function BandGauge({ bps, bandUtilPct }: { bps: number; bandUtilPct?: number }) 
         />
       </div>
       <div className="flex justify-between text-[9px] text-slate-600 mt-0.5 font-mono">
-        <span>âˆ’{BAND_PCT}%</span><span>ParitÃ©</span><span>+{BAND_PCT}%</span>
+        <span>âˆ’{BAND_PCT}%</span><span>Parité</span><span>+{BAND_PCT}%</span>
       </div>
     </div>
   );
@@ -84,7 +84,7 @@ function StatCard({ label, value, sub, color = 'text-white' }: {
 
 function exportCSV(row: FixingDayRow) {
   const lines: string[] = [
-    'Devise,Code ISO,UnitÃ© de cotation,Cours moyen (MAD),Source',
+    'Devise,Code ISO,Unité de cotation,Cours moyen (MAD),Source',
   ];
 
   // Use raw BKAM data if available for exact official values
@@ -148,11 +148,11 @@ export default function BkamFixing() {
         dateMode === 'specific' && selectedDate ? selectedDate : undefined,
       );
       if (dateMode === 'specific' && selectedDate && data.length === 0) {
-        setError(`Aucune donnÃ©e disponible pour le ${formatDateLabel(selectedDate)}.`);
+        setError(`Aucune donnée disponible pour le ${formatDateLabel(selectedDate)}.`);
       }
       setRows(data);
     } catch (e) {
-      setError('Impossible de rÃ©cupÃ©rer les donnÃ©es de fixing.');
+      setError('Impossible de récupérer les données de fixing.');
     } finally {
       setLoading(false);
     }
@@ -192,18 +192,18 @@ export default function BkamFixing() {
             <div>
               <h2 className="text-xl font-bold text-white flex items-center gap-2 uppercase tracking-widest">
                 <Database size={18} className="text-gold-400" />
-                Fixing Officiel BKAM â€” ParitÃ© MAD
+                Fixing Officiel BKAM â€” Parité MAD
               </h2>
               <p className="text-slate-400 text-sm mt-1">
                 {isOfficial
-                  ? `Cours CoursVirement officiel BKAM Â· ${latest?.date} Â· 12h30 Casablanca Â· ${latest?.rawBkamRates?.length ?? 0} devises`
-                  : 'Source: ECB/Frankfurter (proxy indicatif) Â· Formule panier K=10,49 Â· 60% EUR / 40% USD'}
+                  ? `Cours CoursVirement officiel BKAM · ${latest?.date} · 12h30 Casablanca · ${latest?.rawBkamRates?.length ?? 0} devises`
+                  : 'Source: ECB/Frankfurter (proxy indicatif) · Formule panier K=10,49 · 60% EUR / 40% USD'}
               </p>
               {isOfficial && (
                 <div className="flex items-center gap-1.5 mt-1.5">
                   <CheckCircle size={11} className="text-emerald-400" />
                   <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wide">
-                    BKAM CoursVirement Officiel â€” DonnÃ©es authentiques
+                    BKAM CoursVirement Officiel â€” Données authentiques
                   </span>
                 </div>
               )}
@@ -259,12 +259,12 @@ export default function BkamFixing() {
             <Info size={11} className="text-navy-400 mt-0.5 flex-shrink-0" />
             <p className="text-[10px] text-slate-500 leading-relaxed">
               {isOfficial
-                ? <>Taux de change virements (CoursVirement) publiÃ©s par Bank Al-Maghrib Ã  16h15. ParitÃ© panier&nbsp;:
-                    <span className="font-mono text-gold-600 mx-1">USD/MAD = K/(w<sub>EUR</sub>Â·EUR/USD<sub>BCE</sub> + w<sub>USD</sub>)</span>
-                    avec K=10,49 Â· w<sub>EUR</sub>=0,60 Â· w<sub>USD</sub>=0,40.
-                    DÃ©rive = <span className="font-mono text-gold-600 mx-1">(Fixing<sub>BKAM</sub>âˆ’ParitÃ©)/ParitÃ© Ã— 10 000 pb</span>.
+                ? <>Taux de change virements (CoursVirement) publiés par Bank Al-Maghrib Ã  16h15. Parité panier&nbsp;:
+                    <span className="font-mono text-gold-600 mx-1">USD/MAD = K/(w<sub>EUR</sub>·EUR/USD<sub>BCE</sub> + w<sub>USD</sub>)</span>
+                    avec K=10,49 · w<sub>EUR</sub>=0,60 · w<sub>USD</sub>=0,40.
+                    Dérive = <span className="font-mono text-gold-600 mx-1">(Fixing<sub>BKAM</sub>âˆ’Parité)/Parité Ã— 10 000 pb</span>.
                     Art.&nbsp;3, Circ.&nbsp;LC/BKAM/2018/2 â€” non contractuel.</>
-                : 'Aucun proxy configurÃ© â€” donnÃ©es BCE/Frankfurter utilisÃ©es comme proxy indicatif. Configurez un proxy CORS dans Admin pour accÃ©der aux fixing officiels BKAM.'}
+                : 'Aucun proxy configuré â€” données BCE/Frankfurter utilisées comme proxy indicatif. Configurez un proxy CORS dans Admin pour accéder aux fixing officiels BKAM.'}
               {' '}
               <a href={BKAM_LINKS.fixingTransfer}
                 target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400">
@@ -279,7 +279,7 @@ export default function BkamFixing() {
       {loading && (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
           <RefreshCw size={28} className="text-gold-500 animate-spin" />
-          <p className="text-slate-500 text-sm">Chargement du fixing BKAMâ€¦</p>
+          <p className="text-slate-500 text-sm">Chargement du fixing BKAM…</p>
         </div>
       )}
 
@@ -289,7 +289,7 @@ export default function BkamFixing() {
           <AlertTriangle size={16} className="text-red-400 mt-0.5 flex-shrink-0" />
           <div>
             <p className="text-sm font-semibold text-red-400">{error}</p>
-            <button onClick={load} className="text-xs text-red-400 underline mt-1">RÃ©essayer</button>
+            <button onClick={load} className="text-xs text-red-400 underline mt-1">Réessayer</button>
           </div>
         </div>
       )}
@@ -310,21 +310,21 @@ export default function BkamFixing() {
                     ECB PROXY
                   </span>
                 )}
-                SÃ©ance {latest.dateLabel}
+                Séance {latest.dateLabel}
               </h3>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-              <StatCard label="EUR/USD (ECB)" value={fmt4(latest.eurUsd)} sub="Cross de rÃ©fÃ©rence" color="text-slate-300" />
+              <StatCard label="EUR/USD (ECB)" value={fmt4(latest.eurUsd)} sub="Cross de référence" color="text-slate-300" />
               <StatCard
                 label={isOfficial ? 'EUR/MAD Fixing BKAM' : 'EUR/MAD (ECB Proxy)'}
                 value={fmt4(latest.eurMad_ecb)}
-                sub={isOfficial ? 'â–¸ Cours officiel' : 'â‰ˆ Proxy indicatif'}
+                sub={isOfficial ? '▸ Cours officiel' : 'â‰ˆ Proxy indicatif'}
                 color="text-white"
               />
-              <StatCard label="EUR/MAD ParitÃ© Panier" value={fmt4(latest.eurMad_basket)} sub="K/(0.60Ã—EUR/USD+0.40)" color="text-slate-400" />
+              <StatCard label="EUR/MAD Parité Panier" value={fmt4(latest.eurMad_basket)} sub="K/(0.60Ã—EUR/USD+0.40)" color="text-slate-400" />
               <StatCard
-                label="DÃ©rive EUR/MAD"
+                label="Dérive EUR/MAD"
                 value={fmtBps(latest.eurMad_div_bps)}
                 sub={fmtPct(latest.eurMad_div_pct)}
                 color={divColor(latest.eurMad_div_bps)}
@@ -332,11 +332,11 @@ export default function BkamFixing() {
               <StatCard
                 label={isOfficial ? 'USD/MAD Fixing BKAM' : 'USD/MAD (ECB Proxy)'}
                 value={fmt4(latest.usdMad_ecb)}
-                sub={isOfficial ? 'â–¸ Cours officiel' : 'â‰ˆ Proxy indicatif'}
+                sub={isOfficial ? '▸ Cours officiel' : 'â‰ˆ Proxy indicatif'}
                 color="text-white"
               />
               <StatCard
-                label="DÃ©rive USD/MAD"
+                label="Dérive USD/MAD"
                 value={fmtBps(latest.usdMad_div_bps)}
                 color={divColor(latest.usdMad_div_bps)}
               />
@@ -348,11 +348,11 @@ export default function BkamFixing() {
             <div className={`border rounded-xl p-4 flex items-start gap-3 ${divBg(Math.max(Math.abs(latest.eurMad_div_bps), Math.abs(latest.usdMad_div_bps)))}`}>
               <AlertTriangle size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
               <div>
-                <p className="text-sm font-bold text-amber-300">DÃ©rive significative du fixing BKAM</p>
+                <p className="text-sm font-bold text-amber-300">Dérive significative du fixing BKAM</p>
                 <p className="text-[11px] text-slate-400 leading-relaxed mt-0.5">
-                  Le cours EUR/MAD s'Ã©carte de <strong className="text-white">{fmtBps(latest.eurMad_div_bps)}</strong> de la
-                  paritÃ© panier thÃ©orique. Ce type de dÃ©rive reflÃ¨te l'activitÃ© du MarchÃ© Interbancaire des Changes (MIC) BKAM,
-                  qui intÃ¨gre l'offre et la demande rÃ©elles de devises. Le MAD reste dans la bande lÃ©gale de Â±{BAND_PCT}%.
+                  Le cours EUR/MAD s'écarte de <strong className="text-white">{fmtBps(latest.eurMad_div_bps)}</strong> de la
+                  parité panier théorique. Ce type de dérive reflète l'activité du Marché Interbancaire des Changes (MIC) BKAM,
+                  qui intègre l'offre et la demande réelles de devises. Le MAD reste dans la bande légale de ±{BAND_PCT}%.
                 </p>
               </div>
             </div>
@@ -363,7 +363,7 @@ export default function BkamFixing() {
             <div className="px-5 py-3 border-b border-navy-800 flex items-center justify-between">
               <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">
                 {isOfficial
-                  ? `Cours Officiels BKAM â€” ${latest.rawBkamRates?.length ?? 0} Devises Â· ${latest.date}`
+                  ? `Cours Officiels BKAM â€” ${latest.rawBkamRates?.length ?? 0} Devises · ${latest.date}`
                   : 'Cours Indicatifs (ECB Proxy) â€” 24 Devises'}
               </h3>
               <div className="flex items-center gap-2">
@@ -389,9 +389,9 @@ export default function BkamFixing() {
                     <th className="text-right px-3 py-2.5 font-semibold">
                       {isOfficial ? 'Cours BKAM (MAD)' : 'Cours Proxy (MAD)'}
                     </th>
-                    <th className="text-right px-3 py-2.5 font-semibold">ParitÃ© Panier</th>
-                    <th className="text-right px-3 py-2.5 font-semibold">DÃ©rive (bps)</th>
-                    <th className="text-right px-4 py-2.5 font-semibold">Bande Â±5%</th>
+                    <th className="text-right px-3 py-2.5 font-semibold">Parité Panier</th>
+                    <th className="text-right px-3 py-2.5 font-semibold">Dérive (bps)</th>
+                    <th className="text-right px-4 py-2.5 font-semibold">Bande ±5%</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-navy-800/40">
@@ -486,8 +486,8 @@ export default function BkamFixing() {
             <div className="px-5 py-2.5 border-t border-navy-800 flex flex-wrap items-center gap-3">
               <p className="text-[9px] text-slate-600">
                 {isOfficial
-                  ? `Source: BKAM CoursVirement API Â· Fixing ${latest.date} 12h30 Â· ${latest.rawBkamRates?.length} devises`
-                  : 'Source: ECB Frankfurter (proxy indicatif) Â· Non officiel BKAM'}
+                  ? `Source: BKAM CoursVirement API · Fixing ${latest.date} 12h30 · ${latest.rawBkamRates?.length} devises`
+                  : 'Source: ECB Frankfurter (proxy indicatif) · Non officiel BKAM'}
               </p>
               <a href={BKAM_LINKS.fixingTransfer}
                 target="_blank" rel="noopener noreferrer"
@@ -506,7 +506,7 @@ export default function BkamFixing() {
                 aria-expanded={showTrend}
               >
                 <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">
-                  Tendance 5 Jours â€” EUR/MAD & USD/MAD vs ParitÃ© Panier
+                  Tendance 5 Jours â€” EUR/MAD & USD/MAD vs Parité Panier
                 </h3>
                 <ChevronDown size={14} className={`text-slate-400 transition-transform ${showTrend ? 'rotate-180' : ''}`} />
               </button>
@@ -537,7 +537,7 @@ export default function BkamFixing() {
               </div>
 
               <h3 className="text-[11px] font-bold text-white uppercase tracking-widest pt-2">
-                DÃ©rive Fixing vs Panier (bps) â€” {isOfficial ? 'DonnÃ©es BKAM Officielles' : 'Proxy ECB'}
+                Dérive Fixing vs Panier (bps) â€” {isOfficial ? 'Données BKAM Officielles' : 'Proxy ECB'}
               </h3>
               <div className="h-40">
                 <ResponsiveContainer width="100%" height="100%">
@@ -562,8 +562,8 @@ export default function BkamFixing() {
                 </ResponsiveContainer>
               </div>
               <p className="text-[9px] text-slate-600">
-                DÃ©rive = (Fixing {isOfficial ? 'BKAM' : 'ECB'} âˆ’ ParitÃ© panier) / ParitÃ© panier Ã— 10 000 bps Â·
-                K=10,49 Â· Panier 60% EUR / 40% USD Â· Bande rÃ©glementaire Â±{BAND_PCT}% (500 bps)
+                Dérive = (Fixing {isOfficial ? 'BKAM' : 'ECB'} âˆ’ Parité panier) / Parité panier Ã— 10 000 bps ·
+                K=10,49 · Panier 60% EUR / 40% USD · Bande réglementaire ±{BAND_PCT}% (500 bps)
               </p>
                 </>
               )}
@@ -574,9 +574,9 @@ export default function BkamFixing() {
 
       {/* â”€â”€ Legal â”€â”€ */}
       <p className="text-[9px] text-slate-700 leading-relaxed text-center">
-        Les taux prÃ©sentÃ©s sur cette page sont {isOfficial ? 'les cours officiels CoursVirement publiÃ©s par Bank Al-Maghrib' : 'des estimations indicatives basÃ©es sur les donnÃ©es BCE'}.
-        Ils ne constituent pas des prix de transaction. Pour toute opÃ©ration de change, adressez-vous Ã  un Ã©tablissement de crÃ©dit agrÃ©Ã© par Bank Al-Maghrib (Art. 3, LC/BKAM/2018/2).
-        JAD2 Advisory â€” non Ã©tablissement financier (Loi nÂ° 43-12).
+        Les taux présentés sur cette page sont {isOfficial ? 'les cours officiels CoursVirement publiés par Bank Al-Maghrib' : 'des estimations indicatives basées sur les données BCE'}.
+        Ils ne constituent pas des prix de transaction. Pour toute opération de change, adressez-vous Ã  un établissement de crédit agréé par Bank Al-Maghrib (Art. 3, LC/BKAM/2018/2).
+        JAD2 Advisory â€” non établissement financier (Loi n° 43-12).
       </p>
     </div>
   );

@@ -196,13 +196,13 @@ const BilletsPage: React.FC = () => {
                 <h1 className="text-lg font-bold text-white uppercase tracking-widest">
                   {locale === 'ar' ? 'Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø£ÙˆØ±Ø§Ù‚ Ø§Ù„Ù†Ù‚Ø¯ÙŠØ© Ø§Ù„Ø£Ø¬Ù†Ø¨ÙŠØ© â€” Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨' :
                    locale === 'en' ? 'Foreign Banknote Rates â€” Bank Al-Maghrib' :
-                   'Cours Billets de Banque Ã‰trangers â€” Bank Al-Maghrib'}
+                   'Cours Billets de Banque Étrangers â€” Bank Al-Maghrib'}
                 </h1>
               </div>
               <p className="text-[11px] text-slate-400">
-                {locale === 'ar' ? 'Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ø§Ù„Ù…Ù†Ø´ÙˆØ±Ø© ÙŠÙˆÙ…ÙŠØ§Ù‹ Â· CoursBBE Â· Ù…ØµØ¯Ø±: Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨' :
-                 locale === 'en' ? 'Official daily rates Â· CoursBBE Â· Source: Bank Al-Maghrib' :
-                 'Cours officiels publiÃ©s quotidiennement Â· CoursBBE Â· Source: Bank Al-Maghrib'}
+                {locale === 'ar' ? 'Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ø§Ù„Ù…Ù†Ø´ÙˆØ±Ø© ÙŠÙˆÙ…ÙŠØ§Ù‹ · CoursBBE · Ù…ØµØ¯Ø±: Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨' :
+                 locale === 'en' ? 'Official daily rates · CoursBBE · Source: Bank Al-Maghrib' :
+                 'Cours officiels publiés quotidiennement · CoursBBE · Source: Bank Al-Maghrib'}
               </p>
             </div>
             <div className="flex items-center gap-2">
@@ -247,7 +247,7 @@ const BilletsPage: React.FC = () => {
             <span className="text-[9px] font-mono px-2 py-0.5 rounded border border-amber-700/40 bg-amber-950/20 text-amber-400">
               âš  {locale === 'ar' ? 'Ø¨ÙŠØ§Ù†Ø§Øª BKAM ØºÙŠØ± Ù…ØªØ§Ø­Ø© â€” ØªØ­Ù‚Ù‚ Ù…Ù† Ø¥Ø¹Ø¯Ø§Ø¯ Ø§Ù„ÙˆÙƒÙŠÙ„' :
                   locale === 'en' ? 'BKAM data unavailable â€” check proxy config' :
-                  'DonnÃ©es BKAM indisponibles â€” vÃ©rifiez la configuration proxy'}
+                  'Données BKAM indisponibles â€” vérifiez la configuration proxy'}
             </span>
           )}
         </div>
@@ -261,7 +261,7 @@ const BilletsPage: React.FC = () => {
             ? 'Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ø£Ø¯Ù†Ø§Ù‡ Ù‡ÙŠ Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ø§Ù„ØªÙŠ ØªÙ†Ø´Ø±Ù‡Ø§ ÙŠÙˆÙ…ÙŠØ§Ù‹ Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨. ØªÙØ·Ø¨ÙÙ‘Ù‚ Ø§Ù„Ø¨Ù†ÙˆÙƒ Ø§Ù„ØªØ¬Ø§Ø±ÙŠØ© Ø§Ù„Ù…Ø¹ØªÙ…Ø¯Ø© Ù‡ÙˆØ§Ù…Ø´Ù‡Ø§ Ø§Ù„Ø®Ø§ØµØ© Ø¹Ù„Ù‰ Ù‡Ø°Ù‡ Ø§Ù„Ø£Ø³Ø¹Ø§Ø±. Ù„Ù„Ø­ØµÙˆÙ„ Ø¹Ù„Ù‰ Ø§Ù„Ø³Ø¹Ø± Ø§Ù„Ù…Ø·Ø¨ÙŽÙ‘Ù‚ ÙØ¹Ù„ÙŠØ§Ù‹ Ø¹Ù„Ù‰ Ø¹Ù…Ù„ÙŠØªÙƒØŒ ØªÙˆØ§ØµÙ„ Ù…Ø¹ Ø¨Ù†ÙƒÙƒ Ø§Ù„Ù…Ø¹ØªÙ…Ø¯ Ù„Ø¯Ù‰ Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨.'
             : locale === 'en'
             ? 'The rates below are the official daily rates published by Bank Al-Maghrib. Licensed commercial banks apply their own commercial margins above these rates. For the exact rate applicable to your transaction, contact your BAM-licensed bank.'
-            : 'Les cours ci-dessous sont les taux officiels quotidiens publiÃ©s par Bank Al-Maghrib. Les banques commerciales agrÃ©Ã©es appliquent leurs propres marges commerciales sur la base de ces cours. Pour le taux effectivement applicable Ã  votre opÃ©ration, contactez votre Ã©tablissement bancaire agrÃ©Ã© par Bank Al-Maghrib.'}
+            : 'Les cours ci-dessous sont les taux officiels quotidiens publiés par Bank Al-Maghrib. Les banques commerciales agréées appliquent leurs propres marges commerciales sur la base de ces cours. Pour le taux effectivement applicable Ã  votre opération, contactez votre établissement bancaire agréé par Bank Al-Maghrib.'}
         </p>
       </div>
 
@@ -277,16 +277,16 @@ const BilletsPage: React.FC = () => {
           <span className="text-[9px] text-slate-500">
             {locale === 'ar' ? 'Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ù…Ø¹Ø±ÙˆØ¶Ø©: achatClientele / venteClientele â€” Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨' :
              locale === 'en' ? 'Rates shown: achatClientele / venteClientele â€” Bank Al-Maghrib' :
-             'Cours affichÃ©s: achatClientele / venteClientele â€” Bank Al-Maghrib'}
+             'Cours affichés: achatClientele / venteClientele â€” Bank Al-Maghrib'}
           </span>
         </div>
 
         {loading ? (
           <div className="py-16 text-center text-slate-400 text-sm">
             <RefreshCw size={20} className="animate-spin mx-auto mb-3 text-gold-500" />
-            {locale === 'ar' ? 'Ø¬Ø§Ø±Ù ØªØ­Ù…ÙŠÙ„ Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨â€¦' :
-             locale === 'en' ? 'Loading BKAM ratesâ€¦' :
-             'Chargement des cours BKAMâ€¦'}
+            {locale === 'ar' ? 'Ø¬Ø§Ø±Ù ØªØ­Ù…ÙŠÙ„ Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨…' :
+             locale === 'en' ? 'Loading BKAM rates…' :
+             'Chargement des cours BKAM…'}
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -297,7 +297,7 @@ const BilletsPage: React.FC = () => {
                     {locale === 'ar' ? 'Ø§Ù„Ø¹Ù…Ù„Ø©' : locale === 'en' ? 'Currency' : 'Devise'}
                   </th>
                   <th className="py-3 px-3 text-center font-semibold">
-                    {locale === 'ar' ? 'Ø§Ù„ÙˆØ­Ø¯Ø©' : 'UnitÃ©'}
+                    {locale === 'ar' ? 'Ø§Ù„ÙˆØ­Ø¯Ø©' : 'Unité'}
                   </th>
                   <th className="py-3 px-3 text-right font-semibold text-emerald-400">
                     {locale === 'ar' ? 'Ø´Ø±Ø§Ø¡ (Ø£ÙˆØ±Ø§Ù‚ Ù†Ù‚Ø¯ÙŠØ©)' : locale === 'en' ? 'Buy (Banknotes)' : 'Achat (Billets)'}
@@ -380,10 +380,10 @@ const BilletsPage: React.FC = () => {
         <div className="px-5 py-3 border-t border-navy-800 flex flex-wrap items-center justify-between gap-2">
           <p className="text-[10px] text-slate-500 leading-relaxed">
             {locale === 'ar'
-              ? 'Ø§Ù„Ù…ØµØ¯Ø±: Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨ â€” CoursBBE (Ø£ÙˆØ±Ø§Ù‚ Ù†Ù‚Ø¯ÙŠØ© Ø£Ø¬Ù†Ø¨ÙŠØ©) Â· Ù…Ù†Ø´ÙˆØ± ÙŠÙˆÙ…ÙŠØ§Ù‹ ÙÙŠ 08:30 ØµØ¨Ø§Ø­Ø§Ù‹ Â· Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ù„Ø§ ØªØ´Ù…Ù„ Ø§Ù„Ø¹Ù…ÙˆÙ„Ø§Øª Ø§Ù„ØªØ¬Ø§Ø±ÙŠØ© Ù„Ù„Ø¨Ù†ÙˆÙƒ'
+              ? 'Ø§Ù„Ù…ØµØ¯Ø±: Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨ â€” CoursBBE (Ø£ÙˆØ±Ø§Ù‚ Ù†Ù‚Ø¯ÙŠØ© Ø£Ø¬Ù†Ø¨ÙŠØ©) · Ù…Ù†Ø´ÙˆØ± ÙŠÙˆÙ…ÙŠØ§Ù‹ ÙÙŠ 08:30 ØµØ¨Ø§Ø­Ø§Ù‹ · Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ù„Ø§ ØªØ´Ù…Ù„ Ø§Ù„Ø¹Ù…ÙˆÙ„Ø§Øª Ø§Ù„ØªØ¬Ø§Ø±ÙŠØ© Ù„Ù„Ø¨Ù†ÙˆÙƒ'
               : locale === 'en'
-              ? 'Source: Bank Al-Maghrib â€” CoursB.B.E Â· Published daily at 08:30 Casablanca Â· Official rates do not include commercial bank margins'
-              : 'Source: Bank Al-Maghrib â€” CoursB.B.E (Billets de Banque Ã‰trangers) Â· PubliÃ© quotidiennement Ã  08h30 Â· Ces cours ne comprennent pas les marges commerciales des banques'}
+              ? 'Source: Bank Al-Maghrib â€” CoursB.B.E · Published daily at 08:30 Casablanca · Official rates do not include commercial bank margins'
+              : 'Source: Bank Al-Maghrib â€” CoursB.B.E (Billets de Banque Étrangers) · Publié quotidiennement Ã  08h30 · Ces cours ne comprennent pas les marges commerciales des banques'}
           </p>
           <a
             href={BKAM_LINKS.fixingBanknotes}
@@ -413,7 +413,7 @@ const BilletsPage: React.FC = () => {
                 ? 'ÙŠØµØ¯Ø± Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨ ÙŠÙˆÙ…ÙŠØ§Ù‹ Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø´Ø±Ø§Ø¡ ÙˆØ§Ù„Ø¨ÙŠØ¹ Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ù„Ù„Ø¹Ù…Ù„Ø§Øª Ø§Ù„Ø£Ø¬Ù†Ø¨ÙŠØ© ÙÙŠ Ø´ÙƒÙ„ Ø£ÙˆØ±Ø§Ù‚ Ù†Ù‚Ø¯ÙŠØ©. ØªÙÙ…Ø«ÙÙ‘Ù„ Ù‡Ø°Ù‡ Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø­Ø¯ÙˆØ¯ Ø§Ù„Ù…Ø±Ø¬Ø¹ÙŠØ© Ù„Ù„Ø¹Ù…Ù„ÙŠØ§Øª.'
                 : locale === 'en'
                 ? 'Bank Al-Maghrib publishes daily official buy/sell rates for foreign banknotes. These rates represent the official regulatory reference for banknote transactions.'
-                : 'Bank Al-Maghrib publie quotidiennement les cours officiels d\'achat et de vente pour les billets de banque Ã©trangers. Ces cours constituent le rÃ©fÃ©rentiel rÃ©glementaire officiel.',
+                : 'Bank Al-Maghrib publie quotidiennement les cours officiels d\'achat et de vente pour les billets de banque étrangers. Ces cours constituent le référentiel réglementaire officiel.',
               icon: 'ðŸ›',
             },
             {
@@ -422,7 +422,7 @@ const BilletsPage: React.FC = () => {
                 ? 'ØªÙØ·Ø¨ÙÙ‘Ù‚ Ø§Ù„Ø¨Ù†ÙˆÙƒ Ø§Ù„ØªØ¬Ø§Ø±ÙŠØ© Ø§Ù„Ù…Ø¹ØªÙ…Ø¯Ø© Ù…Ù† Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨ Ù‡ÙˆØ§Ù…Ø´Ù‡Ø§ Ø§Ù„Ø®Ø§ØµØ© ÙÙˆÙ‚ Ù‡Ø°Ù‡ Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø±Ø³Ù…ÙŠØ©. Ù„Ù„Ø§Ø·Ù„Ø§Ø¹ Ø¹Ù„Ù‰ Ø§Ù„Ø³Ø¹Ø± Ø§Ù„ÙØ¹Ù„ÙŠ Ø§Ù„Ù…Ø·Ø¨ÙŽÙ‘Ù‚ØŒ ØªÙˆØ§ØµÙ„ Ù…Ø¨Ø§Ø´Ø±Ø© Ù…Ø¹ Ø¨Ù†ÙƒÙƒ.'
                 : locale === 'en'
                 ? 'Licensed commercial banks apply their own margins above these official rates. Contact your bank directly for the rate applicable to your specific transaction.'
-                : 'Les banques commerciales agrÃ©Ã©es appliquent leurs propres marges commerciales au-dessus de ces cours. Pour le cours applicable Ã  votre opÃ©ration, contactez directement votre banque.',
+                : 'Les banques commerciales agréées appliquent leurs propres marges commerciales au-dessus de ces cours. Pour le cours applicable Ã  votre opération, contactez directement votre banque.',
               icon: 'ðŸ¦',
             },
             {
@@ -431,7 +431,7 @@ const BilletsPage: React.FC = () => {
                 ? 'Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø£ÙˆØ±Ø§Ù‚ Ø§Ù„Ù†Ù‚Ø¯ÙŠØ© Ø£Ù‚Ù„ Ù…Ù„Ø§Ø¡Ù…Ø©Ù‹ Ø¹Ù…ÙˆÙ…Ø§Ù‹ Ù…Ù† Ø£Ø³Ø¹Ø§Ø± Ø§Ù„ØªØ­ÙˆÙŠÙ„Ø§Øª Ø¨Ø³Ø¨Ø¨ ØªÙƒØ§Ù„ÙŠÙ Ø§Ù„Ù…Ù†Ø§ÙˆÙ„Ø© Ø§Ù„Ù…Ø§Ø¯ÙŠØ© (Ù†Ù‚Ù„ Ø§Ù„Ø£Ù…ÙˆØ§Ù„ØŒ Ø§Ù„ØªØ£Ù…ÙŠÙ†ØŒ Ø§Ù„ØªØ®Ø²ÙŠÙ† Ø§Ù„Ø¢Ù…Ù†ØŒ Ø§Ù„Ø¹Ø¯). Ù‡Ø°Ø§ Ø§Ù„ÙØ§Ø±Ù‚ Ù‡ÙŠÙƒÙ„ÙŠ ÙÙŠ Ø§Ù„Ù†Ø¸Ø§Ù… Ø§Ù„Ù…ØµØ±ÙÙŠ.'
                 : locale === 'en'
                 ? 'Banknote rates are generally less favorable than wire transfer rates due to physical handling costs (cash transport, insurance, secure storage, counting). This differential is structural across banking systems.'
-                : 'Les cours billets sont structurellement moins favorables que les cours virements en raison des coÃ»ts logistiques : transport de fonds, assurance, stockage sÃ©curisÃ©, manipulation physique des espÃ¨ces.',
+                : 'Les cours billets sont structurellement moins favorables que les cours virements en raison des coûts logistiques : transport de fonds, assurance, stockage sécurisé, manipulation physique des espèces.',
               icon: 'ðŸ’µ',
             },
           ].map(card => (
@@ -452,7 +452,7 @@ const BilletsPage: React.FC = () => {
           ? 'JAD2FX ÙŠØ¹ÙŠØ¯ Ù†Ø´Ø± Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ù„Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨ Ù„Ø£ØºØ±Ø§Ø¶ ØªØ¹Ù„ÙŠÙ…ÙŠØ© ÙˆØ¥Ø¹Ù„Ø§Ù…ÙŠØ© ÙØ­Ø³Ø¨. Ù‡Ø°Ù‡ Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ù„Ø§ ØªÙ…Ø«Ù„ Ø¹Ø±ÙˆØ¶Ø§Ù‹ Ù‚Ø§Ø¨Ù„Ø© Ù„Ù„ØªÙ†ÙÙŠØ°. JAD2 Advisory Ù„ÙŠØ³Øª Ù…Ø¤Ø³Ø³Ø© Ù…Ø±Ø®ØµØ© Ù„ØªÙ‚Ø¯ÙŠÙ… Ø®Ø¯Ù…Ø§Øª Ø§Ù„Ø§Ø³ØªØ«Ù…Ø§Ø± ÙˆÙ„Ø§ ØªÙÙ†ÙÙÙ‘Ø° Ø¹Ù…Ù„ÙŠØ§Øª ØµØ±Ù Ø§Ù„Ø¹Ù…Ù„Ø§Øª. Ù„Ø£ÙŠ Ø¹Ù…Ù„ÙŠØ© ØµØ±ÙØŒ ØªÙˆØ§ØµÙ„ Ù…Ø¹ Ø¨Ù†Ùƒ Ù…Ø¹ØªÙ…Ø¯ Ù„Ø¯Ù‰ Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨.'
           : locale === 'en'
           ? 'JAD2FX reproduces official Bank Al-Maghrib rates for educational and informational purposes only. These rates do not constitute executable offers. JAD2 Advisory is not a licensed investment service provider and does not execute currency transactions. For any exchange transaction, contact a BAM-licensed bank.'
-          : 'JAD2FX reproduit les cours officiels de Bank Al-Maghrib Ã  titre Ã©ducatif et informatif uniquement. Ces cours ne constituent pas des offres exÃ©cutables. JAD2 Advisory n\'est pas habilitÃ©e Ã  fournir des services d\'investissement et n\'exÃ©cute aucune transaction de change. Pour toute opÃ©ration de change, adressez-vous Ã  un Ã©tablissement de crÃ©dit agrÃ©Ã© par Bank Al-Maghrib.'}
+          : 'JAD2FX reproduit les cours officiels de Bank Al-Maghrib Ã  titre éducatif et informatif uniquement. Ces cours ne constituent pas des offres exécutables. JAD2 Advisory n\'est pas habilitée Ã  fournir des services d\'investissement et n\'exécute aucune transaction de change. Pour toute opération de change, adressez-vous Ã  un établissement de crédit agréé par Bank Al-Maghrib.'}
       </p>
     </div>
   );

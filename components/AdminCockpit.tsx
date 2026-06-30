@@ -288,11 +288,11 @@ export default function AdminCockpit({ navTo }: { navTo?: (v: any) => void }) {
         <div className="flex items-center gap-2">
           <Layers size={16} className="text-gold-500" />
           <h1 className="text-sm sm:text-base font-bold text-white uppercase tracking-wider">
-            Cockpit MaÃ®tre â€” Desk FX
+            Cockpit Maître â€” Desk FX
           </h1>
           {/* P2-6: positions/P&L/VaR below are synthetic (see comments at 209,237,240) */}
           <span className="text-[9px] font-black text-amber-300 bg-amber-900/40 border border-amber-700/50 px-1.5 py-0.5 rounded uppercase tracking-widest">
-            DÃ©mo
+            Démo
           </span>
         </div>
         <div className="flex items-center gap-1.5 text-[10px] sm:text-xs">
@@ -300,7 +300,7 @@ export default function AdminCockpit({ navTo }: { navTo?: (v: any) => void }) {
           <span className={isLive ? 'text-emerald-400' : 'text-red-400'}>
             {isLive ? 'LIVE' : paused ? 'PAUSE' : 'OFFLINE'}
           </span>
-          <span className="text-slate-500">Â· {ageSecs}s</span>
+          <span className="text-slate-500">· {ageSecs}s</span>
         </div>
         <div className="ml-auto flex gap-1.5">
           <button
@@ -344,7 +344,7 @@ export default function AdminCockpit({ navTo }: { navTo?: (v: any) => void }) {
         <KPI
           label="P&L Jour"
           value={`${pnlUp ? '+' : ''}${(pnlDay / 1000).toFixed(1)}k MAD`}
-          sub={`${positions.length} positions Â· ${(totalNotional / 1_000_000).toFixed(1)}M notional`}
+          sub={`${positions.length} positions · ${(totalNotional / 1_000_000).toFixed(1)}M notional`}
           delta={`${grossPnlPct >= 0 ? '+' : ''}${grossPnlPct.toFixed(1)} bps`}
           deltaUp={pnlUp}
           icon={pnlUp ? TrendingUp : TrendingDown}
@@ -400,7 +400,7 @@ export default function AdminCockpit({ navTo }: { navTo?: (v: any) => void }) {
               <h2 className="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider">Positions & P&L</h2>
             </div>
             <span className="text-[9px] sm:text-[10px] text-slate-500">
-              {positions.filter((p) => p.pnl >= 0).length} gagnantes Â· {positions.filter((p) => p.pnl < 0).length} perdantes
+              {positions.filter((p) => p.pnl >= 0).length} gagnantes · {positions.filter((p) => p.pnl < 0).length} perdantes
             </span>
           </div>
           <div className="overflow-x-auto">
@@ -448,19 +448,19 @@ export default function AdminCockpit({ navTo }: { navTo?: (v: any) => void }) {
           <Clock size={11} className="text-slate-500" />
           {new Date(now).toLocaleTimeString('fr-MA')}
         </span>
-        <span className="text-slate-500">Â·</span>
+        <span className="text-slate-500">·</span>
         <span className="text-slate-400">
           Refresh: <span className="text-slate-200 font-bold">{Math.round(config.refreshIntervalMs / 1000)}s</span>
         </span>
-        <span className="text-slate-500">Â·</span>
+        <span className="text-slate-500">·</span>
         <span className="text-slate-400">
           Live: <span className="text-slate-200 font-bold">{livePrices.length}</span> pairs
         </span>
-        <span className="text-slate-500">Â·</span>
+        <span className="text-slate-500">·</span>
         <span className="text-slate-400 hidden sm:inline">
           Source: <span className="text-slate-200 font-bold">ECB + BKAM</span>
         </span>
-        <span className="text-slate-500 hidden md:inline">Â·</span>
+        <span className="text-slate-500 hidden md:inline">·</span>
         <span className="text-slate-400 hidden md:inline">
           Admin: <span className={isAdmin ? 'text-emerald-400' : 'text-amber-400'}>{isAdmin ? 'OK' : 'Guest'}</span>
         </span>

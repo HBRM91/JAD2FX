@@ -74,7 +74,7 @@ const OPENAPI_SPEC = {
   info: {
     title: 'JAD2FX Public API',
     version: '1.0.0',
-    description: 'Taux de change MAD, simulations forward, donnÃ©es OC. Free tier 100 req/jour, paid 10k req/jour.',
+    description: 'Taux de change MAD, simulations forward, données OC. Free tier 100 req/jour, paid 10k req/jour.',
     contact: { email: 'api@jad2advisory.com', url: 'https://jad2advisory.com' },
     license: { name: 'Proprietary' },
   },
@@ -115,7 +115,7 @@ export default function ApiDocs() {
       <div className="flex items-center gap-2">
         <Code size={14} className="text-gold-500" />
         <h1 className="text-base font-bold text-white uppercase tracking-wider">API Documentation</h1>
-        <span className="text-[10px] text-slate-500 ml-auto">v1.0 Â· OpenAPI 3.0</span>
+        <span className="text-[10px] text-slate-500 ml-auto">v1.0 · OpenAPI 3.0</span>
       </div>
 
       {/* Quickstart */}
@@ -123,24 +123,24 @@ export default function ApiDocs() {
         <h2 className="text-sm font-bold text-white">Quickstart</h2>
         <p className="text-[12px] text-slate-300 leading-relaxed">
           Base URL: <code className="text-gold-400 font-mono">https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev/v1</code>.
-          Toutes les requÃªtes sont <code className="font-mono">GET</code> sauf indication contraire.
-          RÃ©ponses en <code className="font-mono">application/json</code> avec charset UTF-8.
+          Toutes les requêtes sont <code className="font-mono">GET</code> sauf indication contraire.
+          Réponses en <code className="font-mono">application/json</code> avec charset UTF-8.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2">
           <div className="bg-navy-950 border border-navy-800 rounded-lg p-3">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">Free tier</p>
             <p className="text-sm font-bold text-emerald-400">100 req/jour</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">Endpoints publics Â· Pas d'auth</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Endpoints publics · Pas d'auth</p>
           </div>
           <div className="bg-navy-950 border border-navy-800 rounded-lg p-3">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">Pro tier</p>
             <p className="text-sm font-bold text-blue-400">10 000 req/jour</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">API key Â· 99.9% SLA</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">API key · 99.9% SLA</p>
           </div>
           <div className="bg-navy-950 border border-navy-800 rounded-lg p-3">
             <p className="text-[10px] text-slate-500 uppercase tracking-wider">Enterprise</p>
             <p className="text-sm font-bold text-gold-400">Sur devis</p>
-            <p className="text-[10px] text-slate-500 mt-0.5">VolumÃ©trie + SLA custom</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">Volumétrie + SLA custom</p>
           </div>
         </div>
       </div>
@@ -183,7 +183,7 @@ export default function ApiDocs() {
       {/* Code examples */}
       <div className="bg-navy-900 border border-navy-700 rounded-2xl p-6 space-y-3">
         <h2 className="text-sm font-bold text-white flex items-center gap-2">
-          <BookOpen size={14} className="text-gold-500" /> Exemples d'intÃ©gration
+          <BookOpen size={14} className="text-gold-500" /> Exemples d'intégration
         </h2>
 
         <div>
@@ -231,7 +231,7 @@ fwd = requests.get(
             download="jad2fx-openapi.json"
             className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold bg-gold-500 text-navy-950 rounded hover:bg-gold-400 transition-colors"
           >
-            <Code size={12} /> TÃ©lÃ©charger OpenAPI JSON
+            <Code size={12} /> Télécharger OpenAPI JSON
           </a>
         </div>
       </div>
@@ -242,9 +242,9 @@ fwd = requests.get(
         <ul className="text-[12px] text-slate-300 space-y-1.5 list-disc list-inside">
           <li>Endpoints <strong>publics</strong>: pas d'auth, 100 req/jour par IP.</li>
           <li>Endpoints <strong>API key</strong>: header <code className="text-gold-400">X-API-Key: jad2_xxx</code>.</li>
-          <li>Rate limit: <strong>429</strong> si dÃ©passÃ©, avec <code className="font-mono">Retry-After</code>.</li>
+          <li>Rate limit: <strong>429</strong> si dépassé, avec <code className="font-mono">Retry-After</code>.</li>
           <li>Cache: 60s pour rates, 5min pour fixing, 1h pour glossary.</li>
-          <li>Uptime cible: 99.9% (Pro) Â· 99.99% (Enterprise).</li>
+          <li>Uptime cible: 99.9% (Pro) · 99.99% (Enterprise).</li>
         </ul>
       </div>
 

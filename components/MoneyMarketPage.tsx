@@ -35,11 +35,11 @@ export default function MoneyMarketPage() {
     <div className="space-y-4 max-w-4xl mx-auto">
       <div className="flex items-center gap-2">
         <Activity size={14} className="text-gold-500" />
-        <h1 className="text-base font-bold text-white uppercase tracking-wider">MarchÃ© MonÃ©taire Â· BAM</h1>
+        <h1 className="text-base font-bold text-white uppercase tracking-wider">Marché Monétaire · BAM</h1>
         <span className="text-[9px] font-bold text-amber-400 bg-amber-900/30 border border-amber-700/40 px-1.5 py-0.5 rounded uppercase tracking-wider">
-          Indicatif Â· DonnÃ©es synthÃ©tiques
+          Indicatif · Données synthétiques
         </span>
-        <span className="text-[10px] text-slate-500 ml-auto">P1.9 Â· Money market module</span>
+        <span className="text-[10px] text-slate-500 ml-auto">P1.9 · Money market module</span>
       </div>
 
       {mad && (
@@ -48,8 +48,8 @@ export default function MoneyMarketPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <KPI label="Taux directeur BAM" value={`${(mad.policyRate * 100).toFixed(2)}%`} sub="Policy rate" color="text-gold-400" />
             <KPI label="MONIA" value={`${(mad.overnightRate * 100).toFixed(2)}%`} sub="Overnight" color="text-emerald-400" />
-            <KPI label="RÃ©serves oblig." value={`${(mad.reserveRequirementPct * 100).toFixed(1)}%`} sub="DÃ©pÃ´ts Ã  vue" color="text-blue-400" />
-            <KPI label="RÃ©serves de change" value={`${mad.fxReservesUSDbn} Mds$`} sub={`${reserveCoverage} mois d'imports`} color="text-amber-400" />
+            <KPI label="Réserves oblig." value={`${(mad.reserveRequirementPct * 100).toFixed(1)}%`} sub="Dépôts Ã  vue" color="text-blue-400" />
+            <KPI label="Réserves de change" value={`${mad.fxReservesUSDbn} Mds$`} sub={`${reserveCoverage} mois d'imports`} color="text-amber-400" />
           </div>
 
           {/* MONIA chart */}
@@ -72,7 +72,7 @@ export default function MoneyMarketPage() {
               </ResponsiveContainer>
             </div>
             <p className="text-[10px] text-slate-500 mt-1 italic">
-              DonnÃ©es synthÃ©tiques indicatives Â· Source officielle: BAM (Bank Al-Maghrib)
+              Données synthétiques indicatives · Source officielle: BAM (Bank Al-Maghrib)
             </p>
           </div>
 
@@ -88,7 +88,7 @@ export default function MoneyMarketPage() {
                   <th className="px-2 py-1 text-left">Pays</th>
                   <th className="px-2 py-1 text-right">Policy rate</th>
                   <th className="px-2 py-1 text-right">Overnight</th>
-                  <th className="px-2 py-1 text-right">RÃ©serves</th>
+                  <th className="px-2 py-1 text-right">Réserves</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-navy-800">
@@ -113,7 +113,7 @@ export default function MoneyMarketPage() {
           {/* A2.1 + A2.2 â€” Courbe des taux MAD (BDT + OAT) */}
           <div className="bg-navy-900 border border-navy-700 rounded-xl p-4">
             <h2 className="text-[11px] font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
-              <FileText size={11} /> Courbe des taux MAD Â· BDT + OAT
+              <FileText size={11} /> Courbe des taux MAD · BDT + OAT
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-[11px]">
@@ -145,14 +145,14 @@ export default function MoneyMarketPage() {
               </table>
             </div>
             <p className="text-[9px] text-slate-500 mt-2 italic">
-              BDT = Bons du TrÃ©sor adjudicÃ©s chaque mardi par BAM Â· OAT = Obligations Assimilables du TrÃ©sor (10Y benchmark souverain MAD).
+              BDT = Bons du Trésor adjudicés chaque mardi par BAM · OAT = Obligations Assimilables du Trésor (10Y benchmark souverain MAD).
             </p>
           </div>
 
           {/* A1.4â€“A1.8 â€” Maroc â€” Indicateurs structurels (BKAM, HCP, OC) */}
           <div className="bg-navy-900 border border-gold-700/30 rounded-xl p-4">
             <h2 className="text-[11px] font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
-              <Building2 size={11} /> Maroc Â· Indicateurs structurels
+              <Building2 size={11} /> Maroc · Indicateurs structurels
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
               {MOROCCO_MACRO_KPIS.map((k) => {
@@ -165,7 +165,7 @@ export default function MoneyMarketPage() {
                       {k.unit === '%' ? `${k.value > 0 && k.value < 100 ? k.value.toFixed(1) : k.value}${k.unit}` : `${k.value} ${k.unit}`}
                     </p>
                     <p className={`text-[9px] mt-0.5 flex items-center gap-0.5 ${trendColor}`}>
-                      <TrendIcon size={9} /> {k.year} Â· {k.source}
+                      <TrendIcon size={9} /> {k.year} · {k.source}
                     </p>
                   </div>
                 );
@@ -222,7 +222,7 @@ export default function MoneyMarketPage() {
           )}
 
           <p className="text-[10px] text-slate-500 text-center italic">
-            DonnÃ©es synthÃ©tiques indicatives Â· Pour des chiffres officiels, consultez directement BAM et le HCP
+            Données synthétiques indicatives · Pour des chiffres officiels, consultez directement BAM et le HCP
           </p>
         </>
       )}
@@ -283,7 +283,7 @@ function PppCalculator() {
             <p className="text-base font-mono font-bold text-gold-400">{result.pppLongTerm.toFixed(4)}</p>
           </div>
           <div>
-            <p className="text-[10px] text-slate-500">DÃ©viation</p>
+            <p className="text-[10px] text-slate-500">Déviation</p>
             <p className={`text-base font-mono font-bold ${result.deviationPct > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
               {result.deviationPct > 0 ? '+' : ''}{result.deviationPct.toFixed(2)}%
             </p>

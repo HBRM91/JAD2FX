@@ -21,27 +21,27 @@ const REGULATIONS: RegDoc[] = [
   // â”€â”€ Office des Changes â€” Circulaires â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   {
     id: 'circ-2017-01',
-    title: 'Circular nÂ°2017/01 â€” Exchange Control Regulations for Imports & Exports',
-    titleFr: 'Circulaire nÂ°2017/01 â€” RÃ©glementation des Changes Ã  l\'Import/Export',
+    title: 'Circular n°2017/01 â€” Exchange Control Regulations for Imports & Exports',
+    titleFr: 'Circulaire n°2017/01 â€” Réglementation des Changes Ã  l\'Import/Export',
     titleAr: 'Ù…Ù†Ø´ÙˆØ± Ø±Ù‚Ù… 2017/01 â€” Ø£Ø­ÙƒØ§Ù… Ø§Ù„ØµØ±Ù Ø§Ù„Ù…ØªØ¹Ù„Ù‚Ø© Ø¨Ø§Ù„Ø§Ø³ØªÙŠØ±Ø§Ø¯ ÙˆØ§Ù„ØªØµØ¯ÙŠØ±',
     date: '2017-01-01',
     category: 'OC_CIRC',
     url: 'https://www.oc.gov.ma/sites/default/files/2017-08/Circulaire_2017-01.pdf',
     summary: 'General framework for foreign exchange operations related to trade transactions â€” import/export repatriation obligations.',
-    summaryFr: 'Cadre gÃ©nÃ©ral des opÃ©rations de change liÃ©es aux transactions commerciales â€” obligations de rapatriement import/export.',
+    summaryFr: 'Cadre général des opérations de change liées aux transactions commerciales â€” obligations de rapatriement import/export.',
     summaryAr: 'Ø§Ù„Ø¥Ø·Ø§Ø± Ø§Ù„Ø¹Ø§Ù… Ù„Ø¹Ù…Ù„ÙŠØ§Øª Ø§Ù„ØµØ±Ù Ø§Ù„Ù…ØªØ¹Ù„Ù‚Ø© Ø¨Ø§Ù„Ù…Ø¹Ø§Ù…Ù„Ø§Øª Ø§Ù„ØªØ¬Ø§Ø±ÙŠØ© â€” Ø§Ù„ØªØ²Ø§Ù…Ø§Øª Ø§Ù„Ø¥Ø¹Ø§Ø¯Ø© Ù„Ù„Ø§Ø³ØªÙŠØ±Ø§Ø¯/Ø§Ù„ØªØµØ¯ÙŠØ±.',
     tags: ['import', 'export', 'rapatriement', 'commerce'],
   },
   {
     id: 'circ-2014-02',
-    title: 'Circular nÂ°2014/02 â€” Capital Operations and Direct Investment',
-    titleFr: 'Circulaire nÂ°2014/02 â€” OpÃ©rations en Capital et Investissements Directs',
+    title: 'Circular n°2014/02 â€” Capital Operations and Direct Investment',
+    titleFr: 'Circulaire n°2014/02 â€” Opérations en Capital et Investissements Directs',
     titleAr: 'Ù…Ù†Ø´ÙˆØ± Ø±Ù‚Ù… 2014/02 â€” Ø¹Ù…Ù„ÙŠØ§Øª Ø±Ø£Ø³ Ø§Ù„Ù…Ø§Ù„ ÙˆØ§Ù„Ø§Ø³ØªØ«Ù…Ø§Ø±Ø§Øª Ø§Ù„Ù…Ø¨Ø§Ø´Ø±Ø©',
     date: '2014-04-01',
     category: 'OC_CIRC',
     url: 'https://www.oc.gov.ma/sites/default/files/2017-08/Circulaire_2014-02.pdf',
     summary: 'Rules governing foreign direct investment (FDI) flows, capital transfers, and repatriation of investment income.',
-    summaryFr: 'RÃ¨gles rÃ©gissant les flux d\'investissements directs Ã©trangers (IDE), les transferts de capitaux et le rapatriement des revenus.',
+    summaryFr: 'Règles régissant les flux d\'investissements directs étrangers (IDE), les transferts de capitaux et le rapatriement des revenus.',
     summaryAr: 'Ù‚ÙˆØ§Ø¹Ø¯ ØªÙ†Ø¸ÙŠÙ… ØªØ¯ÙÙ‚Ø§Øª Ø§Ù„Ø§Ø³ØªØ«Ù…Ø§Ø± Ø§Ù„Ø£Ø¬Ù†Ø¨ÙŠ Ø§Ù„Ù…Ø¨Ø§Ø´Ø± ÙˆØªØ­ÙˆÙŠÙ„Ø§Øª Ø±Ø£Ø³ Ø§Ù„Ù…Ø§Ù„ ÙˆØ¥Ø¹Ø§Ø¯Ø© Ø¯Ø®Ù„ Ø§Ù„Ø§Ø³ØªØ«Ù…Ø§Ø±.',
     tags: ['IDE', 'capital', 'investissement', 'rapatriement'],
   },
@@ -54,15 +54,15 @@ const REGULATIONS: RegDoc[] = [
     category: 'OC_CIRC',
     url: 'https://www.oc.gov.ma/fr/reglementation/voyageurs',
     summary: 'Annual travel allowances for Moroccan residents: 45,000 MAD general travel, 20,000 MAD business, student dotations.',
-    summaryFr: 'Dotations annuelles pour les rÃ©sidents marocains : 45 000 MAD voyages personnels, 20 000 MAD affaires, dotations Ã©tudiants.',
+    summaryFr: 'Dotations annuelles pour les résidents marocains : 45 000 MAD voyages personnels, 20 000 MAD affaires, dotations étudiants.',
     summaryAr: 'Ø§Ù„Ù…Ø®ØµØµØ§Øª Ø§Ù„Ø³Ù†ÙˆÙŠØ© Ù„Ù„Ù…Ù‚ÙŠÙ…ÙŠÙ† Ø§Ù„Ù…ØºØ§Ø±Ø¨Ø©: 45,000 Ø¯Ø±Ù‡Ù… Ù„Ù„Ø³ÙØ± Ø§Ù„Ø´Ø®ØµÙŠØŒ 20,000 Ø¯Ø±Ù‡Ù… Ù„Ù„Ø£Ø¹Ù…Ø§Ù„ØŒ Ù…Ø®ØµØµØ§Øª Ø§Ù„Ø·Ù„Ø§Ø¨.',
     tags: ['voyage', 'dotation', 'tourisme', 'allocation'],
   },
   // â”€â”€ Office des Changes â€” Instructions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   {
     id: 'instr-2023-01',
-    title: 'Instruction nÂ°01/2023 â€” Hedging of FX Risk by Moroccan Companies',
-    titleFr: 'Instruction nÂ°01/2023 â€” Couverture du Risque de Change par les Entreprises',
+    title: 'Instruction n°01/2023 â€” Hedging of FX Risk by Moroccan Companies',
+    titleFr: 'Instruction n°01/2023 â€” Couverture du Risque de Change par les Entreprises',
     titleAr: 'ØªØ¹Ù„ÙŠÙ…Ø§Øª Ø±Ù‚Ù… 01/2023 â€” ØªØºØ·ÙŠØ© Ù…Ø®Ø§Ø·Ø± Ø§Ù„ØµØ±Ù Ù…Ù† Ù‚Ø¨Ù„ Ø§Ù„Ø´Ø±ÙƒØ§Øª Ø§Ù„Ù…ØºØ±Ø¨ÙŠØ©',
     date: '2023-03-15',
     category: 'OC_INSTR',
@@ -75,13 +75,13 @@ const REGULATIONS: RegDoc[] = [
   {
     id: 'instr-services',
     title: 'Instruction â€” Payments for International Services & Royalties',
-    titleFr: 'Instruction â€” RÃ¨glement des Services Internationaux et Redevances',
+    titleFr: 'Instruction â€” Règlement des Services Internationaux et Redevances',
     titleAr: 'ØªØ¹Ù„ÙŠÙ…Ø§Øª â€” Ø³Ø¯Ø§Ø¯ Ø§Ù„Ø®Ø¯Ù…Ø§Øª Ø§Ù„Ø¯ÙˆÙ„ÙŠØ© ÙˆØ§Ù„Ø¥ØªØ§ÙˆØ§Øª',
     date: '2022-01-01',
     category: 'OC_INSTR',
     url: 'https://www.oc.gov.ma/fr/reglementation/entreprises/services',
     summary: 'Procedures and limits for outward payments for services: consulting, IT, royalties, technical assistance.',
-    summaryFr: 'ProcÃ©dures et plafonds pour les paiements extÃ©rieurs de services : conseil, IT, redevances, assistance technique.',
+    summaryFr: 'Procédures et plafonds pour les paiements extérieurs de services : conseil, IT, redevances, assistance technique.',
     summaryAr: 'Ø§Ù„Ø¥Ø¬Ø±Ø§Ø¡Ø§Øª ÙˆØ§Ù„Ø­Ø¯ÙˆØ¯ Ù„Ù…Ø¯ÙÙˆØ¹Ø§Øª Ø§Ù„Ø®Ø¯Ù…Ø§Øª Ø§Ù„Ø®Ø§Ø±Ø¬ÙŠØ©: Ø§Ù„Ø§Ø³ØªØ´Ø§Ø±Ø§Øª ÙˆØªÙƒÙ†ÙˆÙ„ÙˆØ¬ÙŠØ§ Ø§Ù„Ù…Ø¹Ù„ÙˆÙ…Ø§Øª ÙˆØ§Ù„Ø¥ØªØ§ÙˆØ§Øª ÙˆØ§Ù„Ù…Ø³Ø§Ø¹Ø¯Ø© Ø§Ù„ØªÙ‚Ù†ÙŠØ©.',
     tags: ['services', 'IT', 'redevances', 'assistance technique'],
   },
@@ -94,7 +94,7 @@ const REGULATIONS: RegDoc[] = [
     category: 'OC_INSTR',
     url: 'https://www.oc.gov.ma/fr/reglementation/entreprises/dividendes',
     summary: 'Conditions for transferring dividends, interest and profits from Morocco abroad by foreign investors.',
-    summaryFr: 'Conditions de transfert de dividendes, intÃ©rÃªts et bÃ©nÃ©fices depuis le Maroc vers l\'Ã©tranger par les investisseurs Ã©trangers.',
+    summaryFr: 'Conditions de transfert de dividendes, intérêts et bénéfices depuis le Maroc vers l\'étranger par les investisseurs étrangers.',
     summaryAr: 'Ø´Ø±ÙˆØ· ØªØ­ÙˆÙŠÙ„ Ø£Ø±Ø¨Ø§Ø­ Ø§Ù„Ø£Ø³Ù‡Ù… ÙˆØ§Ù„ÙÙˆØ§Ø¦Ø¯ ÙˆØ§Ù„Ø£Ø±Ø¨Ø§Ø­ Ù…Ù† Ø§Ù„Ù…ØºØ±Ø¨ Ø¥Ù„Ù‰ Ø§Ù„Ø®Ø§Ø±Ø¬ Ù…Ù† Ù‚Ø¨Ù„ Ø§Ù„Ù…Ø³ØªØ«Ù…Ø±ÙŠÙ† Ø§Ù„Ø£Ø¬Ø§Ù†Ø¨.',
     tags: ['dividendes', 'IDE', 'transfert', 'investisseurs'],
   },
@@ -102,39 +102,39 @@ const REGULATIONS: RegDoc[] = [
   {
     id: 'bkam-methodo-fixing',
     title: 'BKAM â€” Methodology of the MAD Reference Exchange Rate',
-    titleFr: 'BKAM â€” MÃ©thodologie du Cours de RÃ©fÃ©rence du Dirham',
+    titleFr: 'BKAM â€” Méthodologie du Cours de Référence du Dirham',
     titleAr: 'Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨ â€” Ù…Ù†Ù‡Ø¬ÙŠØ© Ø³Ø¹Ø± ØµØ±Ù Ø§Ù„Ø¯Ø±Ù‡Ù… Ø§Ù„Ù…Ø±Ø¬Ø¹ÙŠ',
     date: '2018-07-02',
     category: 'BKAM_NOTE',
     url: BKAM_LINKS.methodologyTCRE,
     summary: "Official methodology for computing the MAD fixing rate from the EUR/USD basket (60/40 weighting) and BKAM's 14-currency panel.",
-    summaryFr: 'MÃ©thodologie officielle du calcul du cours de rÃ©fÃ©rence MAD Ã  partir du panier EUR/USD (pondÃ©ration 60/40) et panel 14 devises BKAM.',
+    summaryFr: 'Méthodologie officielle du calcul du cours de référence MAD Ã  partir du panier EUR/USD (pondération 60/40) et panel 14 devises BKAM.',
     summaryAr: 'Ø§Ù„Ù…Ù†Ù‡Ø¬ÙŠØ© Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ù„Ø­Ø³Ø§Ø¨ Ø³Ø¹Ø± ØµØ±Ù Ø§Ù„Ø¯Ø±Ù‡Ù… Ø§Ù„Ù…Ø±Ø¬Ø¹ÙŠ Ù…Ù† Ø³Ù„Ø© Ø§Ù„ÙŠÙˆØ±Ùˆ/Ø§Ù„Ø¯ÙˆÙ„Ø§Ø± (ØªØ±Ø¬ÙŠØ­ 60/40) ÙˆÙ„Ø¬Ù†Ø© 14 Ø¹Ù…Ù„Ø© Ù„Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨.',
-    tags: ['fixing', 'mÃ©thodologie', 'panier', 'EUR/USD', 'MAD'],
+    tags: ['fixing', 'méthodologie', 'panier', 'EUR/USD', 'MAD'],
   },
   {
     id: 'bkam-flexibilite-2018',
     title: 'BKAM â€” Foreign Exchange Regime Flexibility (January 2018)',
-    titleFr: 'BKAM â€” Ã‰largissement des Marges de Fluctuation du Dirham (Janvier 2018)',
+    titleFr: 'BKAM â€” Élargissement des Marges de Fluctuation du Dirham (Janvier 2018)',
     titleAr: 'Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨ â€” ØªÙˆØ³ÙŠØ¹ Ù‡Ø§Ù…Ø´ ØªØ°Ø¨Ø°Ø¨ Ø§Ù„Ø¯Ø±Ù‡Ù… (ÙŠÙ†Ø§ÙŠØ± 2018)',
     date: '2018-01-15',
     category: 'BKAM_NOTE',
     url: BKAM_LINKS.regimeDeChange,
-    summary: 'BKAM widens MAD fluctuation band from Â±0.3% to Â±2.5% against the EUR/USD basket, marking Morocco\'s move toward greater FX flexibility.',
-    summaryFr: 'Ã‰largissement du taux de fluctuation du dirham de Â±0,3% Ã  Â±2,5% par rapport au panier EUR/USD â€” passage vers plus de flexibilitÃ©.',
-    summaryAr: 'ØªÙˆØ³ÙŠØ¹ Ù‡Ø§Ù…Ø´ ØªØ°Ø¨Ø°Ø¨ Ø§Ù„Ø¯Ø±Ù‡Ù… Ù…Ù† Â±0.3% Ø¥Ù„Ù‰ Â±2.5% Ù…Ù‚Ø§Ø¨Ù„ Ø³Ù„Ø© Ø§Ù„ÙŠÙˆØ±Ùˆ/Ø§Ù„Ø¯ÙˆÙ„Ø§Ø± â€” Ø§Ù„ØªØ­ÙˆÙ„ Ù†Ø­Ùˆ Ù…Ø±ÙˆÙ†Ø© Ø£ÙƒØ¨Ø±.',
-    tags: ['flexibilitÃ©', 'bande', 'fluctuation', 'regime change', '2018'],
+    summary: 'BKAM widens MAD fluctuation band from ±0.3% to ±2.5% against the EUR/USD basket, marking Morocco\'s move toward greater FX flexibility.',
+    summaryFr: 'Élargissement du taux de fluctuation du dirham de ±0,3% Ã  ±2,5% par rapport au panier EUR/USD â€” passage vers plus de flexibilité.',
+    summaryAr: 'ØªÙˆØ³ÙŠØ¹ Ù‡Ø§Ù…Ø´ ØªØ°Ø¨Ø°Ø¨ Ø§Ù„Ø¯Ø±Ù‡Ù… Ù…Ù† ±0.3% Ø¥Ù„Ù‰ ±2.5% Ù…Ù‚Ø§Ø¨Ù„ Ø³Ù„Ø© Ø§Ù„ÙŠÙˆØ±Ùˆ/Ø§Ù„Ø¯ÙˆÙ„Ø§Ø± â€” Ø§Ù„ØªØ­ÙˆÙ„ Ù†Ø­Ùˆ Ù…Ø±ÙˆÙ†Ø© Ø£ÙƒØ¨Ø±.',
+    tags: ['flexibilité', 'bande', 'fluctuation', 'regime change', '2018'],
   },
   {
     id: 'bkam-guide-entreprises',
     title: 'BKAM â€” Practical Guide for FX Operations by Moroccan Companies',
-    titleFr: 'BKAM â€” Guide Pratique des OpÃ©rations de Change pour les Entreprises',
+    titleFr: 'BKAM â€” Guide Pratique des Opérations de Change pour les Entreprises',
     titleAr: 'Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨ â€” Ø§Ù„Ø¯Ù„ÙŠÙ„ Ø§Ù„Ø¹Ù…Ù„ÙŠ Ù„Ø¹Ù…Ù„ÙŠØ§Øª Ø§Ù„ØµØ±Ù Ù„Ù„Ø´Ø±ÙƒØ§Øª',
     date: '2020-03-01',
     category: 'BKAM_GUIDE',
     url: BKAM_LINKS.guideEntreprises,
     summary: 'Practical guide covering FX operations available to Moroccan companies: spot, forward, options, and documentary requirements.',
-    summaryFr: 'Guide pratique des opÃ©rations de change disponibles aux entreprises marocaines : spot, forward, options et exigences documentaires.',
+    summaryFr: 'Guide pratique des opérations de change disponibles aux entreprises marocaines : spot, forward, options et exigences documentaires.',
     summaryAr: 'Ø¯Ù„ÙŠÙ„ Ø¹Ù…Ù„ÙŠ Ù„Ø¹Ù…Ù„ÙŠØ§Øª Ø§Ù„ØµØ±Ù Ø§Ù„Ù…ØªØ§Ø­Ø© Ù„Ù„Ø´Ø±ÙƒØ§Øª Ø§Ù„Ù…ØºØ±Ø¨ÙŠØ©: Ø§Ù„ÙÙˆØ±ÙŠ ÙˆØ§Ù„Ø¢Ø¬Ù„ ÙˆØ§Ù„Ø®ÙŠØ§Ø±Ø§Øª ÙˆØ§Ù„Ù…ØªØ·Ù„Ø¨Ø§Øª Ø§Ù„ÙˆØ«Ø§Ø¦Ù‚ÙŠØ©.',
     tags: ['guide', 'entreprises', 'spot', 'forward', 'options'],
   },
@@ -166,13 +166,13 @@ export default function RegulationsPage() {
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
 
-  const heading = locale === 'ar' ? 'Ø§Ù„Ù…Ø±Ø¬Ø¹ÙŠØ© Ø§Ù„ØªÙ†Ø¸ÙŠÙ…ÙŠØ©' : locale === 'en' ? 'Regulatory Reference' : 'RÃ©fÃ©rentiel RÃ©glementaire';
+  const heading = locale === 'ar' ? 'Ø§Ù„Ù…Ø±Ø¬Ø¹ÙŠØ© Ø§Ù„ØªÙ†Ø¸ÙŠÙ…ÙŠØ©' : locale === 'en' ? 'Regulatory Reference' : 'Référentiel Réglementaire';
   const sub     = locale === 'ar'
     ? 'Ø§Ù„Ù†ØµÙˆØµ Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ù„Ù…ÙƒØªØ¨ Ø§Ù„ØµØ±Ù ÙˆØ¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨ Ø§Ù„Ù…ØªØ¹Ù„Ù‚Ø© Ø¨Ø³ÙˆÙ‚ Ø§Ù„ØµØ±Ù'
     : locale === 'en'
     ? 'Official Office des Changes & BKAM texts governing the FX market'
-    : 'Textes officiels de l\'Office des Changes & BKAM rÃ©gissant le marchÃ© des changes';
-  const searchPlaceholder = locale === 'ar' ? 'Ø§Ø¨Ø­Ø« ÙÙŠ Ø§Ù„Ø£Ù†Ø¸Ù…Ø©â€¦' : locale === 'en' ? 'Search regulationsâ€¦' : 'Rechercherâ€¦';
+    : 'Textes officiels de l\'Office des Changes & BKAM régissant le marché des changes';
+  const searchPlaceholder = locale === 'ar' ? 'Ø§Ø¨Ø­Ø« ÙÙŠ Ø§Ù„Ø£Ù†Ø¸Ù…Ø©…' : locale === 'en' ? 'Search regulations…' : 'Rechercher…';
   const openLabel = locale === 'ar' ? 'ÙØªØ­ Ø§Ù„ÙˆØ«ÙŠÙ‚Ø© Ø§Ù„Ø±Ø³Ù…ÙŠØ©' : locale === 'en' ? 'Open Official Document' : 'Ouvrir le Document Officiel';
   const updatedLabel = locale === 'ar' ? 'ØªØ§Ø±ÙŠØ® Ø§Ù„Ù†Ø´Ø±:' : locale === 'en' ? 'Date:' : 'Date:';
   const allLabel = locale === 'ar' ? 'Ø§Ù„ÙƒÙ„' : locale === 'en' ? 'All' : 'Tout';
@@ -180,7 +180,7 @@ export default function RegulationsPage() {
     ? 'Ù‡Ø°Ù‡ Ø§Ù„Ù‚Ø§Ø¦Ù…Ø© Ù„Ù„Ø£ØºØ±Ø§Ø¶ Ø§Ù„ØªØ¹Ù„ÙŠÙ…ÙŠØ© ÙÙ‚Ø·. ØªØ­Ù‚Ù‚ Ø¯Ø§Ø¦Ù…Ù‹Ø§ Ù…Ù† Ø§Ù„Ø¥ØµØ¯Ø§Ø±Ø§Øª Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ø§Ù„Ø£Ø­Ø¯Ø« Ø¹Ù„Ù‰ Ù…ÙˆØ§Ù‚Ø¹ Ù…ÙƒØªØ¨ Ø§Ù„ØµØ±Ù ÙˆØ¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨.'
     : locale === 'en'
     ? 'This list is for educational purposes only. Always verify against the latest official versions on oc.gov.ma and bkam.ma.'
-    : 'Cette liste est fournie Ã  titre informatif. VÃ©rifiez toujours les versions officielles les plus rÃ©centes sur oc.gov.ma et bkam.ma.';
+    : 'Cette liste est fournie Ã  titre informatif. Vérifiez toujours les versions officielles les plus récentes sur oc.gov.ma et bkam.ma.';
 
   const categories = Object.keys(CATEGORY_META) as Category[];
 
@@ -266,7 +266,7 @@ export default function RegulationsPage() {
       {/* Results */}
       {filtered.length === 0 ? (
         <div className="text-center py-12 text-slate-500">
-          {locale === 'ar' ? 'Ù„Ø§ ØªÙˆØ¬Ø¯ Ù†ØªØ§Ø¦Ø¬' : locale === 'en' ? 'No results found' : 'Aucun rÃ©sultat'}
+          {locale === 'ar' ? 'Ù„Ø§ ØªÙˆØ¬Ø¯ Ù†ØªØ§Ø¦Ø¬' : locale === 'en' ? 'No results found' : 'Aucun résultat'}
         </div>
       ) : (
         categories.map(cat => {

@@ -30,25 +30,25 @@ export const SECTORS: SectorConfig[] = [
     id: 'auto',
     badge: 'Secteur Automobile',
     badgeStyle: 'bg-blue-500/15 text-blue-400 border-blue-500/30',
-    title: 'Ã‰quipementiers Automobiles â€” Exposition EUR / JPY / USD',
-    subtitle: 'Renault Â· BYD Â· Stellantis Â· Fournisseurs Tanger-MeknÃ¨s',
-    description: 'L\'industrie automobile marocaine gÃ©nÃ¨re une exposition bi-devises structurelle : composants europÃ©ens (EUR), technologie asiatique (JPY/CNY), et revenus d\'export vers l\'UE (EUR). La double exposition EUR/JPY est le risque non compensÃ© le plus frÃ©quent chez les Ã©quipementiers de rang 2 et 3.',
+    title: 'Équipementiers Automobiles â€” Exposition EUR / JPY / USD',
+    subtitle: 'Renault · BYD · Stellantis · Fournisseurs Tanger-Meknès',
+    description: 'L\'industrie automobile marocaine génère une exposition bi-devises structurelle : composants européens (EUR), technologie asiatique (JPY/CNY), et revenus d\'export vers l\'UE (EUR). La double exposition EUR/JPY est le risque non compensé le plus fréquent chez les équipementiers de rang 2 et 3.',
     primaryCurrency: 'EUR',
     primaryCountry: 'eu',
     secondaryCurrencies: [
       { code: 'JPY', cc: 'jp', role: 'Technologie batteries & semi-conducteurs' },
-      { code: 'USD', cc: 'us', role: 'MatiÃ¨res premiÃ¨res acier & plastiques' },
-      { code: 'CNY', cc: 'cn', role: 'Composants Ã©lectroniques' },
+      { code: 'USD', cc: 'us', role: 'Matières premières acier & plastiques' },
+      { code: 'CNY', cc: 'cn', role: 'Composants électroniques' },
     ],
     exposureType: 'Import (JPY/USD) â†’ Production MAD â†’ Export EUR',
-    keyRisk: 'VolatilitÃ© EUR/JPY non couverte',
-    keyRiskDetail: 'Une apprÃ©ciation du JPY de 100 bps renchÃ©rit les inputs technologiques de ~0.8% sur la facture totale. Sans couverture EUR/JPY, la marge brute d\'un Ã©quipementier de rang 2 (marges 8â€“12%) peut se contracter de 15 Ã  25% sur un choc de change de 500 bps.',
-    ocRelevance: 'Circ. OC nÂ°01/2024, Art. 12',
-    ocArticle: 'Forwards et options vanille autorisÃ©s pour import rÃ©current. MaturitÃ© max 12 mois. Documentation : bon de commande ou facture pro forma suffisant pour les PME.',
+    keyRisk: 'Volatilité EUR/JPY non couverte',
+    keyRiskDetail: 'Une appréciation du JPY de 100 bps renchérit les inputs technologiques de ~0.8% sur la facture totale. Sans couverture EUR/JPY, la marge brute d\'un équipementier de rang 2 (marges 8â€“12%) peut se contracter de 15 Ã  25% sur un choc de change de 500 bps.',
+    ocRelevance: 'Circ. OC n°01/2024, Art. 12',
+    ocArticle: 'Forwards et options vanille autorisés pour import récurrent. Maturité max 12 mois. Documentation : bon de commande ou facture pro forma suffisant pour les PME.',
     watchpoints: [
-      'EUR/JPY : indicateur leading pour les coÃ»ts de composants electroniques',
-      'USD/MAD : matiÃ¨res premiÃ¨res acier cotÃ©es en USD sur LME',
-      'CNY/MAD : trend yuan (apprÃ©ciation structurelle probable sur 3-5 ans)',
+      'EUR/JPY : indicateur leading pour les coûts de composants electroniques',
+      'USD/MAD : matières premières acier cotées en USD sur LME',
+      'CNY/MAD : trend yuan (appréciation structurelle probable sur 3-5 ans)',
       'Calendrier production : Q1 achats composants, Q3 export finaux vers UE',
     ],
   },
@@ -56,24 +56,24 @@ export const SECTORS: SectorConfig[] = [
     id: 'textile',
     badge: 'Secteur Textile',
     badgeStyle: 'bg-purple-500/15 text-purple-400 border-purple-500/30',
-    title: 'Textile & Habillement â€” Couverture naturelle incomplÃ¨te',
-    subtitle: 'Import coton USD Â· Export confection EUR Â· Gap net MAD',
-    description: 'L\'industrie textile marocaine (65% des exports vers l\'UE) est structurellement bi-monÃ©taire. La couverture naturelle partielle â€” coÃ»ts EUR Ã©quilibrant recettes EUR â€” masque une exposition USD nette significative sur les importations de coton, fibres et colorants.',
+    title: 'Textile & Habillement â€” Couverture naturelle incomplète',
+    subtitle: 'Import coton USD · Export confection EUR · Gap net MAD',
+    description: 'L\'industrie textile marocaine (65% des exports vers l\'UE) est structurellement bi-monétaire. La couverture naturelle partielle â€” coûts EUR équilibrant recettes EUR â€” masque une exposition USD nette significative sur les importations de coton, fibres et colorants.',
     primaryCurrency: 'USD',
     primaryCountry: 'us',
     secondaryCurrencies: [
       { code: 'EUR', cc: 'eu', role: 'Recettes export UE (65% CA export)' },
-      { code: 'CNY', cc: 'cn', role: 'Fils synthÃ©tiques & matiÃ¨res premiÃ¨res' },
+      { code: 'CNY', cc: 'cn', role: 'Fils synthétiques & matières premières' },
     ],
     exposureType: 'Import USD (coton) + Export EUR (confection) â†’ Gap net USD',
-    keyRisk: 'Exposition USD/MAD nette non compensÃ©e',
-    keyRiskDetail: 'Un importateur de coton pur (sans revenus USD) exposÃ© Ã  1M USD annuel supporte un risque de change de ~60 000 MAD par 100 bps de mouvement USD/MAD. La saisonnalitÃ© Q1 (achats) vs Q3 (exports) crÃ©e un dÃ©calage temporel d\'exposition de 120 Ã  150 jours.',
-    ocRelevance: 'Circ. OC nÂ°01/2024 + Circ. nÂ°2/2012',
-    ocArticle: 'Couverture import coton : forward achat USD autorisÃ© jusqu\'Ã  100% du carnet de commandes documentÃ©. Domiciliation obligatoire pour importations >100 000 MAD.',
+    keyRisk: 'Exposition USD/MAD nette non compensée',
+    keyRiskDetail: 'Un importateur de coton pur (sans revenus USD) exposé Ã  1M USD annuel supporte un risque de change de ~60 000 MAD par 100 bps de mouvement USD/MAD. La saisonnalité Q1 (achats) vs Q3 (exports) crée un décalage temporel d\'exposition de 120 Ã  150 jours.',
+    ocRelevance: 'Circ. OC n°01/2024 + Circ. n°2/2012',
+    ocArticle: 'Couverture import coton : forward achat USD autorisé jusqu\'Ã  100% du carnet de commandes documenté. Domiciliation obligatoire pour importations >100 000 MAD.',
     watchpoints: [
-      'USD/MAD : exposition directe sur achats coton (marchÃ© ICE, coton = 100% USD)',
-      'EUR/USD : dÃ©termine la compÃ©titivitÃ© prix des exports vers l\'UE',
-      'SaisonnalitÃ© : pic d\'achats Q1, pic exports Q2-Q3',
+      'USD/MAD : exposition directe sur achats coton (marché ICE, coton = 100% USD)',
+      'EUR/USD : détermine la compétitivité prix des exports vers l\'UE',
+      'Saisonnalité : pic d\'achats Q1, pic exports Q2-Q3',
       'CNY/MAD : approvisionnements alternatifs Asie en hausse',
     ],
   },
@@ -81,50 +81,50 @@ export const SECTORS: SectorConfig[] = [
     id: 'nordique',
     badge: 'Devises Nordiques',
     badgeStyle: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
-    title: 'Importateurs Bois & MatÃ©riaux â€” Couronnes NOK / SEK / DKK',
-    subtitle: 'Bois construction Â· Papier & emballage Â· Ã‰quipements industriels',
-    description: 'Les couronnes norvÃ©gienne (NOK), suÃ©doise (SEK) et danoise (DKK) reprÃ©sentent une exposition de change structurellement sous-couverte pour les importateurs marocains. La NOK est doublement exposÃ©e : variation de change ET prix du Brent (Ã©conomie pÃ©troliÃ¨re norvÃ©gienne), crÃ©ant une double pression sur la facture totale.',
+    title: 'Importateurs Bois & Matériaux â€” Couronnes NOK / SEK / DKK',
+    subtitle: 'Bois construction · Papier & emballage · Équipements industriels',
+    description: 'Les couronnes norvégienne (NOK), suédoise (SEK) et danoise (DKK) représentent une exposition de change structurellement sous-couverte pour les importateurs marocains. La NOK est doublement exposée : variation de change ET prix du Brent (économie pétrolière norvégienne), créant une double pression sur la facture totale.',
     primaryCurrency: 'NOK',
     primaryCountry: 'no',
     secondaryCurrencies: [
-      { code: 'SEK', cc: 'se', role: 'Ã‰quipements industriels suÃ©dois (Volvo, SKF)' },
+      { code: 'SEK', cc: 'se', role: 'Équipements industriels suédois (Volvo, SKF)' },
       { code: 'DKK', cc: 'dk', role: 'Pharmaceutique & agroalimentaire danois' },
     ],
-    exposureType: 'Import NOK/SEK/DKK â€” non cotÃ©es directement BKAM â†’ cross via EUR',
+    exposureType: 'Import NOK/SEK/DKK â€” non cotées directement BKAM â†’ cross via EUR',
     keyRisk: 'Double exposition NOK : change + Brent',
-    keyRiskDetail: 'Une hausse simultanÃ©e du Brent (+10%) et de NOK/MAD (+200 bps) â€” corrÃ©lation positive historique â€” peut augmenter la facture d\'importation de bois de 3 Ã  4% sur un trimestre. Les DKK ont un quasi-peg EUR (Â±2,25%) â€” exposition plus stable mais toujours non nulle.',
-    ocRelevance: 'Circ. OC nÂ°01/2024 + Convention UMA (TND/DZD/LYD)',
-    ocArticle: 'NOK/SEK/DKK : forwards EUR/NOK disponibles via banques agrÃ©Ã©es marocaines. Cross via EUR : banque calcule le taux implicite NOK/MAD = EUR/MAD Ã· EUR/NOK.',
+    keyRiskDetail: 'Une hausse simultanée du Brent (+10%) et de NOK/MAD (+200 bps) â€” corrélation positive historique â€” peut augmenter la facture d\'importation de bois de 3 Ã  4% sur un trimestre. Les DKK ont un quasi-peg EUR (±2,25%) â€” exposition plus stable mais toujours non nulle.',
+    ocRelevance: 'Circ. OC n°01/2024 + Convention UMA (TND/DZD/LYD)',
+    ocArticle: 'NOK/SEK/DKK : forwards EUR/NOK disponibles via banques agréées marocaines. Cross via EUR : banque calcule le taux implicite NOK/MAD = EUR/MAD Ã· EUR/NOK.',
     watchpoints: [
-      'NOK/MAD : surveiller corrÃ©lation Brent (double exposition Ã©nergie + change)',
-      'EUR/NOK : principal dÃ©terminant du cross NOK/MAD',
-      'SEK : cycle Riksbank + exposition industrielle europÃ©enne',
-      'DKK/EUR : spread quasi-fixe Â±2.25% â€” risque rÃ©siduel faible',
+      'NOK/MAD : surveiller corrélation Brent (double exposition énergie + change)',
+      'EUR/NOK : principal déterminant du cross NOK/MAD',
+      'SEK : cycle Riksbank + exposition industrielle européenne',
+      'DKK/EUR : spread quasi-fixe ±2.25% â€” risque résiduel faible',
     ],
   },
   {
     id: 'agri',
     badge: 'Agroalimentaire & Agriculture',
     badgeStyle: 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30',
-    title: 'Agroalimentaire â€” BlÃ©, MaÃ¯s, Sucre : Exposition USD Structurelle',
-    subtitle: 'Importateurs cÃ©rÃ©ales Â· Minoteries Â· COSUMAR Â· Ã‰leveurs',
-    description: 'Le secteur agroalimentaire marocain est massivement exposÃ© au USD via les importations de blÃ© tendre, maÃ¯s, soja et sucre â€” tous cotÃ©s sur les marchÃ©s ICE/CBOT en dollars. Cette exposition est amplifiÃ©e par la subvention partielle de l\'Ã‰tat, qui crÃ©e une asymÃ©trie : les entreprises exposÃ©es supportent la hausse USD mais bÃ©nÃ©ficient partiellement des baisses via les mÃ©canismes de compensation.',
+    title: 'Agroalimentaire â€” Blé, Maïs, Sucre : Exposition USD Structurelle',
+    subtitle: 'Importateurs céréales · Minoteries · COSUMAR · Éleveurs',
+    description: 'Le secteur agroalimentaire marocain est massivement exposé au USD via les importations de blé tendre, maïs, soja et sucre â€” tous cotés sur les marchés ICE/CBOT en dollars. Cette exposition est amplifiée par la subvention partielle de l\'État, qui crée une asymétrie : les entreprises exposées supportent la hausse USD mais bénéficient partiellement des baisses via les mécanismes de compensation.',
     primaryCurrency: 'USD',
     primaryCountry: 'us',
     secondaryCurrencies: [
-      { code: 'EUR', cc: 'eu', role: 'Intrants agricoles europÃ©ens & emballages' },
-      { code: 'BRL', cc: 'br', role: 'Soja brÃ©silien (concurrent USD)' },
+      { code: 'EUR', cc: 'eu', role: 'Intrants agricoles européens & emballages' },
+      { code: 'BRL', cc: 'br', role: 'Soja brésilien (concurrent USD)' },
     ],
-    exposureType: 'Import USD matiÃ¨res premiÃ¨res agricoles (ICE/CBOT)',
-    keyRisk: 'CorrÃ©lation USD/MAD Ã— prix commoditÃ©s',
-    keyRiskDetail: 'Un choc USD/MAD (+300 bps) coÃ¯ncidant avec un choc blÃ© (+15%) sur le marchÃ© Chicago â€” scÃ©narios corrÃ©lÃ©s lors de crises (2022) â€” peut augmenter le coÃ»t de revient d\'une minoterie de 8 Ã  12% en une semaine. La couverture rÃ©glementaire OC permet maintenant de couvrir simultanÃ©ment le change ET les prix matiÃ¨res premiÃ¨res (Circ. OC 01/2024, Art. 14).',
-    ocRelevance: 'Circ. OC nÂ°01/2024, Art. 12 & 14',
-    ocArticle: 'Art. 14 autorise la couverture contre la fluctuation des prix de produits de base via marchÃ©s organisÃ©s internationaux. Les banques ouvrent des sous-comptes dÃ©diÃ©s pour garantir traÃ§abilitÃ© (dÃ©pÃ´t de garantie, appels de marge).',
+    exposureType: 'Import USD matières premières agricoles (ICE/CBOT)',
+    keyRisk: 'Corrélation USD/MAD Ã— prix commodités',
+    keyRiskDetail: 'Un choc USD/MAD (+300 bps) coïncidant avec un choc blé (+15%) sur le marché Chicago â€” scénarios corrélés lors de crises (2022) â€” peut augmenter le coût de revient d\'une minoterie de 8 Ã  12% en une semaine. La couverture réglementaire OC permet maintenant de couvrir simultanément le change ET les prix matières premières (Circ. OC 01/2024, Art. 14).',
+    ocRelevance: 'Circ. OC n°01/2024, Art. 12 & 14',
+    ocArticle: 'Art. 14 autorise la couverture contre la fluctuation des prix de produits de base via marchés organisés internationaux. Les banques ouvrent des sous-comptes dédiés pour garantir traçabilité (dépôt de garantie, appels de marge).',
     watchpoints: [
-      'USD/MAD : exposition directe sur toutes les matiÃ¨res premiÃ¨res agricoles',
-      'Prix blÃ© Chicago (ZW=F) : corrÃ©lation avec tensions gÃ©opolitiques (Ukraine)',
-      'Prix sucre ICE (SB=F) : COSUMAR et transformateurs directement exposÃ©s',
-      'BRL/MAD : alternative brÃ©silienne au soja amÃ©ricain (prix et change)',
+      'USD/MAD : exposition directe sur toutes les matières premières agricoles',
+      'Prix blé Chicago (ZW=F) : corrélation avec tensions géopolitiques (Ukraine)',
+      'Prix sucre ICE (SB=F) : COSUMAR et transformateurs directement exposés',
+      'BRL/MAD : alternative brésilienne au soja américain (prix et change)',
     ],
   },
   {
@@ -132,24 +132,24 @@ export const SECTORS: SectorConfig[] = [
     badge: 'Phosphates & Mining',
     badgeStyle: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/30',
     title: 'Phosphates & Mining â€” Exposition USD Massive, Couverture >120M EUR',
-    subtitle: 'OCP & sous-traitants Â· Khouribga Â· Youssoufia Â· Jorf Lasfar',
-    description: 'Le secteur phosphates marocain (OCP et sous-traitants) exporte massivement en USD (98% du CA). La conversion vers MAD pour les coÃ»ts opÃ©rationnels (Ã©nergie, salaires, fournitures) crÃ©e une exposition USD/MAD structurelle massive. La stratÃ©gie de couverture combine forwards, conservation en CDE/CPEC et options pour gÃ©rer des maturitÃ©s longues non couvertes par les banques.',
+    subtitle: 'OCP & sous-traitants · Khouribga · Youssoufia · Jorf Lasfar',
+    description: 'Le secteur phosphates marocain (OCP et sous-traitants) exporte massivement en USD (98% du CA). La conversion vers MAD pour les coûts opérationnels (énergie, salaires, fournitures) crée une exposition USD/MAD structurelle massive. La stratégie de couverture combine forwards, conservation en CDE/CPEC et options pour gérer des maturités longues non couvertes par les banques.',
     primaryCurrency: 'USD',
     primaryCountry: 'us',
     secondaryCurrencies: [
-      { code: 'EUR', cc: 'eu', role: 'Equipement', label: 'EUR Â· Ã‰quipement industriel (Allemagne, France)' },
-      { code: 'CNY', cc: 'cn', role: 'Composants', label: 'CNY Â· Composants chimiques' },
+      { code: 'EUR', cc: 'eu', role: 'Equipement', label: 'EUR · Équipement industriel (Allemagne, France)' },
+      { code: 'CNY', cc: 'cn', role: 'Composants', label: 'CNY · Composants chimiques' },
     ],
-    exposureType: 'USD (98% CA) Â· 1.5-2 Md USD/an (OCP) Â· 50-200M USD/an (sous-traitants)',
-    keyRisk: 'Couverture >12M refusÃ©e par les banques Â· Couts en MAD, CA en USD',
-    keyRiskDetail: 'Forwards 12M refusÃ©s par les banques (ligne insuffisante). Couverture rollÃ©e 3M mais exposition rÃ©siduelle structurelle. VolatilitÃ© USD/MAD peut faire varier le rÃ©sultat consolidÃ© de 5-8% sur un trimestre.',
-    ocRelevance: 'Circ. 3/2019 Â· CDE/CPEC Â· IFRS 9',
-    ocArticle: 'CDE/CPEC pour conservation 70% recettes export (Circ. 3/2019). Forwards 12-24M non accessibles directement â€” utiliser CCS ou options exotiques auprÃ¨s de la BMCE. Hedge accounting IFRS 9 requis pour couverture >12 mois.',
+    exposureType: 'USD (98% CA) · 1.5-2 Md USD/an (OCP) · 50-200M USD/an (sous-traitants)',
+    keyRisk: 'Couverture >12M refusée par les banques · Couts en MAD, CA en USD',
+    keyRiskDetail: 'Forwards 12M refusés par les banques (ligne insuffisante). Couverture rollée 3M mais exposition résiduelle structurelle. Volatilité USD/MAD peut faire varier le résultat consolidé de 5-8% sur un trimestre.',
+    ocRelevance: 'Circ. 3/2019 · CDE/CPEC · IFRS 9',
+    ocArticle: 'CDE/CPEC pour conservation 70% recettes export (Circ. 3/2019). Forwards 12-24M non accessibles directement â€” utiliser CCS ou options exotiques auprès de la BMCE. Hedge accounting IFRS 9 requis pour couverture >12 mois.',
     watchpoints: [
       'USD/MAD : exposition directe et massive (volume Ã— variation)',
-      'Prix DAP/TSP (engrais) sur les marchÃ©s mondiaux : corrÃ©lation prix Ã— change',
+      'Prix DAP/TSP (engrais) sur les marchés mondiaux : corrélation prix Ã— change',
       'Spread OAT 10Y Maroc vs UST 10Y : indicateur souverain du risque de change',
-      'Demande indienne et brÃ©silienne (DAP) : impact sur le pricing power',
+      'Demande indienne et brésilienne (DAP) : impact sur le pricing power',
     ],
   },
 ];
@@ -192,7 +192,7 @@ export default function SectorLanding({ sectorId, navTo, onContact }: Props) {
       {(primaryRate || secondaryRates.length > 0) && (
         <div className="bg-navy-900 border border-navy-700 rounded-xl p-4">
           <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-3 font-bold">
-            Taux indicatifs temps rÃ©el â€” devises du secteur
+            Taux indicatifs temps réel â€” devises du secteur
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {primaryRate && (
@@ -219,7 +219,7 @@ export default function SectorLanding({ sectorId, navTo, onContact }: Props) {
               </div>
             ))}
           </div>
-          <p className="text-[9px] text-slate-700 mt-2">Taux indicatifs JAD2FX Â· Non exÃ©cutables Â· Source ECB/BKAM</p>
+          <p className="text-[9px] text-slate-700 mt-2">Taux indicatifs JAD2FX · Non exécutables · Source ECB/BKAM</p>
         </div>
       )}
 
@@ -243,7 +243,7 @@ export default function SectorLanding({ sectorId, navTo, onContact }: Props) {
 
       {/* Risk detail */}
       <div className="bg-navy-900 border border-navy-700 rounded-xl p-5">
-        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2 font-bold">MÃ©canique de risque</p>
+        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2 font-bold">Mécanique de risque</p>
         <p className="text-[12px] text-slate-300 leading-relaxed">{sector.keyRiskDetail}</p>
       </div>
 
@@ -253,7 +253,7 @@ export default function SectorLanding({ sectorId, navTo, onContact }: Props) {
           <Shield size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
           <div>
             <p className="text-[10px] font-bold text-amber-400 uppercase tracking-wider mb-1">
-              Cadre RÃ©glementaire â€” {sector.ocRelevance}
+              Cadre Réglementaire â€” {sector.ocRelevance}
             </p>
             <p className="text-[12px] text-amber-300/80 leading-relaxed">{sector.ocArticle}</p>
           </div>
@@ -263,12 +263,12 @@ export default function SectorLanding({ sectorId, navTo, onContact }: Props) {
       {/* Watch-points */}
       <div className="bg-navy-900 border border-navy-700 rounded-xl p-5">
         <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-3 font-bold">
-          Points de Vigilance â€” TrÃ©sorier Sectoriel
+          Points de Vigilance â€” Trésorier Sectoriel
         </p>
         <div className="space-y-2">
           {sector.watchpoints.map((w, i) => (
             <div key={i} className="flex items-start gap-2.5 text-[12px] text-slate-300">
-              <span className="text-gold-500 flex-shrink-0 mt-0.5 text-xs">â–¸</span>
+              <span className="text-gold-500 flex-shrink-0 mt-0.5 text-xs">▸</span>
               {w}
             </div>
           ))}
@@ -298,8 +298,8 @@ export default function SectorLanding({ sectorId, navTo, onContact }: Props) {
       </div>
 
       <p className="text-[9px] text-slate-700 text-center leading-relaxed">
-        Analyse sectorielle indicative Ã  vocation pÃ©dagogique â€” JAD2 Advisory (non Ã©tablissement financier agrÃ©Ã© BAM, Loi nÂ° 43-12).
-        Les niveaux de risque et estimations sont basÃ©s sur des donnÃ©es historiques indicatives.
+        Analyse sectorielle indicative Ã  vocation pédagogique â€” JAD2 Advisory (non établissement financier agréé BAM, Loi n° 43-12).
+        Les niveaux de risque et estimations sont basés sur des données historiques indicatives.
       </p>
     </div>
   );

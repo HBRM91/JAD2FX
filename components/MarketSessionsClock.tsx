@@ -1,7 +1,7 @@
 /**
  * MarketSessionsClock â€” BKAM-accurate FX session display
  *
- * Casablanca MIC hours per Doc 1 Â§I:
+ * Casablanca MIC hours per Doc 1 §I:
  *   Standard  : 08:30â€“15:30  (publication 16:15)
  *   Ramadan   : 09:15â€“13:15  (publication 14:00)
  *
@@ -50,7 +50,7 @@ function buildSessions(ramadan: boolean): Session[] {
     {
       city: 'Casablanca', cityAr: 'Ø§Ù„Ø¯Ø§Ø± Ø§Ù„Ø¨ÙŠØ¶Ø§Ø¡', cityFr: 'Casablanca',
       tz: 'Africa/Casablanca',
-      // Doc 1 Â§I footnote Â¹Â²: Ramadan 09:15â€“13:15; standard 08:30â€“15:30
+      // Doc 1 §I footnote Â¹Â²: Ramadan 09:15â€“13:15; standard 08:30â€“15:30
       open:    ramadan ? 9  : 8,  openMin:  ramadan ? 15 : 30,
       close:   ramadan ? 13 : 15, closeMin: ramadan ? 15 : 30,
       color: 'text-gold-400',
@@ -113,7 +113,7 @@ function isPublicationTime(ramadan: boolean): boolean {
   const isWeekday = local.getDay() >= 1 && local.getDay() <= 5;
   if (!isWeekday) return false;
   const currentMin = local.getHours() * 60 + local.getMinutes();
-  // Doc 1 Â§II: 16:15 standard (14:00 Ramadan) Â±5 min window
+  // Doc 1 §II: 16:15 standard (14:00 Ramadan) ±5 min window
   const pubMin = ramadan ? 14 * 60 : 16 * 60 + 15;
   return currentMin >= pubMin && currentMin <= pubMin + 10;
 }
@@ -151,9 +151,9 @@ export default function MarketSessionsClock() {
   const micOpen = sessions.some(s => s.bkamMic && isFixingWindow(s));
   const pubWindow = isPublicationTime(ramadan);
 
-  const title       = locale === 'ar' ? 'Ø¬Ù„Ø³Ø§Øª Ø§Ù„Ø³ÙˆÙ‚' : locale === 'en' ? 'Market Sessions' : 'SÃ©ances de MarchÃ©';
+  const title       = locale === 'ar' ? 'Ø¬Ù„Ø³Ø§Øª Ø§Ù„Ø³ÙˆÙ‚' : locale === 'en' ? 'Market Sessions' : 'Séances de Marché';
   const openLabel   = locale === 'ar' ? 'Ù…ÙØªÙˆØ­' : locale === 'en' ? 'Open' : 'Ouvert';
-  const closedLabel = locale === 'ar' ? 'Ù…ØºÙ„Ù‚' : locale === 'en' ? 'Closed' : 'FermÃ©';
+  const closedLabel = locale === 'ar' ? 'Ù…ØºÙ„Ù‚' : locale === 'en' ? 'Closed' : 'Fermé';
 
   return (
     <div
@@ -213,7 +213,7 @@ export default function MarketSessionsClock() {
               className={`p-4 text-center ${open ? session.bgColor : 'bg-transparent'} transition-colors relative`}
             >
               {isMic && (
-                <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse" title="FenÃªtre de fixing BKAM MIC" />
+                <div className="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-gold-400 animate-pulse" title="Fenêtre de fixing BKAM MIC" />
               )}
               <div className={`text-[11px] font-bold uppercase tracking-wider mb-1 ${open ? session.color : 'text-slate-500'}`}>
                 {cityName}
@@ -237,10 +237,10 @@ export default function MarketSessionsClock() {
       <div className="px-5 py-2 border-t border-navy-800">
         <p className="text-[9px] text-slate-700 font-mono">
           {locale === 'ar'
-            ? 'Ø³Ø§Ø¹Ø§Øª MIC BKAM Â· Ø§Ù„ØªØ«Ø¨ÙŠØª: Ù…ØªÙˆØ³Ø· Ù…Ø±Ø¬Ø­ Ø¨Ø§Ù„Ø­Ø¬Ù… (Ø§Ù„Ù…Ø§Ø¯Ø© I Â§1) Â· Ø§Ù„Ù†Ø´Ø±: 16:15 (14:00 Ø±Ù…Ø¶Ø§Ù†)'
+            ? 'Ø³Ø§Ø¹Ø§Øª MIC BKAM · Ø§Ù„ØªØ«Ø¨ÙŠØª: Ù…ØªÙˆØ³Ø· Ù…Ø±Ø¬Ø­ Ø¨Ø§Ù„Ø­Ø¬Ù… (Ø§Ù„Ù…Ø§Ø¯Ø© I §1) · Ø§Ù„Ù†Ø´Ø±: 16:15 (14:00 Ø±Ù…Ø¶Ø§Ù†)'
             : locale === 'en'
-            ? 'BKAM MIC hours per Circular LC/BKAM/2018/1 Â· Fixing: volume-weighted avg (Doc 1 Â§I.1) Â· Publication: 16:15 (14:00 Ramadan)'
-            : 'Horaires MIC BKAM selon LC/BKAM/2018/1 Â· Fixing: moyenne pondÃ©rÃ©e (Doc 1 Â§I.1) Â· Publication: 16h15 (14h00 Ramadan)'}
+            ? 'BKAM MIC hours per Circular LC/BKAM/2018/1 · Fixing: volume-weighted avg (Doc 1 §I.1) · Publication: 16:15 (14:00 Ramadan)'
+            : 'Horaires MIC BKAM selon LC/BKAM/2018/1 · Fixing: moyenne pondérée (Doc 1 §I.1) · Publication: 16h15 (14h00 Ramadan)'}
         </p>
       </div>
     </div>

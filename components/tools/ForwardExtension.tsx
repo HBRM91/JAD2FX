@@ -1,18 +1,18 @@
 /**
- * Prorogation & LevÃ©e AnticipÃ©e â€” Extension et dÃ©nouement anticipÃ© de forward
+ * Prorogation & Levée Anticipée â€” Extension et dénouement anticipé de forward
  *
  * Prorogation (Rollover):
- *   L'entreprise souhaite repousser la date d'Ã©chÃ©ance d'un forward existant.
- *   La banque dÃ©noue le forward initial au cours spot courant, puis rebooke
- *   un nouveau forward pour la pÃ©riode d'extension.
- *   Nouveau cours â‰ˆ Cours spot actuel + Points forward pour la pÃ©riode d'extension
+ *   L'entreprise souhaite repousser la date d'échéance d'un forward existant.
+ *   La banque dénoue le forward initial au cours spot courant, puis rebooke
+ *   un nouveau forward pour la période d'extension.
+ *   Nouveau cours â‰ˆ Cours spot actuel + Points forward pour la période d'extension
  *
- * LevÃ©e AnticipÃ©e (Early Settlement):
- *   L'entreprise veut dÃ©nouer son forward avant l'Ã©chÃ©ance.
+ * Levée Anticipée (Early Settlement):
+ *   L'entreprise veut dénouer son forward avant l'échéance.
  *   Le gain/perte = (Cours spot actuel - Cours forward initial) Ã— Notionnel
  *
- * IngÃ©nierie de marge bancaire:
- *   Marge = |Cours communiquÃ© par la banque - Cours thÃ©orique CIP| / Cours thÃ©orique Ã— 10 000 bps
+ * Ingénierie de marge bancaire:
+ *   Marge = |Cours communiqué par la banque - Cours théorique CIP| / Cours théorique Ã— 10 000 bps
  */
 import React, { useState, useMemo } from 'react';
 import { Calculator, AlertTriangle, Info, TrendingDown, TrendingUp } from 'lucide-react';
@@ -48,7 +48,7 @@ export default function ForwardExtension() {
   // Prorogation only
   const [newMaturity, setNewMaturity] = useState('');
 
-  // LevÃ©e only â€” uses originalMaturity as "today"
+  // Levée only â€” uses originalMaturity as "today"
 
   // Marge only
   const [bankRate, setBankRate]       = useState('');
@@ -94,7 +94,7 @@ export default function ForwardExtension() {
     } catch { return null; }
   }, [mode, spot, originalRate, originalMaturity, newMaturity, newMaturity, currency, direction, notional, config]);
 
-  // â”€â”€ LevÃ©e AnticipÃ©e â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // â”€â”€ Levée Anticipée â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const leveeResult = useMemo(() => {
     if (mode !== 'levee') return null;
     if (!spot || !originalRate || !originalMaturity) return null;
@@ -147,9 +147,9 @@ export default function ForwardExtension() {
   }, [mode, spot, bankRate, tenor, direction, currency, notional, config]);
 
   const tabs: { id: Mode; label: string; desc: string }[] = [
-    { id: 'prorogation', label: 'Prorogation', desc: 'Repousser l\'Ã©chÃ©ance' },
-    { id: 'levee', label: 'LevÃ©e AnticipÃ©e', desc: 'DÃ©nouer avant terme' },
-    { id: 'marge', label: 'Marge Bancaire', desc: 'RÃ©tro-ingÃ©nierie du taux banque' },
+    { id: 'prorogation', label: 'Prorogation', desc: 'Repousser l\'échéance' },
+    { id: 'levee', label: 'Levée Anticipée', desc: 'Dénouer avant terme' },
+    { id: 'marge', label: 'Marge Bancaire', desc: 'Rétro-ingénierie du taux banque' },
   ];
 
   return (
@@ -161,15 +161,15 @@ export default function ForwardExtension() {
           <div className="flex items-center gap-2 mb-1">
             <Calculator size={15} className="text-purple-400" />
             <span className="text-[9px] font-bold text-purple-400 uppercase tracking-[0.2em] bg-purple-500/10 border border-purple-500/25 px-2 py-0.5 rounded">
-              Gestion Forward â€” OpÃ©rations Post-Booking
+              Gestion Forward â€” Opérations Post-Booking
             </span>
           </div>
           <h2 className="text-lg font-serif font-bold text-white mb-1">
-            Prorogation, LevÃ©e AnticipÃ©e & Analyse de Marge
+            Prorogation, Levée Anticipée & Analyse de Marge
           </h2>
           <p className="text-sm text-slate-400">
-            Calculez le nouveau taux d'un forward prorogÃ©, le coÃ»t d'une levÃ©e anticipÃ©e,
-            ou rÃ©tro-calculez la marge prise par votre banque sur un taux communiquÃ©.
+            Calculez le nouveau taux d'un forward prorogé, le coût d'une levée anticipée,
+            ou rétro-calculez la marge prise par votre banque sur un taux communiqué.
           </p>
         </div>
       </div>
@@ -229,7 +229,7 @@ export default function ForwardExtension() {
             <Info size={11} className="text-purple-400" />
             <span className="text-[10px] text-slate-400">Cours spot indicatif actuel</span>
             <span className="font-mono font-bold text-white text-[12px]">{currency}/MAD {spot.toFixed(4)}</span>
-            <span className="text-[9px] text-slate-600 ml-auto">non exÃ©cutable</span>
+            <span className="text-[9px] text-slate-600 ml-auto">non exécutable</span>
           </div>
         )}
 
@@ -237,22 +237,22 @@ export default function ForwardExtension() {
         {mode === 'prorogation' && (
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Date d'Ã©chÃ©ance initiale</label>
+              <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Date d'échéance initiale</label>
               <input type="date" value={originalMaturity} onChange={e => setOriginalMaturity(e.target.value)}
                 className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors" />
             </div>
             <div>
-              <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Nouvelle date d'Ã©chÃ©ance</label>
+              <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Nouvelle date d'échéance</label>
               <input type="date" value={newMaturity} onChange={e => setNewMaturity(e.target.value)}
                 className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors" />
             </div>
           </div>
         )}
 
-        {/* LevÃ©e inputs */}
+        {/* Levée inputs */}
         {mode === 'levee' && (
           <div>
-            <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Date d'Ã©chÃ©ance contractuelle</label>
+            <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Date d'échéance contractuelle</label>
             <input type="date" value={originalMaturity} onChange={e => setOriginalMaturity(e.target.value)}
               className="w-full sm:w-56 bg-navy-950 border border-navy-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors" />
           </div>
@@ -262,13 +262,13 @@ export default function ForwardExtension() {
         {mode === 'marge' && (
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Taux communiquÃ© par la banque</label>
+              <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Taux communiqué par la banque</label>
               <input type="number" step="0.0001" value={bankRate} onChange={e => setBankRate(e.target.value)}
                 className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-purple-500 transition-colors"
                 placeholder="10.8750" />
             </div>
             <div>
-              <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">DurÃ©e (jours)</label>
+              <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Durée (jours)</label>
               <input type="number" value={tenor} onChange={e => setTenor(e.target.value)}
                 className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-purple-500 transition-colors"
                 placeholder="90" />
@@ -280,13 +280,13 @@ export default function ForwardExtension() {
       {/* â”€â”€ Prorogation result â”€â”€ */}
       {mode === 'prorogation' && prorResult && (
         <div className="bg-navy-900 border border-purple-700/30 rounded-xl p-5 space-y-4">
-          <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">RÃ©sultat â€” Prorogation de {prorResult.extensionDays} jours</p>
+          <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">Résultat â€” Prorogation de {prorResult.extensionDays} jours</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: 'Taux initial', value: fmt4(parseFloat(originalRate)), color: 'text-slate-400' },
               { label: 'Points d\'extension', value: fmtPips(prorResult.extensionPoints) + ' pips', color: prorResult.extensionPoints > 0 ? 'text-red-400' : 'text-emerald-400' },
               { label: 'Nouveau taux forward', value: fmt4(prorResult.newForwardRate), color: 'text-white' },
-              { label: 'CoÃ»t prorogation', value: fmtMAD(Math.abs(prorResult.cost)) + ' MAD', color: prorResult.cost > 0 ? 'text-red-400' : 'text-emerald-400' },
+              { label: 'Coût prorogation', value: fmtMAD(Math.abs(prorResult.cost)) + ' MAD', color: prorResult.cost > 0 ? 'text-red-400' : 'text-emerald-400' },
             ].map(m => (
               <div key={m.label} className="bg-navy-800 rounded-lg p-3">
                 <p className="text-[9px] text-slate-500 mb-1">{m.label}</p>
@@ -298,24 +298,24 @@ export default function ForwardExtension() {
             <AlertTriangle size={12} className="text-amber-400 flex-shrink-0 mt-0.5" />
             <p className="text-[11px] text-amber-300/80 leading-snug">
               {prorResult.cost > 0
-                ? `La prorogation coÃ»te ${fmtMAD(prorResult.cost)} MAD car les points forward sont positifs (MAD plus cher Ã  terme). Pour dÃ©nouement effectif, contactez votre Ã©tablissement bancaire agrÃ©Ã© par Bank Al-Maghrib.`
-                : `La prorogation gÃ©nÃ¨re un gain apparent de ${fmtMAD(Math.abs(prorResult.cost))} MAD. Les conditions exactes dÃ©pendent des taux interbancaires au moment de l'opÃ©ration avec votre banque agrÃ©Ã©e BAM.`}
+                ? `La prorogation coûte ${fmtMAD(prorResult.cost)} MAD car les points forward sont positifs (MAD plus cher Ã  terme). Pour dénouement effectif, contactez votre établissement bancaire agréé par Bank Al-Maghrib.`
+                : `La prorogation génère un gain apparent de ${fmtMAD(Math.abs(prorResult.cost))} MAD. Les conditions exactes dépendent des taux interbancaires au moment de l'opération avec votre banque agréée BAM.`}
             </p>
           </div>
         </div>
       )}
 
-      {/* â”€â”€ LevÃ©e anticipÃ©e result â”€â”€ */}
+      {/* â”€â”€ Levée anticipée result â”€â”€ */}
       {mode === 'levee' && leveeResult && (
         <div className="bg-navy-900 border border-purple-700/30 rounded-xl p-5 space-y-4">
           <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">
-            RÃ©sultat â€” LevÃ©e AnticipÃ©e ({leveeResult.daysLeft} jours avant Ã©chÃ©ance)
+            Résultat â€” Levée Anticipée ({leveeResult.daysLeft} jours avant échéance)
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
               { label: 'Cours spot actuel', value: fmt4(leveeResult.spot) },
               { label: 'Cours forward initial', value: fmt4(leveeResult.orig) },
-              { label: leveeResult.pnl >= 0 ? 'Gain levÃ©e anticipÃ©e' : 'Perte levÃ©e anticipÃ©e',
+              { label: leveeResult.pnl >= 0 ? 'Gain levée anticipée' : 'Perte levée anticipée',
                 value: fmtMAD(Math.abs(leveeResult.pnl)) + ' MAD',
                 color: leveeResult.pnl >= 0 ? 'text-emerald-400' : 'text-red-400' },
             ].map(m => (
@@ -327,14 +327,14 @@ export default function ForwardExtension() {
           </div>
           {leveeResult.remainingForwardRate && (
             <div className="p-3 bg-navy-800 border border-navy-700 rounded-lg">
-              <p className="text-[10px] text-slate-500 mb-1">Cours forward indicatif pour la durÃ©e rÃ©siduelle de {leveeResult.daysLeft} jours</p>
+              <p className="text-[10px] text-slate-500 mb-1">Cours forward indicatif pour la durée résiduelle de {leveeResult.daysLeft} jours</p>
               <p className="text-sm font-mono font-bold text-white">{fmt4(leveeResult.remainingForwardRate)}</p>
-              <p className="text-[9px] text-slate-600 mt-0.5">CalculÃ© par CIP â€” Ã  titre pÃ©dagogique uniquement</p>
+              <p className="text-[9px] text-slate-600 mt-0.5">Calculé par CIP â€” Ã  titre pédagogique uniquement</p>
             </div>
           )}
           <p className="text-[10px] text-slate-600">
-            La levÃ©e anticipÃ©e entraÃ®ne un dÃ©nouement du forward au cours spot courant. Le gain ou la perte
-            est rÃ©glÃ© avec votre banque domiciliataire agrÃ©Ã©e par Bank Al-Maghrib Ã  la date de levÃ©e.
+            La levée anticipée entraîne un dénouement du forward au cours spot courant. Le gain ou la perte
+            est réglé avec votre banque domiciliataire agréée par Bank Al-Maghrib Ã  la date de levée.
           </p>
         </div>
       )}
@@ -348,9 +348,9 @@ export default function ForwardExtension() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: 'Cours spot', value: fmt4(spot!), color: 'text-slate-400' },
-              { label: 'Taux CIP thÃ©orique', value: fmt4(margeResult.theoreticalRate), color: 'text-emerald-400' },
-              { label: 'Taux banque communiquÃ©', value: fmt4(margeResult.bank), color: 'text-white' },
-              { label: 'Marge estimÃ©e', value: fmtBps(margeResult.marginBps), color: margeResult.marginBps > 50 ? 'text-red-400' : margeResult.marginBps > 20 ? 'text-amber-400' : 'text-emerald-400' },
+              { label: 'Taux CIP théorique', value: fmt4(margeResult.theoreticalRate), color: 'text-emerald-400' },
+              { label: 'Taux banque communiqué', value: fmt4(margeResult.bank), color: 'text-white' },
+              { label: 'Marge estimée', value: fmtBps(margeResult.marginBps), color: margeResult.marginBps > 50 ? 'text-red-400' : margeResult.marginBps > 20 ? 'text-amber-400' : 'text-emerald-400' },
             ].map(m => (
               <div key={m.label} className="bg-navy-800 rounded-lg p-3">
                 <p className="text-[9px] text-slate-500 mb-1">{m.label}</p>
@@ -367,19 +367,19 @@ export default function ForwardExtension() {
           <div className="flex items-start gap-2 p-3 bg-amber-500/5 border border-amber-700/20 rounded-lg">
             <Info size={12} className="text-amber-400 flex-shrink-0 mt-0.5" />
             <p className="text-[10px] text-amber-300/70 leading-relaxed">
-              Le taux CIP thÃ©orique est calculÃ© Ã  partir des taux MONIA interpolÃ©s. La marge estimÃ©e est
-              purement indicative â€” la banque intÃ¨gre Ã©galement sa liquiditÃ© interne, le risque contrepartie
-              et ses coÃ»ts opÃ©rationnels. Cette analyse est fournie Ã  titre Ã©ducatif uniquement.
-              Pour toute opÃ©ration, adressez-vous Ã  votre Ã©tablissement bancaire agrÃ©Ã© par Bank Al-Maghrib.
+              Le taux CIP théorique est calculé Ã  partir des taux MONIA interpolés. La marge estimée est
+              purement indicative â€” la banque intègre également sa liquidité interne, le risque contrepartie
+              et ses coûts opérationnels. Cette analyse est fournie Ã  titre éducatif uniquement.
+              Pour toute opération, adressez-vous Ã  votre établissement bancaire agréé par Bank Al-Maghrib.
             </p>
           </div>
         </div>
       )}
 
       <p className="text-[9px] text-slate-700 text-center leading-relaxed">
-        Calculs indicatifs basÃ©s sur les taux CIP JAD2FX (non exÃ©cutables). Les taux effectifs dÃ©pendent
-        des conditions de marchÃ© au moment de l'opÃ©ration avec votre banque agrÃ©Ã©e BAM.
-        JAD2 Advisory â€” non Ã©tablissement financier agrÃ©Ã© (Loi nÂ° 43-12).
+        Calculs indicatifs basés sur les taux CIP JAD2FX (non exécutables). Les taux effectifs dépendent
+        des conditions de marché au moment de l'opération avec votre banque agréée BAM.
+        JAD2 Advisory â€” non établissement financier agréé (Loi n° 43-12).
       </p>
     </div>
   );
