@@ -165,7 +165,7 @@ export default function MarketSessionsClock() {
           <Clock size={13} className="text-gold-500" />
           <h3 className="text-xs font-bold text-white uppercase tracking-widest">{title}</h3>
           {ramadan && (
-            <span className="text-[9px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded uppercase tracking-wide">
+            <span className="text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded uppercase tracking-wide">
               Ramadan
             </span>
           )}
@@ -173,14 +173,14 @@ export default function MarketSessionsClock() {
         <div className="flex items-center gap-2">
           {/* BKAM MIC fixing window status */}
           {micOpen && (
-            <span className="text-[9px] font-bold text-gold-400 bg-gold-500/10 border border-gold-500/30 px-1.5 py-0.5 rounded flex items-center gap-1">
+            <span className="text-[10px] font-bold text-gold-400 bg-gold-500/10 border border-gold-500/30 px-1.5 py-0.5 rounded flex items-center gap-1">
               <span className="w-1 h-1 rounded-full bg-gold-400 animate-pulse" />
               {locale === 'ar' ? 'نافذة التسعير BKAM' : locale === 'en' ? 'BKAM MIC fixing' : 'Fixing MIC BKAM'}
             </span>
           )}
           {/* Publication window */}
           {pubWindow && (
-            <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded flex items-center gap-1">
+            <span className="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded flex items-center gap-1">
               <span className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
               {locale === 'en' ? 'Rate publication' : 'Publication des cours'}
             </span>
@@ -224,9 +224,9 @@ export default function MarketSessionsClock() {
               <div className={`text-[10px] mt-1 font-mono ${open ? 'text-emerald-400' : 'text-slate-500'}`}>
                 {open ? 'ðŸŸ¢' : 'ðŸ”´'} {open ? openLabel : closedLabel}
               </div>
-              <div className="text-[9px] text-slate-600 mt-0.5 font-mono">{hoursLabel}</div>
+              <div className="text-[10px] text-slate-600 mt-0.5 font-mono">{hoursLabel}</div>
               {pubLabel && (
-                <div className="text-[9px] text-slate-700 font-mono">{pubLabel}</div>
+                <div className="text-[10px] text-slate-700 font-mono">{pubLabel}</div>
               )}
             </div>
           );
@@ -235,7 +235,7 @@ export default function MarketSessionsClock() {
 
       {/* Regulatory note */}
       <div className="px-5 py-2 border-t border-navy-800">
-        <p className="text-[9px] text-slate-700 font-mono">
+        <p className="text-[10px] text-slate-700 font-mono">
           {locale === 'ar'
             ? 'ساعات MIC BKAM · التثبيت: متوسط مرجح بالحجم (المادة I §1) · النشر: 16:15 (14:00 رمضان)'
             : locale === 'en'

@@ -160,7 +160,7 @@ export default function ForwardExtension() {
         <div className="p-5">
           <div className="flex items-center gap-2 mb-1">
             <Calculator size={15} className="text-purple-400" />
-            <span className="text-[9px] font-bold text-purple-400 uppercase tracking-[0.2em] bg-purple-500/10 border border-purple-500/25 px-2 py-0.5 rounded">
+            <span className="text-[10px] font-bold text-purple-400 uppercase tracking-[0.2em] bg-purple-500/10 border border-purple-500/25 px-2 py-0.5 rounded">
               Gestion Forward — Opérations Post-Booking
             </span>
           </div>
@@ -184,7 +184,7 @@ export default function ForwardExtension() {
                 : 'border-navy-700 text-slate-400 hover:border-navy-600'
             }`}>
             <p className="text-[11px] font-bold">{t.label}</p>
-            <p className="text-[9px] text-slate-500 mt-0.5">{t.desc}</p>
+            <p className="text-[10px] text-slate-500 mt-0.5">{t.desc}</p>
           </button>
         ))}
       </div>
@@ -193,7 +193,7 @@ export default function ForwardExtension() {
       <div className="bg-navy-900 border border-navy-700 rounded-xl p-5 space-y-4">
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <div>
-            <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Devise</label>
+            <label className="block text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Devise</label>
             <select value={currency} onChange={e => setCurrency(e.target.value)}
               className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors appearance-none">
               {BKAM_CURRENCIES.filter(c => c.bkamUnit === 1).map(c => (
@@ -202,7 +202,7 @@ export default function ForwardExtension() {
             </select>
           </div>
           <div>
-            <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Sens</label>
+            <label className="block text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Sens</label>
             <select value={direction} onChange={e => setDirection(e.target.value as 'BUY'|'SELL')}
               className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors appearance-none">
               <option value="BUY">Achat {currency}</option>
@@ -210,13 +210,13 @@ export default function ForwardExtension() {
             </select>
           </div>
           <div>
-            <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Notionnel ({currency})</label>
+            <label className="block text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Notionnel ({currency})</label>
             <input type="number" value={notional} onChange={e => setNotional(e.target.value)}
               className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-purple-500 transition-colors"
               placeholder="500000" />
           </div>
           <div>
-            <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Taux forward initial</label>
+            <label className="block text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Taux forward initial</label>
             <input type="number" step="0.0001" value={originalRate} onChange={e => setOriginalRate(e.target.value)}
               className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-purple-500 transition-colors"
               placeholder="10.8500" />
@@ -229,7 +229,7 @@ export default function ForwardExtension() {
             <Info size={11} className="text-purple-400" />
             <span className="text-[10px] text-slate-400">Cours spot indicatif actuel</span>
             <span className="font-mono font-bold text-white text-[12px]">{currency}/MAD {spot.toFixed(4)}</span>
-            <span className="text-[9px] text-slate-600 ml-auto">non exécutable</span>
+            <span className="text-[10px] text-slate-600 ml-auto">non exécutable</span>
           </div>
         )}
 
@@ -237,12 +237,12 @@ export default function ForwardExtension() {
         {mode === 'prorogation' && (
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Date d'échéance initiale</label>
+              <label className="block text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Date d'échéance initiale</label>
               <input type="date" value={originalMaturity} onChange={e => setOriginalMaturity(e.target.value)}
                 className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors" />
             </div>
             <div>
-              <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Nouvelle date d'échéance</label>
+              <label className="block text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Nouvelle date d'échéance</label>
               <input type="date" value={newMaturity} onChange={e => setNewMaturity(e.target.value)}
                 className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors" />
             </div>
@@ -252,7 +252,7 @@ export default function ForwardExtension() {
         {/* Levée inputs */}
         {mode === 'levee' && (
           <div>
-            <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Date d'échéance contractuelle</label>
+            <label className="block text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Date d'échéance contractuelle</label>
             <input type="date" value={originalMaturity} onChange={e => setOriginalMaturity(e.target.value)}
               className="w-full sm:w-56 bg-navy-950 border border-navy-700 rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-purple-500 transition-colors" />
           </div>
@@ -262,13 +262,13 @@ export default function ForwardExtension() {
         {mode === 'marge' && (
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Taux communiqué par la banque</label>
+              <label className="block text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Taux communiqué par la banque</label>
               <input type="number" step="0.0001" value={bankRate} onChange={e => setBankRate(e.target.value)}
                 className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-purple-500 transition-colors"
                 placeholder="10.8750" />
             </div>
             <div>
-              <label className="block text-[9px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Durée (jours)</label>
+              <label className="block text-[10px] text-slate-500 uppercase tracking-wider mb-1.5 font-bold">Durée (jours)</label>
               <input type="number" value={tenor} onChange={e => setTenor(e.target.value)}
                 className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-purple-500 transition-colors"
                 placeholder="90" />
@@ -280,7 +280,7 @@ export default function ForwardExtension() {
       {/* ── Prorogation result ── */}
       {mode === 'prorogation' && prorResult && (
         <div className="bg-navy-900 border border-purple-700/30 rounded-xl p-5 space-y-4">
-          <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">Résultat — Prorogation de {prorResult.extensionDays} jours</p>
+          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Résultat — Prorogation de {prorResult.extensionDays} jours</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: 'Taux initial', value: fmt4(parseFloat(originalRate)), color: 'text-slate-400' },
@@ -289,7 +289,7 @@ export default function ForwardExtension() {
               { label: 'Coût prorogation', value: fmtMAD(Math.abs(prorResult.cost)) + ' MAD', color: prorResult.cost > 0 ? 'text-red-400' : 'text-emerald-400' },
             ].map(m => (
               <div key={m.label} className="bg-navy-800 rounded-lg p-3">
-                <p className="text-[9px] text-slate-500 mb-1">{m.label}</p>
+                <p className="text-[10px] text-slate-500 mb-1">{m.label}</p>
                 <p className={`text-base font-mono font-bold ${m.color}`}>{m.value}</p>
               </div>
             ))}
@@ -308,7 +308,7 @@ export default function ForwardExtension() {
       {/* ── Levée anticipée result ── */}
       {mode === 'levee' && leveeResult && (
         <div className="bg-navy-900 border border-purple-700/30 rounded-xl p-5 space-y-4">
-          <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">
+          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">
             Résultat — Levée Anticipée ({leveeResult.daysLeft} jours avant échéance)
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -320,7 +320,7 @@ export default function ForwardExtension() {
                 color: leveeResult.pnl >= 0 ? 'text-emerald-400' : 'text-red-400' },
             ].map(m => (
               <div key={m.label} className="bg-navy-800 rounded-lg p-3">
-                <p className="text-[9px] text-slate-500 mb-1">{m.label}</p>
+                <p className="text-[10px] text-slate-500 mb-1">{m.label}</p>
                 <p className={`text-base font-mono font-bold ${(m as any).color ?? 'text-white'}`}>{m.value}</p>
               </div>
             ))}
@@ -329,7 +329,7 @@ export default function ForwardExtension() {
             <div className="p-3 bg-navy-800 border border-navy-700 rounded-lg">
               <p className="text-[10px] text-slate-500 mb-1">Cours forward indicatif pour la durée résiduelle de {leveeResult.daysLeft} jours</p>
               <p className="text-sm font-mono font-bold text-white">{fmt4(leveeResult.remainingForwardRate)}</p>
-              <p className="text-[9px] text-slate-600 mt-0.5">Calculé par CIP — à titre pédagogique uniquement</p>
+              <p className="text-[10px] text-slate-600 mt-0.5">Calculé par CIP — à titre pédagogique uniquement</p>
             </div>
           )}
           <p className="text-[10px] text-slate-600">
@@ -342,7 +342,7 @@ export default function ForwardExtension() {
       {/* ── Marge bancaire result ── */}
       {mode === 'marge' && margeResult && (
         <div className="bg-navy-900 border border-purple-700/30 rounded-xl p-5 space-y-4">
-          <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">
+          <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">
             Analyse de Marge — Forward {margeResult.days} jours
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -353,7 +353,7 @@ export default function ForwardExtension() {
               { label: 'Marge estimée', value: fmtBps(margeResult.marginBps), color: margeResult.marginBps > 50 ? 'text-red-400' : margeResult.marginBps > 20 ? 'text-amber-400' : 'text-emerald-400' },
             ].map(m => (
               <div key={m.label} className="bg-navy-800 rounded-lg p-3">
-                <p className="text-[9px] text-slate-500 mb-1">{m.label}</p>
+                <p className="text-[10px] text-slate-500 mb-1">{m.label}</p>
                 <p className={`text-base font-mono font-bold ${m.color}`}>{m.value}</p>
               </div>
             ))}
@@ -376,7 +376,7 @@ export default function ForwardExtension() {
         </div>
       )}
 
-      <p className="text-[9px] text-slate-700 text-center leading-relaxed">
+      <p className="text-[10px] text-slate-700 text-center leading-relaxed">
         Calculs indicatifs basés sur les taux CIP JAD2FX (non exécutables). Les taux effectifs dépendent
         des conditions de marché au moment de l'opération avec votre banque agréée BAM.
         JAD2 Advisory — non établissement financier agréé (Loi n° 43-12).

@@ -66,7 +66,7 @@ export default function BasketExplainer() {
               onChange={(e) => setEurWeight(parseInt(e.target.value, 10))}
               className="w-full accent-blue-500"
             />
-            <div className="flex justify-between text-[9px] text-slate-600 mt-0.5">
+            <div className="flex justify-between text-[10px] text-slate-600 mt-0.5">
               <span>0%</span><span>50%</span><span>100%</span>
             </div>
           </div>
@@ -80,7 +80,7 @@ export default function BasketExplainer() {
               onChange={(e) => setUsdWeight(parseInt(e.target.value, 10))}
               className="w-full accent-emerald-500"
             />
-            <div className="flex justify-between text-[9px] text-slate-600 mt-0.5">
+            <div className="flex justify-between text-[10px] text-slate-600 mt-0.5">
               <span>0%</span><span>50%</span><span>100%</span>
             </div>
           </div>

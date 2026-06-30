@@ -1,3 +1,4 @@
+import { useSessionState } from '../hooks/useSessionState';
 import React, { useState, useMemo, useCallback } from 'react';
 import { ArrowLeftRight, RotateCcw, RotateCw, ChevronDown, Trash2, TrendingDown } from 'lucide-react';
 import { BKAM_CURRENCIES } from '../constants';
@@ -24,7 +25,7 @@ function cfRow(receive: boolean, amount: number, ccy: string) {
         {receive ? '↑' : '↓'}
       </span>
       <div>
-        <p className="text-[9px] text-slate-500 uppercase">{receive ? 'Reçu' : 'Livré'}</p>
+        <p className="text-[10px] text-slate-500 uppercase">{receive ? 'Reçu' : 'Livré'}</p>
         <p className={`font-mono font-bold text-xs ${receive ? 'text-emerald-400' : 'text-red-400'}`}>
           {receive ? '+' : '−'}{fmtMAD(amount)} {ccy}
         </p>
@@ -67,7 +68,7 @@ function CashFlowTimeline({ swap, notional, currency }: {
         {/* TODAY */}
         <div className="absolute left-4 top-[7px] flex flex-col items-center" style={{ transform: 'translateX(-50%)' }}>
           <div className="w-3 h-3 rounded-full bg-slate-600 border-2 border-slate-500 z-10" />
-          <p className="text-[9px] text-slate-600 mt-1 whitespace-nowrap">{today}</p>
+          <p className="text-[10px] text-slate-600 mt-1 whitespace-nowrap">{today}</p>
         </div>
 
         {/* NEAR */}
@@ -76,7 +77,7 @@ function CashFlowTimeline({ swap, notional, currency }: {
           style={{ left: `calc(1rem + (100% - 2rem) * ${nearPct / 100})`, transform: 'translateX(-50%)' }}
         >
           <div className="w-4 h-4 rounded-full bg-blue-600 border-2 border-blue-400 z-10" />
-          <p className="text-[9px] text-blue-400 font-bold mt-1 whitespace-nowrap">
+          <p className="text-[10px] text-blue-400 font-bold mt-1 whitespace-nowrap">
             {swap.nearLeg.tenorLabel} · {nearDate}
           </p>
         </div>
@@ -84,7 +85,7 @@ function CashFlowTimeline({ swap, notional, currency }: {
         {/* FAR */}
         <div className="absolute right-4 top-[6px] flex flex-col items-center" style={{ transform: 'translateX(50%)' }}>
           <div className="w-4 h-4 rounded-full bg-purple-600 border-2 border-purple-400 z-10" />
-          <p className="text-[9px] text-purple-400 font-bold mt-1 whitespace-nowrap">
+          <p className="text-[10px] text-purple-400 font-bold mt-1 whitespace-nowrap">
             {swap.farLeg.tenorLabel} · {farDate}
           </p>
         </div>
@@ -94,22 +95,22 @@ function CashFlowTimeline({ swap, notional, currency }: {
       <div className="grid grid-cols-2 gap-3 pt-2">
         {/* NEAR leg */}
         <div className="border border-blue-800/40 bg-blue-950/10 rounded-lg p-3 space-y-2">
-          <p className="text-[9px] font-bold uppercase tracking-widest text-blue-400">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-blue-400">
             Jambe Near · {swap.nearLeg.tenorDays}j
           </p>
           {cfRow(isNearBuy, nearFcy, currency)}
           {cfRow(!isNearBuy, nearMad, 'MAD')}
-          <p className="text-right text-[9px] text-slate-600 font-mono">@ {fmt4(swap.nearLeg.rate)}</p>
+          <p className="text-right text-[10px] text-slate-600 font-mono">@ {fmt4(swap.nearLeg.rate)}</p>
         </div>
 
         {/* FAR leg */}
         <div className="border border-purple-800/40 bg-purple-950/10 rounded-lg p-3 space-y-2">
-          <p className="text-[9px] font-bold uppercase tracking-widest text-purple-400">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-purple-400">
             Jambe Far · {swap.farLeg.tenorDays}j
           </p>
           {cfRow(!isNearBuy, farFcy, currency)}
           {cfRow(isNearBuy, farMad, 'MAD')}
-          <p className="text-right text-[9px] text-slate-600 font-mono">@ {fmt4(swap.farLeg.rate)}</p>
+          <p className="text-right text-[10px] text-slate-600 font-mono">@ {fmt4(swap.farLeg.rate)}</p>
         </div>
       </div>
 
@@ -126,7 +127,7 @@ function CashFlowTimeline({ swap, notional, currency }: {
           </span>
         </div>
         <div className="text-right flex-shrink-0">
-          <p className="text-[9px] text-slate-500 uppercase">Swap pts</p>
+          <p className="text-[10px] text-slate-500 uppercase">Swap pts</p>
           <p className={`font-mono font-bold text-xs ${swap.swapPointsPips >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
             {fmtPips(swap.swapPointsPips)} pips
           </p>
@@ -230,8 +231,8 @@ export default function SwapSimulator() {
   const { config, livePrices, addBlotterEntry } = useAdmin();
 
   // Swap inputs
-  const [currency, setCurrency]       = useState('EUR');
-  const [notional, setNotional]       = useState(1_000_000);
+  const [currency, setCurrency]       = useSessionState('swap_currency', 'EUR');
+  const [notional, setNotional]       = useSessionState('swap_notional', 1_000_000);
   const [nearTenor, setNearTenor]     = useState('1M');
   const [farTenor, setFarTenor]       = useState('3M');
   const [nearDir, setNearDir]         = useState<'BUY' | 'SELL'>('BUY');
@@ -479,12 +480,12 @@ export default function SwapSimulator() {
                       { label: 'Break-even (pips)', value: fmtPips(swap.swapPointsPips >= 0 ? beMove : -beMove), color: swap.swapPointsPips >= 0 ? 'text-emerald-400' : 'text-red-400' },
                     ].map(item => (
                       <div key={item.label} className="bg-navy-900/60 rounded p-2 text-center">
-                        <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-0.5">{item.label}</p>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">{item.label}</p>
                         <p className={`text-xs font-mono font-bold ${item.color ?? 'text-white'}`}>{item.value}</p>
                       </div>
                     ))}
                   </div>
-                  <p className="text-[9px] text-slate-600 mt-2">
+                  <p className="text-[10px] text-slate-600 mt-2">
                     Carry annualisé = |pts fwd| / spot × 365 / écart jours · Break-even = mouvement spot min. pour couvrir le coût du swap
                   </p>
                 </div>

@@ -113,7 +113,7 @@ export default function GlobalSearch({ isOpen, onClose, onNavigate }: Props) {
               }
             }}
           />
-          <kbd className="hidden sm:flex items-center px-1.5 py-0.5 text-[9px] font-mono text-slate-500 bg-navy-800 border border-navy-700 rounded">Esc</kbd>
+          <kbd className="hidden sm:flex items-center px-1.5 py-0.5 text-[10px] font-mono text-slate-500 bg-navy-800 border border-navy-700 rounded">Esc</kbd>
         </div>
 
         <div className="max-h-[50vh] overflow-y-auto">
@@ -148,7 +148,7 @@ export default function GlobalSearch({ isOpen, onClose, onNavigate }: Props) {
           )}
         </div>
 
-        <div className="px-4 py-2 border-t border-navy-700 flex items-center justify-between text-[9px] text-slate-500">
+        <div className="px-4 py-2 border-t border-navy-700 flex items-center justify-between text-[10px] text-slate-500">
           <span>↑↓ Naviguer · ↵ Ouvrir · Esc Fermer</span>
           <span>{results.length} résultats</span>
         </div>

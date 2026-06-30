@@ -90,9 +90,9 @@ export default function CorrelationHeatmap() {
         <table className="border-collapse">
           <thead>
             <tr>
-              <th className="px-1 py-1 text-[9px] text-slate-500 text-right"></th>
+              <th className="px-1 py-1 text-[10px] text-slate-500 text-right"></th>
               {CURRENCIES.map((c) => (
-                <th key={c} className="px-1 py-1 text-[9px] text-slate-400 text-center font-mono min-w-[36px]">
+                <th key={c} className="px-1 py-1 text-[10px] text-slate-400 text-center font-mono min-w-[36px]">
                   {c}
                 </th>
               ))}
@@ -101,11 +101,11 @@ export default function CorrelationHeatmap() {
           <tbody>
             {matrix.map((row, i) => (
               <tr key={i}>
-                <td className="px-1.5 py-1 text-[9px] text-slate-400 text-right font-mono">{CURRENCIES[i]}</td>
+                <td className="px-1.5 py-1 text-[10px] text-slate-400 text-right font-mono">{CURRENCIES[i]}</td>
                 {row.map((c, j) => (
                   <td
                     key={j}
-                    className="px-1 py-1 text-center text-[9px] font-mono"
+                    className="px-1 py-1 text-center text-[10px] font-mono"
                     style={{
                       backgroundColor: colorForCorr(c),
                       color: Math.abs(c) > 0.6 ? 'white' : '#cbd5e1',

@@ -177,7 +177,7 @@ export default function AuditLanding() {
                 >
                   <Calendar size={14} /> Réserver mon créneau
                 </button>
-                <p className="text-[9px] text-slate-500 text-center leading-relaxed">
+                <p className="text-[10px] text-slate-500 text-center leading-relaxed">
                   Vos données sont traitées selon la loi 09-08 · CNDP. Pas de spam, désabonnement en 1 clic.
                 </p>
               </form>

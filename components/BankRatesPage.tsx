@@ -120,7 +120,7 @@ export default function BankRatesPage() {
       <div className="bg-navy-900 border border-navy-700 rounded-xl overflow-hidden">
         <table className="w-full text-[11px]">
           <thead className="bg-navy-950">
-            <tr className="text-[9px] text-slate-500 uppercase tracking-wider">
+            <tr className="text-[10px] text-slate-500 uppercase tracking-wider">
               <th className="px-3 py-2 text-left">Banque</th>
               <th className="px-3 py-2 text-right">Bid (vous vendez)</th>
               <th className="px-3 py-2 text-right">Ask (vous achetez)</th>

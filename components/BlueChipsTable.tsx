@@ -70,7 +70,7 @@ export default function BlueChipsTable() {
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-[11px]">
-          <thead className="text-[9px] text-slate-500 uppercase tracking-wider">
+          <thead className="text-[10px] text-slate-500 uppercase tracking-wider">
             <tr>
               <th className="px-2 py-1 text-left">Société</th>
               <th className="px-2 py-1 text-left">Secteur</th>
@@ -100,7 +100,7 @@ export default function BlueChipsTable() {
           </tbody>
         </table>
       </div>
-      <p className="text-[9px] text-slate-500 mt-2 italic">
+      <p className="text-[10px] text-slate-500 mt-2 italic">
         Données via Yahoo Finance · Délai ~15min · Source officielle : casablanca-bourse.com
       </p>
     </div>

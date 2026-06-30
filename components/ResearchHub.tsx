@@ -403,7 +403,7 @@ function ArticleCard({ article, badgeCategory, badgeColor }: {
           <span className="text-[10px] text-slate-500 font-mono">{article.date}</span>
           <div className="flex flex-wrap gap-1 ml-auto">
             {article.tags.slice(0, 3).map(tag => (
-              <span key={tag} className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded bg-navy-800 text-slate-500 border border-navy-700">
+              <span key={tag} className="text-[10px] font-mono uppercase px-1.5 py-0.5 rounded bg-navy-800 text-slate-500 border border-navy-700">
                 {tag}
               </span>
             ))}
@@ -428,7 +428,7 @@ function PillarCTA({ pillar, onAction }: {
         <div className="flex-1 min-w-0">
           <p className="text-[12px] font-bold text-white">{pillar.name}</p>
           {pillar.tier && (
-            <span className={`text-[9px] font-bold border px-1.5 py-0.5 rounded uppercase tracking-wide ${TIER_META[pillar.tier].style}`}>
+            <span className={`text-[10px] font-bold border px-1.5 py-0.5 rounded uppercase tracking-wide ${TIER_META[pillar.tier].style}`}>
               {TIER_META[pillar.tier].label}
             </span>
           )}
@@ -694,7 +694,7 @@ export default function ResearchHub({ navTo }: ResearchHubProps) {
                       )}
                     </div>
                     {isActive && (
-                      <span className="ml-auto text-[9px] font-bold uppercase bg-gold-500 text-navy-950 px-1.5 py-0.5 rounded flex-shrink-0">
+                      <span className="ml-auto text-[10px] font-bold uppercase bg-gold-500 text-navy-950 px-1.5 py-0.5 rounded flex-shrink-0">
                         {activePillar.articles.length}
                       </span>
                     )}

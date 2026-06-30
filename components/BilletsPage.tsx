@@ -234,17 +234,17 @@ const BilletsPage: React.FC = () => {
         {/* Status bar */}
         <div className="px-5 py-2 border-t border-navy-800 flex flex-wrap items-center gap-3">
           {officialCount > 0 && (
-            <span className="text-[9px] font-mono px-2 py-0.5 rounded border border-emerald-700/40 bg-emerald-950/20 text-emerald-400">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-emerald-700/40 bg-emerald-950/20 text-emerald-400">
               ✓ {officialCount} {locale === 'ar' ? 'أسعار رسمية BKAM' : locale === 'en' ? 'official BKAM rates' : 'cours officiels BKAM'}
             </span>
           )}
           {bbeDate && (
-            <span className="text-[9px] text-slate-500 font-mono">
+            <span className="text-[10px] text-slate-500 font-mono">
               {locale === 'ar' ? 'تاريخ:' : locale === 'en' ? 'Date:' : 'Date:'} {bbeDate}
             </span>
           )}
           {officialCount === 0 && !loading && (
-            <span className="text-[9px] font-mono px-2 py-0.5 rounded border border-amber-700/40 bg-amber-950/20 text-amber-400">
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-amber-700/40 bg-amber-950/20 text-amber-400">
               ⚠ {locale === 'ar' ? 'بيانات BKAM غير متاحة — تحقق Ù…Ù† إعداد الوكيل' :
                   locale === 'en' ? 'BKAM data unavailable — check proxy config' :
                   'Données BKAM indisponibles — vérifiez la configuration proxy'}
@@ -274,7 +274,7 @@ const BilletsPage: React.FC = () => {
              locale === 'en' ? `Official Rates — ${rows.length} currencies` :
              `Cours Officiels — ${rows.length} devises`}
           </h2>
-          <span className="text-[9px] text-slate-500">
+          <span className="text-[10px] text-slate-500">
             {locale === 'ar' ? 'الأسعار المعروضة: achatClientele / venteClientele — بنك المغرب' :
              locale === 'en' ? 'Rates shown: achatClientele / venteClientele — Bank Al-Maghrib' :
              'Cours affichés: achatClientele / venteClientele — Bank Al-Maghrib'}
@@ -359,11 +359,11 @@ const BilletsPage: React.FC = () => {
                       </td>
                       <td className="py-3 px-4 text-center">
                         {row.source === 'BKAM_OFFICIAL' ? (
-                          <span className="text-[9px] font-mono bg-emerald-950/30 text-emerald-400 border border-emerald-800/40 px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] font-mono bg-emerald-950/30 text-emerald-400 border border-emerald-800/40 px-1.5 py-0.5 rounded">
                             BKAM
                           </span>
                         ) : (
-                          <span className="text-[9px] font-mono bg-amber-950/20 text-amber-500 border border-amber-800/30 px-1.5 py-0.5 rounded">
+                          <span className="text-[10px] font-mono bg-amber-950/20 text-amber-500 border border-amber-800/30 px-1.5 py-0.5 rounded">
                             CALC
                           </span>
                         )}

@@ -199,7 +199,7 @@ export default function NewsletterAdmin() {
                 </p>
               </div>
               <span className="text-[10px] text-slate-500 font-mono">{s.subscribedAt?.slice(0, 10)}</span>
-              <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${
+              <span className={`text-[10px] font-bold uppercase px-1.5 py-0.5 rounded ${
                 s.confirmed ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'
               }`}>
                 {s.confirmed ? 'OK' : 'Pending'}

@@ -168,7 +168,7 @@ export default function ResourcesPage() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-[9px] text-navy-600 font-mono">{section.links.length} liens</span>
+                <span className="text-[10px] text-navy-600 font-mono">{section.links.length} liens</span>
                 {isOpen ? (
                   <ChevronUp size={14} className="text-navy-500" />
                 ) : (
@@ -193,7 +193,7 @@ export default function ResourcesPage() {
                           {link.name}
                         </span>
                         {link.tag && (
-                          <span className="flex-shrink-0 text-[9px] font-bold uppercase tracking-wider bg-navy-800 border border-navy-700 text-navy-400 px-1.5 py-0.5 rounded">
+                          <span className="flex-shrink-0 text-[10px] font-bold uppercase tracking-wider bg-navy-800 border border-navy-700 text-navy-400 px-1.5 py-0.5 rounded">
                             {link.tag}
                           </span>
                         )}

@@ -108,7 +108,7 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }: Props) {
             className="flex-1 bg-transparent text-sm text-slate-200 placeholder-slate-500 outline-none"
             aria-label="Search"
           />
-          <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 text-[9px] font-mono text-slate-500 bg-navy-800 border border-navy-700 rounded">
+          <kbd className="hidden sm:flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono text-slate-500 bg-navy-800 border border-navy-700 rounded">
             <Command size={9} />K
           </kbd>
           <button onClick={onClose} className="text-slate-500 hover:text-white p-0.5">
@@ -132,7 +132,7 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }: Props) {
                       highlighted === idx ? 'bg-gold-500/10' : 'hover:bg-navy-800/50'
                     }`}
                   >
-                    <span className={`flex-shrink-0 w-6 h-6 rounded text-[9px] font-bold flex items-center justify-center ${
+                    <span className={`flex-shrink-0 w-6 h-6 rounded text-[10px] font-bold flex items-center justify-center ${
                       r.type === 'currency' ? 'bg-blue-500/20 text-blue-400' :
                       r.type === 'tool' ? 'bg-purple-500/20 text-purple-400' :
                                               'bg-gold-500/20 text-gold-400'
@@ -152,7 +152,7 @@ export default function CommandPalette({ isOpen, onClose, onNavigate }: Props) {
           )}
         </div>
 
-        <div className="px-4 py-2 border-t border-navy-700 flex items-center gap-3 text-[9px] text-slate-500">
+        <div className="px-4 py-2 border-t border-navy-700 flex items-center gap-3 text-[10px] text-slate-500">
           <span><kbd className="px-1 bg-navy-800 rounded">↑↓</kbd> Naviguer</span>
           <span><kbd className="px-1 bg-navy-800 rounded">↵</kbd> Ouvrir</span>
           <span><kbd className="px-1 bg-navy-800 rounded">Esc</kbd> Fermer</span>

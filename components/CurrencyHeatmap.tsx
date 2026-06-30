@@ -50,12 +50,12 @@ export default function CurrencyHeatmap({ rates }: Props) {
     <div className={`bg-navy-900/90 border border-navy-700 rounded-xl overflow-hidden ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="px-5 py-3 border-b border-navy-700 flex items-center justify-between">
         <h3 className="text-xs font-bold text-white uppercase tracking-widest">{title}</h3>
-        <div className="flex items-center gap-3 text-[9px] font-mono">
+        <div className="flex items-center gap-3 text-[10px] font-mono">
           <span className="flex items-center gap-1"><span className="w-3 h-3 bg-emerald-600 rounded inline-block" /> {locale === 'ar' ? 'صعود' : locale === 'en' ? 'Rising' : 'Hausse'}</span>
           <span className="flex items-center gap-1"><span className="w-3 h-3 bg-red-600 rounded inline-block" /> {locale === 'ar' ? 'هبوط' : locale === 'en' ? 'Falling' : 'Baisse'}</span>
           <button
             onClick={() => setFilterOpen(o => !o)}
-            className={`flex items-center gap-1 text-[9px] font-bold px-2 py-1 rounded border transition ${filterOpen ? 'border-gold-600/50 text-gold-400' : 'border-navy-700 text-navy-400 hover:border-navy-600 hover:text-slate-300'}`}
+            className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded border transition ${filterOpen ? 'border-gold-600/50 text-gold-400' : 'border-navy-700 text-navy-400 hover:border-navy-600 hover:text-slate-300'}`}
           >
             <Settings2 size={9} />
             {visibleCodes.size < BKAM_CURRENCIES.length ? `${visibleCodes.size}/${BKAM_CURRENCIES.length}` : 'Filtrer'}
@@ -89,11 +89,11 @@ export default function CurrencyHeatmap({ rates }: Props) {
               <div className="text-[10px] font-bold">{rate.currency}</div>
               <div className="flex items-center justify-center gap-0.5 mt-0.5">
                 <Icon size={9} />
-                <span className="text-[9px] font-mono font-bold">
+                <span className="text-[10px] font-mono font-bold">
                   {chg >= 0 ? '+' : ''}{chg.toFixed(2)}%
                 </span>
               </div>
-              <div className="text-[9px] font-mono opacity-75 mt-0.5">
+              <div className="text-[10px] font-mono opacity-75 mt-0.5">
                 {rate.mid.toFixed(3)}
               </div>
             </div>
@@ -101,7 +101,7 @@ export default function CurrencyHeatmap({ rates }: Props) {
         })}
       </div>
       <div className="px-5 py-2 border-t border-navy-800">
-        <p className="text-[9px] text-navy-600 font-mono">
+        <p className="text-[10px] text-navy-600 font-mono">
           {locale === 'ar' ? 'التغيير مقارنةً بآخر يوم عمل · أسعار استرشادية' : locale === 'en' ? '24h change vs previous business day · indicative rates' : 'Variation 24h vs veille ouvrable · taux indicatifs'}
         </p>
       </div>

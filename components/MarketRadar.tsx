@@ -140,14 +140,14 @@ function QuoteCard({ q, locale }: { q: RadarQuote; locale: string; key?: React.K
           : q.flag && <span className="text-base flex-shrink-0">{q.flag}</span>}
         <div className="min-w-0">
           <p className="text-[11px] font-bold text-white truncate">{label}</p>
-          {q.unit && <p className="text-[9px] text-slate-600 font-mono">{q.unit}</p>}
+          {q.unit && <p className="text-[10px] text-slate-600 font-mono">{q.unit}</p>}
         </div>
       </div>
       <div className="text-right flex-shrink-0">
         <p className="text-sm font-mono font-bold text-white">{priceStr}</p>
         <div className={`flex items-center gap-0.5 justify-end ${color}`}>
           <Icon size={9} />
-          <span className="text-[9px] font-mono font-bold">
+          <span className="text-[10px] font-mono font-bold">
             {pct >= 0 ? '+' : ''}{pct.toFixed(2)}%
           </span>
         </div>
@@ -245,7 +245,7 @@ export default function MarketRadar({ tickerRates }: Props) {
         </div>
         <div className="flex items-center gap-3">
           {lastUpdate && (
-            <span className="text-[9px] text-slate-600 font-mono">{lastUpdate}</span>
+            <span className="text-[10px] text-slate-600 font-mono">{lastUpdate}</span>
           )}
           <button
             onClick={fetchAll}
@@ -260,7 +260,7 @@ export default function MarketRadar({ tickerRates }: Props) {
       <div className="p-4 space-y-4">
         {/* FX section */}
         <div>
-          <p className="text-[9px] font-bold uppercase tracking-widest text-blue-400 mb-2">{fxTitle}</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-blue-400 mb-2">{fxTitle}</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2">
             {(loading && fxQuotes.length === 0
               ? RADAR_ITEMS.filter(r => FX_SYMBOLS.has(r.symbol)).map(r => ({
@@ -275,7 +275,7 @@ export default function MarketRadar({ tickerRates }: Props) {
 
         {/* Commodities section */}
         <div>
-          <p className="text-[9px] font-bold uppercase tracking-widest text-yellow-400 mb-2">{commTitle}</p>
+          <p className="text-[10px] font-bold uppercase tracking-widest text-yellow-400 mb-2">{commTitle}</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
             {(loading && commQuotes.length === 0
               ? RADAR_ITEMS.filter(r => !FX_SYMBOLS.has(r.symbol)).map(r => ({
@@ -290,7 +290,7 @@ export default function MarketRadar({ tickerRates }: Props) {
       </div>
 
       <div className="px-5 py-2 border-t border-navy-800">
-        <p className="text-[9px] text-slate-600 font-mono">
+        <p className="text-[10px] text-slate-600 font-mono">
           {locale === 'ar'
             ? 'أسعار استرشادية · Frankfurter ECB + Yahoo Finance · يتجدد كل 5 دقائق'
             : locale === 'en'

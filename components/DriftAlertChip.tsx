@@ -51,7 +51,7 @@ export default function DriftAlertChip({ proxyUrl, onNavigate }: Props) {
             )}
           </span>
           {isExtreme && (
-            <span className="block text-[9px] text-amber-500/80">
+            <span className="block text-[10px] text-amber-500/80">
               Positionnement MAD hors zone neutre — impact sur vos flux EUR/USD
             </span>
           )}

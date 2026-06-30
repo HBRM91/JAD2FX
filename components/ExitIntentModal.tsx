@@ -158,7 +158,7 @@ export default function ExitIntentModal() {
             >
               <Download size={14} /> Recevoir le guide gratuit
             </button>
-            <p className="text-[9px] text-slate-500 text-center italic">
+            <p className="text-[10px] text-slate-500 text-center italic">
               Données traitées selon la loi 09-08 · CNDP
             </p>
           </form>

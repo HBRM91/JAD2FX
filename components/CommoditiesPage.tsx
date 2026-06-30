@@ -119,7 +119,7 @@ function CommodityCard({ q }: { q: CommodityQuote }) {
 
         {/* 52w range */}
         <div className="mt-3">
-          <div className="flex justify-between text-[9px] text-slate-400 font-mono mb-0.5">
+          <div className="flex justify-between text-[10px] text-slate-400 font-mono mb-0.5">
             <span>L {FMT_PRICE(q.low52w, q.symbol)}</span>
             <span className="text-slate-500">52w</span>
             <span>H {FMT_PRICE(q.high52w, q.symbol)}</span>
@@ -128,13 +128,13 @@ function CommodityCard({ q }: { q: CommodityQuote }) {
         </div>
 
         {q.source === 'FALLBACK' && (
-          <div className="mt-2 flex items-center gap-1 text-[9px] text-amber-600">
+          <div className="mt-2 flex items-center gap-1 text-[10px] text-amber-600">
             <AlertTriangle size={9} />
             <span>Reference data</span>
           </div>
         )}
         {q.timestamp && q.source === 'LIVE' && (
-          <p className="mt-1 text-[9px] text-slate-700 font-mono">
+          <p className="mt-1 text-[10px] text-slate-700 font-mono">
             {new Date(q.timestamp).toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit' })}
           </p>
         )}
@@ -266,7 +266,7 @@ const CommoditiesPage: React.FC = () => {
             >
               <CatIcon size={11} />
               {cat.label}
-              <span className={`text-[9px] rounded-full px-1 ${active ? 'bg-white/20' : 'bg-navy-700 text-slate-400'}`}>
+              <span className={`text-[10px] rounded-full px-1 ${active ? 'bg-white/20' : 'bg-navy-700 text-slate-400'}`}>
                 {count}
               </span>
             </button>

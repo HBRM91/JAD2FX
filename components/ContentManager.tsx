@@ -144,7 +144,7 @@ export default function ContentManager({ schema, className }: Props) {
 
       <div className="overflow-x-auto rounded border border-navy-700">
         <table className="w-full text-[11px] min-w-[480px]">
-          <thead className="bg-navy-800 text-slate-500 uppercase text-[9px]">
+          <thead className="bg-navy-800 text-slate-500 uppercase text-[10px]">
             <tr>
               {schema.fields.slice(0, 3).map(f => (
                 <th key={f.key} className="text-left py-2 px-3 font-medium">{f.label}</th>

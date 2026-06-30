@@ -1,4 +1,6 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { useSessionState } from '../hooks/useSessionState';
+import { useDragToSwipe } from '../hooks/useDragToSwipe';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, ReferenceLine,
@@ -6,7 +8,7 @@ import {
 import CurrencyFlag from './CurrencyFlag';
 import {
   Calculator, TrendingUp, Clock, ChevronDown, RotateCw,
-  AlertTriangle, BookOpen, Printer,
+  AlertTriangle, BookOpen, Printer, Link2, Check,
 } from 'lucide-react';
 import { BKAM_CURRENCIES } from '../constants';
 import { ForwardQuote } from '../types';
@@ -49,13 +51,11 @@ function TermRow({ label, value, unit, highlight, color }: {
   );
 }
 
-function SpreadsTab({ spot, currency }: { spot: number; currency: string }) {
-  const [near, setNear] = useState<{ tenor: string; rate: number; pipMultiplier: number }[]>([
-    { tenor: '1M', rate: 8,  pipMultiplier: 100 },
-    { tenor: '3M', rate: 22, pipMultiplier: 100 },
-    { tenor: '6M', rate: 42, pipMultiplier: 100 },
-    { tenor: '1Y', rate: 88, pipMultiplier: 100 },
-  ]);
+function SpreadsTab({ curvePoints }: { curvePoints: { tenor: string; forwardPointsPips: number }[] }) {
+  const near = ['1M', '3M', '6M', '1Y'].map(t => ({
+    tenor: t,
+    rate: +(curvePoints.find(p => p.tenor === t)?.forwardPointsPips ?? 0).toFixed(2),
+  }));
   return (
     <div className="space-y-4">
       <p className="text-[12px] text-slate-300 leading-relaxed">
@@ -560,7 +560,7 @@ function HistoricalComparisonSection({ currency }: { currency: string }) {
       <div className="bg-navy-900 border border-navy-700 rounded-xl overflow-hidden">
         <table className="w-full text-xs">
           <thead className="bg-navy-950">
-            <tr className="text-[9px] text-slate-500 uppercase tracking-wider">
+            <tr className="text-[10px] text-slate-500 uppercase tracking-wider">
               <th className="px-3 py-2 text-left">Tenor</th>
               <th className="px-3 py-2 text-right">Forward théorique</th>
               <th className="px-3 py-2 text-right">Points forward</th>
@@ -597,13 +597,44 @@ export default function ForwardCalculator() {
   const { locale } = useI18n();
 
   const [activeTab, setActiveTab]     = useState<Tab>('PRICER');
-  const [currency, setCurrency]       = useState('EUR'); // EUR first per G10 market convention
-  const [tenor, setTenor]             = useState('3M');
-  const [notional, setNotional]       = useState(1_000_000);
-  const [direction, setDirection]     = useState<'BUY' | 'SELL'>('BUY');
+  const ORDERED_TABS: Tab[] = ['PRICER', 'CURVE', 'MTM', 'SPREADS'];
+  const swipeHandlers = useDragToSwipe(
+    () => setActiveTab(t => { const i = ORDERED_TABS.indexOf(t); return i < ORDERED_TABS.length - 1 ? ORDERED_TABS[i + 1] : t; }),
+    () => setActiveTab(t => { const i = ORDERED_TABS.indexOf(t); return i > 0 ? ORDERED_TABS[i - 1] : t; }),
+  );
+  const [currency, setCurrency]       = useSessionState('fwd_currency', 'EUR');
+  const [tenor, setTenor]             = useSessionState('fwd_tenor', '3M');
+  const [notional, setNotional]       = useSessionState('fwd_notional', 1_000_000);
+  const [direction, setDirection]     = useSessionState<'BUY' | 'SELL'>('fwd_direction', 'BUY');
   const [customDate, setCustomDate]   = useState('');
   const [saved, setSaved]             = useState(false);
   const [showPrint, setShowPrint]     = useState(false);
+  const [copyLinkDone, setCopyLinkDone] = useState(false);
+
+  // Hydrate from URL hash on mount (permalink support)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const hash = window.location.hash.slice(1);
+    if (!hash) return;
+    const params = new URLSearchParams(hash);
+    const pair = params.get('pair');
+    const t = params.get('tenor');
+    const n = params.get('notional');
+    const d = params.get('direction');
+    if (pair) setCurrency(pair);
+    if (t) setTenor(t);
+    if (n && !isNaN(+n)) setNotional(+n);
+    if (d === 'BUY' || d === 'SELL') setDirection(d);
+  }, []);
+
+  const copyPermalink = useCallback(() => {
+    const hash = new URLSearchParams({ pair: currency, tenor, notional: String(notional), direction }).toString();
+    const url = window.location.origin + window.location.pathname + '?' + new URLSearchParams({ view: 'FORWARDS' }).toString() + '#' + hash;
+    navigator.clipboard.writeText(url).then(() => {
+      setCopyLinkDone(true);
+      setTimeout(() => setCopyLinkDone(false), 2000);
+    });
+  }, [currency, tenor, notional, direction]);
 
   const spotEntry = livePrices.find(p => p.currency === currency);
   const spot      = config.spotOverrides[currency] ?? spotEntry?.mid ?? 0;
@@ -677,7 +708,7 @@ export default function ForwardCalculator() {
               <h2 className="text-base font-bold text-white tracking-widest uppercase">
                 {locale === 'ar' ? 'حاسبة العقود الآجلة FX' : locale === 'en' ? 'FX Forward Calculator' : 'Calculateur Forward FX'}
               </h2>
-              <span className="text-[9px] font-bold bg-amber-700/30 text-amber-400 border border-amber-700/40 px-1.5 py-0.5 rounded uppercase tracking-wider">
+              <span className="text-[10px] font-bold bg-amber-700/30 text-amber-400 border border-amber-700/40 px-1.5 py-0.5 rounded uppercase tracking-wider">
                 {locale === 'ar' ? 'تعليمي' : locale === 'en' ? 'Indicative' : 'Indicatif'}
               </span>
             </div>
@@ -691,7 +722,7 @@ export default function ForwardCalculator() {
           {/* Live spot chip */}
           {spot ? (
             <div className="bg-navy-800 border border-navy-600 rounded-lg px-4 py-2 text-right">
-              <p className="text-[9px] text-slate-500 uppercase tracking-wider">
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider">
                 <span className="inline-flex items-center gap-1">{curInfo && <CurrencyFlag countryCode={curInfo.countryCode} size="xs" />} {currency}/MAD {locale === 'ar' ? 'فوري' : 'Spot'}</span>
               </p>
               <p className="text-xl font-mono font-bold text-gold-400">{fmt4(spot)}</p>
@@ -716,7 +747,7 @@ export default function ForwardCalculator() {
         {/* Tab bar — B4.1 PRICER is primary; others grouped under "Avancé" label */}
         <div className="flex items-center gap-1 mt-4 border-b border-navy-700">
           <TabButton active={activeTab === 'PRICER'} onClick={() => setActiveTab('PRICER')}>{tabPricer}</TabButton>
-          <span className="text-[9px] text-slate-600 uppercase tracking-wider px-2 ml-1">{locale === 'ar' ? 'متقدم' : 'Avancé'}</span>
+          <span className="text-[10px] text-slate-600 uppercase tracking-wider px-2 ml-1">{locale === 'ar' ? 'متقدم' : 'Avancé'}</span>
           <TabButton active={activeTab === 'CURVE'}  onClick={() => setActiveTab('CURVE')}>{tabCurve}</TabButton>
           <TabButton active={activeTab === 'MTM'}    onClick={() => setActiveTab('MTM')}>{tabMtm}</TabButton>
           <TabButton active={activeTab === 'SPREADS' as any} onClick={() => setActiveTab('SPREADS' as any)}>{locale === 'ar' ? '??????' : locale === 'en' ? 'Spreads' : 'Spreads'}</TabButton>
@@ -724,7 +755,7 @@ export default function ForwardCalculator() {
         </div>
       </div>
 
-      <div className="bg-navy-950/60 border border-t-0 border-navy-700 rounded-b-xl p-6">
+      <div className="bg-navy-950/60 border border-t-0 border-navy-700 rounded-b-xl p-6" {...swipeHandlers}>
 
         {/* ── PRICER TAB ── */}
         {activeTab === 'PRICER' && (
@@ -845,7 +876,7 @@ export default function ForwardCalculator() {
                       <h3 className="text-[10px] font-bold uppercase tracking-widest text-gold-500">
                         <span className="inline-flex items-center gap-1.5">{curInfo && <CurrencyFlag countryCode={curInfo.countryCode} size="xs" />} {currency}/MAD — {locale === 'ar' ? 'عرض سعر آجل' : locale === 'en' ? 'Forward Quote' : 'Cotation Forward'}</span>
                       </h3>
-                      <span className="text-[9px] font-mono text-slate-500">{settlement}</span>
+                      <span className="text-[10px] font-mono text-slate-500">{settlement}</span>
                     </div>
 
                     {/* Big forward rate */}
@@ -909,6 +940,14 @@ export default function ForwardCalculator() {
                     >
                       <Printer size={12} />
                       {locale === 'ar' ? 'فيشة' : locale === 'en' ? 'Sheet' : 'Fiche'}
+                    </button>
+                    <button
+                      onClick={copyPermalink}
+                      className="px-3 py-2.5 text-xs font-bold rounded border border-navy-600 bg-navy-800 hover:bg-navy-700 text-slate-300 transition flex items-center gap-1.5"
+                      title={locale === 'en' ? 'Copy shareable link' : 'Copier le lien'}
+                    >
+                      {copyLinkDone ? <Check size={12} className="text-emerald-400" /> : <Link2 size={12} />}
+                      {copyLinkDone ? 'OK' : 'Lien'}
                     </button>
                     <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer"
                        className="flex-1 py-2.5 text-center text-xs font-bold bg-gold-500 hover:bg-gold-400 text-navy-900 rounded transition">
@@ -998,7 +1037,7 @@ export default function ForwardCalculator() {
                                 : locale === 'en' ? 'Interpolated — not a direct curve knot'
                                 : 'Interpolé — pas de nÅ“ud direct sur la courbe'
                               }>
-                                {row.tenor}<sup className="text-[9px] text-amber-400 ml-0.5">*</sup>
+                                {row.tenor}<sup className="text-[10px] text-amber-400 ml-0.5">*</sup>
                               </span>
                             ) : row.tenor}
                           </td>
@@ -1050,7 +1089,7 @@ export default function ForwardCalculator() {
           <HistoricalComparisonSection currency={currency} />
         )}
         {activeTab === 'SPREADS' && (
-          <SpreadsTab spot={spot} currency={currency} />
+          <SpreadsTab curvePoints={curvePoints} />
         )}
       </div>
       </div>

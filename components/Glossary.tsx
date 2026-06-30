@@ -170,10 +170,10 @@ export default function Glossary() {
           >
             <div className="flex items-start justify-between gap-2">
               <h3 className="text-[13px] font-bold text-white leading-tight">{t.term}</h3>
-              <span className="text-[9px] text-slate-600 font-mono flex-shrink-0">/{t.slug}/</span>
+              <span className="text-[10px] text-slate-600 font-mono flex-shrink-0">/{t.slug}/</span>
             </div>
             <p className="text-[11px] text-slate-400 mt-1 leading-snug line-clamp-2">{t.shortFr}</p>
-            <span className="text-[9px] text-slate-500 mt-1.5 inline-block">
+            <span className="text-[10px] text-slate-500 mt-1.5 inline-block">
               {GLOSSARY_CATEGORIES[t.category].icon} {GLOSSARY_CATEGORIES[t.category].label}
             </span>
           </button>

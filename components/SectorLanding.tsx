@@ -179,7 +179,7 @@ export default function SectorLanding({ sectorId, navTo, onContact }: Props) {
       <div className="bg-navy-900 border border-navy-700 rounded-2xl overflow-hidden">
         <div className="h-0.5 bg-gradient-to-r from-navy-700 via-gold-500 to-navy-700" />
         <div className="p-6">
-          <span className={`text-[9px] font-bold border px-2 py-0.5 rounded uppercase tracking-[0.15em] ${sector.badgeStyle}`}>
+          <span className={`text-[10px] font-bold border px-2 py-0.5 rounded uppercase tracking-[0.15em] ${sector.badgeStyle}`}>
             {sector.badge}
           </span>
           <h1 className="text-xl font-serif font-bold text-white mt-2 mb-1">{sector.title}</h1>
@@ -191,7 +191,7 @@ export default function SectorLanding({ sectorId, navTo, onContact }: Props) {
       {/* Live rate strip */}
       {(primaryRate || secondaryRates.length > 0) && (
         <div className="bg-navy-900 border border-navy-700 rounded-xl p-4">
-          <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-3 font-bold">
+          <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-3 font-bold">
             Taux indicatifs temps réel — devises du secteur
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -200,10 +200,10 @@ export default function SectorLanding({ sectorId, navTo, onContact }: Props) {
                 <div className="flex items-center gap-1.5 mb-1">
                   <CurrencyFlag countryCode={sector.primaryCountry} size="xs" />
                   <span className="text-[10px] font-bold text-white">{sector.primaryCurrency}/MAD</span>
-                  <span className="text-[9px] text-gold-500 ml-auto font-bold">PRINCIPAL</span>
+                  <span className="text-[10px] text-gold-500 ml-auto font-bold">PRINCIPAL</span>
                 </div>
                 <p className="text-lg font-mono font-bold text-white">{primaryRate.mid.toFixed(4)}</p>
-                <p className={`text-[9px] font-mono ${primaryRate.changePercent > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                <p className={`text-[10px] font-mono ${primaryRate.changePercent > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
                   {primaryRate.changePercent >= 0 ? '+' : ''}{primaryRate.changePercent.toFixed(2)}%
                 </p>
               </div>
@@ -215,11 +215,11 @@ export default function SectorLanding({ sectorId, navTo, onContact }: Props) {
                   <span className="text-[10px] font-bold text-slate-300">{c.code}/MAD</span>
                 </div>
                 <p className="text-sm font-mono font-bold text-white">{c.rate.mid.toFixed(4)}</p>
-                <p className="text-[9px] text-slate-600 leading-tight mt-0.5">{c.role}</p>
+                <p className="text-[10px] text-slate-600 leading-tight mt-0.5">{c.role}</p>
               </div>
             ))}
           </div>
-          <p className="text-[9px] text-slate-700 mt-2">Taux indicatifs JAD2FX · Non exécutables · Source ECB/BKAM</p>
+          <p className="text-[10px] text-slate-700 mt-2">Taux indicatifs JAD2FX · Non exécutables · Source ECB/BKAM</p>
         </div>
       )}
 
@@ -297,7 +297,7 @@ export default function SectorLanding({ sectorId, navTo, onContact }: Props) {
         </button>
       </div>
 
-      <p className="text-[9px] text-slate-700 text-center leading-relaxed">
+      <p className="text-[10px] text-slate-700 text-center leading-relaxed">
         Analyse sectorielle indicative à vocation pédagogique — JAD2 Advisory (non établissement financier agréé BAM, Loi n° 43-12).
         Les niveaux de risque et estimations sont basés sur des données historiques indicatives.
       </p>

@@ -222,7 +222,7 @@ export default function BkamParityMatrix() {
               { label: 'ECB EUR/USD', value: latest.ecbEurUsd?.toFixed(4) ?? '—', color: 'text-slate-300' },
             ].map(k => (
               <div key={k.label} className="bg-navy-800/40 rounded-lg px-3 py-2">
-                <p className="text-[9px] text-slate-500 uppercase tracking-wider">{k.label}</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider">{k.label}</p>
                 <p className={`text-sm font-mono font-bold ${k.color}`}>{k.value}</p>
               </div>
             ))}
@@ -260,7 +260,7 @@ export default function BkamParityMatrix() {
                 <div className="flex items-center gap-1.5">
                   {(['g10', 'drift', 'band', 'alpha'] as const).map(s => (
                     <button key={s} onClick={() => setSortBy(s)}
-                      className={`text-[9px] font-bold px-2 py-0.5 rounded border transition ${sortBy===s ? 'border-gold-600/60 bg-gold-500/10 text-gold-400' : 'border-navy-700 text-slate-500 hover:border-navy-600'}`}>
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded border transition ${sortBy===s ? 'border-gold-600/60 bg-gold-500/10 text-gold-400' : 'border-navy-700 text-slate-500 hover:border-navy-600'}`}>
                       {s === 'g10' ? 'G10↓' : s === 'drift' ? '|Dérive|↓' : s === 'band' ? 'Bande↓' : 'A→Z'}
                     </button>
                   ))}
@@ -301,7 +301,7 @@ export default function BkamParityMatrix() {
                   {showAll ? `Afficher moins` : `Afficher les ${enrichedRates.length - 15} devises supplémentaires ↓`}
                 </button>
               )}
-              <p className="text-[9px] text-slate-700">
+              <p className="text-[10px] text-slate-700">
                 Négatif = MAD plus fort que la parité panier implique (BKAM maintient le MAD en bas de la bande).
                 Positif = MAD plus faible que la parité panier. Bande réglementaire ±5% (Phase II, mars 2020).
               </p>
@@ -315,7 +315,7 @@ export default function BkamParityMatrix() {
                 <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">
                   Tendance Dérive EUR/MAD · USD/MAD · GBP/MAD — {history.length} séances
                 </h3>
-                <div className="flex items-center gap-3 text-[9px]">
+                <div className="flex items-center gap-3 text-[10px]">
                   <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-gold-400" /> BKAM Officiel</span>
                   <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-gold-400 opacity-50" style={{borderTop:'1px dashed'}} /> Panier ECB (continu)</span>
                   <span className="text-slate-600">Points isolés = séances sans fixing BKAM (dérive N/A)</span>
@@ -411,7 +411,7 @@ export default function BkamParityMatrix() {
                   </ScatterChart>
                 </ResponsiveContainer>
               </div>
-              <p className="text-[9px] text-slate-600">
+              <p className="text-[10px] text-slate-600">
                 Zone verte (|dérive| &lt;100 bps, bande 35–65%): MAD bien ancré sur la parité panier.
                 Zone rouge: MAD significativement écarté — surveiller l'évolution.
               </p>
@@ -426,14 +426,14 @@ export default function BkamParityMatrix() {
                   Tableau Complet — {enrichedRates.length} Devises Enrichies · {latest.date}
                 </h3>
                 <button onClick={() => exportCSV(latest)}
-                  className="flex items-center gap-1 text-[9px] text-slate-400 hover:text-emerald-400 font-semibold border border-navy-700 hover:border-emerald-700 px-2 py-1 rounded transition">
+                  className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-emerald-400 font-semibold border border-navy-700 hover:border-emerald-700 px-2 py-1 rounded transition">
                   <Download size={10} /> CSV
                 </button>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-xs min-w-[700px]">
                   <thead>
-                    <tr className="bg-navy-800/40 text-[9px] text-slate-500 uppercase tracking-wider border-b border-navy-800">
+                    <tr className="bg-navy-800/40 text-[10px] text-slate-500 uppercase tracking-wider border-b border-navy-800">
                       <th className="text-left py-2.5 px-4">Devise</th>
                       <th className="text-right px-3">BKAM Fixing</th>
                       <th className="text-right px-3">Parité Panier</th>
@@ -454,10 +454,10 @@ export default function BkamParityMatrix() {
                               {meta?.countryCode && <CurrencyFlag countryCode={meta.countryCode} size="sm" />}
                               <div>
                                 <p className="font-bold text-white text-[12px]">{r.libDevise}/MAD</p>
-                                <p className="text-[9px] text-slate-500">{meta?.nameFr ?? ''}</p>
+                                <p className="text-[10px] text-slate-500">{meta?.nameFr ?? ''}</p>
                               </div>
                               {r.uniteDevise !== 1 && (
-                                <span className="text-[9px] text-navy-500 bg-navy-800 px-1 rounded">×{r.uniteDevise}</span>
+                                <span className="text-[10px] text-navy-500 bg-navy-800 px-1 rounded">×{r.uniteDevise}</span>
                               )}
                             </div>
                           </td>
@@ -479,7 +479,7 @@ export default function BkamParityMatrix() {
                                 <div className="h-full rounded-full"
                                   style={{ width: `${r.bandUtilPct ?? 50}%`, background: bandUtilColor(r.bandUtilPct ?? 50) }} />
                               </div>
-                              <span className="text-[9px] font-mono tabular-nums"
+                              <span className="text-[10px] font-mono tabular-nums"
                                 style={{ color: bandUtilColor(r.bandUtilPct ?? 50) }}>
                                 {r.bandUtilPct?.toFixed(0) ?? '—'}%
                               </span>
@@ -495,7 +495,7 @@ export default function BkamParityMatrix() {
                 </table>
               </div>
               <div className="px-5 py-2.5 border-t border-navy-800">
-                <p className="text-[9px] text-slate-600">
+                <p className="text-[10px] text-slate-600">
                   Dérive = (Fixing BKAM − Parité panier ECB) / Parité × 10 000 bps ·
                   Parité = USD/MAD_basket × (CCY/USD ECB ou peg officiel) ·
                   Bande réglementaire ±5% (Phase II BKAM, mars 2020) · Loi 43-12

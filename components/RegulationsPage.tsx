@@ -319,7 +319,7 @@ export default function RegulationsPage() {
                           <p className="text-sm text-slate-300 mt-3 leading-relaxed">{summary}</p>
                           <div className="flex flex-wrap gap-1.5 mt-3">
                             {doc.tags.map(tag => (
-                              <span key={tag} className="text-[9px] font-mono font-bold uppercase px-1.5 py-0.5 rounded bg-navy-800 text-slate-500 border border-navy-700">
+                              <span key={tag} className="text-[10px] font-mono font-bold uppercase px-1.5 py-0.5 rounded bg-navy-800 text-slate-500 border border-navy-700">
                                 {tag}
                               </span>
                             ))}

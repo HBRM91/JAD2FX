@@ -1043,7 +1043,7 @@ function PricingTab() {
                   <span className="text-[10px] text-slate-500 self-center">↔</span>
                   <span className="text-red-400 font-bold">{virSell.toFixed(4)}</span>
                 </div>
-                <p className="text-[9px] text-slate-500 mt-0.5">Buy / Sell · Total spread: {totalVirPct}%</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Buy / Sell · Total spread: {totalVirPct}%</p>
               </div>
               <div className="bg-navy-900/60 rounded p-3">
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Billet EUR/MAD</p>
@@ -1052,7 +1052,7 @@ function PricingTab() {
                   <span className="text-[10px] text-slate-500 self-center">↔</span>
                   <span className="text-red-400 font-bold">{bilSell.toFixed(4)}</span>
                 </div>
-                <p className="text-[9px] text-slate-500 mt-0.5">Buy / Sell · Total spread: {totalBilPct}%</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Buy / Sell · Total spread: {totalBilPct}%</p>
               </div>
             </div>
 
@@ -1092,7 +1092,7 @@ function PricingTab() {
                     onChange={e => updateTier(tier, { [item.key]: Number(e.target.value) })}
                     className="w-full accent-gold-500 h-1"
                   />
-                  <div className="flex justify-between text-[9px] text-slate-600 font-mono">
+                  <div className="flex justify-between text-[10px] text-slate-600 font-mono">
                     <span>0</span><span>{item.max / 2} bps</span><span>{item.max} bps</span>
                   </div>
                 </div>
@@ -1173,7 +1173,7 @@ function AuditTab() {
                   <td className="py-2 px-3 text-slate-500 whitespace-nowrap">
                     {new Date(entry.time).toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                     <br />
-                    <span className="text-[9px]">{new Date(entry.time).toLocaleDateString('fr-MA')}</span>
+                    <span className="text-[10px]">{new Date(entry.time).toLocaleDateString('fr-MA')}</span>
                   </td>
                   <td className="py-2 px-3">
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${AUDIT_ACTION_COLOR[entry.action] ?? 'text-slate-400 bg-slate-700/30'}`}>
@@ -1276,7 +1276,7 @@ function ConsultantTab() {
               {msg.text.split('\n').map((line, i) => <p key={i} className={i > 0 ? 'mt-1' : ''}>{line}</p>)}
             </div>
             {msg.role === 'model' && msg.provider && (
-              <div className={`mt-0.5 flex items-center gap-1 text-[9px] font-mono px-1.5 py-0.5 rounded border ${
+              <div className={`mt-0.5 flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded border ${
                 PROVIDER_COLORS[msg.provider as keyof typeof PROVIDER_COLORS] ?? 'bg-slate-800 text-slate-400 border-slate-700'
               }`}>
                 <Send size={7} />

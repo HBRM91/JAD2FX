@@ -222,7 +222,7 @@ export default function OcComplianceAssessment() {
         <div className="p-6">
           <div className="flex items-center gap-2 mb-1">
             <Shield size={16} className="text-amber-400" />
-            <span className="text-[9px] font-bold text-amber-400 uppercase tracking-[0.2em] bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded">
+            <span className="text-[10px] font-bold text-amber-400 uppercase tracking-[0.2em] bg-amber-500/10 border border-amber-500/25 px-2 py-0.5 rounded">
               Lead Magnet 1 — PME & Corporate
             </span>
           </div>
@@ -247,7 +247,7 @@ export default function OcComplianceAssessment() {
       {/* ── Steps ── */}
       {step < 6 && (
         <div className="bg-navy-900 border border-navy-700 rounded-2xl p-6">
-          <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-1">
+          <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
             Étape {step + 1} / {steps.length}
           </p>
           <h2 className="text-base font-bold text-white mb-5">{steps[step].q}</h2>
@@ -355,7 +355,7 @@ export default function OcComplianceAssessment() {
               <label className="flex items-start gap-2.5 cursor-pointer">
                 <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)}
                   className="mt-0.5 flex-shrink-0 accent-amber-500" />
-                <span className="text-[9px] text-slate-600 leading-relaxed">
+                <span className="text-[10px] text-slate-600 leading-relaxed">
                   J'accepte que JAD2 Advisory traite mon email pour m'envoyer ce rapport et me contacter.
                   Loi 09-08 / RGPD Art. 6(1)(a). Retrait : contact@jad2advisory.com.
                 </span>
@@ -376,7 +376,7 @@ export default function OcComplianceAssessment() {
           <div className={`bg-navy-900 border ${tierBorder} rounded-2xl p-6`}>
             <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-1">Score de Maturité OC</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Score de Maturité OC</p>
                 <p className={`text-5xl font-mono font-black ${tierColor}`}>{result.score}<span className="text-2xl text-slate-600">/100</span></p>
                 <p className={`text-sm font-bold mt-1 ${tierColor}`}>{result.tier}</p>
               </div>
@@ -429,7 +429,7 @@ export default function OcComplianceAssessment() {
         </div>
       )}
 
-      <p className="text-[9px] text-slate-700 text-center leading-relaxed">
+      <p className="text-[10px] text-slate-700 text-center leading-relaxed">
         Diagnostic pédagogique fourni par JAD2 Advisory (cabinet de conseil en management, non établissement financier agréé BAM).
         Loi n° 43-12. Faire valider par votre banque domiciliataire et/ou un conseil juridique.
       </p>

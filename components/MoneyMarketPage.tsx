@@ -36,7 +36,7 @@ export default function MoneyMarketPage() {
       <div className="flex items-center gap-2">
         <Activity size={14} className="text-gold-500" />
         <h1 className="text-base font-bold text-white uppercase tracking-wider">Marché Monétaire · BAM</h1>
-        <span className="text-[9px] font-bold text-amber-400 bg-amber-900/30 border border-amber-700/40 px-1.5 py-0.5 rounded uppercase tracking-wider">
+        <span className="text-[10px] font-bold text-amber-400 bg-amber-900/30 border border-amber-700/40 px-1.5 py-0.5 rounded uppercase tracking-wider">
           Indicatif · Données synthétiques
         </span>
         <span className="text-[10px] text-slate-500 ml-auto">P1.9 · Money market module</span>
@@ -82,7 +82,7 @@ export default function MoneyMarketPage() {
               <Globe size={11} /> Taux directeurs G10 + Chine
             </h2>
             <table className="w-full text-[11px]">
-              <thead className="text-[9px] text-slate-500 uppercase tracking-wider">
+              <thead className="text-[10px] text-slate-500 uppercase tracking-wider">
                 <tr>
                   <th className="px-2 py-1 text-left">Devise</th>
                   <th className="px-2 py-1 text-left">Pays</th>
@@ -97,7 +97,7 @@ export default function MoneyMarketPage() {
                   return (
                     <tr key={m.currency} className={isMAD ? 'bg-gold-500/5' : 'hover:bg-navy-800/30'}>
                       <td className="px-2 py-1.5 font-bold text-slate-200">
-                        {m.currency}{isMAD && <span className="ml-1 text-[9px] text-gold-400">★</span>}
+                        {m.currency}{isMAD && <span className="ml-1 text-[10px] text-gold-400">★</span>}
                       </td>
                       <td className="px-2 py-1.5 text-slate-400 text-[10px]">{m.label}</td>
                       <td className="px-2 py-1.5 text-right font-mono text-gold-400">{(m.policyRate * 100).toFixed(2)}%</td>
@@ -117,7 +117,7 @@ export default function MoneyMarketPage() {
             </h2>
             <div className="overflow-x-auto">
               <table className="w-full text-[11px]">
-                <thead className="text-[9px] text-slate-500 uppercase tracking-wider">
+                <thead className="text-[10px] text-slate-500 uppercase tracking-wider">
                   <tr>
                     <th className="px-2 py-1 text-left">Tenor</th>
                     <th className="px-2 py-1 text-left">Instrument</th>
@@ -144,7 +144,7 @@ export default function MoneyMarketPage() {
                 </tbody>
               </table>
             </div>
-            <p className="text-[9px] text-slate-500 mt-2 italic">
+            <p className="text-[10px] text-slate-500 mt-2 italic">
               BDT = Bons du Trésor adjudicés chaque mardi par BAM · OAT = Obligations Assimilables du Trésor (10Y benchmark souverain MAD).
             </p>
           </div>
@@ -160,18 +160,18 @@ export default function MoneyMarketPage() {
                 const trendColor = k.trend === 'UP' ? 'text-emerald-400' : k.trend === 'DOWN' ? 'text-red-400' : 'text-slate-400';
                 return (
                   <div key={k.id} className="bg-navy-950 border border-navy-800 rounded-lg p-2.5">
-                    <p className="text-[9px] text-slate-500 uppercase tracking-wider leading-tight mb-1">{k.label}</p>
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider leading-tight mb-1">{k.label}</p>
                     <p className="text-base font-bold text-gold-400 font-mono">
                       {k.unit === '%' ? `${k.value > 0 && k.value < 100 ? k.value.toFixed(1) : k.value}${k.unit}` : `${k.value} ${k.unit}`}
                     </p>
-                    <p className={`text-[9px] mt-0.5 flex items-center gap-0.5 ${trendColor}`}>
+                    <p className={`text-[10px] mt-0.5 flex items-center gap-0.5 ${trendColor}`}>
                       <TrendIcon size={9} /> {k.year} · {k.source}
                     </p>
                   </div>
                 );
               })}
             </div>
-            <p className="text-[9px] text-slate-500 mt-2 italic">
+            <p className="text-[10px] text-slate-500 mt-2 italic">
               Sources: Bank Al-Maghrib (Rapport Annuel 2024), HCP, Office des Changes. Mis à jour annuellement.
             </p>
           </div>
@@ -182,7 +182,7 @@ export default function MoneyMarketPage() {
               <BarChart3 size={11} /> Inflation & PPP
             </h2>
             <table className="w-full text-[11px]">
-              <thead className="text-[9px] text-slate-500 uppercase tracking-wider">
+              <thead className="text-[10px] text-slate-500 uppercase tracking-wider">
                 <tr>
                   <th className="px-2 py-1 text-left">Pays</th>
                   <th className="px-2 py-1 text-right">CPI YoY</th>
@@ -197,7 +197,7 @@ export default function MoneyMarketPage() {
                   return (
                     <tr key={i.currency} className={isMAD ? 'bg-gold-500/5' : 'hover:bg-navy-800/30'}>
                       <td className="px-2 py-1.5 font-bold text-slate-200">
-                        {i.currency}{isMAD && <span className="ml-1 text-[9px] text-gold-400">★</span>}
+                        {i.currency}{isMAD && <span className="ml-1 text-[10px] text-gold-400">★</span>}
                       </td>
                       <td className="px-2 py-1.5 text-right font-mono">{i.cpiYoYPct.toFixed(1)}%</td>
                       <td className="px-2 py-1.5 text-right font-mono text-slate-400">{i.cpiCoreYoYPct.toFixed(1)}%</td>

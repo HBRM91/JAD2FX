@@ -51,7 +51,7 @@ export default function FixingCalendar() {
               {d.date.getDate()}
             </p>
             {d.isHoliday && d.holidayName && (
-              <p className="text-[9px] text-red-400 leading-tight mt-1 line-clamp-2" title={d.holidayName}>
+              <p className="text-[10px] text-red-400 leading-tight mt-1 line-clamp-2" title={d.holidayName}>
                 {d.holidayName}
               </p>
             )}

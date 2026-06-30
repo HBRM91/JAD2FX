@@ -150,7 +150,7 @@ export default function Changelog() {
               </ul>
               <div className="flex flex-wrap gap-1">
                 {e.tags.map((t) => (
-                  <span key={t} className="text-[9px] text-slate-500 bg-navy-800 px-1.5 py-0.5 rounded">
+                  <span key={t} className="text-[10px] text-slate-500 bg-navy-800 px-1.5 py-0.5 rounded">
                     <Tag size={8} className="inline mr-0.5" />{t}
                   </span>
                 ))}

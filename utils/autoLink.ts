@@ -18,7 +18,7 @@ const TERM_TO_SLUG: Array<{ pattern: RegExp; slug: string }> = GLOSSARY
  * Only the first occurrence of each term is linked (avoids spam).
  * Terms are case-sensitive (we don't want to over-link in middle of words).
  */
-export function autoLinkTerms(text: string, options: { siteBase?: string; className?: string } = {}): string {
+function autoLinkTerms(text: string, options: { siteBase?: string; className?: string } = {}): string {
   const siteBase = options.siteBase || 'https://fx.jad2advisory.com';
   const className = options.className || 'text-gold-400 hover:text-gold-300 underline decoration-dotted underline-offset-2';
   const linked = new Set<string>();
@@ -37,7 +37,7 @@ export function autoLinkTerms(text: string, options: { siteBase?: string; classN
  * Return all glossary term slugs that appear in a text.
  * Used to build "Related terms" sections on blog posts.
  */
-export function findTermsInText(text: string): string[] {
+function findTermsInText(text: string): string[] {
   const found: string[] = [];
   for (const { pattern, slug } of TERM_TO_SLUG) {
     if (pattern.test(text)) found.push(slug);

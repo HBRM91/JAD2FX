@@ -83,7 +83,7 @@ function KPI({
   return (
     <div className="bg-navy-900 border border-navy-700 rounded-xl p-3 sm:p-4 min-w-0">
       <div className="flex items-center justify-between gap-2 mb-1.5">
-        <span className="text-[9px] sm:text-[10px] text-slate-500 uppercase tracking-wider font-bold truncate">{label}</span>
+        <span className="text-[10px] sm:text-[10px] text-slate-500 uppercase tracking-wider font-bold truncate">{label}</span>
         <Icon size={14} className={color} aria-hidden />
       </div>
       <div className="flex items-baseline gap-2 flex-wrap">
@@ -148,11 +148,11 @@ function AlertItem({ alert }: { alert: Alert }) {
       <AlertCircle size={12} className={`${colorByLevel[alert.level]} mt-0.5 flex-shrink-0`} aria-hidden />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className={`text-[9px] font-bold uppercase ${colorByLevel[alert.level]}`}>{alert.level}</span>
-          <span className="text-[9px] text-slate-500">{new Date(alert.ts).toLocaleTimeString('fr-MA')}</span>
+          <span className={`text-[10px] font-bold uppercase ${colorByLevel[alert.level]}`}>{alert.level}</span>
+          <span className="text-[10px] text-slate-500">{new Date(alert.ts).toLocaleTimeString('fr-MA')}</span>
         </div>
         <p className="text-[10px] sm:text-[11px] text-slate-200 leading-snug truncate">{alert.message}</p>
-        <p className="text-[9px] text-slate-500">{alert.source}</p>
+        <p className="text-[10px] text-slate-500">{alert.source}</p>
       </div>
     </div>
   );
@@ -164,7 +164,7 @@ function RateTile({ code, mid, change, spark }: { code: string; mid: number; cha
     <div className="bg-navy-900 border border-navy-700 rounded-lg p-2 sm:p-3 min-w-0">
       <div className="flex items-center justify-between gap-1 mb-1">
         <span className="text-[10px] sm:text-[11px] font-bold text-white">{code}/MAD</span>
-        <span className={`text-[9px] font-bold ${up ? 'text-emerald-400' : 'text-red-400'}`}>
+        <span className={`text-[10px] font-bold ${up ? 'text-emerald-400' : 'text-red-400'}`}>
           {up ? '+' : ''}{change.toFixed(2)}%
         </span>
       </div>
@@ -291,7 +291,7 @@ export default function AdminCockpit({ navTo }: { navTo?: (v: any) => void }) {
             Cockpit Maître — Desk FX
           </h1>
           {/* P2-6: positions/P&L/VaR below are synthetic (see comments at 209,237,240) */}
-          <span className="text-[9px] font-black text-amber-300 bg-amber-900/40 border border-amber-700/50 px-1.5 py-0.5 rounded uppercase tracking-widest">
+          <span className="text-[10px] font-black text-amber-300 bg-amber-900/40 border border-amber-700/50 px-1.5 py-0.5 rounded uppercase tracking-widest">
             Démo
           </span>
         </div>
@@ -399,14 +399,14 @@ export default function AdminCockpit({ navTo }: { navTo?: (v: any) => void }) {
               <BarChart3 size={13} className="text-gold-500" />
               <h2 className="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider">Positions & P&L</h2>
             </div>
-            <span className="text-[9px] sm:text-[10px] text-slate-500">
+            <span className="text-[10px] sm:text-[10px] text-slate-500">
               {positions.filter((p) => p.pnl >= 0).length} gagnantes · {positions.filter((p) => p.pnl < 0).length} perdantes
             </span>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-navy-950">
-                <tr className="text-[9px] text-slate-500 uppercase tracking-wider">
+                <tr className="text-[10px] text-slate-500 uppercase tracking-wider">
                   <th className="px-2 sm:px-3 py-2 text-left">Paire</th>
                   <th className="px-2 sm:px-3 py-2 text-left">Side</th>
                   <th className="px-2 sm:px-3 py-2 text-right">Notional</th>
@@ -432,7 +432,7 @@ export default function AdminCockpit({ navTo }: { navTo?: (v: any) => void }) {
               <Bell size={13} className="text-amber-400" />
               <h2 className="text-[11px] sm:text-xs font-bold text-white uppercase tracking-wider">Alertes</h2>
             </div>
-            <span className="text-[9px] sm:text-[10px] text-slate-500">
+            <span className="text-[10px] sm:text-[10px] text-slate-500">
               {alerts.filter((a) => a.level === 'CRIT').length} critiques
             </span>
           </div>

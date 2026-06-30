@@ -50,7 +50,7 @@ export default function DisclaimerModal() {
           </div>
           <div className="flex-1">
             <h2 className="font-serif font-bold text-white text-sm">Avertissement Légal</h2>
-            <p className="text-[9px] text-gold-500/70 tracking-widest uppercase font-bold">
+            <p className="text-[10px] text-gold-500/70 tracking-widest uppercase font-bold">
               Outil pédagogique · Conformité OC
             </p>
           </div>
@@ -61,7 +61,7 @@ export default function DisclaimerModal() {
           <ol className="list-none space-y-2">
             {DISCLAIMER_POINTS.map((text, i) => (
               <li key={i} className="flex items-start gap-2">
-                <span className="flex-shrink-0 w-4 h-4 rounded-full bg-gold-500/15 border border-gold-500/30 text-gold-400 text-[9px] font-bold flex items-center justify-center mt-0.5">
+                <span className="flex-shrink-0 w-4 h-4 rounded-full bg-gold-500/15 border border-gold-500/30 text-gold-400 text-[10px] font-bold flex items-center justify-center mt-0.5">
                   {i + 1}
                 </span>
                 <span
@@ -87,7 +87,7 @@ export default function DisclaimerModal() {
           >
             J'ai compris — Accéder aux taux
           </button>
-          <p className="text-[9px] text-slate-500 mt-1.5 text-center">
+          <p className="text-[10px] text-slate-500 mt-1.5 text-center">
             ou appuyez sur <kbd className="px-1 bg-navy-800 border border-navy-700 rounded">Échap</kbd> · clic en dehors pour accepter
           </p>
         </div>

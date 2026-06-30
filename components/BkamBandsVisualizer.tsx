@@ -128,7 +128,7 @@ function BandGauge({ data, pair, countryCode }: { data: BandState; pair: string;
         {/* Central parity line */}
         <div className="absolute top-0 bottom-0 border-l-2 border-gold-500/60 z-10" style={{ left: '50%' }}>
           <div className="absolute -top-1 -translate-x-1/2 w-1 h-2 bg-gold-500 rounded-sm" />
-          <div className="absolute -bottom-0 -translate-x-1/2 text-[9px] text-gold-500 font-bold whitespace-nowrap font-mono">
+          <div className="absolute -bottom-0 -translate-x-1/2 text-[10px] text-gold-500 font-bold whitespace-nowrap font-mono">
             K={data.central.toFixed(4)}
           </div>
         </div>
@@ -148,13 +148,13 @@ function BandGauge({ data, pair, countryCode }: { data: BandState; pair: string;
       </div>
 
       {/* Labels under gauge */}
-      <div className="flex justify-between text-[9px] text-navy-500 font-mono px-0.5">
+      <div className="flex justify-between text-[10px] text-navy-500 font-mono px-0.5">
         <div className="text-left">
           <p className="font-bold text-red-400">{data.lower.toFixed(4)}</p>
           <p>PLANCHER âË†’5%</p>
         </div>
         <div className="text-center">
-          <p className="text-[9px] text-blue-400/70">±2.5% Phase I</p>
+          <p className="text-[10px] text-blue-400/70">±2.5% Phase I</p>
         </div>
         <div className="text-right">
           <p className="font-bold text-red-400">{data.upper.toFixed(4)}</p>
@@ -171,9 +171,9 @@ function BandGauge({ data, pair, countryCode }: { data: BandState; pair: string;
           { label: 'Position', value: `${data.utilPct > 50 ? '+' : ''}${(data.spot - data.central).toFixed(4)}`, sub: 'vs parité', color: data.utilPct > 50 ? '#f59e0b' : '#10b981' },
         ].map(m => (
           <div key={m.label} className="bg-navy-900 border border-navy-800 rounded px-2 py-1.5 text-center">
-            <p className="text-[9px] text-navy-500 uppercase tracking-wider">{m.label}</p>
+            <p className="text-[10px] text-navy-500 uppercase tracking-wider">{m.label}</p>
             <p className="text-[13px] font-mono font-bold" style={{ color: m.color }}>{m.value}</p>
-            <p className="text-[9px] text-navy-600">{m.sub}</p>
+            <p className="text-[10px] text-navy-600">{m.sub}</p>
           </div>
         ))}
       </div>
@@ -227,7 +227,7 @@ function DriftChart({ drift, loading }: { drift: DriftRegression | null; loading
             <p className="text-[10px] font-bold" style={{ color: trendColor }}>
               {drift.trendDir === 'WIDENING' ? 'ÉLARGISSEMENT' : drift.trendDir === 'NARROWING' ? 'RESSERREMENT' : 'STABLE'}
             </p>
-            <p className="text-[9px] text-navy-500">
+            <p className="text-[10px] text-navy-500">
               Î² = {drift.beta >= 0 ? '+' : ''}{drift.beta.toFixed(1)} pb/j · R²={drift.r2.toFixed(2)}
             </p>
           </div>
@@ -263,14 +263,14 @@ function DriftChart({ drift, loading }: { drift: DriftRegression | null; loading
           { label: 'Source', value: drift.dataSource === 'BKAM_OFFICIAL' ? 'âÅ““ BKAM' : drift.dataSource === 'ECB_PROXY' ? 'ECB' : 'MIXTE', color: drift.dataSource === 'BKAM_OFFICIAL' ? '#10b981' : '#f59e0b', title: drift.dataSource === 'BKAM_OFFICIAL' ? 'Fixing interb. pondéré (Doc 1 §I.1.a)' : 'Proxy ECB/Frankfurter.' },
         ].map(m => (
           <div key={m.label} className="bg-navy-900 border border-navy-800 rounded px-2 py-1.5" title={m.title}>
-            <p className="text-[9px] text-navy-500 uppercase tracking-wider">{m.label}</p>
+            <p className="text-[10px] text-navy-500 uppercase tracking-wider">{m.label}</p>
             <p className="text-[12px] font-mono font-bold" style={{ color: m.color }}>{m.value}</p>
           </div>
         ))}
       </div>
 
       {/* Method footnote per BKAM Doc 1 */}
-      <p className="text-[9px] text-navy-700 font-mono leading-relaxed">
+      <p className="text-[10px] text-navy-700 font-mono leading-relaxed">
         Dérive = (USD/MAD_BKAM âË†’ USD/MAD_basket) / USD/MAD_basket × 10 000 pb ·
         Basket = K / (w_EUR × EUR/USD_ECB + w_USD), K=10.49 ·
         Source: Doc 1 §I méthode principale (transactions &gt;12M USD, &gt;6 opérations, &gt;6 TM) ou méthode de substitution (cotations fermes 5 min)
@@ -336,7 +336,7 @@ function HistoricalDriftChart({ corsProxyUrl }: { corsProxyUrl: string }) {
           <p className="text-[11px] font-bold text-white uppercase tracking-wider">
             Historique de Dérive — {data.length} jours ouvrés
           </p>
-          <p className="text-[9px] text-navy-500">
+          <p className="text-[10px] text-navy-500">
             Fixing BKAM officiel âË†’ parité panier théorique (EUR/USD ECB à l'heure du fixing)
           </p>
         </div>
@@ -345,7 +345,7 @@ function HistoricalDriftChart({ corsProxyUrl }: { corsProxyUrl: string }) {
             <button
               key={d}
               onClick={() => setDays(d)}
-              className={`text-[9px] font-mono px-2 py-0.5 rounded border transition ${
+              className={`text-[10px] font-mono px-2 py-0.5 rounded border transition ${
                 days === d
                   ? 'bg-gold-500 text-navy-950 border-gold-500 font-bold'
                   : 'border-navy-700 text-navy-400 hover:border-navy-600 hover:text-slate-300'
@@ -424,14 +424,14 @@ function HistoricalDriftChart({ corsProxyUrl }: { corsProxyUrl: string }) {
             { label: '→ MAD+', value: `${stats.negativeCount}j`, color: '#10b981', title: 'Jours MAD plus fort que panier' },
           ].map(m => (
             <div key={m.label} className="bg-navy-900 border border-navy-800 rounded px-1.5 py-1" title={m.title}>
-              <p className="text-[9px] text-navy-500 uppercase tracking-wider leading-tight">{m.label}</p>
+              <p className="text-[10px] text-navy-500 uppercase tracking-wider leading-tight">{m.label}</p>
               <p className="text-[11px] font-mono font-bold" style={{ color: m.color }}>{m.value}</p>
             </div>
           ))}
         </div>
       )}
 
-      <p className="text-[9px] text-navy-700 font-mono">
+      <p className="text-[10px] text-navy-700 font-mono">
         Bande assumée: ±{(bandPct * 100).toFixed(1)}% · Méthodologie: K/(w_EUR×EUR/USD_ECB+w_USD), K=10.49
         · Les données s'accumulent quotidiennement via le cron BKAM à 09h00 Casablanca
       </p>
@@ -485,7 +485,7 @@ export default function BkamBandsVisualizer({ compact = false }: { compact?: boo
             <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.15em]">
               La Cage & L'Oiseau — Bande BKAM ±5%
             </h3>
-            <p className="text-[9px] text-navy-500">
+            <p className="text-[10px] text-navy-500">
               Panier 60% EUR / 40% USD · K = {K} · Régime Phase II (mars 2020)
             </p>
           </div>
@@ -559,9 +559,9 @@ export default function BkamBandsVisualizer({ compact = false }: { compact?: boo
                   { label: 'EUR/MAD central', value: eurCentral.toFixed(4), sub: `USD/MAD × ${eurUsd.toFixed(3)}`, color: 'text-gold-400' },
                 ].map(m => (
                   <div key={m.label} className="bg-navy-950 border border-navy-800 rounded-lg p-3 text-center">
-                    <p className="text-[9px] text-navy-500 uppercase tracking-wider">{m.label}</p>
+                    <p className="text-[10px] text-navy-500 uppercase tracking-wider">{m.label}</p>
                     <p className={`text-[15px] font-mono font-bold ${m.color}`}>{m.value}</p>
-                    <p className="text-[9px] text-navy-600 font-mono mt-0.5">{m.sub}</p>
+                    <p className="text-[10px] text-navy-600 font-mono mt-0.5">{m.sub}</p>
                   </div>
                 ))}
               </div>
@@ -604,7 +604,7 @@ export default function BkamBandsVisualizer({ compact = false }: { compact?: boo
         {/* Compliance note */}
         <div className="flex items-start gap-2 bg-navy-950/50 border border-navy-800/60 rounded-lg px-3 py-2">
           <AlertTriangle size={11} className="text-amber-500/70 flex-shrink-0 mt-0.5" />
-          <p className="text-[9px] text-navy-600 leading-relaxed">
+          <p className="text-[10px] text-navy-600 leading-relaxed">
             Bandes calculées sur la base des taux indicatifs JAD2FX. Pour le fixing officiel quotidien, consultez{' '}
             <a href={BKAM_LINKS.mainSite} target="_blank" rel="noopener noreferrer" className="text-blue-500/70 hover:text-blue-400 underline">
               bkam.ma

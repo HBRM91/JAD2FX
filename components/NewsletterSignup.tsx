@@ -141,7 +141,7 @@ export default function NewsletterSignup({ proxyUrl, variant = 'card', source, d
           </div>
         )}
       </form>
-      <p className="text-[9px] text-slate-500 mt-2 leading-relaxed">
+      <p className="text-[10px] text-slate-500 mt-2 leading-relaxed">
         Données traitées selon la loi 09-08 · CNDP · Désabonnement en 1 clic
       </p>
     </div>

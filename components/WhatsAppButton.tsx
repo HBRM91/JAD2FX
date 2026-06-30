@@ -36,14 +36,14 @@ export default function WhatsAppButton() {
     <>
       {/* Pulse glow */}
       {pulse && !open && (
-        <div className="fixed bottom-20 right-5 z-40 pointer-events-none">
+        <div className="fixed bottom-36 right-5 z-40 pointer-events-none">
           <div className="w-14 h-14 rounded-full bg-emerald-500/40 animate-ping" />
         </div>
       )}
 
       {/* Tooltip popup */}
       {open && (
-        <div className="fixed bottom-32 right-5 z-50 w-72 bg-navy-900 border border-emerald-700/50 rounded-2xl shadow-2xl p-4">
+        <div className="fixed bottom-36 right-5 z-50 w-72 bg-navy-900 border border-emerald-700/50 rounded-2xl shadow-2xl p-4">
           <button onClick={() => setOpen(false)} className="absolute top-2 right-2 text-slate-500 hover:text-slate-300">
             <X size={14} />
           </button>
@@ -80,7 +80,7 @@ export default function WhatsAppButton() {
       <button
         onClick={() => setOpen((o) => !o)}
         aria-label="Contact WhatsApp"
-        className="fixed bottom-5 right-5 z-40 w-14 h-14 rounded-full bg-emerald-500 text-navy-950 flex items-center justify-center shadow-2xl shadow-emerald-900/50 hover:scale-105 transition-transform"
+        className="fixed bottom-20 right-5 z-40 w-14 h-14 rounded-full bg-emerald-500 text-navy-950 flex items-center justify-center shadow-2xl shadow-emerald-900/50 hover:scale-105 transition-transform"
       >
         {open ? <X size={22} /> : <MessageCircle size={22} />}
       </button>

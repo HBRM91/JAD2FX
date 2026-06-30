@@ -69,7 +69,7 @@ export default function Watchlist({ rates, isRTL }: { rates: LiveRate[]; isRTL?:
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-[12px] font-bold text-white">{item.code}/MAD</p>
-                  <p className="text-[9px] text-slate-500 truncate">
+                  <p className="text-[10px] text-slate-500 truncate">
                     {BKAM_CURRENCIES.find((c) => c.code === item.code)?.nameFr ?? ''}
                   </p>
                 </div>

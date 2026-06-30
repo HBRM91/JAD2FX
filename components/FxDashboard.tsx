@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { DashboardTab, LiveRate, BasketConfig, CurrencyInfo } from '../types';
+import React, { useState } from 'react';
+import { DashboardTab, LiveRate, CurrencyInfo } from '../types';
 import FxChart from './FxChart';
-import { BKAM_CURRENCIES, BANKS, BANK_SPREAD_PREMIUM, DEFAULT_BASKET_CONFIG, CURRENCY_ORDER } from '../constants';
-import { fetchAllMadRates, generateIntradayData } from '../services/fxRates';
+import { BKAM_CURRENCIES, BANKS, BANK_SPREAD_PREMIUM, CURRENCY_ORDER } from '../constants';
+import { generateIntradayData } from '../services/fxRates';
 import { isJumuahReducedLiquidity } from '../services/holidays';
 import { Download, RefreshCw, Search, ArrowUpDown, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { BKAM_LINKS } from '../constants/bkamLinks';
@@ -11,6 +11,7 @@ import ProvenanceChip from './ProvenanceChip';
 import FixingFanChart from './FixingFanChart';
 import FixingCalendar from './FixingCalendar';
 import { useI18n } from '../context/I18nContext';
+import { useAdmin } from '../context/AdminContext';
 
 const SPREAD_TOOLTIP = "Marges simulées sur base des moyennes mondiales marchés émergents. Sources : Banque Mondiale (Remittance Prices 2024) / BIS (Triennial Survey 2022). Non contractuelles.";
 
@@ -31,35 +32,16 @@ const TAB_LABELS: Record<DashboardTab, Record<string, string>> = {
 
 const FxDashboard: React.FC = () => {
   const { locale, isRTL } = useI18n();
+  const { rates, lastPriceUpdate } = useAdmin();
   const L = (fr: string, en: string, ar: string) => locale === 'ar' ? ar : locale === 'en' ? en : fr;
   const [activeTab, setActiveTab] = useState<DashboardTab>('VIREMENTS');
-  const [rates, setRates] = useState<LiveRate[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
-  const [ratesDate, setRatesDate] = useState<string>('');
+  const isLoading = rates.length === 0;
+  const lastUpdate = lastPriceUpdate;
+  const ratesDate = lastPriceUpdate ? new Date(lastPriceUpdate).toLocaleDateString('fr-MA') : '';
   const [selectedCurrency, setSelectedCurrency] = useState<string>('EUR');
   const [search, setSearch] = useState('');
-  const [sortByMid, setSortByMid] = useState(false); // false = canonical G10 order
+  const [sortByMid, setSortByMid] = useState(false);
   const [sortAsc, setSortAsc] = useState(false);
-  const [config] = useState<BasketConfig>(DEFAULT_BASKET_CONFIG);
-
-  const refresh = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const { rates: r, ratesDate: d, lastFetch } = await fetchAllMadRates(config);
-      setRates(r);
-      setRatesDate(d);
-      setLastUpdate(lastFetch);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [config]);
-
-  useEffect(() => {
-    refresh();
-    const interval = setInterval(refresh, 5 * 60 * 1000);
-    return () => clearInterval(interval);
-  }, [refresh]);
 
   const selectedRate = rates.find(r => r.currency === selectedCurrency);
   const chartData = selectedRate ? generateIntradayData(selectedRate.mid, selectedRate.pair) : [];
@@ -103,7 +85,7 @@ const FxDashboard: React.FC = () => {
   const renderRatesTable = () => (
     <div className="overflow-x-auto">
       <table className="w-full text-sm text-left">
-        <thead className="bg-navy-950 border-b border-navy-800">
+        <thead className="sticky top-0 z-10 bg-navy-950 border-b border-navy-800">
           <tr>
             <th className="px-4 py-3 text-[10px] text-navy-400 font-bold uppercase tracking-wider">
               {locale === 'ar' ? 'العملة' : locale === 'en' ? 'Currency' : 'Devise'}
@@ -164,7 +146,7 @@ const FxDashboard: React.FC = () => {
                           <span title="Vendredi — Liquidité réduite" className="text-[11px]">ðŸ•Œ</span>
                         )}
                         {meta?.bkamUnit === 100 && (
-                          <span className="text-[9px] bg-navy-800 text-navy-400 border border-navy-700 px-1 rounded">×100</span>
+                          <span className="text-[10px] bg-navy-800 text-navy-400 border border-navy-700 px-1 rounded">×100</span>
                         )}
                         {meta?.umaConvention && (
                           <span title="Taux fixé par Convention UMA (Doc 1 §I.1.b) — non coté en cross ECB" className="text-[7px] bg-amber-950/30 text-amber-600 border border-amber-800/40 px-1 rounded">UMA</span>
@@ -229,19 +211,19 @@ const FxDashboard: React.FC = () => {
         <h4 className="text-[11px] font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
           <TrendingUp size={12} className="text-gold-500" />
           {locale === 'en' ? 'Bank Comparison' : 'Comparatif Établissements'} — {selectedRate.pair}
-          <span className="text-[9px] font-normal text-navy-600">
+          <span className="text-[10px] font-normal text-navy-600">
             {locale === 'en' ? '(click row to compare)' : '(cliquer pour comparer)'}
           </span>
         </h4>
         <table className="w-full text-[11px] text-left">
-          <thead className="border-b border-navy-800">
+          <thead className="sticky top-0 z-10 bg-navy-900 border-b border-navy-800">
             <tr>
-              <th className="pb-2 text-navy-500 font-bold uppercase tracking-wider text-[9px]">
+              <th className="pb-2 text-navy-500 font-bold uppercase tracking-wider text-[10px]">
                 {locale === 'en' ? 'Establishment' : 'Établissement'}
               </th>
-              <th className="pb-2 text-right text-navy-500 font-bold uppercase tracking-wider text-[9px]">{L('Achat Réf.', 'Ref Bid', 'سعر الشراء')}</th>
-              <th className="pb-2 text-right text-navy-500 font-bold uppercase tracking-wider text-[9px]">{L('Vente Réf.', 'Ref Ask', 'سعر البيع')}</th>
-              <th className="pb-2 text-right text-navy-500 font-bold uppercase tracking-wider text-[9px]">{L('vs Réf.', 'vs Ref', 'مقابل المرجع')}</th>
+              <th className="pb-2 text-right text-navy-500 font-bold uppercase tracking-wider text-[10px]">{L('Achat Réf.', 'Ref Bid', 'سعر الشراء')}</th>
+              <th className="pb-2 text-right text-navy-500 font-bold uppercase tracking-wider text-[10px]">{L('Vente Réf.', 'Ref Ask', 'سعر البيع')}</th>
+              <th className="pb-2 text-right text-navy-500 font-bold uppercase tracking-wider text-[10px]">{L('vs Réf.', 'vs Ref', 'مقابل المرجع')}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-navy-800/60">
@@ -252,7 +234,7 @@ const FxDashboard: React.FC = () => {
               </td>
               <td className="py-2 text-right font-mono text-emerald-400 font-bold">{buy.toFixed(4)}</td>
               <td className="py-2 text-right font-mono text-red-400 font-bold">{sell.toFixed(4)}</td>
-              <td className="py-2 text-right text-navy-600 text-[9px] italic">Benchmark</td>
+              <td className="py-2 text-right text-navy-600 text-[10px] italic">Benchmark</td>
             </tr>
             {BANKS.map((bank, i) => {
               const premium    = BANK_SPREAD_PREMIUM[i] ?? 0.004;
@@ -270,7 +252,7 @@ const FxDashboard: React.FC = () => {
             })}
           </tbody>
         </table>
-        <p className="text-[9px] text-navy-700 mt-3">
+        <p className="text-[10px] text-navy-700 mt-3">
           Marges simulées — non contractuelles. Sources : BM / BIS Triennial Survey. Pour taux exécutables, contactez votre banque.
         </p>
       </div>
@@ -316,7 +298,7 @@ const FxDashboard: React.FC = () => {
             </div>
           )}
           <button
-            onClick={refresh}
+            onClick={() => {}} /* rates refresh handled by App.tsx */
             disabled={isLoading}
             className="flex items-center gap-1.5 px-3 py-1.5 bg-navy-800 border border-navy-700 text-slate-300 text-[11px] font-medium rounded-lg hover:border-navy-600 hover:text-white disabled:opacity-50 transition-colors"
           >
@@ -330,7 +312,7 @@ const FxDashboard: React.FC = () => {
             <Download size={11} />
             CSV
           </button>
-          <div className="text-[9px] text-navy-600 font-mono">
+          <div className="text-[10px] text-navy-600 font-mono">
             {ratesDate && <span>ECB {ratesDate}</span>}
             {lastUpdate && (
               <span className="ml-2">
@@ -382,7 +364,7 @@ const FxDashboard: React.FC = () => {
                     ? (locale === 'ar' ? 'تحويلات — جميع العملات' : locale === 'en' ? 'Wire Transfers — All Currencies' : 'Virements — Toutes Devises')
                     : (locale === 'ar' ? 'أوراق نقدية — جميع العملات' : locale === 'en' ? 'Banknotes — All Currencies' : 'Billets — Toutes Devises')}
                 </h3>
-                <p className="text-[9px] text-navy-500 mt-0.5">
+                <p className="text-[10px] text-navy-500 mt-0.5">
                   {activeTab === 'VIREMENTS' ? 'Spread ±0.8% indicatif' : 'Spread ±1.8% indicatif'}
                   {' · '}{filteredRates.length} devises
                 </p>
@@ -406,7 +388,7 @@ const FxDashboard: React.FC = () => {
               <div className="absolute top-3 right-3 opacity-5">
                 <TrendingUp size={72} className="text-gold-400" />
               </div>
-              <h4 className="text-[9px] font-black uppercase tracking-[0.18em] text-gold-400 mb-4">
+              <h4 className="text-[10px] font-black uppercase tracking-[0.18em] text-gold-400 mb-4">
                 Panier BKAM · Taux Pivots
               </h4>
               <div className="space-y-3">
@@ -419,7 +401,7 @@ const FxDashboard: React.FC = () => {
                     <div key={code} className="bg-navy-950 border border-navy-800 rounded-lg p-3">
                       <div className="flex items-center justify-between mb-1">
                         <span className="text-[10px] text-navy-400 font-bold">{code}/MAD</span>
-                        <span className="text-[9px] text-navy-600">{code === 'EUR' ? '60%' : '40%'} panier</span>
+                        <span className="text-[10px] text-navy-600">{code === 'EUR' ? '60%' : '40%'} panier</span>
                       </div>
                       <div className="flex items-baseline gap-2">
                         <span className="text-[20px] font-mono font-bold text-white tabular-nums">
@@ -436,11 +418,11 @@ const FxDashboard: React.FC = () => {
                 })}
                 <div className="grid grid-cols-2 gap-2 pt-2 border-t border-navy-800 text-center">
                   {[
-                    { label: 'K panier', value: String(config.referenceBasketValue) },
+                    { label: 'K panier', value: '10.49' },
                     { label: 'Bande BKAM', value: '±5%' },
                   ].map(m => (
                     <div key={m.label} className="bg-navy-950 rounded px-2 py-1.5">
-                      <p className="text-[9px] text-navy-600 uppercase tracking-wider">{m.label}</p>
+                      <p className="text-[10px] text-navy-600 uppercase tracking-wider">{m.label}</p>
                       <p className="text-[12px] font-mono font-bold text-gold-400">{m.value}</p>
                     </div>
                   ))}
@@ -453,7 +435,7 @@ const FxDashboard: React.FC = () => {
               <h4 className="text-[10px] font-bold text-white uppercase tracking-wider mb-0.5">
                 {locale === 'ar' ? 'الخليج وشمال أفريقيا' : locale === 'en' ? 'Gulf & North Africa' : 'Golfe & Maghreb'}
               </h4>
-              <p className="text-[9px] text-navy-600 mb-3">
+              <p className="text-[10px] text-navy-600 mb-3">
                 {locale === 'en' ? 'USD cross-rates · indicative' : 'Taux croisés via USD · indicatif'}
               </p>
               <div className="space-y-1">
@@ -476,13 +458,13 @@ const FxDashboard: React.FC = () => {
                         {meta && <CurrencyFlag countryCode={meta.countryCode} size="md" />}
                         <div>
                           <span className="text-[11px] font-bold text-slate-300">{code}</span>
-                          {meta?.bkamUnit === 100 && <span className="text-[9px] text-navy-600 ml-1">×100</span>}
+                          {meta?.bkamUnit === 100 && <span className="text-[10px] text-navy-600 ml-1">×100</span>}
                         </div>
                       </span>
                       <div className="text-right">
                         <span className="font-mono font-bold text-white text-[11px] tabular-nums">{r.mid.toFixed(4)}</span>
                         {chg !== 0 && (
-                          <span className={`block text-[9px] font-mono ${isUp ? 'text-emerald-400' : isDn ? 'text-red-400' : 'text-navy-600'}`}>
+                          <span className={`block text-[10px] font-mono ${isUp ? 'text-emerald-400' : isDn ? 'text-red-400' : 'text-navy-600'}`}>
                             {isUp ? '+' : ''}{chg.toFixed(2)}%
                           </span>
                         )}
@@ -531,7 +513,7 @@ const FxDashboard: React.FC = () => {
                       {meta && <CurrencyFlag countryCode={meta.countryCode} size="sm" />}
                       <span>{r.currency}</span>
                       {chg !== 0 && (
-                        <span className={`text-[9px] font-mono ${active ? 'text-navy-800' : isUp ? 'text-emerald-400' : isDn ? 'text-red-400' : ''}`}>
+                        <span className={`text-[10px] font-mono ${active ? 'text-navy-800' : isUp ? 'text-emerald-400' : isDn ? 'text-red-400' : ''}`}>
                           {isUp ? '▲' : isDn ? '▼' : ''}
                         </span>
                       )}
@@ -559,7 +541,7 @@ const FxDashboard: React.FC = () => {
                         {(selectedRate.change24h ?? 0) > 0 ? '+' : ''}{(selectedRate.change24h ?? 0).toFixed(2)}% 24h
                       </p>
                     )}
-                    <p className="text-[9px] text-navy-600">
+                    <p className="text-[10px] text-navy-600">
                       per {currencyMeta[selectedCurrency]?.bkamUnit === 100 ? '100' : '1'} {selectedCurrency}
                     </p>
                   </div>
@@ -598,13 +580,13 @@ const FxDashboard: React.FC = () => {
                         {meta && <CurrencyFlag countryCode={meta.countryCode} size="md" />}
                         <div>
                           <p className="text-[11px] font-bold text-white">{r.currency}</p>
-                          <p className="text-[9px] text-navy-600">{getCurrencyName(meta, locale)}</p>
+                          <p className="text-[10px] text-navy-600">{getCurrencyName(meta, locale)}</p>
                         </div>
                       </div>
                       <div className="text-right">
                         <p className="text-[12px] font-mono font-bold text-white tabular-nums">{r.mid.toFixed(4)}</p>
                         {chg !== 0 && (
-                          <p className={`text-[9px] font-mono font-bold ${isUp ? 'text-emerald-400' : isDn ? 'text-red-400' : 'text-navy-600'}`}>
+                          <p className={`text-[10px] font-mono font-bold ${isUp ? 'text-emerald-400' : isDn ? 'text-red-400' : 'text-navy-600'}`}>
                             {isUp ? '+' : ''}{chg.toFixed(2)}%
                           </p>
                         )}

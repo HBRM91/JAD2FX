@@ -157,7 +157,7 @@ export default function ApiDocs() {
                 }`}>{e.method}</span>
                 <code className="text-[12px] text-slate-200 font-mono flex-1">{e.path}</code>
                 {e.auth === 'api-key' && (
-                  <span className="text-[9px] text-amber-400 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">
+                  <span className="text-[10px] text-amber-400 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded font-bold">
                     API KEY
                   </span>
                 )}

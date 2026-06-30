@@ -12,7 +12,7 @@ function escapeCsv(value: any): string {
   return s;
 }
 
-export function toCsv<T extends Record<string, any>>(rows: T[], columns?: (keyof T)[]): string {
+function toCsv<T extends Record<string, any>>(rows: T[], columns?: (keyof T)[]): string {
   if (!rows.length) return '';
   const cols = (columns ?? (Object.keys(rows[0]) as (keyof T)[])) as string[];
   const header = cols.join(',');
@@ -20,7 +20,7 @@ export function toCsv<T extends Record<string, any>>(rows: T[], columns?: (keyof
   return `${header}\n${body}`;
 }
 
-export function toXlsx<T extends Record<string, any>>(rows: T[], sheetName = 'Sheet1', columns?: (keyof T)[]): string {
+function toXlsx<T extends Record<string, any>>(rows: T[], sheetName = 'Sheet1', columns?: (keyof T)[]): string {
   // SpreadsheetML 2003 XML — readable by Excel/LibreOffice/Numbers, no library.
   if (!rows.length) return toXlsx([{} as T], sheetName, columns);
   const cols = (columns ?? (Object.keys(rows[0]) as (keyof T)[])) as string[];
@@ -40,7 +40,7 @@ export function toXlsx<T extends Record<string, any>>(rows: T[], sheetName = 'Sh
 </Workbook>`;
 }
 
-export function toJson<T>(rows: T[]): string {
+function toJson<T>(rows: T[]): string {
   return JSON.stringify(rows, null, 2);
 }
 

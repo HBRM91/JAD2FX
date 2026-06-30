@@ -126,7 +126,7 @@ function RadarCard({ entry, lang }: { entry: RadarEntry; lang: 'fr' | 'ar'; key?
           <CurrencyFlag countryCode={CODE_TO_CC[entry.currency] ?? entry.currency.toLowerCase()} size="md" />
           <div>
             <p className="font-mono font-bold text-white text-[13px] leading-none">{entry.currency}/MAD</p>
-            <div className={`inline-flex items-center gap-1 mt-0.5 text-[9px] font-bold px-1.5 py-0.5 rounded border ${s.badge}`}>
+            <div className={`inline-flex items-center gap-1 mt-0.5 text-[10px] font-bold px-1.5 py-0.5 rounded border ${s.badge}`}>
               <Icon size={9} />
               {entry.sentiment}
             </div>
@@ -350,7 +350,7 @@ function AdvisoryCTA({ lang }: { lang: 'fr' | 'ar' }) {
             <span className="font-serif font-bold text-navy-900 text-[10px]">J2</span>
           </div>
           <span className="text-[10px] font-bold text-gold-400 uppercase tracking-wider">JAD2 Advisory</span>
-          <span className="text-[9px] text-navy-600 border border-navy-700 rounded px-1.5 py-0.5">
+          <span className="text-[10px] text-navy-600 border border-navy-700 rounded px-1.5 py-0.5">
             {lang === 'fr' ? 'Conseil Stratégique & Formation' : 'استشارة استراتيجية وتدريب'}
           </span>
         </div>
@@ -486,15 +486,15 @@ export default function MarketReport() {
             <div className="flex-1 min-w-0">
               {/* Badges */}
               <div className="flex flex-wrap items-center gap-2 mb-3">
-                <span className="text-[9px] bg-gold-500/15 border border-gold-500/30 text-gold-400 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                <span className="text-[10px] bg-gold-500/15 border border-gold-500/30 text-gold-400 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
                   {isRtl ? 'بريفينج يومي' : 'Briefing Quotidien'}
                 </span>
                 {report.isPublished && (
-                  <span className="text-[9px] bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
+                  <span className="text-[10px] bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider">
                     {isRtl ? 'منشور' : 'PUBLIÉ'}
                   </span>
                 )}
-                <span className="text-[9px] bg-navy-800 border border-navy-700 text-navy-400 px-2 py-0.5 rounded">
+                <span className="text-[10px] bg-navy-800 border border-navy-700 text-navy-400 px-2 py-0.5 rounded">
                   {isRtl ? 'مولَّد بالذكاء الاصطناعي · بيانات السوق' : 'Généré par IA · Données de marché'}
                 </span>
               </div>
@@ -596,7 +596,7 @@ export default function MarketReport() {
             <h2 className="text-[11px] font-bold text-white uppercase tracking-[0.12em]">
               {isRtl ? 'رادار السوق' : 'Radar de Marché MAD'}
             </h2>
-            <span className="text-[9px] text-navy-600 border border-navy-800 rounded px-1.5 py-0.5">
+            <span className="text-[10px] text-navy-600 border border-navy-800 rounded px-1.5 py-0.5">
               {mergedRadar.length} {isRtl ? 'عملات' : 'devises'}
             </span>
           </div>

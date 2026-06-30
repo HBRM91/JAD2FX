@@ -141,7 +141,7 @@ export default function BacklinkTracker() {
       <div className="bg-navy-900 border border-navy-700 rounded-xl overflow-hidden">
         <table className="w-full text-[11px]">
           <thead className="bg-navy-950">
-            <tr className="text-[9px] text-slate-500 uppercase tracking-wider">
+            <tr className="text-[10px] text-slate-500 uppercase tracking-wider">
               <th className="px-3 py-2 text-left">Domaine</th>
               <th className="px-3 py-2 text-left">Type</th>
               <th className="px-3 py-2 text-right">DR</th>
@@ -167,7 +167,7 @@ export default function BacklinkTracker() {
                   </td>
                   <td className="px-3 py-2 text-slate-500 text-[10px]">{r.contactEmail || '—'}</td>
                   <td className="px-3 py-2">
-                    <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${St.color}`}>
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${St.color}`}>
                       {St.label}
                     </span>
                   </td>

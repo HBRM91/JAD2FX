@@ -54,8 +54,8 @@ function Chg({ pct }: { pct: number }) {
 
 function Badge({ live }: { live: boolean }) {
   return live
-    ? <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 rounded px-1 py-0.5"><Wifi size={6} /> LIVE</span>
-    : <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-amber-400 bg-amber-950/60 border border-amber-800/50 rounded px-1 py-0.5"><WifiOff size={6} /> REF</span>;
+    ? <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 rounded px-1 py-0.5"><Wifi size={6} /> LIVE</span>
+    : <span className="inline-flex items-center gap-0.5 text-[10px] font-bold text-amber-400 bg-amber-950/60 border border-amber-800/50 rounded px-1 py-0.5"><WifiOff size={6} /> REF</span>;
 }
 
 interface G10Row { pair: string; rate: number; prev?: number; dec: number }
@@ -298,7 +298,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
           {fetchedAt && (
             <div className="text-right">
               <p className="text-[10px] text-slate-500 font-mono">{new Date(fetchedAt).toLocaleTimeString()}</p>
-              <p className="text-[9px] text-slate-600">{todayStr} · ECB/Frankfurter</p>
+              <p className="text-[10px] text-slate-600">{todayStr} · ECB/Frankfurter</p>
             </div>
           )}
           <button
@@ -324,7 +324,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
         <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
           <Globe size={11} className="text-gold-400" />
           <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">G10 FX Monitor</span>
-          <span className="text-[9px] text-slate-600 ml-auto">ECB Indicatif · {todayStr}</span>
+          <span className="text-[10px] text-slate-600 ml-auto">ECB Indicatif · {todayStr}</span>
         </div>
         <div className="overflow-x-auto">
           <div className="flex gap-px min-w-max bg-navy-800/20">
@@ -334,9 +334,9 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
               const flat = Math.abs(chg) < 0.002;
               return (
                 <div key={pair} className="flex flex-col items-center py-3 px-4 bg-[#0b1a30] hover:bg-navy-800/70 transition min-w-[100px] border-r border-navy-800/50 last:border-r-0">
-                  <span className="text-[9px] font-bold text-slate-500 tracking-widest mb-1">{pair}</span>
+                  <span className="text-[10px] font-bold text-slate-500 tracking-widest mb-1">{pair}</span>
                   <span className="text-[14px] font-mono font-bold text-white">{rate.toFixed(dec)}</span>
-                  <span className={`text-[9px] font-semibold flex items-center gap-0.5 mt-0.5 ${flat ? 'text-slate-600' : up ? 'text-emerald-400' : 'text-rose-400'}`}>
+                  <span className={`text-[10px] font-semibold flex items-center gap-0.5 mt-0.5 ${flat ? 'text-slate-600' : up ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {flat ? <Minus size={7} /> : up ? <TrendingUp size={7} /> : <TrendingDown size={7} />}
                     {flat ? '—' : `${up ? '+' : ''}${chg.toFixed(2)}%`}
                   </span>
@@ -355,7 +355,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
           <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
             <BarChart3 size={11} className="text-gold-400" />
             <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">Cours MAD (Dirham)</span>
-            <span className="text-[9px] text-slate-600 ml-auto">Panier K={BASKET_K} · {EUR_WEIGHT*100}%EUR+{USD_WEIGHT*100}%USD</span>
+            <span className="text-[10px] text-slate-600 ml-auto">Panier K={BASKET_K} · {EUR_WEIGHT*100}%EUR+{USD_WEIGHT*100}%USD</span>
           </div>
           <div className="divide-y divide-navy-800/40">
             {madCrosses.map(({ label, rate, prev, primary }) => {
@@ -364,7 +364,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
                 <div key={label} className={`flex items-center justify-between px-4 py-2.5 ${primary ? 'bg-navy-800/25' : ''}`}>
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="text-[11px] font-mono text-slate-400 w-28 shrink-0">{label}</span>
-                    {primary && <span className="text-[9px] font-bold text-gold-500 bg-gold-950/50 border border-gold-800/40 rounded px-1 shrink-0">PANIER</span>}
+                    {primary && <span className="text-[10px] font-bold text-gold-500 bg-gold-950/50 border border-gold-800/40 rounded px-1 shrink-0">PANIER</span>}
                   </div>
                   <div className="flex items-center gap-4 shrink-0">
                     <span className={`font-mono font-bold ${primary ? 'text-base text-white' : 'text-[13px] text-slate-200'}`}>
@@ -379,12 +379,12 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
             })}
           </div>
           <div className="px-4 py-2.5 bg-navy-800/20 border-t border-navy-700/40">
-            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mb-1.5">Composition Panier BKAM · Bande ±5%</p>
+            <p className="text-[10px] font-bold text-slate-600 uppercase tracking-widest mb-1.5">Composition Panier BKAM · Bande ±5%</p>
             <div className="flex rounded-full overflow-hidden h-1.5 w-full">
               <div className="bg-blue-500 h-full" style={{ width: '60%' }} />
               <div className="bg-emerald-500 h-full" style={{ width: '40%' }} />
             </div>
-            <div className="flex justify-between text-[9px] text-slate-600 mt-1">
+            <div className="flex justify-between text-[10px] text-slate-600 mt-1">
               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block" />EUR 60%</span>
               <span className="flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />USD 40%</span>
             </div>
@@ -397,14 +397,14 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
             <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
               <Globe size={11} className="text-gold-400" />
               <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">Gulf MAD</span>
-              <span className="text-[9px] text-slate-600 ml-auto">Parités USD fixes</span>
+              <span className="text-[10px] text-slate-600 ml-auto">Parités USD fixes</span>
             </div>
             <div className="grid grid-cols-2 gap-px bg-navy-800/30">
               {gulfCrosses.map(({ countryCode, label, rate, note }) => (
                 <div key={label} className="bg-[#0b1a30] px-3 py-3">
                   <p className="text-[10px] text-slate-500 flex items-center gap-1"><CurrencyFlag countryCode={countryCode} size="xs" /> {label}</p>
                   <p className="text-sm font-mono font-bold text-white mt-0.5">{rate.toFixed(4)}</p>
-                  <p className="text-[9px] text-slate-700 mt-0.5 leading-tight">{note}</p>
+                  <p className="text-[10px] text-slate-700 mt-0.5 leading-tight">{note}</p>
                 </div>
               ))}
             </div>
@@ -415,14 +415,14 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
             <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
               <Globe size={11} className="text-blue-400" />
               <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Nordiques MAD</span>
-              <span className="text-[9px] text-slate-600 ml-auto">Bois · Papier · Pharma</span>
+              <span className="text-[10px] text-slate-600 ml-auto">Bois · Papier · Pharma</span>
             </div>
             <div className="grid grid-cols-1 gap-px bg-navy-800/30">
               {nordCrosses.map(({ countryCode, label, rate, note }) => (
                 <div key={label} className="bg-[#0b1a30] px-3 py-3 flex items-center justify-between">
                   <div>
                     <p className="text-[10px] text-slate-500 flex items-center gap-1"><CurrencyFlag countryCode={countryCode} size="xs" /> {label}</p>
-                    <p className="text-[9px] text-slate-700 leading-tight">{note}</p>
+                    <p className="text-[10px] text-slate-700 leading-tight">{note}</p>
                   </div>
                   <p className="text-sm font-mono font-bold text-white">{rate.toFixed(4)}</p>
                 </div>
@@ -441,7 +441,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
                   <CurrencyFlag countryCode={countryCode} size="sm" />
                   <div>
                     <p className="text-[10px] font-mono text-slate-300">{label}</p>
-                    <p className="text-[9px] text-slate-600">{note}</p>
+                    <p className="text-[10px] text-slate-600">{note}</p>
                   </div>
                 </div>
                 <span className="font-mono text-[12px] text-slate-200">{rate.toFixed(2)}</span>
@@ -456,7 +456,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
         <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
           <BarChart3 size={11} className="text-gold-400" />
           <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">Matières Premières — Indicateurs Macro Maroc</span>
-          <span className="text-[9px] text-slate-600 ml-auto">Yahoo Finance · CORS proxy</span>
+          <span className="text-[10px] text-slate-600 ml-auto">Yahoo Finance · CORS proxy</span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-navy-800/30">
           {[
@@ -471,20 +471,20 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
             return (
               <div key={sym} className="bg-[#0b1a30] px-3 py-4">
                 <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-[9px] font-bold text-slate-400 uppercase">{flag} {label}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase">{flag} {label}</p>
                   {d ? <Badge live={d.source === 'LIVE'} /> : null}
                 </div>
                 {d ? (
                   <>
                     <p className="text-base font-mono font-bold text-white">
                       ${d.price < 5 ? d.price.toFixed(4) : d.price < 100 ? d.price.toFixed(2) : d.price.toFixed(0)}
-                      <span className="text-[9px] text-slate-600 font-normal">{unit}</span>
+                      <span className="text-[10px] text-slate-600 font-normal">{unit}</span>
                     </p>
                     <div className="flex flex-col gap-0.5 mt-1">
                       <Chg pct={d.pct} />
-                      <span className="text-[9px] text-slate-600">≈{d.madEquiv.toFixed(1)} MAD</span>
+                      <span className="text-[10px] text-slate-600">≈{d.madEquiv.toFixed(1)} MAD</span>
                     </div>
-                    <p className="text-[9px] text-slate-700 mt-1.5 leading-tight">{note}</p>
+                    <p className="text-[10px] text-slate-700 mt-1.5 leading-tight">{note}</p>
                   </>
                 ) : (
                   <div className="flex items-center gap-1 text-slate-600 text-[10px] mt-2">
@@ -511,7 +511,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
                 {wp.icon}
                 <div>
                   <p className="text-[11px] font-bold text-slate-200">{wp.title}</p>
-                  <p className="text-[9px] text-slate-500">{wp.sub}</p>
+                  <p className="text-[10px] text-slate-500">{wp.sub}</p>
                 </div>
               </div>
               <p className="text-[10px] text-slate-400 leading-relaxed">{wp.body}</p>
@@ -519,7 +519,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
           ))}
         </div>
         <div className="px-4 py-2.5 border-t border-navy-700/40 bg-navy-800/10">
-          <p className="text-[9px] text-slate-600">
+          <p className="text-[10px] text-slate-600">
             Circ. OC n° 01/2024 · IGOC 2024 · Données indicatives uniquement — pour toute opération,
             adressez-vous à un <span className="text-gold-600">établissement de crédit agréé par Bank Al-Maghrib</span>
           </p>
@@ -535,11 +535,11 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
           <Cpu size={11} className="text-gold-400" />
           <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">Synthèse IA — Market Brief</span>
           {briefProv && (
-            <span className={`ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded border ${PROVIDER_COLORS[briefProv]}`}>
+            <span className={`ml-2 text-[10px] font-bold px-1.5 py-0.5 rounded border ${PROVIDER_COLORS[briefProv]}`}>
               {PROVIDER_LABELS[briefProv]}
             </span>
           )}
-          <span className="text-[9px] text-slate-600 ml-1">Synthèse IA</span>
+          <span className="text-[10px] text-slate-600 ml-1">Synthèse IA</span>
           <span className="ml-auto text-slate-500">
             {briefOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </span>
@@ -578,7 +578,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
             <ExternalLink size={9} /> {label}
           </a>
         ))}
-        <span className="text-[9px] text-slate-700 ml-auto">
+        <span className="text-[10px] text-slate-700 ml-auto">
           Taux indicatifs uniquement · Pas de conseil en investissement · Non agréé AMMC/BAM ·{' '}
           <span className="text-gold-700">jad2advisory.com</span>
         </span>

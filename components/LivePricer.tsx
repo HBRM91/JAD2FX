@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import {
   Activity, RefreshCw, TrendingUp, TrendingDown, Minus, Wifi, WifiOff,
   BarChart2, AlertCircle, Settings2, Zap, Globe,
@@ -6,6 +6,7 @@ import {
 import { BKAM_CURRENCIES, DEFAULT_BASKET_CONFIG, CURRENCY_ORDER } from '../constants';
 import CurrencyFlag from './CurrencyFlag';
 import { usePriceStream } from '../hooks/usePriceStream';
+import { useHotkeys } from '../hooks/useHotkeys';
 import { useAdmin } from '../context/AdminContext';
 import { useI18n } from '../context/I18nContext';
 import { LivePriceEntry } from '../types';
@@ -19,7 +20,7 @@ function fmtBps(v: number) { return (v >= 0 ? '+' : '') + v.toFixed(1) + ' bps';
 
 // ─── Price Row ─────────────────────────────────────────────────────────────────
 
-function PriceRow({ entry }: { entry: LivePriceEntry }) {
+function PriceRow({ entry, isFocused }: { entry: LivePriceEntry; isFocused?: boolean }) {
   const up = entry.change > 0;
   const dn = entry.change < 0;
   const { locale } = useI18n();
@@ -32,11 +33,14 @@ function PriceRow({ entry }: { entry: LivePriceEntry }) {
 
   const changeColor = up ? 'text-emerald-400' : dn ? 'text-red-400' : 'text-slate-500';
   const bgFlash     = up ? 'group-hover:bg-emerald-950/20' : dn ? 'group-hover:bg-red-950/20' : 'group-hover:bg-navy-800/40';
+  const age = entry.lastUpdated ? Date.now() - new Date(entry.lastUpdated).getTime() : Infinity;
+  const freshDot = age < 5 * 60_000 ? 'bg-emerald-400' : age < 15 * 60_000 ? 'bg-amber-400' : 'bg-red-400';
 
   return (
-    <tr className={`group border-b border-navy-800/60 transition-colors ${bgFlash}`}>
+    <tr className={`group border-b border-navy-800/60 transition-colors ${bgFlash} ${isFocused ? "outline outline-1 outline-gold-500/60 bg-gold-500/5" : ""}`}>
       <td className="py-2.5 pl-4 pr-3">
         <div className="flex items-center gap-2">
+          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${freshDot}`} title={entry.lastUpdated ?? ''} />
           {info ? <CurrencyFlag countryCode={info.countryCode} size="md" /> : <span className="text-base">🌐</span>}
           <div>
             <div className="text-sm font-bold text-white font-mono">{entry.pair}</div>
@@ -45,10 +49,10 @@ function PriceRow({ entry }: { entry: LivePriceEntry }) {
         </div>
       </td>
       <td className="text-right pr-3 font-mono">
-        <span className="text-red-400 font-bold text-sm">{fmt4(entry.bid)}</span>
+        <span className="text-slate-200 font-bold text-sm">{fmt4(entry.bid)}</span>
       </td>
       <td className="text-right pr-3 font-mono">
-        <span className="text-emerald-400 font-bold text-sm">{fmt4(entry.ask)}</span>
+        <span className="text-blue-300 font-bold text-sm">{fmt4(entry.ask)}</span>
       </td>
       <td className="text-right pr-3 font-mono">
         <span className="text-white text-sm">{fmt4(entry.mid)}</span>
@@ -189,7 +193,7 @@ function DriftPanel({ corsProxyUrl }: { corsProxyUrl?: string }) {
           </h3>
         </div>
         {model && (
-          <span className={`text-[9px] font-mono px-2 py-0.5 rounded border ${
+          <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
             model.dataSource === 'BKAM_OFFICIAL'
               ? 'border-emerald-700 bg-emerald-950/30 text-emerald-400'
               : model.dataSource === 'MIXED'
@@ -219,7 +223,7 @@ function DriftPanel({ corsProxyUrl }: { corsProxyUrl?: string }) {
         <>
           <div className="grid grid-cols-4 gap-2 mb-3">
             <div className="bg-navy-800 rounded p-2 text-center">
-              <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-0.5">Latest Drift</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Latest Drift</p>
               <p className={`text-sm font-mono font-bold ${
                 Math.abs(model.latestDriftBps) < 10 ? 'text-emerald-400'
                 : Math.abs(model.latestDriftBps) < 25 ? 'text-amber-400'
@@ -227,18 +231,18 @@ function DriftPanel({ corsProxyUrl }: { corsProxyUrl?: string }) {
               }`}>{fmtBps(model.latestDriftBps)}</p>
             </div>
             <div className="bg-navy-800 rounded p-2 text-center">
-              <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-0.5">Trend</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Trend</p>
               <div className={`flex items-center justify-center gap-1 text-sm font-mono font-bold ${trendColor}`}>
                 <TrendIcon size={12} />
                 <span>{fmtBps(model.beta)}/d</span>
               </div>
             </div>
             <div className="bg-navy-800 rounded p-2 text-center">
-              <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-0.5">Projected</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">Projected</p>
               <p className="text-sm font-mono font-bold text-white">{fmtBps(model.expectedTodayBps)}</p>
             </div>
             <div className="bg-navy-800 rounded p-2 text-center">
-              <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-0.5">R²</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">R²</p>
               <p className="text-sm font-mono font-bold text-slate-300">{model.r2.toFixed(2)}</p>
             </div>
           </div>
@@ -247,7 +251,7 @@ function DriftPanel({ corsProxyUrl }: { corsProxyUrl?: string }) {
             <DriftSparkline model={model} />
           </div>
 
-          <div className="flex flex-wrap items-center gap-4 mt-2 text-[9px] text-slate-500 font-mono">
+          <div className="flex flex-wrap items-center gap-4 mt-2 text-[10px] text-slate-500 font-mono">
             <span>— Actual drift &nbsp; - - Regression trend &nbsp; ● Projected</span>
             <span>▲ Positive = MAD weaker than basket &nbsp; ▼ Negative = MAD stronger</span>
           </div>
@@ -258,7 +262,7 @@ function DriftPanel({ corsProxyUrl }: { corsProxyUrl?: string }) {
         <p className="text-slate-500 text-xs py-2">Insufficient data (need ≥2 trading days)</p>
       )}
 
-      <p className="text-[9px] text-slate-600 mt-2">
+      <p className="text-[10px] text-slate-600 mt-2">
         Drift = (BKAM fix − basket parity) × 10 000 bps · Model: USD/MAD = {DEFAULT_BASKET_CONFIG.referenceBasketValue} / (0.60 × EUR/USD + 0.40) · OLS linear regression
       </p>
     </div>
@@ -277,15 +281,28 @@ export default function LivePricer() {
     if (stream.prices.length > 0) setLivePrices(stream.prices);
   }, [stream.prices, setLivePrices]);
 
+
+
   const intervalSecs = Math.max(30_000, config.refreshIntervalMs) / 1000;
 
   const [filterOpen, setFilterOpen] = useState(false);
+  const [focusedRow, setFocusedRow] = useState(0);
   const [visibleCodes, setVisibleCodes] = useState<Set<string>>(() => {
     try {
       const s = localStorage.getItem('jad2fx_live_ccy');
       return s ? new Set(JSON.parse(s)) : new Set(BKAM_CURRENCIES.map(c => c.code));
     } catch { return new Set(BKAM_CURRENCIES.map(c => c.code)); }
   });
+
+  const visiblePrices = useMemo(
+    () => stream.prices.filter(p => visibleCodes.has(p.currency)),
+    [stream.prices, visibleCodes]
+  );
+
+  useHotkeys([
+    { key: 'j', handler: () => setFocusedRow(r => Math.min(r + 1, visiblePrices.length - 1)) },
+    { key: 'k', handler: () => setFocusedRow(r => Math.max(r - 1, 0)) },
+  ]);
 
   function toggleCode(code: string) {
     setVisibleCodes(prev => {
@@ -314,7 +331,7 @@ export default function LivePricer() {
             {locale === 'ar' ? 'لوحة التداول — أسعار استرشادية' : locale === 'en' ? 'Trading Board — Indicative Rates' : 'Tableau de Bord — Cours Indicatifs'}
           </h2>
           <p className="text-slate-400 text-sm mt-0.5">
-            {locale === 'ar' ? `20 زوج BKAM · شراء / بيع / وسط · دورة ${intervalSecs}ث` : locale === 'en' ? `20 BKAM pairs · Bid / Ask / Mid · Cycle ${intervalSecs}s` : `20 paires BKAM · Bid / Ask / Mid · Cycle ${intervalSecs}s`}
+            {locale === 'ar' ? `20 زوج BKAM · شراء / بيع / وسط · دورة ${intervalSecs}ث` : locale === 'en' ? `20 BKAM pairs · Client Sell / Client Buy / Mid · Cycle ${intervalSecs}s` : `20 paires BKAM · Vente client / Achat client / Mid · Cycle ${intervalSecs}s`}
           </p>
           <div className="mt-1 inline-flex items-center gap-1.5 text-[10px] border border-navy-600/30 text-slate-500 px-2 py-0.5 rounded tracking-wide">
             {locale === 'ar' ? 'أسعار استرشادية · غير رسمية BKAM · للتدريب والاستشارة الاستراتيجية: jad2advisory.com' : locale === 'en' ? 'Indicative rates · Not official BKAM · Strategic consulting & training: jad2advisory.com' : 'Cours indicatifs · Non officiels BKAM · Conseil stratégique & formation : jad2advisory.com'}
@@ -396,11 +413,11 @@ export default function LivePricer() {
       <div className="bg-navy-900 border border-navy-700 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[560px]">
-            <thead>
+            <thead className="sticky top-0 z-10 bg-navy-900">
               <tr className="bg-navy-800/60 border-b border-navy-700 text-[10px] uppercase tracking-widest text-slate-500 font-medium">
                 <th className="text-left py-2.5 pl-4 pr-3">{L('Paire', 'Pair', 'الزوج')}</th>
-                <th className="text-right pr-3">{L('Achat', 'Bid', 'شراء')}</th>
-                <th className="text-right pr-3">{L('Vente', 'Ask', 'بيع')}</th>
+                <th className="text-right pr-3">{L('Vente client', 'Client Sell', 'بيع عميل')}</th>
+                <th className="text-right pr-3">{L('Achat client', 'Client Buy', 'شراء عميل')}</th>
                 <th className="text-right pr-3">Mid</th>
                 <th className="text-right pr-3">{L('Variation %', 'Change %', 'التغير %')}</th>
                 <th className="text-right pr-4">{L('Écart', 'Spread', 'الفارق')}</th>
@@ -430,9 +447,9 @@ export default function LivePricer() {
                   </td>
                 </tr>
               ) : (
-                sorted.map(entry => (
+                sorted.map((entry, idx) => (
                   <React.Fragment key={entry.currency}>
-                    <PriceRow entry={entry} />
+                    <PriceRow entry={entry} isFocused={focusedRow === idx} />
                   </React.Fragment>
                 ))
               )}

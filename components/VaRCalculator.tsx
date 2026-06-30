@@ -30,7 +30,7 @@ export default function VaRCalculator() {
       <div className="flex items-center gap-2">
         <Calculator size={14} className="text-gold-500" />
         <h1 className="text-base font-bold text-white uppercase tracking-wider">Calculateur VaR</h1>
-        <span className="text-[9px] font-bold text-amber-400 bg-amber-900/30 border border-amber-700/40 px-1.5 py-0.5 rounded uppercase tracking-wider">
+        <span className="text-[10px] font-bold text-amber-400 bg-amber-900/30 border border-amber-700/40 px-1.5 py-0.5 rounded uppercase tracking-wider">
           Indicatif · Pédagogique
         </span>
       </div>

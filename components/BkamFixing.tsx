@@ -59,7 +59,7 @@ function BandGauge({ bps, bandUtilPct }: { bps: number; bandUtilPct?: number }) 
           style={{ left: `${pct}%`, background: color }}
         />
       </div>
-      <div className="flex justify-between text-[9px] text-slate-600 mt-0.5 font-mono">
+      <div className="flex justify-between text-[10px] text-slate-600 mt-0.5 font-mono">
         <span>−{BAND_PCT}%</span><span>Parité</span><span>+{BAND_PCT}%</span>
       </div>
     </div>
@@ -73,7 +73,7 @@ function StatCard({ label, value, sub, color = 'text-white' }: {
 }) {
   return (
     <div className="bg-navy-800/60 border border-navy-700 rounded-xl p-4">
-      <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-1">{label}</p>
+      <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{label}</p>
       <p className={`text-lg font-bold font-mono tabular-nums ${color}`}>{value}</p>
       {sub && <p className="text-[10px] text-slate-500 mt-0.5 font-mono">{sub}</p>}
     </div>
@@ -302,11 +302,11 @@ export default function BkamFixing() {
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-[11px] font-bold text-white uppercase tracking-widest flex items-center gap-2">
                 {isOfficial ? (
-                  <span className="text-[9px] bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 px-2 py-0.5 rounded font-mono">
+                  <span className="text-[10px] bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 px-2 py-0.5 rounded font-mono">
                     BKAM OFFICIEL
                   </span>
                 ) : (
-                  <span className="text-[9px] bg-amber-950/40 text-amber-400 border border-amber-800/40 px-2 py-0.5 rounded font-mono">
+                  <span className="text-[10px] bg-amber-950/40 text-amber-400 border border-amber-800/40 px-2 py-0.5 rounded font-mono">
                     ECB PROXY
                   </span>
                 )}
@@ -368,12 +368,12 @@ export default function BkamFixing() {
               </h3>
               <div className="flex items-center gap-2">
                 {isOfficial && (
-                  <span className="text-[9px] font-mono text-emerald-400 bg-emerald-950/30 border border-emerald-800/40 px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/30 border border-emerald-800/40 px-2 py-0.5 rounded">
                     ✓ CoursVirement BKAM
                   </span>
                 )}
                 <button onClick={() => exportCSV(latest)}
-                  className="flex items-center gap-1 text-[9px] text-slate-400 hover:text-emerald-400 font-semibold transition px-2 py-1 border border-navy-700 hover:border-emerald-700 rounded">
+                  className="flex items-center gap-1 text-[10px] text-slate-400 hover:text-emerald-400 font-semibold transition px-2 py-1 border border-navy-700 hover:border-emerald-700 rounded">
                   <Download size={10} /> CSV
                 </button>
               </div>
@@ -384,7 +384,7 @@ export default function BkamFixing() {
               ) : (
               <table className="w-full text-xs min-w-[600px]">
                 <thead>
-                  <tr className="bg-navy-800/40 text-[9px] text-slate-500 uppercase tracking-wider border-b border-navy-800">
+                  <tr className="bg-navy-800/40 text-[10px] text-slate-500 uppercase tracking-wider border-b border-navy-800">
                     <th className="text-left py-2.5 px-4 font-semibold">Devise</th>
                     <th className="text-right px-3 py-2.5 font-semibold">
                       {isOfficial ? 'Cours BKAM (MAD)' : 'Cours Proxy (MAD)'}
@@ -417,7 +417,7 @@ export default function BkamFixing() {
                             <CurrencyFlag countryCode={c.countryCode} size="sm" />
                             <div>
                               <p className="font-bold text-white text-[12px]">{c.code}/MAD</p>
-                              <p className="text-[9px] text-slate-500">
+                              <p className="text-[10px] text-slate-500">
                                 {locale === 'ar' ? c.nameAr : locale === 'en' ? c.name : c.nameFr}
                                 {c.bkamUnit !== 1 && <span className="ml-1 text-navy-500">×{c.bkamUnit}</span>}
                               </p>
@@ -442,7 +442,7 @@ export default function BkamFixing() {
                           ) : <span className="text-slate-700 text-[10px]">—</span>}
                         </td>
                         <td className="py-2.5 px-4 w-32">
-                          {divBps !== null ? <BandGauge bps={divBps} bandUtilPct={bandUtil ?? undefined} /> : <span className="text-slate-700 text-[9px]">—</span>}
+                          {divBps !== null ? <BandGauge bps={divBps} bandUtilPct={bandUtil ?? undefined} /> : <span className="text-slate-700 text-[10px]">—</span>}
                         </td>
                       </tr>
                     );
@@ -460,7 +460,7 @@ export default function BkamFixing() {
                             <CurrencyFlag countryCode={meta.countryCode} size="sm" />
                             <div>
                               <p className="font-bold text-white text-[12px]">{code}/MAD</p>
-                              <p className="text-[9px] text-slate-500">
+                              <p className="text-[10px] text-slate-500">
                                 {locale === 'en' ? meta.name : meta.nameFr}
                                 {meta.unit !== 1 && <span className="ml-1 text-navy-500">×{meta.unit}</span>}
                                 <span className="ml-1.5 text-[7px] text-navy-600 font-mono">BKAM+</span>
@@ -475,7 +475,7 @@ export default function BkamFixing() {
                         </td>
                         <td className="py-2.5 px-3 text-right text-slate-700 text-[10px]">—</td>
                         <td className="py-2.5 px-3 text-right text-slate-700 text-[10px]">—</td>
-                        <td className="py-2.5 px-4 text-slate-700 text-[9px]">—</td>
+                        <td className="py-2.5 px-4 text-slate-700 text-[10px]">—</td>
                       </tr>
                     );
                   })}
@@ -484,14 +484,14 @@ export default function BkamFixing() {
               )}
             </div>
             <div className="px-5 py-2.5 border-t border-navy-800 flex flex-wrap items-center gap-3">
-              <p className="text-[9px] text-slate-600">
+              <p className="text-[10px] text-slate-600">
                 {isOfficial
                   ? `Source: BKAM CoursVirement API · Fixing ${latest.date} 12h30 · ${latest.rawBkamRates?.length} devises`
                   : 'Source: ECB Frankfurter (proxy indicatif) · Non officiel BKAM'}
               </p>
               <a href={BKAM_LINKS.fixingTransfer}
                 target="_blank" rel="noopener noreferrer"
-                className="text-[9px] text-gold-600 hover:text-gold-400 ml-auto">
+                className="text-[10px] text-gold-600 hover:text-gold-400 ml-auto">
                 Cours officiels BKAM ↗
               </a>
             </div>
@@ -561,7 +561,7 @@ export default function BkamFixing() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-              <p className="text-[9px] text-slate-600">
+              <p className="text-[10px] text-slate-600">
                 Dérive = (Fixing {isOfficial ? 'BKAM' : 'ECB'} − Parité panier) / Parité panier × 10 000 bps ·
                 K=10,49 · Panier 60% EUR / 40% USD · Bande réglementaire ±{BAND_PCT}% (500 bps)
               </p>
@@ -573,7 +573,7 @@ export default function BkamFixing() {
       )}
 
       {/* ── Legal ── */}
-      <p className="text-[9px] text-slate-700 leading-relaxed text-center">
+      <p className="text-[10px] text-slate-700 leading-relaxed text-center">
         Les taux présentés sur cette page sont {isOfficial ? 'les cours officiels CoursVirement publiés par Bank Al-Maghrib' : 'des estimations indicatives basées sur les données BCE'}.
         Ils ne constituent pas des prix de transaction. Pour toute opération de change, adressez-vous à un établissement de crédit agréé par Bank Al-Maghrib (Art. 3, LC/BKAM/2018/2).
         JAD2 Advisory — non établissement financier (Loi n° 43-12).

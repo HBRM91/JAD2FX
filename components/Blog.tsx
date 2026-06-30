@@ -79,7 +79,7 @@ export default function Blog() {
             className="bg-navy-900 border border-navy-700 rounded-2xl p-5 hover:border-gold-500/40 transition-colors"
           >
             <div className="flex items-start justify-between gap-2 mb-2">
-              <span className="text-[9px] text-slate-500 uppercase tracking-widest font-bold bg-navy-800 border border-navy-700 px-2 py-0.5 rounded">
+              <span className="text-[10px] text-slate-500 uppercase tracking-widest font-bold bg-navy-800 border border-navy-700 px-2 py-0.5 rounded">
                 {RESEARCH_CATEGORIES[a.category]}
               </span>
               <div className="flex items-center gap-1 text-[10px] text-slate-500">
@@ -94,7 +94,7 @@ export default function Blog() {
                 />
             <div className="flex flex-wrap gap-1.5">
               {a.tags.map((t) => (
-                <span key={t} className="text-[9px] text-slate-500 bg-navy-800 px-1.5 py-0.5 rounded">
+                <span key={t} className="text-[10px] text-slate-500 bg-navy-800 px-1.5 py-0.5 rounded">
                   <Tag size={8} className="inline mr-0.5" />{t}
                 </span>
               ))}

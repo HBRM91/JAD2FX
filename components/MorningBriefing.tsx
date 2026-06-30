@@ -214,7 +214,7 @@ function ImpactBadge({ impact }: { impact: CalendarEvent['impact'] }) {
   };
   const labels = { DIRECT: 'DIRECT MAD', HIGH: 'IMPACT ÉLEVÉ', MEDIUM: 'IMPACT MODÉRÉ', LOW: 'IMPACT FAIBLE' };
   return (
-    <span className={`text-[9px] font-bold border px-1.5 py-0.5 rounded uppercase tracking-wide ${map[impact]}`}>
+    <span className={`text-[10px] font-bold border px-1.5 py-0.5 rounded uppercase tracking-wide ${map[impact]}`}>
       {labels[impact]}
     </span>
   );
@@ -230,7 +230,7 @@ function EventTypeBadge({ type }: { type: CalendarEvent['type'] }) {
     CPI_EU: 'bg-indigo-900/40 text-indigo-300',
   };
   return (
-    <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded ${map[type] ?? 'bg-navy-800 text-slate-400'}`}>
+    <span className={`text-[10px] font-mono font-bold px-1.5 py-0.5 rounded ${map[type] ?? 'bg-navy-800 text-slate-400'}`}>
       {type.replace('_', ' ')}
     </span>
   );
@@ -280,7 +280,7 @@ function BandGauge({ data, locale }: { data: BandData; locale: string }) {
         />
       </div>
       {/* Labels */}
-      <div className="flex items-center justify-between text-[9px] font-mono text-slate-600">
+      <div className="flex items-center justify-between text-[10px] font-mono text-slate-600">
         <span>{data.lower.toFixed(3)}</span>
         <span className="text-navy-500">{locale === 'ar' ? 'التعادل' : locale === 'en' ? 'Parity' : 'Parité'} {data.central.toFixed(3)}</span>
         <span>{data.upper.toFixed(3)}</span>
@@ -361,7 +361,7 @@ function NewsletterSignup({ proxyUrl }: { proxyUrl: string }) {
           onChange={e => setConsent(e.target.checked)}
           className="mt-0.5 flex-shrink-0 accent-gold-500 w-3.5 h-3.5"
         />
-        <span className="text-[9px] text-slate-600 leading-relaxed">
+        <span className="text-[10px] text-slate-600 leading-relaxed">
           J'accepte que <strong className="text-slate-500">JAD2 Advisory</strong> (contrôleur, RC Casablanca) traite mon email
           pour le Morning Briefing FX quotidien. Finalité : communication informative.
           Durée : 24 mois. Retrait : <span className="text-slate-500">contact@jad2advisory.com</span>.
@@ -703,11 +703,11 @@ export default function MorningBriefing() {
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-[9px] font-bold text-gold-400 uppercase tracking-[0.2em] bg-gold-500/10 border border-gold-500/25 px-2 py-0.5 rounded">
+                <span className="text-[10px] font-bold text-gold-400 uppercase tracking-[0.2em] bg-gold-500/10 border border-gold-500/25 px-2 py-0.5 rounded">
                   MORNING BRIEFING · JAD2 ADVISORY
                 </span>
                 {isFixingHour && (
-                  <span className="text-[9px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded uppercase animate-pulse">
+                  <span className="text-[10px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded uppercase animate-pulse">
                     ⚡ HEURE FIXING BKAM
                   </span>
                 )}
@@ -819,12 +819,12 @@ export default function MorningBriefing() {
                 <Activity size={13} className="text-gold-500" />
                 <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Taux de Change Indicatifs — Séance en cours</h3>
               </div>
-              <span className="text-[9px] text-slate-500 font-mono">{effectivePrices.length} paires · ECB / BKAM{ratesLoading ? ' · chargement…' : ''}</span>
+              <span className="text-[10px] text-slate-500 font-mono">{effectivePrices.length} paires · ECB / BKAM{ratesLoading ? ' · chargement…' : ''}</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[700px]">
                 <thead>
-                  <tr className="bg-navy-950/50 text-[9px] uppercase tracking-widest text-slate-500 border-b border-navy-800">
+                  <tr className="bg-navy-950/50 text-[10px] uppercase tracking-widest text-slate-500 border-b border-navy-800">
                     <th className="text-left px-4 py-2.5">{L('Paire', 'Pair', 'الزوج')}</th>
                     <th className="text-right px-3 py-2.5">{L('Achat', 'Bid', 'شراء')}</th>
                     <th className="text-right px-3 py-2.5">{L('Vente', 'Ask', 'بيع')}</th>
@@ -872,7 +872,7 @@ export default function MorningBriefing() {
                                   style={{ width: `${band.utilPct}%` }}
                                 />
                               </div>
-                              <span className="text-[9px] font-mono text-slate-400 w-6 text-right">{band.utilPct.toFixed(0)}%</span>
+                              <span className="text-[10px] font-mono text-slate-400 w-6 text-right">{band.utilPct.toFixed(0)}%</span>
                             </div>
                           ) : <span className="text-slate-600 text-[10px]">—</span>}
                         </td>
@@ -896,7 +896,7 @@ export default function MorningBriefing() {
               <div className="space-y-5">
                 {bandData.map(b => <BandGauge key={b.currency} data={b} locale={locale} />)}
               </div>
-              <p className="text-[9px] text-slate-600 mt-4">
+              <p className="text-[10px] text-slate-600 mt-4">
                 Zone neutre 35–65% · Zone attention 20–35% & 65–80% · Zone danger &lt;20% & &gt;80%
               </p>
             </div>
@@ -919,7 +919,7 @@ export default function MorningBriefing() {
                     style={{ width: `${sentiment.score}%` }}
                   />
                 </div>
-                <div className="flex justify-between text-[9px] font-mono text-slate-600">
+                <div className="flex justify-between text-[10px] font-mono text-slate-600">
                   <span>MAD fort</span>
                   <span className="text-slate-400 font-bold">Score: {sentiment.score}/100</span>
                   <span>MAD faible</span>
@@ -928,7 +928,7 @@ export default function MorningBriefing() {
               {/* Drivers */}
               {sentiment.drivers.length > 0 && (
                 <div className="space-y-1.5">
-                  <p className="text-[9px] font-bold text-slate-500 uppercase tracking-wider mb-2">Facteurs identifiés</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Facteurs identifiés</p>
                   {sentiment.drivers.map((d, i) => (
                     <div key={i} className="flex items-center gap-2 text-[11px] text-slate-300">
                       <ChevronRight size={10} className="text-gold-500 flex-shrink-0" />
@@ -964,7 +964,7 @@ export default function MorningBriefing() {
                   <div className="flex items-center gap-1.5 mb-2">
                     <CurrencyFlag countryCode={pair.countryCode} size="xs" />
                     <span className="text-[11px] font-bold text-white">{pair.label}</span>
-                    <span className="text-[9px] text-slate-500">(niveaux théoriques)</span>
+                    <span className="text-[10px] text-slate-500">(niveaux théoriques)</span>
                   </div>
                   <div className="space-y-1">
                     {[
@@ -984,7 +984,7 @@ export default function MorningBriefing() {
                   </div>
                 </div>
               ))}
-              <p className="text-[9px] text-slate-600 mt-3">
+              <p className="text-[10px] text-slate-600 mt-3">
                 Niveaux pédagogiques — non exécutables · Pour toute opération : banque agréée BAM
               </p>
             </div>
@@ -1037,7 +1037,7 @@ export default function MorningBriefing() {
                 <div key={item.title} className="bg-navy-950/50 border border-navy-700 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <item.icon size={12} className="text-gold-500" />
-                    <span className={`text-[9px] font-bold ${item.priorityColor}`}>PRIORITÉ {item.priority}</span>
+                    <span className={`text-[10px] font-bold ${item.priorityColor}`}>PRIORITÉ {item.priority}</span>
                   </div>
                   <p className="text-[11px] font-bold text-white mb-1.5">{item.title}</p>
                   <p className="text-[11px] text-slate-400 leading-relaxed">{item.body}</p>
@@ -1067,10 +1067,10 @@ export default function MorningBriefing() {
                     <div className="text-[11px] font-bold text-white font-mono">
                       {new Date(ev.date).toLocaleDateString('fr-MA', { day: '2-digit' })}
                     </div>
-                    <div className="text-[9px] text-slate-500 uppercase">
+                    <div className="text-[10px] text-slate-500 uppercase">
                       {new Date(ev.date).toLocaleDateString('fr-MA', { month: 'short' })}
                     </div>
-                    <div className={`text-[9px] font-mono font-bold mt-0.5 ${daysUntil(ev.date) <= 7 ? 'text-red-400' : daysUntil(ev.date) <= 21 ? 'text-amber-400' : 'text-slate-500'}`}>
+                    <div className={`text-[10px] font-mono font-bold mt-0.5 ${daysUntil(ev.date) <= 7 ? 'text-red-400' : daysUntil(ev.date) <= 21 ? 'text-amber-400' : 'text-slate-500'}`}>
                       J-{daysUntil(ev.date)}
                     </div>
                   </div>
@@ -1078,7 +1078,7 @@ export default function MorningBriefing() {
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <CurrencyFlag countryCode={ev.countryCode} size="xs" />
                       <span className="text-[12px] font-semibold text-white">{ev.titleFr}</span>
-                      {ev.hasProjections && <span className="text-[9px] bg-blue-500/15 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded font-bold">+ PROJECTIONS</span>}
+                      {ev.hasProjections && <span className="text-[10px] bg-blue-500/15 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded font-bold">+ PROJECTIONS</span>}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <EventTypeBadge type={ev.type} />
@@ -1121,7 +1121,7 @@ export default function MorningBriefing() {
             </div>
 
             {/* Legend */}
-            <div className="px-5 py-2.5 border-b border-navy-800 flex flex-wrap gap-3 text-[9px] font-bold">
+            <div className="px-5 py-2.5 border-b border-navy-800 flex flex-wrap gap-3 text-[10px] font-bold">
               {[
                 { color: 'bg-gold-500/30 text-gold-300', label: 'BKAM — DIRECT MAD' },
                 { color: 'bg-red-500/20 text-red-300', label: 'HIGH IMPACT' },
@@ -1156,12 +1156,12 @@ export default function MorningBriefing() {
                       <div className="flex items-center gap-2 flex-wrap mb-2">
                         <CurrencyFlag countryCode={ev.countryCode} size="xs" />
                         <span className="text-[13px] font-semibold text-white">{ev.titleFr}</span>
-                        {ev.hasProjections && <span className="text-[9px] bg-blue-500/15 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded font-bold">+ PROJECTIONS SEP</span>}
+                        {ev.hasProjections && <span className="text-[10px] bg-blue-500/15 text-blue-400 border border-blue-500/30 px-1.5 py-0.5 rounded font-bold">+ PROJECTIONS SEP</span>}
                       </div>
                       <div className="flex items-center gap-2 flex-wrap mb-2">
                         <EventTypeBadge type={ev.type} />
                         <ImpactBadge impact={ev.impact} />
-                        <span className="text-[9px] text-slate-500 font-mono">{ev.date}</span>
+                        <span className="text-[10px] text-slate-500 font-mono">{ev.date}</span>
                       </div>
                       <p className="text-[12px] text-slate-400 leading-relaxed">{ev.noteFr}</p>
                     </div>
@@ -1205,8 +1205,8 @@ export default function MorningBriefing() {
                   <div className="flex items-start justify-between flex-wrap gap-4">
                     <div>
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="text-[9px] bg-gold-500/15 border border-gold-500/30 text-gold-400 px-2 py-0.5 rounded-full font-bold uppercase">Rapport IA · JAD2FX</span>
-                        <span className="text-[9px] bg-navy-800 border border-navy-700 text-navy-400 px-1.5 py-0.5 rounded font-mono">{report.llmModel}</span>
+                        <span className="text-[10px] bg-gold-500/15 border border-gold-500/30 text-gold-400 px-2 py-0.5 rounded-full font-bold uppercase">Rapport IA · JAD2FX</span>
+                        <span className="text-[10px] bg-navy-800 border border-navy-700 text-navy-400 px-1.5 py-0.5 rounded font-mono">{report.llmModel}</span>
                       </div>
                       <h2 className="text-xl font-serif font-bold text-white leading-snug mb-1">{report.titleFr}</h2>
                       <p className="text-[11px] text-slate-500 font-mono">
@@ -1242,10 +1242,10 @@ export default function MorningBriefing() {
                         </div>
                         <div className="text-[11px] font-bold text-white">{r.currency}/MAD</div>
                         <div className="text-[14px] font-mono font-bold text-white mt-0.5">{r.currentRate.toFixed(4)}</div>
-                        <div className={`text-[9px] font-bold mt-1 ${r.weeklyChangeBps > 0 ? 'text-red-400' : r.weeklyChangeBps < 0 ? 'text-emerald-400' : 'text-slate-500'}`}>
+                        <div className={`text-[10px] font-bold mt-1 ${r.weeklyChangeBps > 0 ? 'text-red-400' : r.weeklyChangeBps < 0 ? 'text-emerald-400' : 'text-slate-500'}`}>
                           {r.weeklyChangeBps > 0 ? '+' : ''}{r.weeklyChangeBps} bps/sem
                         </div>
-                        <div className="text-[9px] text-slate-400 mt-1 leading-snug">{r.headline}</div>
+                        <div className="text-[10px] text-slate-400 mt-1 leading-snug">{r.headline}</div>
                       </div>
                     ))}
                   </div>

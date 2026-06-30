@@ -54,7 +54,7 @@ export default function SovereignPage() {
           <Award size={11} /> CDS 5 ans (bps)
         </h2>
         <table className="w-full text-[11px]">
-          <thead className="text-[9px] text-slate-500 uppercase tracking-wider">
+          <thead className="text-[10px] text-slate-500 uppercase tracking-wider">
             <tr>
               <th className="px-2 py-1 text-left">Pays</th>
               <th className="px-2 py-1 text-right">Spread</th>
@@ -70,7 +70,7 @@ export default function SovereignPage() {
                 <tr key={country} className={isMA ? 'bg-gold-500/5' : 'hover:bg-navy-800/30'}>
                   <td className="px-2 py-1.5 font-bold text-slate-200">
                     {country.charAt(0).toUpperCase() + country.slice(1)}
-                    {isMA && <span className="ml-1 text-[9px] text-gold-400">★</span>}
+                    {isMA && <span className="ml-1 text-[10px] text-gold-400">★</span>}
                   </td>
                   <td className="px-2 py-1.5 text-right font-mono text-slate-200">{data.bps}</td>
                   <td className={`px-2 py-1.5 text-right font-mono ${data.change > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
@@ -95,7 +95,7 @@ export default function SovereignPage() {
           <TrendingUp size={11} /> EMBI+ JP Morgan (bps)
         </h2>
         <table className="w-full text-[11px]">
-          <thead className="text-[9px] text-slate-500 uppercase tracking-wider">
+          <thead className="text-[10px] text-slate-500 uppercase tracking-wider">
             <tr>
               <th className="px-2 py-1 text-left">Pays</th>
               <th className="px-2 py-1 text-right">Spread</th>
@@ -110,7 +110,7 @@ export default function SovereignPage() {
                 <tr key={country} className={isMA ? 'bg-gold-500/5' : 'hover:bg-navy-800/30'}>
                   <td className="px-2 py-1.5 font-bold text-slate-200">
                     {country.charAt(0).toUpperCase() + country.slice(1)}
-                    {isMA && <span className="ml-1 text-[9px] text-gold-400">★</span>}
+                    {isMA && <span className="ml-1 text-[10px] text-gold-400">★</span>}
                   </td>
                   <td className="px-2 py-1.5 text-right font-mono text-slate-200">{data.bps}</td>
                   <td className={`px-2 py-1.5 text-right font-mono ${data.change > 0 ? 'text-red-400' : 'text-emerald-400'}`}>

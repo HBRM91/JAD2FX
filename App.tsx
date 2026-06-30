@@ -115,7 +115,7 @@ function NewsCard({ news }: { news: typeof MARKET_NEWS[0] }) {
           {news.category}
         </span>
         {news.date && (
-          <time dateTime={news.date} className="text-[9px] text-slate-600 font-mono">
+          <time dateTime={news.date} className="text-[10px] text-slate-600 font-mono">
             {new Date(news.date).toLocaleDateString('fr-MA', { day: '2-digit', month: 'short', year: 'numeric' })}
           </time>
         )}
@@ -156,11 +156,12 @@ function RouteFallback({ name }: { name?: string } = {}) {
 }
 
 function AppInner() {
-  const { config, setLivePrices, isAdmin } = useAdmin();
+  const { config, setLivePrices, setRates, isAdmin } = useAdmin();
   const [contactDrawerOpen, setContactDrawerOpen] = React.useState(false);
   useTheme(); // keeps ThemeProvider active (dark-only)
   const [view, setView]             = useState<ViewState>('HOME');
   const [tickerRates, setTickerRates] = useState<LiveRate[]>([]);
+  const [ratesError, setRatesError]     = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   // P4.16 — Dynamic per-view OG image & title (sets document head for SEO/sharing)
@@ -221,11 +222,16 @@ function AppInner() {
   const navDropdownRef = useRef<HTMLDivElement>(null);
 
   // B1.3 — Deep link from ?view=... on mount + popstate for back/forward.
+  const scrollKey = (v: string) => `jad2fx_scroll_${v}`;
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const apply = () => {
       const v = new URLSearchParams(window.location.search).get('view');
-      if (v && /^[A-Z_]+$/.test(v)) setView(v as ViewState);
+      if (v && /^[A-Z_]+$/.test(v)) {
+        setView(v as ViewState);
+        const saved = sessionStorage.getItem(scrollKey(v));
+        if (saved) requestAnimationFrame(() => window.scrollTo(0, +saved));
+      }
     };
     apply();
     window.addEventListener('popstate', apply);
@@ -275,7 +281,9 @@ function AppInner() {
     }
     fetchAllMadRates(DEFAULT_BASKET_CONFIG, config.corsProxyUrl, config.dealerSpreadPips)
       .then(({ rates }) => {
+        setRatesError(false);
         setTickerRates(rates);
+        setRates(rates);
         const entries: LivePriceEntry[] = rates.map(r => {
           const changePercent = r.change24h ?? 0;
           const prevMid = changePercent !== 0 ? r.mid / (1 + changePercent / 100) : r.mid;
@@ -294,7 +302,7 @@ function AppInner() {
         });
         setLivePrices(entries);
       })
-      .catch(() => {});
+      .catch(() => { setRatesError(true); });
   }, [config.corsProxyUrl, setLivePrices]);
 
   useEffect(() => {
@@ -315,16 +323,17 @@ function AppInner() {
   }, []);
 
   const navTo = (v: ViewState) => {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem(scrollKey(view), String(window.scrollY));
+      const url = new URL(window.location.href);
+      url.searchParams.set('view', v);
+      window.history.pushState(null, '', url.toString());
+    }
     setView(v);
     setMobileOpen(false);
     setOpenGroup(null);
     setPaletteOpen(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-    if (typeof window !== 'undefined') {
-      const url = new URL(window.location.href);
-      url.searchParams.set('view', v);
-      window.history.replaceState(null, '', url.toString());
-    }
   };
 
   const activeGroupId = NAV_GROUPS.find(g => g.items.some(i => i.view === view))?.id ?? null;
@@ -375,8 +384,7 @@ function AppInner() {
               {NAV_GROUPS.map(group => (
                 <div key={group.id} className="relative h-full flex items-center">
                   <button
-                    onMouseEnter={() => setOpenGroup(group.id)}
-                    onMouseLeave={() => setOpenGroup(null)}
+                    onClick={() => setOpenGroup(o => o === group.id ? null : group.id)}
                     className={`flex items-center gap-1.5 px-4 h-full text-[11px] font-semibold tracking-wide uppercase transition-colors ${
                       activeGroupId === group.id
                         ? 'text-gold-400 border-b-2 border-gold-500'
@@ -393,8 +401,6 @@ function AppInner() {
                       className={`absolute top-full left-0 bg-navy-900 border border-navy-800 border-t-0 rounded-b-xl shadow-2xl py-1.5 z-50 ${
                         group.items.length > 4 ? 'grid grid-cols-2 gap-x-1 min-w-[460px]' : 'min-w-[230px]'
                       }`}
-                      onMouseEnter={() => setOpenGroup(group.id)}
-                      onMouseLeave={() => setOpenGroup(null)}
                     >
                       {group.items.map(item => (
                         <button
@@ -409,7 +415,7 @@ function AppInner() {
                           <item.icon size={13} className={view === item.view ? 'text-gold-400' : 'text-navy-400 group-hover:text-slate-300'} />
                           <div>
                             <p className="text-[11px] font-semibold">{item.label}</p>
-                            <p className="text-[9px] text-navy-400 group-hover:text-slate-500">{item.desc}</p>
+                            <p className="text-[10px] text-navy-400 group-hover:text-slate-500">{item.desc}</p>
                           </div>
                         </button>
                       ))}
@@ -465,7 +471,7 @@ function AppInner() {
                 >
                   <Search size={11} />
                   <span>{t('app.searchPlaceholder')}</span>
-                  <kbd className="hidden lg:flex items-center gap-0.5 ml-1 px-1 py-0.5 text-[9px] font-mono text-slate-500 bg-navy-800 border border-navy-700 rounded">⌘K</kbd>
+                  <kbd className="hidden lg:flex items-center gap-0.5 ml-1 px-1 py-0.5 text-[10px] font-mono text-slate-500 bg-navy-800 border border-navy-700 rounded">⌘K</kbd>
                 </button>
                 <button
                   onClick={() => setContactDrawerOpen(true)}
@@ -576,29 +582,15 @@ function AppInner() {
       </nav>
 
       {/* ╔╔ Compliance banner ╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔ */}
-      <div className="bg-navy-950 border-b border-navy-800 px-4 py-1">
-        <p className="text-[11px] text-slate-500 tracking-wide text-center">{DISCLAIMER_SHORT}</p>
-      </div>
+
 
       {/* ╔╔ Single sticky notice banner (rate disclaimer + simulator on mobile) ╔ */}
-      {(() => {
-        const isRateView = ['FORWARDS', 'SWAPS', 'ANALYSIS', 'BANDS', 'LIVE', 'DASHBOARD', 'FIXING', 'BILLETS'].includes(view);
-        const isSimView = ['FORWARDS', 'SWAPS', 'ANALYSIS', 'BANDS', 'REPORT', 'RESEARCH'].includes(view);
-        if (!isRateView && !isSimView) return null;
-        return (
-          <div className="sticky top-14 z-40 border-b border-gold-600/20 bg-gold-500/5 px-4 py-1 text-center">
-            <p className="text-[9px] text-gold-600/80 font-medium">
-              Taux JAD2FX strictement indicatifs — non utilisables pour des opérations de change
-              (BKAM Méthodologie 2024, §II) · Pour un cours ferme : votre banque domiciliataire agréée BAM
-            </p>
-            {isSimView && (
-              <p className="lg:hidden text-[9px] font-bold text-amber-300 uppercase tracking-widest mt-0.5">
-                Mode Simulateur — Résultats Non-Exécutables · Usage Pédagogique Uniquement
-              </p>
-            )}
-          </div>
-        );
-      })()}
+      {/* Compact compliance strip */}
+      <div className="bg-navy-950 border-b border-navy-800/60 px-4 py-0.5 text-center">
+        <span className="text-[10px] text-amber-500/60 font-medium">
+          Données indicatives · Non-exécutables · Usage pédagogique · Pour un cours ferme : votre banque agréée BAM
+        </span>
+      </div>
 
       {/* ╔╔ Ticker ╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔ */}
       <RatesTicker rates={tickerRates} />
@@ -641,7 +633,7 @@ function AppInner() {
               {/* Corporate MAD persona */}
               <div className="bg-navy-900 border border-gold-700/30 rounded-2xl p-6 flex flex-col gap-4 hover:border-gold-600/50 transition-colors">
                 <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-bold text-gold-500 uppercase tracking-[0.2em] bg-gold-500/10 border border-gold-500/25 px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-bold text-gold-500 uppercase tracking-[0.2em] bg-gold-500/10 border border-gold-500/25 px-2 py-0.5 rounded">
                     PME &amp; Corporate Maroc
                   </span>
                 </div>
@@ -674,6 +666,12 @@ function AppInner() {
             </div>
 
             {/* ── B4.4 — Dashboard summary: top 4 watched rates ─────────────── */}
+            {ratesError && (
+              <div className="bg-red-950/30 border border-red-800/50 rounded-xl p-4 text-sm text-red-300 flex items-center justify-between">
+                <span>Impossible de charger les taux en temps réel.</span>
+                <button onClick={refreshRates} className="text-xs font-bold text-red-200 hover:text-white border border-red-700/50 rounded px-2 py-1 hover:bg-red-900/30 transition-colors">Réessayer</button>
+              </div>
+            )}
             {tickerRates.length > 0 && (
               <div className="bg-navy-900 border border-navy-700 rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-2.5">
@@ -699,9 +697,9 @@ function AppInner() {
                         onClick={() => navTo('LIVE')}
                         className="bg-navy-950 border border-navy-800 hover:border-gold-500/50 rounded-lg p-2.5 text-left transition-colors"
                       >
-                        <p className="text-[9px] text-slate-500 uppercase tracking-wider">{r.pair}</p>
+                        <p className="text-[10px] text-slate-500 uppercase tracking-wider">{r.pair}</p>
                         <p className="text-sm font-bold text-white font-mono mt-0.5">{r.mid.toFixed(4)}</p>
-                        <p className={`text-[9px] font-mono mt-0.5 ${chgColor}`}>
+                        <p className={`text-[10px] font-mono mt-0.5 ${chgColor}`}>
                           {isUp ? '▲' : isDn ? '▼' : '—'} {Math.abs(chg).toFixed(2)}%
                         </p>
                       </button>
@@ -721,7 +719,7 @@ function AppInner() {
 
             {/* ── Trust bar (Task 2.2) — P2-1: now clickable sector tiles ──────── */}
             <div className="bg-navy-900/60 border border-navy-800 rounded-xl px-5 py-3">
-              <p className="text-[9px] text-slate-600 uppercase tracking-wider text-center mb-2.5 font-bold">
+              <p className="text-[10px] text-slate-600 uppercase tracking-wider text-center mb-2.5 font-bold">
                 Accompagne des entreprises dans leur gestion de change MAD
               </p>
               <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
@@ -748,7 +746,7 @@ function AppInner() {
             <div className="bg-gradient-to-br from-navy-900 to-navy-950 border border-gold-700/30 rounded-2xl p-5 sm:p-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
                 <div className="lg:col-span-1 space-y-2">
-                  <span className="inline-block text-[9px] font-bold text-gold-500 uppercase tracking-[0.2em] bg-gold-500/10 border border-gold-500/25 px-2 py-0.5 rounded">
+                  <span className="inline-block text-[10px] font-bold text-gold-500 uppercase tracking-[0.2em] bg-gold-500/10 border border-gold-500/25 px-2 py-0.5 rounded">
                     Outil PME
                   </span>
                   <h2 className="text-xl font-serif font-bold text-white leading-tight">
@@ -771,61 +769,9 @@ function AppInner() {
               </div>
             </div>
 
-            {/* ── Original hero banner (now secondary / data terminal showcase) */}
-            <div className="relative rounded-2xl overflow-hidden border border-navy-700 min-h-[280px] sm:min-h-[340px]" style={{ background: 'linear-gradient(135deg, #040C1C 0%, #081628 50%, #0E2336 100%)' }}>
-              {/* Subtle gold radial accent top-right */}
-              <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_15%,rgba(212,175,55,0.12),transparent_55%)]" />
-              {/* Grid lines for depth */}
-              <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'linear-gradient(#D4AF37 1px, transparent 1px), linear-gradient(90deg, #D4AF37 1px, transparent 1px)', backgroundSize: '60px 60px' }} />
-
-              {/* Content */}
-              <div className="relative px-7 sm:px-12 py-10 sm:py-14 max-w-xl">
-                {/* Tags */}
-                <div className="flex flex-wrap gap-2 mb-5">
-                  {['Simulation Pédagogique', 'Données BKAM Live', 'Réglementation OC'].map(tag => (
-                    <span key={tag} className="text-[11px] bg-gold-500/15 border border-gold-500/35 text-gold-400 px-3 py-0.5 rounded-full font-semibold uppercase tracking-wide">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Title */}
-                <h1 className="text-5xl sm:text-6xl font-bold text-white tracking-[0.15em] uppercase mb-2 font-serif drop-shadow-xl">JAD2FX</h1>
-                <p className="text-gold-400 text-[11px] uppercase tracking-[0.25em] mb-5 font-medium">
-                  Outil de Données de Change · by JAD2 Advisory
-                </p>
-
-                {/* Subtitle */}
-                <p className="text-slate-300 text-sm leading-relaxed mb-8">
-                  Données indicatives sur {BKAM_CURRENCIES.length} devises MAD — 14 cotées BKAM + {BKAM_CURRENCIES.length - 14} dérivées. Simulateur pédagogique de forwards & swaps. Référentiel réglementaire Office des Changes.
-                </p>
-
-                {/* CTA buttons */}
-                <div className="flex flex-wrap gap-3">
-                  <button
-                    onClick={() => navTo('LIVE')}
-                    className="flex items-center gap-2 bg-gold-500 text-navy-950 font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-gold-400 transition-colors shadow-lg shadow-gold-900/40"
-                  >
-                    <Activity size={15} /> Live Pricer
-                  </button>
-                  <button
-                    onClick={() => navTo('FORWARDS')}
-                    className="flex items-center gap-2 text-gold-300 border border-gold-500/50 font-semibold text-sm px-5 py-2.5 rounded-lg hover:border-gold-400 hover:text-gold-200 hover:bg-gold-500/5 transition-colors"
-                  >
-                    <TrendingUp size={15} /> Forward Calc
-                  </button>
-                  <button
-                    onClick={() => navTo('DASHBOARD')}
-                    className="flex items-center gap-2 text-slate-200 border border-navy-600 font-medium text-sm px-5 py-2.5 rounded-lg hover:border-navy-500 hover:text-white hover:bg-navy-800/50 transition-colors"
-                  >
-                    <LayoutDashboard size={15} /> Tableau de Bord
-                  </button>
-                </div>
-              </div>
-
-              {/* Quick-access tool tiles — bottom strip inside hero */}
-              <div className="relative px-7 sm:px-12 pb-7">
-                <div className="border-t border-navy-700/50 pt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
+            {/* ── Quick-access tool tiles ─────────────────────────────── */}
+            <div className="bg-navy-900/60 border border-navy-700 rounded-2xl px-6 py-5">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
                   {[
                     { label: 'Diagnostic OC',    desc: 'Conformité 01/2024', view: 'TOOL_OC_ASSESS' as ViewState, icon: Shield,        color: 'text-amber-400',   border: 'border-amber-700/50',   bg: 'bg-amber-900/25' },
                     { label: 'FX Forwards',      desc: 'CIP terme',          view: 'FORWARDS'       as ViewState, icon: TrendingUp,    color: 'text-blue-400',    border: 'border-blue-700/50',    bg: 'bg-blue-900/30' },
@@ -845,7 +791,6 @@ function AppInner() {
                       </div>
                     </button>
                   ))}
-                </div>
               </div>
             </div>
 
@@ -920,7 +865,7 @@ function AppInner() {
                     <div key={stat.label} className="bg-navy-900 border border-navy-700 rounded-xl p-3.5 text-center flex flex-col items-center">
                       <p className={`text-xl font-bold font-mono tabular-nums ${stat.color}`}>{stat.value}</p>
                       <p className="text-[10px] text-slate-300 font-semibold mt-0.5 leading-tight text-center">{stat.label}</p>
-                      <p className="text-[9px] text-slate-500 mt-0.5">{stat.sub}</p>
+                      <p className="text-[10px] text-slate-500 mt-0.5">{stat.sub}</p>
                     </div>
                   ))}
                 </div>
@@ -1063,7 +1008,7 @@ function AppInner() {
               <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/casablanca-night.jpg)' }} />
               <div className="absolute inset-0 bg-gradient-to-b from-navy-950/30 to-navy-950/80" />
               <div className="absolute bottom-4 left-6">
-                <p className="text-[9px] text-navy-400 tracking-widest uppercase">Casablanca · Centre financier de référence du Maroc</p>
+                <p className="text-[10px] text-navy-400 tracking-widest uppercase">Casablanca · Centre financier de référence du Maroc</p>
               </div>
             </div>
             <div className="bg-navy-900 border border-navy-800 rounded-xl p-8">

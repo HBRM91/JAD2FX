@@ -143,7 +143,7 @@ export default function AuditLog() {
           <div className="max-h-[500px] overflow-y-auto">
             <table className="w-full text-xs">
               <thead className="bg-navy-950 sticky top-0">
-                <tr className="text-[9px] text-slate-500 uppercase tracking-wider">
+                <tr className="text-[10px] text-slate-500 uppercase tracking-wider">
                   <th className="px-3 py-2 text-left w-40">
                     <Calendar size={10} className="inline mr-1" />Timestamp
                   </th>
@@ -158,7 +158,7 @@ export default function AuditLog() {
                       {new Date(e.ts).toLocaleString('fr-MA')}
                     </td>
                     <td className="px-3 py-2">
-                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold uppercase ${
+                      <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${
                         e.type === 'forward_calc' ? 'bg-blue-500/20 text-blue-300' :
                         e.type === 'lead_capture' ? 'bg-emerald-500/20 text-emerald-300' :
                         e.type === 'admin_action' ? 'bg-amber-500/20 text-amber-300' :
@@ -186,7 +186,7 @@ export default function AuditLog() {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="bg-navy-900 border border-navy-700 rounded-lg p-3">
-      <p className="text-[9px] text-slate-500 uppercase tracking-wider">{label}</p>
+      <p className="text-[10px] text-slate-500 uppercase tracking-wider">{label}</p>
       <p className="text-xl font-bold text-gold-400 font-mono mt-1">{value}</p>
     </div>
   );

@@ -49,7 +49,7 @@ export default function FxCrossMatrix({ rates }: Props) {
           <h3 className="text-xs font-bold text-white uppercase tracking-widest">{title}</h3>
           <p className="text-[10px] text-slate-500 mt-0.5">{subtitle}</p>
         </div>
-        <span className="text-[9px] text-gold-500 font-mono uppercase tracking-wider">Bloomberg FXGO</span>
+        <span className="text-[10px] text-gold-500 font-mono uppercase tracking-wider">Bloomberg FXGO</span>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full min-w-[640px] text-xs font-mono">
@@ -101,7 +101,7 @@ export default function FxCrossMatrix({ rates }: Props) {
         </table>
       </div>
       <div className="px-5 py-2 border-t border-navy-800">
-        <p className="text-[9px] text-navy-600 font-mono">
+        <p className="text-[10px] text-navy-600 font-mono">
           {locale === 'ar' ? 'أسعار استرشادية · محسوبة عبر MAD · مصدر: ECB / BKAM' : locale === 'en' ? 'Indicative cross-rates · computed via MAD pivot · Source: ECB / BKAM basket' : 'Taux croisés indicatifs · calculés via pivot MAD · Source: ECB / panier BKAM'}
         </p>
       </div>

@@ -170,7 +170,7 @@ export default function PriceAlerts({ rates }: { rates: { currency: string; mid:
                   </p>
                   <button
                     onClick={() => clearTriggered(a.code)}
-                    className="text-[9px] text-amber-400 hover:text-amber-300 underline"
+                    className="text-[10px] text-amber-400 hover:text-amber-300 underline"
                   >
                     OK
                   </button>

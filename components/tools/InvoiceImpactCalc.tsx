@@ -42,7 +42,7 @@ export default function InvoiceImpactCalc() {
         <div className="p-5">
           <div className="flex items-center gap-2 mb-1">
             <Calculator size={15} className="text-purple-400" />
-            <span className="text-[9px] font-bold text-purple-400 uppercase tracking-[0.2em] bg-purple-500/10 border border-purple-500/25 px-2 py-0.5 rounded">
+            <span className="text-[10px] font-bold text-purple-400 uppercase tracking-[0.2em] bg-purple-500/10 border border-purple-500/25 px-2 py-0.5 rounded">
               Outil — Impact Marge
             </span>
           </div>
@@ -111,7 +111,7 @@ export default function InvoiceImpactCalc() {
             <CurrencyFlag countryCode={BKAM_CC[currency] ?? 'un'} size="sm" />
             <span className="text-[11px] text-slate-400">Taux indicatif actuel</span>
             <span className="font-mono font-bold text-white ml-1">{currency}/MAD {spotRate.toFixed(4)}</span>
-            <span className="text-[9px] text-slate-600 ml-auto">indicatif · non exécutable</span>
+            <span className="text-[10px] text-slate-600 ml-auto">indicatif · non exécutable</span>
           </div>
         )}
       </div>
@@ -121,16 +121,16 @@ export default function InvoiceImpactCalc() {
         <div className="space-y-3">
           {/* Baseline */}
           <div className="bg-navy-900 border border-navy-700 rounded-xl p-5">
-            <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-3 font-bold">Valorisation au taux actuel</p>
+            <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-3 font-bold">Valorisation au taux actuel</p>
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-navy-800 rounded-lg p-3">
-                <p className="text-[9px] text-slate-500 mb-1">Facture en MAD</p>
+                <p className="text-[10px] text-slate-500 mb-1">Facture en MAD</p>
                 <p className="text-xl font-mono font-bold text-white">{fmt(invoiceMAD)}</p>
                 <p className="text-[10px] text-slate-600">MAD</p>
               </div>
               {marginMAD && (
                 <div className="bg-navy-800 rounded-lg p-3">
-                  <p className="text-[9px] text-slate-500 mb-1">Marge brute ({margin}%)</p>
+                  <p className="text-[10px] text-slate-500 mb-1">Marge brute ({margin}%)</p>
                   <p className="text-xl font-mono font-bold text-gold-400">{fmt(marginMAD)}</p>
                   <p className="text-[10px] text-slate-600">MAD</p>
                 </div>
@@ -140,7 +140,7 @@ export default function InvoiceImpactCalc() {
 
           {/* Scenarios */}
           <div className="bg-navy-900 border border-navy-700 rounded-xl p-5">
-            <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-3 font-bold">
+            <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-3 font-bold">
               Impact d'un mouvement défavorable {currency}/MAD
             </p>
             <div className="space-y-2">
@@ -155,7 +155,7 @@ export default function InvoiceImpactCalc() {
                     <div>
                       <p className="text-[11px] font-bold text-white">Scénario +{s.bps} bps ({s.bps/100}%)</p>
                       {s.pct !== null && (
-                        <p className="text-[9px] text-slate-500">
+                        <p className="text-[10px] text-slate-500">
                           Représente {s.pct.toFixed(1)}% de votre marge brute
                         </p>
                       )}
@@ -181,7 +181,7 @@ export default function InvoiceImpactCalc() {
 
           {/* Favorable scenario */}
           <div className="bg-navy-900 border border-navy-700 rounded-xl p-4">
-            <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-2 font-bold">
+            <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2 font-bold">
               Scénario favorable (mouvement −{currency}/MAD)
             </p>
             {[100, 200, 300].map(b => (
@@ -204,7 +204,7 @@ export default function InvoiceImpactCalc() {
         </div>
       )}
 
-      <p className="text-[9px] text-slate-700 text-center leading-relaxed">
+      <p className="text-[10px] text-slate-700 text-center leading-relaxed">
         Estimations indicatives basées sur les taux JAD2FX (non exécutables). Marge brute et scénarios sont
         des hypothèses de l'utilisateur. JAD2 Advisory — non établissement financier agréé BAM (Loi n° 43-12).
       </p>

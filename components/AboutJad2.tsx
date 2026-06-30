@@ -175,7 +175,7 @@ export default function AboutJad2() {
             <div key={s.label} className="bg-navy-950 border border-navy-800 rounded-lg p-3 text-center">
               <p className="text-2xl font-bold font-mono text-gold-400">{s.value}</p>
               <p className="text-[10px] font-bold text-slate-200 mt-1">{s.label}</p>
-              <p className="text-[9px] text-slate-500">{s.sub}</p>
+              <p className="text-[10px] text-slate-500">{s.sub}</p>
             </div>
           ))}
         </div>

@@ -218,9 +218,9 @@ export default function LeadsDashboard() {
               </div>
               <div className="text-right">
                 <p className="text-[11px] font-mono text-gold-400 font-bold">{l.leadScore}</p>
-                <p className="text-[9px] text-slate-500 font-mono">{(l.createdAt || '').slice(0, 10)}</p>
+                <p className="text-[10px] text-slate-500 font-mono">{(l.createdAt || '').slice(0, 10)}</p>
               </div>
-              <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${STATUS_COLORS[l.status] || STATUS_COLORS.NEW}`}>
+              <span className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${STATUS_COLORS[l.status] || STATUS_COLORS.NEW}`}>
                 {l.status}
               </span>
               <ChevronRight size={12} className="text-slate-600" />
@@ -269,7 +269,7 @@ export default function LeadsDashboard() {
                   <button
                     key={s}
                     onClick={() => { updateStatus(selected.id, s); setSelected({ ...selected, status: s }); }}
-                    className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                    className={`text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded ${
                       selected.status === s
                         ? 'bg-gold-500 text-navy-950'
                         : STATUS_COLORS[s]

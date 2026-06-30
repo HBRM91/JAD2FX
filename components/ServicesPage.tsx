@@ -130,7 +130,7 @@ export default function ServicesPage({ navTo }: { navTo: (v: ViewState) => void 
               {s.badge && (
                 <div className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5 bg-gold-500 text-navy-950 rounded-full">
                   <Star size={9} className="fill-navy-950" />
-                  <span className="text-[9px] font-bold uppercase tracking-wider">{s.badge}</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider">{s.badge}</span>
                 </div>
               )}
               <div className="w-12 h-12 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center mb-3">

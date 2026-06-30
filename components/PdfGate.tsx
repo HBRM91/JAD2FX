@@ -144,7 +144,7 @@ export default function PdfGate({ pdfUrl, title, description, filename, source, 
               {submitting ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
               {submitting ? 'Préparation…' : 'Recevoir le PDF'}
             </button>
-            <p className="text-[9px] text-slate-500 text-center italic">
+            <p className="text-[10px] text-slate-500 text-center italic">
               Données traitées selon la loi 09-08 (CNDP) · Désabonnement en 1 clic
             </p>
           </form>

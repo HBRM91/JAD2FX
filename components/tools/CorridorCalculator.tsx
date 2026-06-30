@@ -149,7 +149,7 @@ export default function CorridorCalculator() {
         <div className="p-6">
           <div className="flex items-center gap-2 mb-1">
             <Globe size={16} className="text-blue-400" />
-            <span className="text-[9px] font-bold text-blue-400 uppercase tracking-[0.2em] bg-blue-500/10 border border-blue-500/25 px-2 py-0.5 rounded">
+            <span className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] bg-blue-500/10 border border-blue-500/25 px-2 py-0.5 rounded">
               Lead Magnet 2 — European Fintech
             </span>
           </div>
@@ -224,7 +224,7 @@ export default function CorridorCalculator() {
               className="w-full bg-navy-950 border border-navy-700 rounded-xl px-4 py-3 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors" />
             <label className="flex items-start gap-2.5 cursor-pointer">
               <input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} className="mt-0.5 flex-shrink-0 accent-blue-500" />
-              <span className="text-[9px] text-slate-600 leading-relaxed">
+              <span className="text-[10px] text-slate-600 leading-relaxed">
                 I agree JAD2 Advisory may contact me about this assessment. GDPR Art. 6(1)(a). Withdraw: contact@jad2advisory.com.
               </span>
             </label>
@@ -244,7 +244,7 @@ export default function CorridorCalculator() {
           <div className="bg-navy-900 border border-blue-700/30 rounded-2xl p-6">
             <div className="flex items-start justify-between mb-4">
               <div>
-                <p className="text-[9px] text-slate-500 uppercase tracking-wider mb-1">Corridor Viability Score</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Corridor Viability Score</p>
                 <p className={`text-5xl font-mono font-black ${result.color}`}>{result.score}<span className="text-2xl text-slate-600">/10</span></p>
                 <p className={`text-sm font-bold mt-1 ${result.color}`}>{result.label}</p>
               </div>
@@ -260,7 +260,7 @@ export default function CorridorCalculator() {
                 { label: 'Time-to-market', value: result.timeline },
               ].map(m => (
                 <div key={m.label} className="bg-navy-800 rounded-lg px-3 py-2.5">
-                  <p className="text-[9px] text-slate-500 uppercase tracking-wider">{m.label}</p>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-wider">{m.label}</p>
                   <p className="text-sm font-mono font-bold text-white">{m.value}</p>
                 </div>
               ))}
@@ -286,7 +286,7 @@ export default function CorridorCalculator() {
               <div className="space-y-1.5">
                 {result.steps.map((s, i) => (
                   <div key={i} className="flex items-start gap-2.5 text-[12px] text-slate-300">
-                    <span className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 text-[9px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i+1}</span>
+                    <span className="w-5 h-5 rounded-full bg-blue-500/20 text-blue-400 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">{i+1}</span>
                     {s}
                   </div>
                 ))}
@@ -308,7 +308,7 @@ export default function CorridorCalculator() {
         </div>
       )}
 
-      <p className="text-[9px] text-slate-700 text-center">
+      <p className="text-[10px] text-slate-700 text-center">
         JAD2 Advisory — Management consulting firm. Not a licensed payment institution.
         Loi n° 43-12. Scorecard for informational purposes only.
       </p>

@@ -1,7 +1,7 @@
 import React, {
   createContext, useContext, useState, useCallback, useEffect, useRef,
 } from 'react';
-import { AdminConfig, BlotterEntry, LivePriceEntry, ClientTier, TierConfig, AuditEntry } from '../types';
+import { AdminConfig, BlotterEntry, LivePriceEntry, ClientTier, TierConfig, AuditEntry, LiveRate } from '../types';
 
 export const DEFAULT_TIER_COMMISSIONS: Record<ClientTier, TierConfig> = {
   CORPORATE: {
@@ -88,6 +88,9 @@ interface AdminContextType {
   livePrices:     LivePriceEntry[];
   setLivePrices:  (p: LivePriceEntry[]) => void;
   lastPriceUpdate: string | null;
+
+  rates:    LiveRate[];
+  setRates: (r: LiveRate[]) => void;
 }
 
 const AdminContext = createContext<AdminContextType | null>(null);
@@ -151,6 +154,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // Live prices fed by the streaming hook
   const [livePrices, setLivePricesState]   = useState<LivePriceEntry[]>([]);
   const [lastPriceUpdate, setLastPriceUpdate] = useState<string | null>(null);
+  const [rates, setRatesState]             = useState<LiveRate[]>([]);
 
   // Persist config changes
   useEffect(() => {
@@ -296,6 +300,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setLastPriceUpdate(new Date().toISOString());
   }, []);
 
+  const setRates = useCallback((r: LiveRate[]) => setRatesState(r), []);
+
   return (
     <AdminContext.Provider value={{
       config, updateConfig, resetConfig,
@@ -303,6 +309,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       blotter, addBlotterEntry, clearBlotter,
       auditLog, addAuditEntry, clearAuditLog,
       livePrices, setLivePrices, lastPriceUpdate,
+      rates, setRates,
     }}>
       {children}
     </AdminContext.Provider>
