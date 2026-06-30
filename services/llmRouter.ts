@@ -72,9 +72,9 @@ export function getAvailableProviders(runtimeProxyUrl?: string): LLMProvider[] {
 }
 
 export const PROVIDER_LABELS: Record<LLMProvider, string> = {
-  groq:        'Groq / Llama 3.3',
-  openrouter:  'OpenRouter / Llama 3.1',
-  gemini:      'Gemini 2.5 Flash',
+  groq:        'Groq',
+  openrouter:  'OpenRouter',
+  gemini:      'Gemini',
 };
 
 export const PROVIDER_COLORS: Record<LLMProvider, string> = {

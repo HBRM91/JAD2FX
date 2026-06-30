@@ -1258,7 +1258,7 @@ export default function MorningBriefing() {
               </div>
 
               <div className="text-[10px] text-slate-600 text-center">
-                Analyse gÃ©nÃ©rÃ©e par IA (Groq / Gemini) Ã  partir des donnÃ©es BKAM, ECB et sources web Tavily.
+                Analyse gÃ©nÃ©rÃ©e par IA Ã  partir des donnÃ©es BKAM, ECB et sources web Tavily.
                 Ã€ titre informatif uniquement â€” non contractuel â€” JAD2 Advisory.
               </div>
 

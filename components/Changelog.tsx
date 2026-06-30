@@ -56,7 +56,7 @@ const ENTRIES: ChangelogEntry[] = [
     type: 'minor',
     title: 'Market Analysis + Reports v2',
     changes: [
-      'New: AI-generated Morning Briefing (Groq Llama 3.3 + Gemini 2.5)',
+      'New: AI-generated Morning Briefing',
       'New: BkamBandsVisualizer with drift model',
       'New: BkamParityMatrix for 30 currencies',
       'New: BkamFixing history (3-month basket parity backfill)',

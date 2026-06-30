@@ -1093,7 +1093,7 @@ function AppInner() {
                     'Simulateur pÃ©dagogique de forwards (formule CIP) et de swaps de change',
                     'RÃ©fÃ©rentiel rÃ©glementaire Office des Changes (circulaires, instructions, FAQs)',
                     'Courbes de taux MONIA interpolÃ©es Ã  titre informatif et pÃ©dagogique',
-                    'Market Report hebdomadaire gÃ©nÃ©rÃ© par IA (Groq Llama 3.3 + Gemini 2.5)',
+                    'Market Report hebdomadaire gÃ©nÃ©rÃ© par IA',
                   ].map(f => (
                     <li key={f} className="flex items-start gap-2">
                       <span className="text-gold-500 mt-0.5 flex-shrink-0 text-xs">â–¸</span>
@@ -1151,13 +1151,13 @@ function AppInner() {
           onClick={() => setContactDrawerOpen(false)}
         >
           <div
-            className="bg-navy-900 border border-navy-700 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+            className="bg-navy-900 border border-navy-700 rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden"
             onClick={e => e.stopPropagation()}
           >
             <div className="px-6 py-4 border-b border-navy-800 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-white">Parler Ã  un expert JAD2</h3>
-                <p className="text-[11px] text-slate-500 mt-0.5">RÃ©ponse sous 24h ouvrÃ©es Â· Confidentiel</p>
+                <h3 className="text-lg font-bold text-white">Parler à un expert JAD2</h3>
+                <p className="text-xs text-slate-500 mt-0.5">Réponse sous 24h ouvrées · Confidentiel</p>
               </div>
               <button
                 onClick={() => setContactDrawerOpen(false)}

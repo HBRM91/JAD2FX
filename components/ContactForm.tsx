@@ -76,9 +76,9 @@ export default function ContactForm() {
     }
   }
 
-  const inputCls = `w-full bg-navy-950 border border-navy-700 rounded-lg px-4 py-2.5 text-sm
+  const inputCls = `w-full bg-navy-950 border border-navy-700 rounded-xl px-5 py-3.5 text-sm
     text-slate-200 placeholder-slate-500 focus:outline-none focus:border-gold-500
-    focus:ring-1 focus:ring-gold-500/30 transition-colors`;
+    focus:ring-1 focus:ring-gold-500/30 transition-colors shadow-inner shadow-navy-950/50`;
 
   return (
     <div className="max-w-5xl mx-auto">
@@ -159,7 +159,7 @@ export default function ContactForm() {
         </div>
 
         {/* ── Right: form ──────────────────────────────────────────────── */}
-        <div className="lg:col-span-3 bg-navy-900 border border-navy-700 rounded-2xl p-6">
+        <div className="lg:col-span-3 bg-navy-900 border border-navy-700 rounded-2xl p-6 sm:p-8">
           {/* P3.7 — Mode toggle: form vs Calendly */}
           {typeof process !== 'undefined' && (process as any).CALENDLY_URL && (
             <div className="flex items-center gap-1 bg-navy-950 border border-navy-700 rounded-lg p-1 mb-4">

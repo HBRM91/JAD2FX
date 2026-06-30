@@ -6,7 +6,6 @@ interface Props {
   className?: string;
 }
 
-// Display dimensions
 const DIMS: Record<string, [number, number]> = {
   xs: [16, 12],
   sm: [20, 15],
@@ -14,22 +13,20 @@ const DIMS: Record<string, [number, number]> = {
   lg: [32, 24],
 };
 
-// flagcdn.com only serves these exact widths: 20, 40, 80, 160, 320, 640, 1280, 2560
-// Map each display size to the nearest valid CDN width
-const CDN_W: Record<string, number> = {
-  xs: 20,
-  sm: 40,
-  md: 40,
-  lg: 80,
-};
+function codeToEmoji(code: string): string {
+  if (!code || code.length < 2) return '';
+  const upper = code.toUpperCase();
+  const chars = [...upper.slice(0, 2)];
+  return String.fromCodePoint(...chars.map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+}
 
 export default function CurrencyFlag({ countryCode, size = 'sm', className = '' }: Props) {
   const [errored, setErrored] = useState(false);
   const [w, h] = DIMS[size] ?? DIMS.sm;
   const code = (countryCode ?? '').toLowerCase().trim();
+  const emoji = codeToEmoji(code);
 
-  // If no valid code or image failed — show a small letter badge
-  if (!code || errored) {
+  if (!code || errored || !emoji) {
     return (
       <span
         aria-label={code.toUpperCase()}
@@ -57,22 +54,22 @@ export default function CurrencyFlag({ countryCode, size = 'sm', className = '' 
   }
 
   return (
-    <img
-      src={`https://flagcdn.com/w${CDN_W[size]}/${code}.png`}
-      width={w}
-      height={h}
-      alt={code.toUpperCase()}
-      loading="lazy"
-      decoding="async"
+    <span
+      aria-label={code.toUpperCase()}
       className={className}
       style={{
-        borderRadius: 2,
-        objectFit: 'cover',
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        width: w,
+        height: h,
+        fontSize: `${h * 1.1}px`,
+        lineHeight: 1,
         flexShrink: 0,
-        display: 'inline-block',
         verticalAlign: 'middle',
       }}
-      onError={() => setErrored(true)}
-    />
+    >
+      {emoji}
+    </span>
   );
 }

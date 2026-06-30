@@ -539,7 +539,7 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
               {PROVIDER_LABELS[briefProv]}
             </span>
           )}
-          <span className="text-[9px] text-slate-600 ml-1">Auto-gÃ©nÃ©rÃ© Â· Llama 3.3-70B</span>
+          <span className="text-[9px] text-slate-600 ml-1">Synth�se IA</span>
           <span className="ml-auto text-slate-500">
             {briefOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </span>
