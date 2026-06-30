@@ -1873,9 +1873,9 @@ function getISOWeek(d) {
 
 // Build ECB-only synthetic rate entries when BKAM data unavailable.
 // Currencies sourced from ECB cross-rates; moyen/driftBps left null.
-function buildEcbOnlyRates(ecbEurUsd, ecbRates) {
+async function buildEcbOnlyRates(ecbEurUsd, ecbRates, env) {
   if (!ecbEurUsd) return [];
-  const { K, eurWeight, usdWeight } = await getBasketConfig(env.REPORTS_KV);
+  const { K, eurWeight, usdWeight } = await getBasketConfig(env?.REPORTS_KV);
   const usdMadBasket = K / (eurWeight * ecbEurUsd + usdWeight);
 
   const rows = [];
@@ -1962,7 +1962,7 @@ async function handleBkamRatesBackfill(request, env, origin) {
         // ECB-only fallback: store basket parity for all ECB currencies
         const ecbEurUsd2 = ecbRates?.USD ?? null;
         if (!ecbEurUsd2) return { date, status: 'no_bkam_data' };
-        const ecbOnlyRates = buildEcbOnlyRates(ecbEurUsd2, ecbRates);
+        const ecbOnlyRates = await buildEcbOnlyRates(ecbEurUsd2, ecbRates, env);
         const b = await getBasketConfig(env.REPORTS_KV);
         const payload = {
           date, rates: ecbOnlyRates, rawRates: null,
