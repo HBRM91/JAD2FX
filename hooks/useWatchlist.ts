@@ -71,7 +71,7 @@ export function useWatchlist() {
     setState((s) => {
       if (s.items.some((i) => i.code === code)) return s;
       if (s.items.length >= MAX_ITEMS) {
-        if (typeof console !== 'undefined') console.warn(`[Watchlist] max ${MAX_ITEMS} items`);
+        console.warn(`[Watchlist] max ${MAX_ITEMS} items`);
         return s;
       }
       return { ...s, items: [...s.items, { code, addedAt: new Date().toISOString() }] };

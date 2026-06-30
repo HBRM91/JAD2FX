@@ -36,20 +36,6 @@ export const EXTRA_CURRENCY_META: Record<string, { nameFr: string; name: string;
   MRO: { nameFr: 'Ouguiya mauritanien',name: 'Mauritanian Ouguiya',  countryCode: 'mr', unit: 1 },
 };
 
-// ─── Working-day helpers ──────────────────────────────────────────────────────
-
-function getLastNWorkingDays(n: number): string[] {
-  const days: string[] = [];
-  const d = new Date();
-  d.setUTCHours(12, 0, 0, 0);
-  while (days.length < n) {
-    d.setUTCDate(d.getUTCDate() - 1);
-    const dow = d.getUTCDay();
-    if (dow !== 0 && dow !== 6) days.unshift(d.toISOString().slice(0, 10));
-  }
-  return days;
-}
-
 // ─── Basket parity ────────────────────────────────────────────────────────────
 
 function basketParity(eurUsd: number): { usdMad: number; eurMad: number } {
@@ -287,7 +273,7 @@ export async function fetchFixingHistory(
     } catch { return [buildFallbackRow(specificDate)]; }
   }
 
-  const workingDays = getLastNWorkingDays(nDays + 3);
+  const workingDays = bkamWorkingDays(nDays + 3);
   const url = `https://api.frankfurter.app/${workingDays[0]}..${workingDays[workingDays.length - 1]}?from=EUR&to=${QUERY_SYMBOLS}`;
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(10_000) });
@@ -296,6 +282,6 @@ export async function fetchFixingHistory(
     const sortedDates = Object.keys(data.rates).sort();
     return sortedDates.slice(-nDays).map(d => buildRow(d, data.rates[d], 'ECB_PROXY'));
   } catch {
-    return getLastNWorkingDays(nDays).map(d => buildFallbackRow(d));
+    return bkamWorkingDays(nDays).map(d => buildFallbackRow(d));
   }
 }

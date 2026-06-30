@@ -51,14 +51,6 @@ export function tenorToYears(tenor: string): number {
   return TENOR_YEARS[tenor] ?? 0;
 }
 
-export function tenorToDays(tenor: string): number {
-  return Math.round(tenorToYears(tenor) * 365);
-}
-
-export function daysToYears(days: number): number {
-  return days / 365;
-}
-
 export function addDays(date: Date, days: number): Date {
   const d = new Date(date);
   d.setDate(d.getDate() + days);

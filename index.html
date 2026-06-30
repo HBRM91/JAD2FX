@@ -148,19 +148,24 @@
       @media print {
         @page { size: A4; margin: 18mm 20mm; }
 
-        /* Hide all screen chrome */
-        nav, footer, .rates-ticker, [data-no-print],
-        .briefing-screen { display: none !important; }
+        /* Hide screen chrome */
+        nav, footer, .rates-ticker, [data-no-print], .briefing-screen,
+        .no-print, button:not(.print-allow), .sticky,
+        [class*="fixed"], .floating-chat, .lucide-external-link { display: none !important; }
 
-        /* Show print document */
-        .briefing-print-doc { display: block !important; }
-
-        body { background: #fff !important; color: #1a1a2e !important;
+        body { background: white !important; color: #0a0a0a !important;
                font-family: 'Helvetica Neue', Arial, sans-serif !important; font-size: 10pt; }
         main { max-width: 100% !important; padding: 0 !important; }
 
-        /* Print document styles */
-        .briefing-print-doc { font-size: 10pt; color: #1a1a2e; }
+        /* Print header on every page */
+        main::before {
+          content: "JAD2FX — fx.jad2advisory.com — " attr(data-print-date);
+          display: block; font-size: 9pt; color: #666; text-align: right;
+          border-bottom: 1px solid #ccc; padding-bottom: 6pt; margin-bottom: 12pt;
+        }
+
+        /* Show print document */
+        .briefing-print-doc { display: block !important; font-size: 10pt; color: #1a1a2e; }
         .briefing-print-header {
           display: flex; justify-content: space-between; align-items: flex-end;
           padding-bottom: 10px; border-bottom: 2px solid #0E2336;
@@ -172,17 +177,14 @@
         .briefing-print-sub { font-size: 8pt; color: #64748b; margin-top: 2px; }
         .briefing-print-date { font-size: 10pt; font-weight: 600; color: #1a1a2e; text-align: right; }
         .briefing-print-divider { border-top: 1px solid #e2e8f0; margin: 10px 0; }
-
         .briefing-print-section { margin: 14px 0; }
         .briefing-print-label {
           font-size: 8pt; font-weight: 700; color: #64748b;
           text-transform: uppercase; letter-spacing: 0.1em;
-          margin-bottom: 6px; border-left: 3px solid #D4AF37;
-          padding-left: 8px;
+          margin-bottom: 6px; border-left: 3px solid #D4AF37; padding-left: 8px;
         }
         .briefing-print-section-title { font-size: 13pt; font-weight: 700; color: #0f172a; margin-bottom: 6px; }
         .briefing-print-excerpt { font-size: 10pt; color: #334155; font-style: italic; line-height: 1.5; }
-
         .briefing-print-table { width: 100%; border-collapse: collapse; font-size: 9pt; margin: 6px 0; }
         .briefing-print-table th {
           background: #f8fafc; color: #475569; font-weight: 700;
@@ -191,7 +193,6 @@
         }
         .briefing-print-table td { padding: 5px 8px; border: 1px solid #e2e8f0; color: #1e293b; }
         .briefing-print-table tr:nth-child(even) td { background: #f8fafc; }
-
         .briefing-print-note { font-size: 7.5pt; color: #94a3b8; margin-top: 4px; font-style: italic; }
         .briefing-print-band-row { font-size: 9.5pt; color: #334155; margin: 4px 0; line-height: 1.5; }
         .briefing-print-sentiment { font-size: 10pt; color: #334155; line-height: 1.5; }
@@ -205,22 +206,8 @@
           border-top: 1px solid #e2e8f0;
           font-size: 7.5pt; color: #94a3b8; line-height: 1.5;
         }
-      }
-      @media screen {
-        .briefing-print-doc { display: none !important; }
-      }
 
-      /* P2.24 — Print stylesheet for ALL modules.
-         When a user prints, hide nav/footer/buttons/charts, expand content
-         to a single column. Compatible with Chrome/Safari/Firefox print. */
-      @media print {
-        body { background: white !important; color: #0a0a0a !important; }
-        /* Hide non-essential chrome */
-        nav, footer, [data-no-print], .no-print, button:not(.print-allow), .sticky,
-        [class*="fixed"], .floating-chat, .lucide-external-link { display: none !important; }
-        /* Show only main content */
-        main { max-width: 100% !important; padding: 0 !important; }
-        /* Ensure dark-mode contrast doesn't break print */
+        /* Dark-mode contrast fix */
         .bg-navy-900, .bg-navy-950, .bg-navy-800 { background: white !important; border-color: #ddd !important; }
         .text-white, .text-slate-100, .text-slate-200, .text-slate-300, .text-slate-400 { color: #0a0a0a !important; }
         .text-slate-500, .text-slate-600 { color: #444 !important; }
@@ -228,58 +215,21 @@
         .text-blue-400 { color: #1d4ed8 !important; }
         .text-emerald-400 { color: #047857 !important; }
         .text-red-400 { color: #b91c1c !important; }
-        /* Show a print header at the top of every page */
-        main::before {
-          content: "JAD2FX — fx.jad2advisory.com — " attr(data-print-date);
-          display: block;
-          font-size: 9pt;
-          color: #666;
-          text-align: right;
-          border-bottom: 1px solid #ccc;
-          padding-bottom: 6pt;
-          margin-bottom: 12pt;
-        }
         .print-only { display: block !important; }
-        /* Tables: print-friendly */
-        table { page-break-inside: avoid; }
-        tr { page-break-inside: avoid; }
+        table, tr { page-break-inside: avoid; }
         h1, h2, h3 { page-break-after: avoid; color: #0a0a0a !important; }
         a { color: #1d4ed8 !important; text-decoration: underline; }
-        /* Charts: render as static */
         svg { max-height: 250pt !important; }
       }
       @media screen {
+        .briefing-print-doc { display: none !important; }
         .print-only { display: none !important; }
       }
     </style>
-  <!-- LinkedIn Insight Tag - P3.13: reactivated (set VITE_LINKEDIN_PARTNER_ID for production) -->
-  <script type="text/javascript">
-    _linkedin_partner_id = (typeof process !== 'undefined' && process.env && process.env.VITE_LINKEDIN_PARTNER_ID) || 'jad2-fx-placeholder';
-    if (_linkedin_partner_id === 'jad2-fx-placeholder') {
-      // Skip loading until configured
-    } else {
-      window._linkedin_data_partner_ids = window._linkedin_data_partner_ids || [];
-      window._linkedin_data_partner_ids.push(_linkedin_partner_id);
-    }
-  </script>
-  <script async src="https://snap.licdn.com/li.lms-analytics/insight.min.js"></script>
-
   <!-- Plausible Analytics — cookieless, no consent banner needed.
        P0.12: data-domain aligned to canonical fx.jad2advisory.com. -->
   <script defer data-domain="fx.jad2advisory.com" src="https://plausible.io/js/script.js"></script>
 
-  <script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@^19.2.3",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "recharts": "https://esm.sh/recharts@^3.6.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "@google/genai": "https://esm.sh/@google/genai@^1.34.0"
-  }
-}
-</script>
 </head>
   <body>
     <!-- LinkedIn noscript — DEACTIVATED -->

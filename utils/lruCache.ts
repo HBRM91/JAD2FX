@@ -58,12 +58,4 @@ export class LruCache<K, V> {
   get size(): number {
     return this.map.size;
   }
-
-  /** Iterate over live (non-stale) entries, oldest first. */
-  *entries(): IterableIterator<[K, V]> {
-    const now = Date.now();
-    for (const [k, e] of this.map) {
-      if (now - e.ts <= this.ttlMs) yield [k, e.value];
-    }
-  }
 }

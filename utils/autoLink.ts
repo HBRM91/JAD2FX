@@ -5,9 +5,6 @@
 
 import { GLOSSARY, type GlossaryTerm } from '../services/glossary';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _t: GlossaryTerm | undefined = undefined;
-
 const TERM_TO_SLUG: Array<{ pattern: RegExp; slug: string }> = GLOSSARY
   .slice()
   .sort((a: GlossaryTerm, b: GlossaryTerm) => b.term.length - a.term.length)
