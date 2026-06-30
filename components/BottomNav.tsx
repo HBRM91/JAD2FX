@@ -34,8 +34,6 @@ const MORE_ITEMS: { v: ViewState; l: string }[] = [
   { v: 'VAR_CALC',       l: 'Calculateur VaR' },
   { v: 'SOVEREIGN',      l: 'Souveraineté' },
   { v: 'MULTIPANE',      l: 'Multi-Pane' },
-  { v: 'BLUE_CHIPS',     l: 'Blue Chips Casa' },
-  { v: 'VAR_CALC',       l: 'Calculateur VaR' },
   { v: 'CORRELATION',    l: 'Corrélation' },
   { v: 'TOOL_PME_DIAG',  l: 'Diagnostic PME' },
   { v: 'TOOL_OC_ASSESS', l: 'Diagnostic OC' },

@@ -400,12 +400,11 @@ export default function BkamFixing() {
                     const rate    = latest.allRates[c.code];
                     if (!rate) return null;
 
-                    // Use enriched basket parity and drift stored in KV (all 30 currencies)
+                    // KV-enriched data (BKAM official path) → ECB proxy allBasketParities fallback
                     const enriched = latest.rawBkamRates?.find(r => r.libDevise === c.code);
                     const basketRate = enriched?.basketParity
-                      ?? (c.code === 'EUR' ? latest.eurMad_basket * c.bkamUnit
-                        : c.code === 'USD' ? latest.usdMad_basket * c.bkamUnit
-                        : null);
+                      ?? latest.allBasketParities?.[c.code]
+                      ?? null;
                     const divBps = enriched?.driftBps !== undefined && enriched.driftBps !== null
                       ? enriched.driftBps
                       : (basketRate ? ((rate - basketRate) / basketRate) * 10_000 : null);
@@ -518,7 +517,12 @@ export default function BkamFixing() {
                   <LineChart data={trendData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#1C3558" />
                     <XAxis dataKey="date" tick={{ fill: '#3D6491', fontSize: 9 }} />
-                    <YAxis tick={{ fill: '#3D6491', fontSize: 9 }} width={54} />
+                    <YAxis
+                      tick={{ fill: '#3D6491', fontSize: 9 }}
+                      width={58}
+                      domain={(['auto', 'auto'] as [string, string])}
+                      tickFormatter={(v: number) => v.toFixed(3)}
+                    />
                     <Tooltip
                       contentStyle={{ background: '#081628', border: '1px solid #1C3558', borderRadius: 6, fontSize: 11 }}
                       formatter={((v: number, name: string) => [v.toFixed(4), name]) as any}
@@ -540,7 +544,13 @@ export default function BkamFixing() {
                   <BarChart data={divData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#1C3558" />
                     <XAxis dataKey="date" tick={{ fill: '#3D6491', fontSize: 9 }} />
-                    <YAxis tick={{ fill: '#3D6491', fontSize: 9 }} unit=" pb" width={50} />
+                    <YAxis
+                      tick={{ fill: '#3D6491', fontSize: 9 }}
+                      unit=" pb"
+                      width={56}
+                      domain={(['auto', 'auto'] as [string, string])}
+                      tickFormatter={(v: number) => v.toFixed(0)}
+                    />
                     <Tooltip
                       contentStyle={{ background: '#081628', border: '1px solid #1C3558', borderRadius: 6, fontSize: 11 }}
                       formatter={((v: number) => [`${v.toFixed(1)} bps`]) as any}

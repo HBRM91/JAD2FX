@@ -235,6 +235,9 @@ export interface FixingDayRow {
   // BKAM_CURRENCIES rates (bkamUnit already applied for display)
   allRates: Record<string, number>;
 
+  // Basket parity per currency (bkamUnit applied) — available for all sources including ECB_PROXY
+  allBasketParities?: Record<string, number>;
+
   // Extra currencies returned by BKAM API but not in BKAM_CURRENCIES (AUD, EGP, GIP…)
   extraRates?: Record<string, number>;
 

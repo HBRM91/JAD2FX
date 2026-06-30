@@ -140,20 +140,31 @@ function buildRow(date: string, ecbRates: Record<string, number>, source: Fixing
   const usdMad_div_bps = ((usdMad_ecb - usdMad_basket) / usdMad_basket) * 10_000;
 
   const allRates: Record<string, number> = {};
+  const allBasketParities: Record<string, number> = {};
+
   for (const c of BKAM_CURRENCIES) {
     let madPerUnit: number;
+    let basketPerUnit: number;
+
     if (c.code === 'EUR') {
       madPerUnit = eurMad_ecb;
+      basketPerUnit = eurMad_basket;
     } else if (c.code === 'USD') {
       madPerUnit = usdMad_ecb;
+      basketPerUnit = usdMad_basket;
     } else if (GULF_USD_RATES[c.code]) {
-      madPerUnit = GULF_USD_RATES[c.code] * usdMad_ecb;
+      const usdPerCcy = GULF_USD_RATES[c.code]; // USD per 1 CCY (or CCY per USD for some)
+      madPerUnit = usdPerCcy * usdMad_ecb;
+      basketPerUnit = usdPerCcy * usdMad_basket;
     } else {
-      const eurPerX = ecbRates[c.code];
+      const eurPerX = ecbRates[c.code]; // EUR units per 1 CCY (ECB quotes CCY/EUR)
       if (!eurPerX) continue;
       madPerUnit = eurMad_ecb / eurPerX;
+      basketPerUnit = eurMad_basket / eurPerX;
     }
+
     allRates[c.code] = +(madPerUnit * c.bkamUnit).toFixed(4);
+    allBasketParities[c.code] = +(basketPerUnit * c.bkamUnit).toFixed(4);
   }
 
   return {
@@ -168,6 +179,7 @@ function buildRow(date: string, ecbRates: Record<string, number>, source: Fixing
     usdMad_basket:  +usdMad_basket.toFixed(4),
     usdMad_div_bps: +usdMad_div_bps.toFixed(1),
     allRates,
+    allBasketParities,
     source,
   };
 }
