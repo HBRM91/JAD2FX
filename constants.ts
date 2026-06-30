@@ -2,6 +2,18 @@ import { BasketConfig, CurrencyInfo } from './types';
 
 export const APP_NAME = "JAD2FX";
 
+/**
+ * P3-3 — Currency cut map (documented in DEVELOPER_TODO.md)
+ * Each surface picks a subset of BKAM_CURRENCIES tuned for its audience.
+ *  - BKAM_CURRENCIES (14)    : master list — every currency BKAM fixes daily
+ *  - COCKPIT_CURRENCIES (8)  : AdminCockpit grid (G10 + AUD/SEK)
+ *  - RADAR_CURRENCIES (6)    : daily market radar (major FX + Gulf)
+ *  - KEY_PAIRS (5)           : weekly newsletter hero (EUR/USD/GBP + Gulf)
+ */
+export const COCKPIT_CURRENCIES = ['EUR', 'USD', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'SEK'] as const;
+export const RADAR_CURRENCIES_LIST = ['EUR', 'USD', 'GBP', 'SAR', 'AED', 'QAR'] as const;
+export const KEY_PAIRS = ['EUR', 'USD', 'GBP', 'SAR', 'AED'] as const;
+
 export const THEME_COLORS = {
   NAVY: '#0F2645',
   GOLD: '#D4AF37',

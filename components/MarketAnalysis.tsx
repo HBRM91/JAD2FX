@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+﻿import React, { useState, useEffect, useCallback } from 'react';
 import {
   TrendingUp, TrendingDown, Minus, RefreshCw,
   Globe, BarChart3, Cpu, ExternalLink,
@@ -8,10 +8,11 @@ import {
 import { routeQuery, LLMProvider, PROVIDER_LABELS, PROVIDER_COLORS } from '../services/llmRouter';
 import { fetchCommodityQuotes } from '../services/yahooFinance';
 import { useAdmin } from '../context/AdminContext';
+import { BKAM_LINKS } from '../constants/bkamLinks';
 import { DEFAULT_BASKET_CONFIG } from '../constants';
 import CurrencyFlag from './CurrencyFlag';
 
-// ─── Module-level constants & helpers ────────────────────────────────────────
+// â”€â”€â”€ Module-level constants & helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const BASKET_K    = DEFAULT_BASKET_CONFIG.referenceBasketValue;
 const EUR_WEIGHT  = DEFAULT_BASKET_CONFIG.eurWeight;
@@ -37,11 +38,11 @@ function pctChange(curr: number, prev: number | undefined): number {
   return ((curr - prev) / prev) * 100;
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function Chg({ pct }: { pct: number }) {
   const abs = Math.abs(pct);
-  if (abs < 0.002) return <span className="text-slate-600 text-[10px] flex items-center gap-0.5"><Minus size={8} /> —</span>;
+  if (abs < 0.002) return <span className="text-slate-600 text-[10px] flex items-center gap-0.5"><Minus size={8} /> â€”</span>;
   const up = pct > 0;
   return (
     <span className={`text-[10px] font-semibold flex items-center gap-0.5 ${up ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -60,7 +61,7 @@ function Badge({ live }: { live: boolean }) {
 interface G10Row { pair: string; rate: number; prev?: number; dec: number }
 interface CommSnap { price: number; pct: number; source: string; madEquiv: number }
 
-// ─── Component ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const MarketAnalysis: React.FC = () => {
   const { config } = useAdmin();
@@ -80,7 +81,7 @@ const MarketAnalysis: React.FC = () => {
   const usdMad = usdMadFromEurUsd(eu);
   const eurMad = usdMad * eu;
 
-  // ─── Data load ──────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Data load â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -100,7 +101,7 @@ const MarketAnalysis: React.FC = () => {
         ? { ...FALLBACK, ...todayRes.value.rates }
         : { ...FALLBACK }
     );
-    if (todayRes.status === 'rejected') setWarn('Live FX rates unavailable — displaying reference values.');
+    if (todayRes.status === 'rejected') setWarn('Live FX rates unavailable â€” displaying reference values.');
 
     setPrevRates(prevRes.status === 'fulfilled'
       ? addGulf({ ...FALLBACK, ...prevRes.value.rates })
@@ -145,22 +146,22 @@ const MarketAnalysis: React.FC = () => {
         strategy: 'quality-first',
         proxyUrl: config.corsProxyUrl || undefined,
         systemPrompt: `You are the chief FX strategist at a Tier-1 MENA investment bank. Write terse, data-dense institutional commentary. Strict rules:
-— Anchor EVERY claim to the live numbers provided. Do not state generic facts (e.g. "the band is ±5%" or "EUR has 60% weight") — those are known to the reader.
-— Quantify every observation: use basis-point moves, percentage changes, level vs prior range.
-— Do NOT give investment advice, price targets, or "you should hedge."
-— Write in the same language as the user message (French unless specified).`,
-        userMessage: `Rédige un brief institutionnel (3 paragraphes, max 300 mots) à partir de ce snapshot temps réel:
+â€” Anchor EVERY claim to the live numbers provided. Do not state generic facts (e.g. "the band is Â±5%" or "EUR has 60% weight") â€” those are known to the reader.
+â€” Quantify every observation: use basis-point moves, percentage changes, level vs prior range.
+â€” Do NOT give investment advice, price targets, or "you should hedge."
+â€” Write in the same language as the user message (French unless specified).`,
+        userMessage: `RÃ©dige un brief institutionnel (3 paragraphes, max 300 mots) Ã  partir de ce snapshot temps rÃ©el:
 
 G10 FX: EUR/USD ${freshEu.toFixed(4)} | GBP/USD ${gbpUsd.toFixed(4)} | USD/JPY ${usdJpy.toFixed(2)} | USD/CHF ${usdChf.toFixed(4)} | USD/CAD ${usdCad.toFixed(4)} | USD/TRY ${usdTry.toFixed(2)}
 Nordiques (EUR-cross): EUR/NOK ${(todayRates['NOK'] ?? 11.60).toFixed(2)} | EUR/SEK ${(todayRates['SEK'] ?? 11.40).toFixed(2)} | EUR/DKK ${(todayRates['DKK'] ?? 7.460).toFixed(3)}
 MAD: USD/MAD ${freshUsdMad.toFixed(4)} | EUR/MAD ${freshEurMad.toFixed(4)} | NOK/MAD ${nokMad.toFixed(4)} | SEK/MAD ${sekMad.toFixed(4)} | DKK/MAD ${dkkMad.toFixed(4)} | SAR/MAD ${sarMad.toFixed(4)} | AED/MAD ${aedMad.toFixed(4)}
-PANIER: K=${BASKET_K} · EUR/MAD_central théorique ≈ ${(BASKET_K * freshEu).toFixed(4)} vs actuel ${freshEurMad.toFixed(4)}
+PANIER: K=${BASKET_K} Â· EUR/MAD_central thÃ©orique â‰ˆ ${(BASKET_K * freshEu).toFixed(4)} vs actuel ${freshEurMad.toFixed(4)}
 
-§1 — DRIVERS G10 ACTUELS: Quels mouvements G10 spécifiques expliquent la configuration EUR/USD aujourd'hui ? Divergences de politique monétaire BCE/Fed quantifiées. Impact mécanique calculé sur la parité USD/MAD.
-§2 — MARCHÉ MAD: Position du dirham dans la bande (utilisation calculée). Flux structurels dominants cette semaine (MRE saisonnalité, recettes OCP, facture pétrolière) et leur sens sur la pression de change.
-§3 — POINTS DE VIGILANCE CORPORATE: 2-3 thèmes concrets pour les trésoriers marocains — asymétrie de risque EUR vs USD sur le panier, exposition NOK/SEK des importateurs de bois-papier-équipements nordiques (NOK liée au Brent = double exposition), opportunités de refacturation Gulf (AED/SAR stables).
+Â§1 â€” DRIVERS G10 ACTUELS: Quels mouvements G10 spÃ©cifiques expliquent la configuration EUR/USD aujourd'hui ? Divergences de politique monÃ©taire BCE/Fed quantifiÃ©es. Impact mÃ©canique calculÃ© sur la paritÃ© USD/MAD.
+Â§2 â€” MARCHÃ‰ MAD: Position du dirham dans la bande (utilisation calculÃ©e). Flux structurels dominants cette semaine (MRE saisonnalitÃ©, recettes OCP, facture pÃ©troliÃ¨re) et leur sens sur la pression de change.
+Â§3 â€” POINTS DE VIGILANCE CORPORATE: 2-3 thÃ¨mes concrets pour les trÃ©soriers marocains â€” asymÃ©trie de risque EUR vs USD sur le panier, exposition NOK/SEK des importateurs de bois-papier-Ã©quipements nordiques (NOK liÃ©e au Brent = double exposition), opportunitÃ©s de refacturation Gulf (AED/SAR stables).
 
-Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de conseil en investissement (Loi n° 43-12 / Dahir n° 1-13-21). Conseil: jad2advisory.com"`,
+Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â€” pas de conseil en investissement (Loi nÂ° 43-12 / Dahir nÂ° 1-13-21). Conseil: jad2advisory.com"`,
         maxTokens: 800,
         temperature: 0.25,
       });
@@ -177,7 +178,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  // ─── Derived data for rendering ──────────────────────────────────────────────
+  // â”€â”€â”€ Derived data for rendering â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const g10: G10Row[] = [
     { pair: 'EUR/USD', rate: eu,                                                  prev: prevRates?.['USD'],                                                     dec: 4 },
@@ -188,7 +189,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
     { pair: 'EUR/GBP', rate: rates['GBP'] ?? 0.860,                              prev: prevRates?.['GBP'],                                                     dec: 4 },
     { pair: 'EUR/CHF', rate: rates['CHF'] ?? 0.945,                              prev: prevRates?.['CHF'],                                                     dec: 4 },
     { pair: 'EUR/JPY', rate: rates['JPY'] ?? 162.5,                              prev: prevRates?.['JPY'],                                                     dec: 2 },
-    // Scandinavian pairs — essential for Moroccan wood/paper/equipment importers
+    // Scandinavian pairs â€” essential for Moroccan wood/paper/equipment importers
     { pair: 'EUR/NOK', rate: rates['NOK'] ?? 11.60,                              prev: prevRates?.['NOK'],                                                     dec: 2 },
     { pair: 'EUR/SEK', rate: rates['SEK'] ?? 11.40,                              prev: prevRates?.['SEK'],                                                     dec: 2 },
     { pair: 'EUR/DKK', rate: rates['DKK'] ?? 7.460,                              prev: prevRates?.['DKK'],                                                     dec: 3 },
@@ -201,13 +202,13 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
       prev: prevRates ? usdMadFromEurUsd(prevRates['USD'] ?? eu) * (prevRates['USD'] ?? eu) / (prevRates['GBP'] ?? 0.860) : undefined },
     { label: 'CHF / MAD', rate: usdMad * eu / (rates['CHF'] ?? 0.945),
       prev: prevRates ? usdMadFromEurUsd(prevRates['USD'] ?? eu) * (prevRates['USD'] ?? eu) / (prevRates['CHF'] ?? 0.945) : undefined },
-    { label: 'JPY ×100 / MAD', rate: usdMad * eu / (rates['JPY'] ?? 162.5) * 100,
+    { label: 'JPY Ã—100 / MAD', rate: usdMad * eu / (rates['JPY'] ?? 162.5) * 100,
       prev: prevRates ? usdMadFromEurUsd(prevRates['USD'] ?? eu) * (prevRates['USD'] ?? eu) / (prevRates['JPY'] ?? 162.5) * 100 : undefined },
     { label: 'CAD / MAD', rate: usdMad * eu / (rates['CAD'] ?? 1.480),
       prev: prevRates ? usdMadFromEurUsd(prevRates['USD'] ?? eu) * (prevRates['USD'] ?? eu) / (prevRates['CAD'] ?? 1.480) : undefined },
     { label: 'CNY / MAD', rate: usdMad * eu / (rates['CNY'] ?? 7.880),
       prev: prevRates ? usdMadFromEurUsd(prevRates['USD'] ?? eu) * (prevRates['USD'] ?? eu) / (prevRates['CNY'] ?? 7.880) : undefined },
-    // Scandinavian — NOK/SEK/DKK are all EUR-cross pairs from Frankfurter
+    // Scandinavian â€” NOK/SEK/DKK are all EUR-cross pairs from Frankfurter
     { label: 'NOK / MAD', rate: eurMad / (rates['NOK'] ?? 11.60),
       prev: prevRates ? usdMadFromEurUsd(prevRates['USD'] ?? eu) * (prevRates['USD'] ?? eu) / (prevRates['NOK'] ?? 11.60) : undefined },
     { label: 'SEK / MAD', rate: eurMad / (rates['SEK'] ?? 11.40),
@@ -225,9 +226,9 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
 
   // NOK/SEK/DKK: critical for Moroccan importers of wood, paper, pharma, equipment
   const nordCrosses = [
-    { countryCode: 'no', label: 'NOK / MAD', rate: eurMad / (rates['NOK'] ?? 11.60), note: 'Lié au Brent — corr EUR ~70%' },
-    { countryCode: 'se', label: 'SEK / MAD', rate: eurMad / (rates['SEK'] ?? 11.40), note: 'Riksbank — corr EUR ~75%' },
-    { countryCode: 'dk', label: 'DKK / MAD', rate: eurMad / (rates['DKK'] ?? 7.460), note: 'Peg EUR quasi-fixe (±2.25%)' },
+    { countryCode: 'no', label: 'NOK / MAD', rate: eurMad / (rates['NOK'] ?? 11.60), note: 'LiÃ© au Brent â€” corr EUR ~70%' },
+    { countryCode: 'se', label: 'SEK / MAD', rate: eurMad / (rates['SEK'] ?? 11.40), note: 'Riksbank â€” corr EUR ~75%' },
+    { countryCode: 'dk', label: 'DKK / MAD', rate: eurMad / (rates['DKK'] ?? 7.460), note: 'Peg EUR quasi-fixe (Â±2.25%)' },
   ];
 
   const emPeers = [
@@ -237,43 +238,43 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
     { countryCode: 'dz', label: 'USD/DZD', rate: 134.5,                               note: 'Parallel market gap' },
   ];
 
-  // Morocco corporate watchpoints — static but data-contextual
+  // Morocco corporate watchpoints â€” static but data-contextual
   const corpWatchpoints = [
     {
       icon: <Zap size={13} className="text-amber-400 shrink-0 mt-0.5" />,
-      title: 'Importateurs énergie',
+      title: 'Importateurs Ã©nergie',
       sub: 'Brent & WTI',
-      body: `Brent actuel ${comms['BZ=F'] ? `$${comms['BZ=F']!.price.toFixed(2)}/bbl ≈ ${comms['BZ=F']!.madEquiv.toFixed(0)} MAD/bbl` : '—'}. Toute appréciation USD/MAD amplifie la facture énergétique. Couverture forward recommandée (Circ. OC 01/2024).`,
+      body: `Brent actuel ${comms['BZ=F'] ? `$${comms['BZ=F']!.price.toFixed(2)}/bbl â‰ˆ ${comms['BZ=F']!.madEquiv.toFixed(0)} MAD/bbl` : 'â€”'}. Toute apprÃ©ciation USD/MAD amplifie la facture Ã©nergÃ©tique. Couverture forward recommandÃ©e (Circ. OC 01/2024).`,
     },
     {
       icon: <Wheat size={13} className="text-lime-400 shrink-0 mt-0.5" />,
       title: 'Import alimentaire',
-      sub: 'Blé & Maïs',
-      body: `Blé ${comms['ZW=F'] ? `$${comms['ZW=F']!.price.toFixed(2)}/bu ≈ ${(comms['ZW=F']!.madEquiv).toFixed(2)} MAD/bu` : '—'}. COSUMAR, minoteries et éleveurs exposés aux fluctuations USD et aux subventions OC.`,
+      sub: 'BlÃ© & MaÃ¯s',
+      body: `BlÃ© ${comms['ZW=F'] ? `$${comms['ZW=F']!.price.toFixed(2)}/bu â‰ˆ ${(comms['ZW=F']!.madEquiv).toFixed(2)} MAD/bu` : 'â€”'}. COSUMAR, minoteries et Ã©leveurs exposÃ©s aux fluctuations USD et aux subventions OC.`,
     },
     {
       icon: <Truck size={13} className="text-blue-400 shrink-0 mt-0.5" />,
       title: 'Export OCP / Phosphates',
       sub: 'Revenus USD/EUR',
-      body: `OCP facture principalement en USD. Un USD/MAD élevé (${usdMad.toFixed(4)}) améliore les revenus en MAD. Risque de retournement à surveiller sur les échéances Q3-Q4.`,
+      body: `OCP facture principalement en USD. Un USD/MAD Ã©levÃ© (${usdMad.toFixed(4)}) amÃ©liore les revenus en MAD. Risque de retournement Ã  surveiller sur les Ã©chÃ©ances Q3-Q4.`,
     },
     {
       icon: <Building2 size={13} className="text-purple-400 shrink-0 mt-0.5" />,
       title: 'PME Gulf (AED/SAR)',
       sub: 'Prestataires & sous-traitants',
-      body: `AED/MAD ${(0.272294 * usdMad).toFixed(4)} — SAR/MAD ${(0.266667 * usdMad).toFixed(4)}. Facturation Gulf en AED ou SAR expose à la variation USD/MAD (pégs stables mais MAD peut varier). Instruments de couverture disponibles via intermédiaires agréés BAM.`,
+      body: `AED/MAD ${(0.272294 * usdMad).toFixed(4)} â€” SAR/MAD ${(0.266667 * usdMad).toFixed(4)}. Facturation Gulf en AED ou SAR expose Ã  la variation USD/MAD (pÃ©gs stables mais MAD peut varier). Instruments de couverture disponibles via intermÃ©diaires agrÃ©Ã©s BAM.`,
     },
     {
       icon: <ShieldAlert size={13} className="text-rose-400 shrink-0 mt-0.5" />,
       title: 'Risque EUR/USD',
       sub: 'Panier BKAM 60% EUR',
-      body: `EUR/USD ${eu.toFixed(4)}. Le panier MAD pondère l'EUR à 60% : chaque 1% de variation EUR/USD déplace USD/MAD d'env. 0.6%. Impact direct sur les contrats import libellés en EUR.`,
+      body: `EUR/USD ${eu.toFixed(4)}. Le panier MAD pondÃ¨re l'EUR Ã  60% : chaque 1% de variation EUR/USD dÃ©place USD/MAD d'env. 0.6%. Impact direct sur les contrats import libellÃ©s en EUR.`,
     },
     {
       icon: <BarChart3 size={13} className="text-gold-400 shrink-0 mt-0.5" />,
-      title: 'Couverture réglementaire',
+      title: 'Couverture rÃ©glementaire',
       sub: 'Circulaire OC 01/2024',
-      body: 'Les PME peuvent couvrir jusqu\'à 100% de la valeur sous-jacente import/export en forwards. Durée max 12 mois. Seuls les intermédiaires agréés BAM peuvent exécuter ces opérations.',
+      body: 'Les PME peuvent couvrir jusqu\'Ã  100% de la valeur sous-jacente import/export en forwards. DurÃ©e max 12 mois. Seuls les intermÃ©diaires agrÃ©Ã©s BAM peuvent exÃ©cuter ces opÃ©rations.',
     },
   ];
 
@@ -282,7 +283,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
   return (
     <div className="max-w-7xl mx-auto space-y-5 animate-fade-in">
 
-      {/* ── Header ─────────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <h2 className="text-2xl font-serif font-bold text-white flex items-center gap-3">
@@ -290,14 +291,14 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
             Global Market Intelligence
           </h2>
           <p className="text-slate-400 text-sm mt-0.5">
-            G10 FX · MAD Crosses · Matières Premières · Guide Corporates &amp; PME
+            G10 FX Â· MAD Crosses Â· MatiÃ¨res PremiÃ¨res Â· Guide Corporates &amp; PME
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0">
           {fetchedAt && (
             <div className="text-right">
               <p className="text-[10px] text-slate-500 font-mono">{new Date(fetchedAt).toLocaleTimeString()}</p>
-              <p className="text-[9px] text-slate-600">{todayStr} · ECB/Frankfurter</p>
+              <p className="text-[9px] text-slate-600">{todayStr} Â· ECB/Frankfurter</p>
             </div>
           )}
           <button
@@ -318,12 +319,12 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
         </div>
       )}
 
-      {/* ── G10 FX Ticker ───────────────────────────────────────────────────── */}
+      {/* â”€â”€ G10 FX Ticker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="bg-[#0b1a30] border border-navy-700/50 rounded-xl overflow-hidden">
         <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
           <Globe size={11} className="text-gold-400" />
           <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">G10 FX Monitor</span>
-          <span className="text-[9px] text-slate-600 ml-auto">ECB Indicatif · {todayStr}</span>
+          <span className="text-[9px] text-slate-600 ml-auto">ECB Indicatif Â· {todayStr}</span>
         </div>
         <div className="overflow-x-auto">
           <div className="flex gap-px min-w-max bg-navy-800/20">
@@ -337,7 +338,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
                   <span className="text-[14px] font-mono font-bold text-white">{rate.toFixed(dec)}</span>
                   <span className={`text-[9px] font-semibold flex items-center gap-0.5 mt-0.5 ${flat ? 'text-slate-600' : up ? 'text-emerald-400' : 'text-rose-400'}`}>
                     {flat ? <Minus size={7} /> : up ? <TrendingUp size={7} /> : <TrendingDown size={7} />}
-                    {flat ? '—' : `${up ? '+' : ''}${chg.toFixed(2)}%`}
+                    {flat ? 'â€”' : `${up ? '+' : ''}${chg.toFixed(2)}%`}
                   </span>
                 </div>
               );
@@ -346,15 +347,15 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
         </div>
       </div>
 
-      {/* ── MAD Crosses + Gulf/EM ───────────────────────────────────────────── */}
+      {/* â”€â”€ MAD Crosses + Gulf/EM â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
 
-        {/* MAD Crosses — 3/5 cols */}
+        {/* MAD Crosses â€” 3/5 cols */}
         <div className="lg:col-span-3 bg-[#0b1a30] border border-navy-700/50 rounded-xl overflow-hidden">
           <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
             <BarChart3 size={11} className="text-gold-400" />
             <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">Cours MAD (Dirham)</span>
-            <span className="text-[9px] text-slate-600 ml-auto">Panier K={BASKET_K} · {EUR_WEIGHT*100}%EUR+{USD_WEIGHT*100}%USD</span>
+            <span className="text-[9px] text-slate-600 ml-auto">Panier K={BASKET_K} Â· {EUR_WEIGHT*100}%EUR+{USD_WEIGHT*100}%USD</span>
           </div>
           <div className="divide-y divide-navy-800/40">
             {madCrosses.map(({ label, rate, prev, primary }) => {
@@ -370,7 +371,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
                       {rate.toFixed(4)}
                     </span>
                     <div className="w-16 text-right">
-                      {prev !== undefined ? <Chg pct={chg} /> : <span className="text-slate-700 text-[10px]">—</span>}
+                      {prev !== undefined ? <Chg pct={chg} /> : <span className="text-slate-700 text-[10px]">â€”</span>}
                     </div>
                   </div>
                 </div>
@@ -378,7 +379,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
             })}
           </div>
           <div className="px-4 py-2.5 bg-navy-800/20 border-t border-navy-700/40">
-            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mb-1.5">Composition Panier BKAM · Bande ±5%</p>
+            <p className="text-[9px] font-bold text-slate-600 uppercase tracking-widest mb-1.5">Composition Panier BKAM Â· Bande Â±5%</p>
             <div className="flex rounded-full overflow-hidden h-1.5 w-full">
               <div className="bg-blue-500 h-full" style={{ width: '60%' }} />
               <div className="bg-emerald-500 h-full" style={{ width: '40%' }} />
@@ -390,13 +391,13 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
           </div>
         </div>
 
-        {/* Gulf + EM — 2/5 cols */}
+        {/* Gulf + EM â€” 2/5 cols */}
         <div className="lg:col-span-2 space-y-4">
           <div className="bg-[#0b1a30] border border-navy-700/50 rounded-xl overflow-hidden">
             <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
               <Globe size={11} className="text-gold-400" />
               <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">Gulf MAD</span>
-              <span className="text-[9px] text-slate-600 ml-auto">Parités USD fixes</span>
+              <span className="text-[9px] text-slate-600 ml-auto">ParitÃ©s USD fixes</span>
             </div>
             <div className="grid grid-cols-2 gap-px bg-navy-800/30">
               {gulfCrosses.map(({ countryCode, label, rate, note }) => (
@@ -409,12 +410,12 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
             </div>
           </div>
 
-          {/* Scandinavian MAD crosses — bois, papier, équipements */}
+          {/* Scandinavian MAD crosses â€” bois, papier, Ã©quipements */}
           <div className="bg-[#0b1a30] border border-navy-700/50 rounded-xl overflow-hidden">
             <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
               <Globe size={11} className="text-blue-400" />
               <span className="text-[10px] font-bold text-blue-400 uppercase tracking-widest">Nordiques MAD</span>
-              <span className="text-[9px] text-slate-600 ml-auto">Bois · Papier · Pharma</span>
+              <span className="text-[9px] text-slate-600 ml-auto">Bois Â· Papier Â· Pharma</span>
             </div>
             <div className="grid grid-cols-1 gap-px bg-navy-800/30">
               {nordCrosses.map(({ countryCode, label, rate, note }) => (
@@ -450,21 +451,21 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
         </div>
       </div>
 
-      {/* ── Morocco Macro Drivers (Commodities) ─────────────────────────────── */}
+      {/* â”€â”€ Morocco Macro Drivers (Commodities) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="bg-[#0b1a30] border border-navy-700/50 rounded-xl overflow-hidden">
         <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
           <BarChart3 size={11} className="text-gold-400" />
-          <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">Matières Premières — Indicateurs Macro Maroc</span>
-          <span className="text-[9px] text-slate-600 ml-auto">Yahoo Finance · CORS proxy</span>
+          <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">MatiÃ¨res PremiÃ¨res â€” Indicateurs Macro Maroc</span>
+          <span className="text-[9px] text-slate-600 ml-auto">Yahoo Finance Â· CORS proxy</span>
         </div>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-px bg-navy-800/30">
           {[
-            { sym: 'BZ=F', label: 'Brent',   flag: '⚡', unit: '/bbl', note: 'Import énergie ~100%' },
-            { sym: 'GC=F', label: 'Or',       flag: '🥇', unit: '/oz',  note: 'Réserves BAM' },
-            { sym: 'HG=F', label: 'Cuivre',   flag: '🔧', unit: '/lb',  note: 'Nexans · câbliers' },
-            { sym: 'ZW=F', label: 'Blé',      flag: '🌾', unit: '/bu',  note: 'MENA top-5 import' },
-            { sym: 'ZC=F', label: 'Maïs',     flag: '🌽', unit: '/bu',  note: 'Aliment bétail' },
-            { sym: 'SB=F', label: 'Sucre',    flag: '🍬', unit: '/lb',  note: 'COSUMAR · subvention' },
+            { sym: 'BZ=F', label: 'Brent',   flag: 'âš¡', unit: '/bbl', note: 'Import Ã©nergie ~100%' },
+            { sym: 'GC=F', label: 'Or',       flag: 'ðŸ¥‡', unit: '/oz',  note: 'RÃ©serves BAM' },
+            { sym: 'HG=F', label: 'Cuivre',   flag: 'ðŸ”§', unit: '/lb',  note: 'Nexans Â· cÃ¢bliers' },
+            { sym: 'ZW=F', label: 'BlÃ©',      flag: 'ðŸŒ¾', unit: '/bu',  note: 'MENA top-5 import' },
+            { sym: 'ZC=F', label: 'MaÃ¯s',     flag: 'ðŸŒ½', unit: '/bu',  note: 'Aliment bÃ©tail' },
+            { sym: 'SB=F', label: 'Sucre',    flag: 'ðŸ¬', unit: '/lb',  note: 'COSUMAR Â· subvention' },
           ].map(({ sym, label, flag, unit, note }) => {
             const d = comms[sym];
             return (
@@ -481,7 +482,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
                     </p>
                     <div className="flex flex-col gap-0.5 mt-1">
                       <Chg pct={d.pct} />
-                      <span className="text-[9px] text-slate-600">≈{d.madEquiv.toFixed(1)} MAD</span>
+                      <span className="text-[9px] text-slate-600">â‰ˆ{d.madEquiv.toFixed(1)} MAD</span>
                     </div>
                     <p className="text-[8px] text-slate-700 mt-1.5 leading-tight">{note}</p>
                   </>
@@ -497,11 +498,11 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
         </div>
       </div>
 
-      {/* ── Guide Corporates & PME ───────────────────────────────────────────── */}
+      {/* â”€â”€ Guide Corporates & PME â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="bg-[#0b1a30] border border-navy-700/50 rounded-xl overflow-hidden">
         <div className="px-4 py-2 border-b border-navy-700/40 flex items-center gap-2">
           <Building2 size={11} className="text-gold-400" />
-          <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">Points de Vigilance — Corporates &amp; PME Maroc</span>
+          <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">Points de Vigilance â€” Corporates &amp; PME Maroc</span>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-navy-800/30">
           {corpWatchpoints.map((wp, i) => (
@@ -519,26 +520,26 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
         </div>
         <div className="px-4 py-2.5 border-t border-navy-700/40 bg-navy-800/10">
           <p className="text-[9px] text-slate-600">
-            Circ. OC n° 01/2024 · IGOC 2024 · Données indicatives uniquement — pour toute opération,
-            adressez-vous à un <span className="text-gold-600">établissement de crédit agréé par Bank Al-Maghrib</span>
+            Circ. OC nÂ° 01/2024 Â· IGOC 2024 Â· DonnÃ©es indicatives uniquement â€” pour toute opÃ©ration,
+            adressez-vous Ã  un <span className="text-gold-600">Ã©tablissement de crÃ©dit agrÃ©Ã© par Bank Al-Maghrib</span>
           </p>
         </div>
       </div>
 
-      {/* ── AI Market Brief ─────────────────────────────────────────────────── */}
+      {/* â”€â”€ AI Market Brief â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="bg-[#0b1a30] border border-navy-700/50 rounded-xl overflow-hidden">
         <button
           onClick={() => setBriefOpen(o => !o)}
           className="w-full px-4 py-3 border-b border-navy-700/40 flex items-center gap-2 hover:bg-navy-800/30 transition text-left"
         >
           <Cpu size={11} className="text-gold-400" />
-          <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">Synthèse IA — Market Brief</span>
+          <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">SynthÃ¨se IA â€” Market Brief</span>
           {briefProv && (
             <span className={`ml-2 text-[8px] font-bold px-1.5 py-0.5 rounded border ${PROVIDER_COLORS[briefProv]}`}>
               {PROVIDER_LABELS[briefProv]}
             </span>
           )}
-          <span className="text-[9px] text-slate-600 ml-1">Auto-généré · Llama 3.3-70B</span>
+          <span className="text-[9px] text-slate-600 ml-1">Auto-gÃ©nÃ©rÃ© Â· Llama 3.3-70B</span>
           <span className="ml-auto text-slate-500">
             {briefOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </span>
@@ -548,7 +549,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
             {briefLoading ? (
               <div className="flex items-center gap-3">
                 <Cpu size={13} className="animate-pulse text-gold-400" />
-                <span className="text-slate-400 text-sm">Génération du brief institutionnel en cours...</span>
+                <span className="text-slate-400 text-sm">GÃ©nÃ©ration du brief institutionnel en cours...</span>
               </div>
             ) : aiBrief ? (
               <div className="space-y-3">
@@ -558,17 +559,17 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
               </div>
             ) : (
               <p className="text-slate-600 text-sm">
-                Configurez une clé API (Groq, Gemini, OpenRouter) dans Admin → Système pour activer les briefs IA.
+                Configurez une clÃ© API (Groq, Gemini, OpenRouter) dans Admin â†’ SystÃ¨me pour activer les briefs IA.
               </p>
             )}
           </div>
         )}
       </div>
 
-      {/* ── Sources & Disclaimer ────────────────────────────────────────────── */}
+      {/* â”€â”€ Sources & Disclaimer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pb-1">
         {[
-          { href: 'https://www.bkam.ma/en/Markets/Key-indicators/Foreign-exchange-market', label: 'BKAM Fixing Officiel' },
+          { href: BKAM_LINKS.fxMarketOverview, label: 'BKAM Fixing Officiel' },
           { href: 'https://www.oc.gov.ma', label: 'Office des Changes' },
           { href: 'https://api.frankfurter.app', label: 'Frankfurter / BCE' },
         ].map(({ href, label }) => (
@@ -578,7 +579,7 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
           </a>
         ))}
         <span className="text-[9px] text-slate-700 ml-auto">
-          Taux indicatifs uniquement · Pas de conseil en investissement · Non agréé AMMC/BAM ·{' '}
+          Taux indicatifs uniquement Â· Pas de conseil en investissement Â· Non agrÃ©Ã© AMMC/BAM Â·{' '}
           <span className="text-gold-700">jad2advisory.com</span>
         </span>
       </div>
@@ -587,3 +588,4 @@ Terminer obligatoirement par: "⚠️ Données indicatives uniquement — pas de
 };
 
 export default MarketAnalysis;
+

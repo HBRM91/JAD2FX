@@ -1,9 +1,9 @@
-import React, { useEffect, useState, useRef, useCallback, Suspense, lazy } from 'react';
+﻿import React, { useEffect, useState, useRef, useCallback, Suspense, lazy } from 'react';
 import { ViewState, LiveRate, LivePriceEntry } from './types';
 import { DEFAULT_BASKET_CONFIG, MARKET_NEWS, DISCLAIMER_TEXT, DISCLAIMER_SHORT, BKAM_CURRENCIES } from './constants';
 import { fetchAllMadRates } from './services/fxRates';
 
-// P0.14 — Code-split all route components for fast initial load.
+// P0.14 â€” Code-split all route components for fast initial load.
 // Only shell components (nav, ticker, modals, charts used on home) stay eager.
 import RatesTicker        from './components/RatesTicker';
 import FloatingChat       from './components/FloatingChat';
@@ -29,7 +29,6 @@ const AdminCockpit          = lazy(() => import('./components/AdminCockpit'));
 const BkamFixing            = lazy(() => import('./components/BkamFixing'));
 const BilletsPage           = lazy(() => import('./components/BilletsPage'));
 const CommoditiesPage       = lazy(() => import('./components/CommoditiesPage'));
-const MarketReportPage      = lazy(() => import('./components/MarketReport'));
 const MorningBriefing       = lazy(() => import('./components/MorningBriefing'));
 const RegulationsPage       = lazy(() => import('./components/RegulationsPage'));
 const CurrencyHeatmap       = lazy(() => import('./components/CurrencyHeatmap'));
@@ -45,12 +44,12 @@ const BkamParityMatrix      = lazy(() => import('./components/BkamParityMatrix')
 const SectorLanding         = lazy(() => import('./components/SectorLanding'));
 const FxCrossMatrix         = lazy(() => import('./components/FxCrossMatrix'));
 const MarketRadar           = lazy(() => import('./components/MarketRadar'));
-// P3 — Funnel tools
+// P3 â€” Funnel tools
 const PmeDiagnostic         = lazy(() => import('./components/PmeDiagnostic'));
 const ImportCostCalc        = lazy(() => import('./components/ImportCostCalc'));
 const QuarterlyHedge        = lazy(() => import('./components/QuarterlyHedge'));
 const Watchlist             = lazy(() => import('./components/Watchlist'));
-// P4 — Content authority
+// P4 â€” Content authority
 const Glossary              = lazy(() => import('./components/Glossary'));
 const Blog                  = lazy(() => import('./components/Blog'));
 const BasketExplainer       = lazy(() => import('./components/BasketExplainer'));
@@ -61,23 +60,17 @@ const Partnerships         = lazy(() => import('./components/Partnerships'));
 const PressWall             = lazy(() => import('./components/PressWall'));
 const Podcast               = lazy(() => import('./components/Podcast'));
 const QuarterlyOutlook      = lazy(() => import('./components/QuarterlyOutlook'));
-const NewsletterAdmin       = lazy(() => import('./components/admin/NewsletterAdmin'));
-const ApiKeyManagement      = lazy(() => import('./components/admin/ApiKeyManagement'));
-const BacklinkTracker       = lazy(() => import('./components/admin/BacklinkTracker'));
-const LeadsDashboard        = lazy(() => import('./components/admin/LeadsDashboard'));
 import ThemeToggle from './components/ThemeToggle';
 import BottomNav from './components/BottomNav';
-// P3 — Funnel + social proof
+// P3 â€” Funnel + social proof
 const ServicesPage          = lazy(() => import('./components/ServicesPage'));
 const AuditLanding          = lazy(() => import('./components/AuditLanding'));
 const AuditLog              = lazy(() => import('./components/AuditLog'));
-const SectorCaseStudy       = lazy(() => import('./components/SectorCaseStudy'));
 const SocialProofModule     = lazy(() => import('./components/SocialProof'));
 const WhatsAppButton        = lazy(() => import('./components/WhatsAppButton'));
 const ExitIntentModal       = lazy(() => import('./components/ExitIntentModal'));
 const ContextualCTA         = lazy(() => import('./components/ContextualCTA'));
 const PriceAlerts           = lazy(() => import('./components/PriceAlerts'));
-const TimeWindowSelector    = lazy(() => import('./components/TimeWindowSelector'));
 const VolSurfacePage        = lazy(() => import('./components/VolSurfacePage'));
 const MoneyMarketPage       = lazy(() => import('./components/MoneyMarketPage'));
 const BlueChipsTable        = lazy(() => import('./components/BlueChipsTable'));
@@ -85,7 +78,6 @@ const VaRCalculator         = lazy(() => import('./components/VaRCalculator'));
 const SovereignPage         = lazy(() => import('./components/SovereignPage'));
 const BankRatesPage         = lazy(() => import('./components/BankRatesPage'));
 const CorrelationHeatmap    = lazy(() => import('./components/CorrelationHeatmap'));
-const GlobalSearch          = lazy(() => import('./components/GlobalSearch'));
 const MultiPane             = lazy(() => import('./components/MultiPane'));
 const LiveCounterLazy       = lazy(() => import('./components/SocialProof').then(m => ({ default: m.LiveCounter })));
 
@@ -102,13 +94,13 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
-// ─── Nav data is in navConfig.tsx so other components (CommandPalette) can reuse it.
+// â”€â”€â”€ Nav data is in navConfig.tsx so other components (CommandPalette) can reuse it.
 import { NAV_GROUPS as _NAV_GROUPS, type NavGroup } from './navConfig';
 
 const NAV_GROUPS: NavGroup[] = _NAV_GROUPS as unknown as { id: string; label: string; items: { label: string; view: ViewState; icon: React.ElementType; desc: string }[] }[];
 void NAV_GROUPS; // referenced for completeness; command palette uses _NAV_GROUPS directly
 
-// ─── Expandable news card ─────────────────────────────────────────────────────
+// â”€â”€â”€ Expandable news card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function NewsCard({ news }: { news: typeof MARKET_NEWS[0] }) {
   const [expanded, setExpanded] = React.useState(false);
@@ -132,22 +124,22 @@ function NewsCard({ news }: { news: typeof MARKET_NEWS[0] }) {
         {news.summary}
       </p>
       <button className="text-[10px] text-gold-500 hover:text-gold-300 mt-1.5 font-semibold transition-colors">
-        {expanded ? '▲ Réduire' : '▼ Lire la suite'}
+        {expanded ? 'â–² RÃ©duire' : 'â–¼ Lire la suite'}
       </button>
     </div>
   );
 }
 
-// ─── Inner app ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Inner app â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-// P0.14 — Skeleton shown while a route chunk is loading.
+// P0.14 â€” Skeleton shown while a route chunk is loading.
 function RouteFallback({ name }: { name?: string } = {}) {
   return (
     <div className="space-y-4 animate-pulse">
       {name && (
         <div className="flex items-center gap-2 text-[11px] text-slate-500">
           <Loader2 size={12} className="animate-spin text-gold-500" />
-          <span>Chargement de {name}…</span>
+          <span>Chargement de {name}â€¦</span>
         </div>
       )}
       <div className="h-8 w-1/3 bg-navy-800 rounded" />
@@ -169,17 +161,17 @@ function AppInner() {
   const [tickerRates, setTickerRates] = useState<LiveRate[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // P4.16 — Dynamic per-view OG image & title (sets document head for SEO/sharing)
+  // P4.16 â€” Dynamic per-view OG image & title (sets document head for SEO/sharing)
   useEffect(() => {
     const titles: Partial<Record<ViewState, string>> = {
-      HOME: 'JAD2FX — Conseil FX & Stratégie Maroc',
+      HOME: 'JAD2FX â€” Conseil FX & StratÃ©gie Maroc',
       DASHBOARD: 'Tableau de Bord FX | JAD2FX',
       FORWARDS: 'Forward Calculator & CIP | JAD2FX',
       FIXING: 'Fixing Officiel BKAM | JAD2FX',
-      VOL_SURFACE: 'Surface de Volatilité G10-MAD | JAD2FX',
+      VOL_SURFACE: 'Surface de VolatilitÃ© G10-MAD | JAD2FX',
       BANK_RATES: 'Comparatif 5 Banques Marocaines | JAD2FX',
-      COCKPIT: 'Cockpit FX — Desk de Trading | JAD2FX',
-      GLOSSARY: 'Glossaire FX & Marché Marocain | JAD2FX',
+      COCKPIT: 'Cockpit FX â€” Desk de Trading | JAD2FX',
+      GLOSSARY: 'Glossaire FX & MarchÃ© Marocain | JAD2FX',
       BLOG: 'Recherche & Analyses FX | JAD2FX',
       REPORT: 'Morning Briefing FX | JAD2FX',
       SERVICES: 'Services & Tarification | JAD2FX',
@@ -187,28 +179,28 @@ function AppInner() {
       API_DOCS: 'API Documentation | JAD2FX',
       AUDIT_LANDING: 'Audit FX Gratuit 30min | JAD2FX',
       QUARTERLY_OUTLOOK: 'MAD Quarterly Outlook Q2 2026 | JAD2FX',
-      AUDIT_LOG: 'Journal d\'Audit Trésorier | JAD2FX',
+      AUDIT_LOG: 'Journal d\'Audit TrÃ©sorier | JAD2FX',
     };
     const subs: Partial<Record<ViewState, string>> = {
-      HOME: 'Terminal pédagogique · Bank Al-Maghrib',
-      DASHBOARD: 'Vue d\'ensemble 24 devises · P&L · Volatilité',
-      FORWARDS: 'CIP · Cubic spline · Holiday-aware T+2',
+      HOME: 'Terminal pÃ©dagogique Â· Bank Al-Maghrib',
+      DASHBOARD: 'Vue d\'ensemble 24 devises Â· P&L Â· VolatilitÃ©',
+      FORWARDS: 'CIP Â· Cubic spline Â· Holiday-aware T+2',
       FIXING: 'Cours officiels Bank Al-Maghrib',
-      VOL_SURFACE: 'Smile · 25D risk reversal · ATM forward',
-      BANK_RATES: 'Attijariwafa · BP · BMCE · CIH · SG',
-      COCKPIT: 'P&L live · VaR 95% · Positions · Alertes',
-      GLOSSARY: '198 termes FX · MAD · OC',
+      VOL_SURFACE: 'Smile Â· 25D risk reversal Â· ATM forward',
+      BANK_RATES: 'Attijariwafa Â· BP Â· BMCE Â· CIH Â· SG',
+      COCKPIT: 'P&L live Â· VaR 95% Â· Positions Â· Alertes',
+      GLOSSARY: '198 termes FX Â· MAD Â· OC',
       BLOG: 'Recherche institutionnelle sur le MAD',
-      REPORT: 'Briefing quotidien · Stratégiste en chef',
-      SERVICES: '4 offres · Conseil · Formation · Audit · Automatisation',
-      PRESS: 'Logos · Bios · Assets',
-      API_DOCS: 'REST API · OpenAPI 3.0 · Clé gratuite',
-      AUDIT_LANDING: 'Conformité Circ. OC 01/2024',
-      QUARTERLY_OUTLOOK: 'Perspectives trimestrielles · Phosphate · Tourisme · MRE',
-      AUDIT_LOG: 'Traçabilité session · Export CSV',
+      REPORT: 'Briefing quotidien Â· StratÃ©giste en chef',
+      SERVICES: '4 offres Â· Conseil Â· Formation Â· Audit Â· Automatisation',
+      PRESS: 'Logos Â· Bios Â· Assets',
+      API_DOCS: 'REST API Â· OpenAPI 3.0 Â· ClÃ© gratuite',
+      AUDIT_LANDING: 'ConformitÃ© Circ. OC 01/2024',
+      QUARTERLY_OUTLOOK: 'Perspectives trimestrielles Â· Phosphate Â· Tourisme Â· MRE',
+      AUDIT_LOG: 'TraÃ§abilitÃ© session Â· Export CSV',
     };
-    const t = titles[view] ?? 'JAD2FX — Taux de Change MAD | Bank Al-Maghrib';
-    const s = subs[view] ?? 'Terminal pédagogique · Bank Al-Maghrib';
+    const t = titles[view] ?? 'JAD2FX â€” Taux de Change MAD | Bank Al-Maghrib';
+    const s = subs[view] ?? 'Terminal pÃ©dagogique Â· Bank Al-Maghrib';
     document.title = t;
     const setMeta = (prop: string, val: string) => {
       let el = document.querySelector(`meta[property="${prop}"]`) as HTMLMetaElement | null;
@@ -226,7 +218,7 @@ function AppInner() {
   const { t, locale, setLocale, isRTL } = useI18n();
   const navDropdownRef = useRef<HTMLDivElement>(null);
 
-  // B1.3 — Deep link from ?view=... on mount + popstate for back/forward.
+  // B1.3 â€” Deep link from ?view=... on mount + popstate for back/forward.
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const apply = () => {
@@ -253,7 +245,7 @@ function AppInner() {
     };
   }, [contactDrawerOpen]);
 
-  // P2.3 + P2.12 — Global keyboard shortcuts: Cmd+K (palette), ? (cheatsheet), h, etc.
+  // P2.3 + P2.12 â€” Global keyboard shortcuts: Cmd+K (palette), ? (cheatsheet), h, etc.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
@@ -274,6 +266,11 @@ function AppInner() {
   }, []);
 
   const refreshRates = useCallback(() => {
+    // P1-5: when isLive=false, skip the network call and clear the ticker
+    if (!config.isLive) {
+      setTickerRates([]);
+      return;
+    }
     fetchAllMadRates(DEFAULT_BASKET_CONFIG, config.corsProxyUrl, config.dealerSpreadPips)
       .then(({ rates }) => {
         setTickerRates(rates);
@@ -333,10 +330,10 @@ function AppInner() {
   const LOCALE_OPTIONS: { code: Locale; label: string }[] = [
     { code: 'fr', label: 'FR' },
     { code: 'en', label: 'EN' },
-    { code: 'ar', label: 'عربي' },
+    { code: 'ar', label: 'Ø¹Ø±Ø¨ÙŠ' },
   ];
 
-  // ── Page title chip ───────────────────────────────────────────────────────
+  // â”€â”€ Page title chip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const allItems = NAV_GROUPS.flatMap(g => g.items);
   const activeItem = allItems.find(i => i.view === view);
 
@@ -357,7 +354,7 @@ function AppInner() {
       <WhatsAppButton />
       <Onboarding />
 
-      {/* ══ Navbar ══════════════════════════════════════════════════════════ */}
+      {/* â•â• Navbar â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <nav ref={navDropdownRef} className="bg-navy-900 sticky top-0 z-50 border-b border-navy-800">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14">
@@ -366,7 +363,7 @@ function AppInner() {
             <button
               className="flex-shrink-0 focus:outline-none"
               onClick={() => navTo('HOME')}
-              aria-label="JAD2FX — Accueil"
+              aria-label="JAD2FX â€” Accueil"
             >
               <LogoJad2Fx height={34} dark={true} showSub={false} />
             </button>
@@ -426,7 +423,7 @@ function AppInner() {
                   view === 'ABOUT_JAD2' ? 'text-gold-400 border-b-2 border-gold-500' : 'text-navy-300 hover:text-white'
                 }`}
               >
-                À Propos
+                Ã€ Propos
               </button>
               <button
                 onClick={() => setContactDrawerOpen(true)}
@@ -455,7 +452,7 @@ function AppInner() {
                 ))}
               </div>
 
-              {/* P3.22 — external Advisory link removed from top nav (was bypassing funnel).
+              {/* P3.22 â€” external Advisory link removed from top nav (was bypassing funnel).
                   In-domain primary CTAs: Audit Gratuit + Morning Briefing. */}
               <div className="hidden md:flex items-center gap-2">
                 <ThemeToggle />
@@ -465,8 +462,8 @@ function AppInner() {
                   aria-label="Recherche globale (Cmd+K)"
                 >
                   <Search size={11} />
-                  <span>Rechercher…</span>
-                  <kbd className="hidden lg:flex items-center gap-0.5 ml-1 px-1 py-0.5 text-[8px] font-mono text-slate-500 bg-navy-800 border border-navy-700 rounded">⌘K</kbd>
+                  <span>Rechercherâ€¦</span>
+                  <kbd className="hidden lg:flex items-center gap-0.5 ml-1 px-1 py-0.5 text-[8px] font-mono text-slate-500 bg-navy-800 border border-navy-700 rounded">âŒ˜K</kbd>
                 </button>
                 <button
                   onClick={() => setContactDrawerOpen(true)}
@@ -538,7 +535,7 @@ function AppInner() {
                 view === 'ABOUT' ? 'text-gold-400 bg-navy-800' : 'text-slate-300 hover:text-white hover:bg-navy-800/50'
               }`}
             >
-              <Building2 size={14} /> À Propos
+              <Building2 size={14} /> Ã€ Propos
             </button>
             <button
               onClick={() => navTo('CONTACT')}
@@ -576,12 +573,12 @@ function AppInner() {
         )}
       </nav>
 
-      {/* ══ Compliance banner ════════════════════════════════════════════════ */}
+      {/* â•â• Compliance banner â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <div className="bg-navy-950 border-b border-navy-800 px-4 py-1">
         <p className="text-[11px] text-slate-500 tracking-wide text-center">{DISCLAIMER_SHORT}</p>
       </div>
 
-      {/* ══ Single sticky notice banner (rate disclaimer + simulator on mobile) ═ */}
+      {/* â•â• Single sticky notice banner (rate disclaimer + simulator on mobile) â• */}
       {(() => {
         const isRateView = ['FORWARDS', 'SWAPS', 'ANALYSIS', 'BANDS', 'LIVE', 'DASHBOARD', 'FIXING', 'BILLETS'].includes(view);
         const isSimView = ['FORWARDS', 'SWAPS', 'ANALYSIS', 'BANDS', 'REPORT', 'RESEARCH'].includes(view);
@@ -589,25 +586,25 @@ function AppInner() {
         return (
           <div className="sticky top-14 z-40 border-b border-gold-600/20 bg-gold-500/5 px-4 py-1 text-center">
             <p className="text-[9px] text-gold-600/80 font-medium">
-              Taux JAD2FX strictement indicatifs — non utilisables pour des opérations de change
-              (BKAM Méthodologie 2024, §II) · Pour un cours ferme : votre banque domiciliataire agréée BAM
+              Taux JAD2FX strictement indicatifs â€” non utilisables pour des opÃ©rations de change
+              (BKAM MÃ©thodologie 2024, Â§II) Â· Pour un cours ferme : votre banque domiciliataire agrÃ©Ã©e BAM
             </p>
             {isSimView && (
               <p className="lg:hidden text-[8px] font-bold text-amber-300 uppercase tracking-widest mt-0.5">
-                Mode Simulateur — Résultats Non-Exécutables · Usage Pédagogique Uniquement
+                Mode Simulateur â€” RÃ©sultats Non-ExÃ©cutables Â· Usage PÃ©dagogique Uniquement
               </p>
             )}
           </div>
         );
       })()}
 
-      {/* ══ Ticker ═══════════════════════════════════════════════════════════ */}
+      {/* â•â• Ticker â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <RatesTicker rates={tickerRates} />
       <div className="flex justify-end max-w-[1440px] mx-auto px-4 sm:px-6 -mt-1">
         <LiveCounterLazy />
       </div>
 
-      {/* ══ Page breadcrumb (non-home views) ═════════════════════════════════ */}
+      {/* â•â• Page breadcrumb (non-home views) â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {view !== 'HOME' && activeItem && (
         <div className="bg-navy-950 border-b border-navy-900 px-4 sm:px-6">
           <div className="max-w-[1440px] mx-auto flex items-center gap-2 py-2">
@@ -629,15 +626,15 @@ function AppInner() {
         </div>
       )}
 
-      {/* ══ Main content ═════════════════════════════════════════════════════ */}
+      {/* â•â• Main content â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <main id="main-content" role="main" className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 view-enter">
         <Suspense fallback={<RouteFallback />}>
 
-        {/* ─── HOME ──────────────────────────────────────────────────────── */}
+        {/* â”€â”€â”€ HOME â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {view === 'HOME' && (
           <div className="space-y-6">
 
-            {/* ── Persona split hero (Task 2.1) ───────────────────────────── */}
+            {/* â”€â”€ Persona split hero (Task 2.1) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <div className="grid grid-cols-1 gap-4">
               {/* Corporate MAD persona */}
               <div className="bg-navy-900 border border-gold-700/30 rounded-2xl p-6 flex flex-col gap-4 hover:border-gold-600/50 transition-colors">
@@ -648,11 +645,11 @@ function AppInner() {
                 </div>
                 <div>
                   <h2 className="text-xl font-serif font-bold text-white leading-tight mb-2">
-                    Maîtrisez votre exposition de change MAD
+                    MaÃ®trisez votre exposition de change MAD
                   </h2>
                   <p className="text-sm text-slate-400 leading-relaxed">
-                    Forward, swap, conformité OC 01/2024 — outils pédagogiques, Morning Briefing
-                    quotidien et accompagnement stratégique pour les trésoriers marocains.
+                    Forward, swap, conformitÃ© OC 01/2024 â€” outils pÃ©dagogiques, Morning Briefing
+                    quotidien et accompagnement stratÃ©gique pour les trÃ©soriers marocains.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2 mt-auto">
@@ -671,15 +668,15 @@ function AppInner() {
                 </div>
               </div>
 
-              {/* P2.19 — Removed: European Fintech persona per plan (single PME hero) */}
+              {/* P2.19 â€” Removed: European Fintech persona per plan (single PME hero) */}
             </div>
 
-            {/* ── B4.4 — Dashboard summary: top 4 watched rates ─────────────── */}
+            {/* â”€â”€ B4.4 â€” Dashboard summary: top 4 watched rates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             {tickerRates.length > 0 && (
               <div className="bg-navy-900 border border-navy-700 rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-2.5">
                   <h2 className="text-[11px] font-bold text-white uppercase tracking-wider flex items-center gap-2">
-                    <Activity size={11} className="text-gold-500" /> Marché · Snapshot
+                    <Activity size={11} className="text-gold-500" /> MarchÃ© Â· Snapshot
                   </h2>
                   <button
                     onClick={() => navTo('LIVE')}
@@ -703,7 +700,7 @@ function AppInner() {
                         <p className="text-[9px] text-slate-500 uppercase tracking-wider">{r.pair}</p>
                         <p className="text-sm font-bold text-white font-mono mt-0.5">{r.mid.toFixed(4)}</p>
                         <p className={`text-[9px] font-mono mt-0.5 ${chgColor}`}>
-                          {isUp ? '▲' : isDn ? '▼' : '—'} {Math.abs(chg).toFixed(2)}%
+                          {isUp ? 'â–²' : isDn ? 'â–¼' : 'â€”'} {Math.abs(chg).toFixed(2)}%
                         </p>
                       </button>
                     );
@@ -712,7 +709,7 @@ function AppInner() {
               </div>
             )}
 
-            {/* ── Drift alert chip (Task 2.3) ──────────────────────────────── */}
+            {/* â”€â”€ Drift alert chip (Task 2.3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             {config.corsProxyUrl && (
               <DriftAlertChip
                 proxyUrl={config.corsProxyUrl}
@@ -720,28 +717,28 @@ function AppInner() {
               />
             )}
 
-            {/* ── Trust bar (Task 2.2) ─────────────────────────────────────── */}
+            {/* â”€â”€ Trust bar (Task 2.2) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <div className="bg-navy-900/60 border border-navy-800 rounded-xl px-5 py-3">
               <p className="text-[9px] text-slate-600 uppercase tracking-wider text-center mb-2.5 font-bold">
                 Accompagne des entreprises dans leur gestion de change MAD
               </p>
               <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
                 {[
-                  { sector: 'Équipementier automobile',  city: 'Tanger' },
+                  { sector: 'Ã‰quipementier automobile',  city: 'Tanger' },
                   { sector: 'Importateur bois & papier', city: 'Casablanca' },
-                  { sector: 'Exportateur textile',        city: 'Fès-Meknès' },
-                  { sector: 'Opérateur phosphates',       city: 'Khouribga' },
-                  { sector: 'Fintech européenne',         city: 'Corridor MENA' },
+                  { sector: 'Exportateur textile',        city: 'FÃ¨s-MeknÃ¨s' },
+                  { sector: 'OpÃ©rateur phosphates',       city: 'Khouribga' },
+                  { sector: 'Fintech europÃ©enne',         city: 'Corridor MENA' },
                 ].map(c => (
                   <div key={c.city} className="flex items-center gap-1.5 text-[10px] text-slate-600">
                     <span className="w-1 h-1 rounded-full bg-gold-500/40 flex-shrink-0" />
-                    <span>{c.sector} · <em className="not-italic text-slate-700">{c.city}</em></span>
+                    <span>{c.sector} Â· <em className="not-italic text-slate-700">{c.city}</em></span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* ── P3 Funnel: Diagnostic FX PME (highest-intent tool) ───────── */}
+            {/* â”€â”€ P3 Funnel: Diagnostic FX PME (highest-intent tool) â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <div className="bg-gradient-to-br from-navy-900 to-navy-950 border border-gold-700/30 rounded-2xl p-5 sm:p-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
                 <div className="lg:col-span-1 space-y-2">
@@ -752,8 +749,8 @@ function AppInner() {
                     Connaissez-vous vraiment votre exposition de change ?
                   </h2>
                   <p className="text-[12px] text-slate-400 leading-relaxed">
-                    5 questions · 90 secondes · score 0-100 avec recommandations
-                    personnalisées. Pour DAF, trésoriers, gérants PME.
+                    5 questions Â· 90 secondes Â· score 0-100 avec recommandations
+                    personnalisÃ©es. Pour DAF, trÃ©soriers, gÃ©rants PME.
                   </p>
                   <button
                     onClick={() => navTo('TOOL_PME_DIAG')}
@@ -768,7 +765,7 @@ function AppInner() {
               </div>
             </div>
 
-            {/* ── Original hero banner (now secondary / data terminal showcase) */}
+            {/* â”€â”€ Original hero banner (now secondary / data terminal showcase) */}
             <div className="relative rounded-2xl overflow-hidden border border-navy-700 min-h-[280px] sm:min-h-[340px]" style={{ background: 'linear-gradient(135deg, #040C1C 0%, #081628 50%, #0E2336 100%)' }}>
               {/* Subtle gold radial accent top-right */}
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_15%,rgba(212,175,55,0.12),transparent_55%)]" />
@@ -779,7 +776,7 @@ function AppInner() {
               <div className="relative px-7 sm:px-12 py-10 sm:py-14 max-w-xl">
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2 mb-5">
-                  {['Simulation Pédagogique', 'Données BKAM Live', 'Réglementation OC'].map(tag => (
+                  {['Simulation PÃ©dagogique', 'DonnÃ©es BKAM Live', 'RÃ©glementation OC'].map(tag => (
                     <span key={tag} className="text-[11px] bg-gold-500/15 border border-gold-500/35 text-gold-400 px-3 py-0.5 rounded-full font-semibold uppercase tracking-wide">
                       {tag}
                     </span>
@@ -789,12 +786,12 @@ function AppInner() {
                 {/* Title */}
                 <h1 className="text-5xl sm:text-6xl font-bold text-white tracking-[0.15em] uppercase mb-2 font-serif drop-shadow-xl">JAD2FX</h1>
                 <p className="text-gold-400 text-[11px] uppercase tracking-[0.25em] mb-5 font-medium">
-                  Outil de Données de Change · by JAD2 Advisory
+                  Outil de DonnÃ©es de Change Â· by JAD2 Advisory
                 </p>
 
                 {/* Subtitle */}
                 <p className="text-slate-300 text-sm leading-relaxed mb-8">
-                  Données indicatives sur {BKAM_CURRENCIES.length} devises MAD — 14 cotées BKAM + {BKAM_CURRENCIES.length - 14} dérivées. Simulateur pédagogique de forwards & swaps. Référentiel réglementaire Office des Changes.
+                  DonnÃ©es indicatives sur {BKAM_CURRENCIES.length} devises MAD â€” 14 cotÃ©es BKAM + {BKAM_CURRENCIES.length - 14} dÃ©rivÃ©es. Simulateur pÃ©dagogique de forwards & swaps. RÃ©fÃ©rentiel rÃ©glementaire Office des Changes.
                 </p>
 
                 {/* CTA buttons */}
@@ -820,15 +817,15 @@ function AppInner() {
                 </div>
               </div>
 
-              {/* Quick-access tool tiles — bottom strip inside hero */}
+              {/* Quick-access tool tiles â€” bottom strip inside hero */}
               <div className="relative px-7 sm:px-12 pb-7">
                 <div className="border-t border-navy-700/50 pt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
                   {[
-                    { label: 'Diagnostic OC',    desc: 'Conformité 01/2024', view: 'TOOL_OC_ASSESS' as ViewState, icon: Shield,        color: 'text-amber-400',   border: 'border-amber-700/50',   bg: 'bg-amber-900/25' },
+                    { label: 'Diagnostic OC',    desc: 'ConformitÃ© 01/2024', view: 'TOOL_OC_ASSESS' as ViewState, icon: Shield,        color: 'text-amber-400',   border: 'border-amber-700/50',   bg: 'bg-amber-900/25' },
                     { label: 'FX Forwards',      desc: 'CIP terme',          view: 'FORWARDS'       as ViewState, icon: TrendingUp,    color: 'text-blue-400',    border: 'border-blue-700/50',    bg: 'bg-blue-900/30' },
-                    { label: 'Bandes BKAM',      desc: 'Cage ±5%',          view: 'BANDS'          as ViewState, icon: BarChart2,      color: 'text-gold-400',    border: 'border-gold-700/50',    bg: 'bg-yellow-900/20' },
-                    { label: 'Morning Briefing', desc: 'Analyse Éditoriale', view: 'REPORT'         as ViewState, icon: Newspaper,      color: 'text-emerald-400', border: 'border-emerald-700/50', bg: 'bg-emerald-900/30' },
-                    { label: 'Impact Facture',   desc: 'Érosion marge MAD',  view: 'TOOL_INVOICE'   as ViewState, icon: BarChart2,      color: 'text-purple-400',  border: 'border-purple-700/50',  bg: 'bg-purple-900/30' },
+                    { label: 'Bandes BKAM',      desc: 'Cage Â±5%',          view: 'BANDS'          as ViewState, icon: BarChart2,      color: 'text-gold-400',    border: 'border-gold-700/50',    bg: 'bg-yellow-900/20' },
+                    { label: 'Morning Briefing', desc: 'Analyse Ã‰ditoriale', view: 'REPORT'         as ViewState, icon: Newspaper,      color: 'text-emerald-400', border: 'border-emerald-700/50', bg: 'bg-emerald-900/30' },
+                    { label: 'Impact Facture',   desc: 'Ã‰rosion marge MAD',  view: 'TOOL_INVOICE'   as ViewState, icon: BarChart2,      color: 'text-purple-400',  border: 'border-purple-700/50',  bg: 'bg-purple-900/30' },
                   ].map(item => (
                     <button
                       key={item.view}
@@ -846,10 +843,10 @@ function AppInner() {
               </div>
             </div>
 
-            {/* ── Market sessions clock ────────────────────────────────────── */}
+            {/* â”€â”€ Market sessions clock â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <MarketSessionsClock />
 
-            {/* ── 2-col: news + sidebar ───────────────────────────────────── */}
+            {/* â”€â”€ 2-col: news + sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
               {/* News feed */}
@@ -857,9 +854,9 @@ function AppInner() {
                 <div className="px-5 py-3.5 border-b border-navy-700 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <Globe size={14} className="text-gold-500" />
-                    <h3 className="text-xs font-bold text-white uppercase tracking-widest">Intelligence de Marché</h3>
+                    <h3 className="text-xs font-bold text-white uppercase tracking-widest">Intelligence de MarchÃ©</h3>
                   </div>
-                  <span className="text-[11px] text-slate-500 font-semibold px-2.5 py-0.5 border border-navy-600 rounded-full">Éditorial</span>
+                  <span className="text-[11px] text-slate-500 font-semibold px-2.5 py-0.5 border border-navy-600 rounded-full">Ã‰ditorial</span>
                 </div>
                 <div className="divide-y divide-navy-700/60">
                   {MARKET_NEWS.map(news => (
@@ -875,9 +872,9 @@ function AppInner() {
                 <div className="bg-navy-900 border border-navy-700 rounded-2xl p-5 flex flex-col items-center text-center gap-4">
                   <LogoJad2Fx height={48} dark={true} showSub={true} />
                   <div>
-                    <p className="text-xs font-bold text-white mb-1.5 uppercase tracking-wider">Cabinet de Conseil Stratégique</p>
+                    <p className="text-xs font-bold text-white mb-1.5 uppercase tracking-wider">Cabinet de Conseil StratÃ©gique</p>
                     <p className="text-xs text-slate-400 leading-relaxed">
-                      Formation risque de change · Conseil stratégique · Accompagnement réglementaire OC
+                      Formation risque de change Â· Conseil stratÃ©gique Â· Accompagnement rÃ©glementaire OC
                     </p>
                   </div>
                   <a
@@ -886,10 +883,10 @@ function AppInner() {
                     rel="noopener noreferrer"
                     className="block w-full py-2.5 bg-gold-500 text-navy-950 text-sm font-bold rounded-lg hover:bg-gold-400 transition-colors"
                   >
-                    jad2advisory.com →
+                    jad2advisory.com â†’
                   </a>
                   <p className="text-[11px] text-slate-500 leading-relaxed">
-                    Conseil stratégique · Formation · Accompagnement réglementaire OC
+                    Conseil stratÃ©gique Â· Formation Â· Accompagnement rÃ©glementaire OC
                   </p>
                 </div>
 
@@ -899,9 +896,9 @@ function AppInner() {
                     <Zap size={16} className="text-gold-400" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-white mb-1">Assistant IA Réglementaire</p>
+                    <p className="text-sm font-semibold text-white mb-1">Assistant IA RÃ©glementaire</p>
                     <p className="text-xs text-slate-400 leading-relaxed">
-                      Questions OC & BKAM via le bouton flottant ↘
+                      Questions OC & BKAM via le bouton flottant â†˜
                     </p>
                   </div>
                 </div>
@@ -909,10 +906,10 @@ function AppInner() {
                 {/* Quick stat cards */}
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { label: 'Devises Cotées', value: '14', sub: 'par BKAM', color: 'text-gold-400' },
-                    { label: 'Devises Totales', value: String(BKAM_CURRENCIES.length), sub: `+${BKAM_CURRENCIES.length - 14} dérivées`, color: 'text-blue-400' },
-                    { label: 'Mise à Jour', value: 'Live', sub: 'en continu', color: 'text-emerald-400' },
-                    { label: 'Accès', value: 'Gratuit', sub: 'pédagogique', color: 'text-purple-400' },
+                    { label: 'Devises CotÃ©es', value: '14', sub: 'par BKAM', color: 'text-gold-400' },
+                    { label: 'Devises Totales', value: String(BKAM_CURRENCIES.length), sub: `+${BKAM_CURRENCIES.length - 14} dÃ©rivÃ©es`, color: 'text-blue-400' },
+                    { label: 'Mise Ã  Jour', value: 'Live', sub: 'en continu', color: 'text-emerald-400' },
+                    { label: 'AccÃ¨s', value: 'Gratuit', sub: 'pÃ©dagogique', color: 'text-purple-400' },
                   ].map(stat => (
                     <div key={stat.label} className="bg-navy-900 border border-navy-700 rounded-xl p-3.5 text-center flex flex-col items-center">
                       <p className={`text-xl font-bold font-mono tabular-nums ${stat.color}`}>{stat.value}</p>
@@ -924,27 +921,27 @@ function AppInner() {
               </div>
             </div>
 
-            {/* Market Radar — full width */}
+            {/* Market Radar â€” full width */}
             <MarketRadar tickerRates={tickerRates} />
 
-            {/* P2.4 — Watchlist (persistent, drag-to-reorder) */}
+            {/* P2.4 â€” Watchlist (persistent, drag-to-reorder) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               <Watchlist rates={tickerRates} isRTL={isRTL} />
               <NewsletterSignup proxyUrl={config.corsProxyUrl} source="home_watchlist_card" variant="card" />
             </div>
 
-            {/* P3.8 — Social proof: Stats + Testimonials + LogoWall */}
+            {/* P3.8 â€” Social proof: Stats + Testimonials + LogoWall */}
             <SocialProofModule />
 
-            {/* P3.5 — Contextual CTA (engagement-based) */}
+            {/* P3.5 â€” Contextual CTA (engagement-based) */}
             <ContextualCTA variant="banner" pageKey="home" navTo={navTo} />
 
-            {/* ── Advisory CTA strip ───────────────────────────────────── */}
+            {/* â”€â”€ Advisory CTA strip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <div className="bg-navy-900 border border-navy-700 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <p className="text-base font-bold text-white mb-1">Formation & Conseil en Gestion du Risque de Change</p>
                 <p className="text-sm text-slate-400">
-                  Auditez votre exposition FX · Optimisez votre stratégie de couverture · Maîtrisez la réglementation OC
+                  Auditez votre exposition FX Â· Optimisez votre stratÃ©gie de couverture Â· MaÃ®trisez la rÃ©glementation OC
                 </p>
               </div>
               <div className="flex gap-3 flex-shrink-0">
@@ -969,7 +966,7 @@ function AppInner() {
           </div>
         )}
 
-        {/* ─── DASHBOARD ─────────────────────────────────────────────────── */}
+        {/* â”€â”€â”€ DASHBOARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {view === 'DASHBOARD' && (
           <div className="space-y-6">
             <FxDashboard />
@@ -978,7 +975,7 @@ function AppInner() {
           </div>
         )}
 
-        {/* ─── Other views ───────────────────────────────────────────────── */}
+        {/* â”€â”€â”€ Other views â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {view === 'ANALYSIS'    && <MarketAnalysis />}
         {view === 'FIXING'      && <BkamFixing />}
         {view === 'BILLETS'     && <BilletsPage />}
@@ -1045,14 +1042,14 @@ function AppInner() {
             <div className="border-b border-navy-800 pb-4">
               <h1 className="text-2xl font-bold text-white">Contactez JAD2 Advisory</h1>
               <p className="text-sm text-slate-400 mt-1">
-                Cabinet de conseil stratégique & formation en gestion du risque de change · Casablanca
+                Cabinet de conseil stratÃ©gique & formation en gestion du risque de change Â· Casablanca
               </p>
             </div>
             <ContactForm />
           </div>
         )}
 
-        {/* ─── ABOUT ─────────────────────────────────────────────────────── */}
+        {/* â”€â”€â”€ ABOUT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
         {view === 'ABOUT' && (
           <div className="max-w-3xl mx-auto space-y-5">
             {/* Casablanca hero image */}
@@ -1060,42 +1057,42 @@ function AppInner() {
               <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: 'url(/casablanca-night.jpg)' }} />
               <div className="absolute inset-0 bg-gradient-to-b from-navy-950/30 to-navy-950/80" />
               <div className="absolute bottom-4 left-6">
-                <p className="text-[9px] text-navy-400 tracking-widest uppercase">Casablanca · Centre financier de référence du Maroc</p>
+                <p className="text-[9px] text-navy-400 tracking-widest uppercase">Casablanca Â· Centre financier de rÃ©fÃ©rence du Maroc</p>
               </div>
             </div>
             <div className="bg-navy-900 border border-navy-800 rounded-xl p-8">
               <div className="flex items-center gap-4 mb-6 pb-6 border-b border-navy-800">
                 <LogoJad2Fx height={56} dark={true} showSub={true} />
                 <div className="border-l border-navy-700 pl-4">
-                  <p className="text-[10px] text-gold-500 tracking-wider mt-0.5">Outil de Données de Change MAD · Pédagogique</p>
+                  <p className="text-[10px] text-gold-500 tracking-wider mt-0.5">Outil de DonnÃ©es de Change MAD Â· PÃ©dagogique</p>
                 </div>
               </div>
 
               <div className="space-y-4 text-navy-300 text-[13px] leading-relaxed">
                 <p>
-                  <strong className="text-slate-200">JAD2FX</strong> est l'outil en ligne de données de change et de simulation pédagogique
+                  <strong className="text-slate-200">JAD2FX</strong> est l'outil en ligne de donnÃ©es de change et de simulation pÃ©dagogique
                   de <strong className="text-slate-200">JAD2 Advisory</strong>. Il permet aux entreprises et professionnels marocains de
-                  comprendre les dynamiques du marché des changes MAD et la réglementation de l'Office des Changes.
+                  comprendre les dynamiques du marchÃ© des changes MAD et la rÃ©glementation de l'Office des Changes.
                 </p>
                 <p>
-                  JAD2FX est un outil de référence et de simulation pédagogique — il ne constitue pas un conseil en investissement.
-                  Pour toute transaction ou conseil personnalisé, consultez un{' '}
-                  <strong className="text-slate-200">établissement de crédit agréé par Bank Al-Maghrib</strong>.
+                  JAD2FX est un outil de rÃ©fÃ©rence et de simulation pÃ©dagogique â€” il ne constitue pas un conseil en investissement.
+                  Pour toute transaction ou conseil personnalisÃ©, consultez un{' '}
+                  <strong className="text-slate-200">Ã©tablissement de crÃ©dit agrÃ©Ã© par Bank Al-Maghrib</strong>.
                 </p>
 
                 <h3 className="text-[11px] font-bold text-white mt-6 mb-3 uppercase tracking-[0.15em] flex items-center gap-2">
-                  <span className="w-4 h-px bg-gold-500 inline-block" /> Fonctionnalités
+                  <span className="w-4 h-px bg-gold-500 inline-block" /> FonctionnalitÃ©s
                 </h3>
                 <ul className="space-y-2">
                   {[
-                    `Données indicatives sur ${BKAM_CURRENCIES.length} devises (14 cotées BKAM + ${BKAM_CURRENCIES.length - 14} dérivées par taux croisés)`,
-                    'Simulateur pédagogique de forwards (formule CIP) et de swaps de change',
-                    'Référentiel réglementaire Office des Changes (circulaires, instructions, FAQs)',
-                    'Courbes de taux MONIA interpolées à titre informatif et pédagogique',
-                    'Market Report hebdomadaire généré par IA (Groq Llama 3.3 + Gemini 2.5)',
+                    `DonnÃ©es indicatives sur ${BKAM_CURRENCIES.length} devises (14 cotÃ©es BKAM + ${BKAM_CURRENCIES.length - 14} dÃ©rivÃ©es par taux croisÃ©s)`,
+                    'Simulateur pÃ©dagogique de forwards (formule CIP) et de swaps de change',
+                    'RÃ©fÃ©rentiel rÃ©glementaire Office des Changes (circulaires, instructions, FAQs)',
+                    'Courbes de taux MONIA interpolÃ©es Ã  titre informatif et pÃ©dagogique',
+                    'Market Report hebdomadaire gÃ©nÃ©rÃ© par IA (Groq Llama 3.3 + Gemini 2.5)',
                   ].map(f => (
                     <li key={f} className="flex items-start gap-2">
-                      <span className="text-gold-500 mt-0.5 flex-shrink-0 text-xs">▸</span>
+                      <span className="text-gold-500 mt-0.5 flex-shrink-0 text-xs">â–¸</span>
                       <span>{f}</span>
                     </li>
                   ))}
@@ -1105,15 +1102,15 @@ function AppInner() {
                   <span className="w-4 h-px bg-gold-500 inline-block" /> JAD2 Advisory
                 </h3>
                 <p>
-                  Cabinet de conseil stratégique et de formation en gestion du risque de change, enregistré au RC Casablanca.
-                  Services : formation équipes financières, conseil en stratégie de couverture, accompagnement réglementaire OC.
+                  Cabinet de conseil stratÃ©gique et de formation en gestion du risque de change, enregistrÃ© au RC Casablanca.
+                  Services : formation Ã©quipes financiÃ¨res, conseil en stratÃ©gie de couverture, accompagnement rÃ©glementaire OC.
                 </p>
 
                 <div className="mt-4 p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
                   <p className="text-[11px] text-amber-400/90">
-                    ℹ️ <strong className="text-amber-300">JAD2 Advisory fournit exclusivement</strong>{' '}
-                    conseil stratégique et formation en gestion du risque de change — sans exécution de transactions de change ni conseil en investissement.
-                    Pour vos opérations, adressez-vous à un établissement bancaire agréé.
+                    â„¹ï¸ <strong className="text-amber-300">JAD2 Advisory fournit exclusivement</strong>{' '}
+                    conseil stratÃ©gique et formation en gestion du risque de change â€” sans exÃ©cution de transactions de change ni conseil en investissement.
+                    Pour vos opÃ©rations, adressez-vous Ã  un Ã©tablissement bancaire agrÃ©Ã©.
                   </p>
                 </div>
 
@@ -1127,7 +1124,7 @@ function AppInner() {
                 </a>
 
                 <div className="mt-6 p-4 bg-navy-950 border border-navy-700 rounded-lg">
-                  <p className="text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Mentions Légales & Conformité</p>
+                  <p className="text-[11px] font-bold text-slate-400 mb-1.5 uppercase tracking-wider">Mentions LÃ©gales & ConformitÃ©</p>
                   <p className="text-xs text-slate-500 leading-relaxed">{DISCLAIMER_TEXT}</p>
                 </div>
               </div>
@@ -1137,13 +1134,13 @@ function AppInner() {
         </Suspense>
       </main>
 
-      {/* ══ Mobile-only bottom tab nav (B3.5) ════════════════════════════════ */}
+      {/* â•â• Mobile-only bottom tab nav (B3.5) â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <BottomNav view={view} navTo={navTo} />
 
-      {/* ══ Floating chatbot ═════════════════════════════════════════════════ */}
+      {/* â•â• Floating chatbot â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <FloatingChat />
 
-      {/* ══ In-platform contact drawer (Task 2.4) ═══════════════════════════ */}
+      {/* â•â• In-platform contact drawer (Task 2.4) â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       {contactDrawerOpen && (
         <div
           className="fixed inset-0 z-[9998] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-navy-950/85 backdrop-blur-sm"
@@ -1155,8 +1152,8 @@ function AppInner() {
           >
             <div className="px-6 py-4 border-b border-navy-800 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-bold text-white">Parler à un expert JAD2</h3>
-                <p className="text-[11px] text-slate-500 mt-0.5">Réponse sous 24h ouvrées · Confidentiel</p>
+                <h3 className="text-base font-bold text-white">Parler Ã  un expert JAD2</h3>
+                <p className="text-[11px] text-slate-500 mt-0.5">RÃ©ponse sous 24h ouvrÃ©es Â· Confidentiel</p>
               </div>
               <button
                 onClick={() => setContactDrawerOpen(false)}
@@ -1172,20 +1169,20 @@ function AppInner() {
         </div>
       )}
 
-      {/* ══ Footer ═══════════════════════════════════════════════════════════ */}
+      {/* â•â• Footer â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */}
       <footer className="bg-navy-900 text-slate-400 border-t border-navy-700 mt-auto">
         {/* Advisory CTA */}
         <div className="border-b border-navy-800 py-4">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div>
               <p className="text-sm font-bold text-white">Formation & Conseil en Gestion du Risque de Change</p>
-              <p className="text-xs text-slate-400">Cabinet de conseil · Formation en gestion du risque de change · Accompagnement réglementaire OC</p>
+              <p className="text-xs text-slate-400">Cabinet de conseil Â· Formation en gestion du risque de change Â· Accompagnement rÃ©glementaire OC</p>
             </div>
             <button
               onClick={() => setContactDrawerOpen(true)}
               className="flex-shrink-0 px-5 py-2 bg-gold-500 text-navy-950 text-sm font-bold rounded hover:bg-gold-400 transition-colors"
             >
-              Parler à un expert →
+              Parler Ã  un expert â†’
             </button>
           </div>
         </div>
@@ -1193,12 +1190,12 @@ function AppInner() {
         {/* Legal + content links */}
         <div className="py-6">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6">
-            {/* P4 — Footer resource links (SEO internal linking) */}
+            {/* P4 â€” Footer resource links (SEO internal linking) */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-6 pb-6 border-b border-navy-800">
               <div className="col-span-2 sm:col-span-3 md:col-span-2">
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-2">Ressources</p>
                 <p className="text-[10px] text-slate-600 leading-relaxed">
-                  Outil pédagogique de JAD2 Advisory. Données BKAM, BCE, et Yahoo Finance. Conformité OC 01/2024.
+                  Outil pÃ©dagogique de JAD2 Advisory. DonnÃ©es BKAM, BCE, et Yahoo Finance. ConformitÃ© OC 01/2024.
                 </p>
               </div>
               <div>
@@ -1210,10 +1207,10 @@ function AppInner() {
                 </ul>
               </div>
               <div>
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-2">Médias</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-2">MÃ©dias</p>
                 <ul className="space-y-1">
                   <li><button onClick={() => navTo('PRESS')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Press Kit</button></li>
-                  <li><button onClick={() => navTo('CITED')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Cité par</button></li>
+                  <li><button onClick={() => navTo('CITED')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">CitÃ© par</button></li>
                   <li><button onClick={() => navTo('PODCAST')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Podcast</button></li>
                 </ul>
               </div>
@@ -1226,9 +1223,9 @@ function AppInner() {
                 </ul>
               </div>
               <div>
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-2">Société</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-2">SociÃ©tÃ©</p>
                 <ul className="space-y-1">
-                  <li><button onClick={() => navTo('ABOUT_JAD2')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">À propos</button></li>
+                  <li><button onClick={() => navTo('ABOUT_JAD2')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Ã€ propos</button></li>
                   <li><button onClick={() => navTo('PARTNERSHIPS')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Partenaires</button></li>
                   <li><button onClick={() => navTo('CHANGELOG')} className="text-[11px] text-slate-400 hover:text-gold-400 transition-colors">Changelog</button></li>
                 </ul>
@@ -1238,11 +1235,11 @@ function AppInner() {
             <p className="text-xs leading-relaxed max-w-3xl mx-auto text-slate-500 text-center">{DISCLAIMER_TEXT}</p>
             <div className="flex flex-wrap justify-center gap-3 mt-3 text-xs text-slate-500">
               <span>ECB / Frankfurter</span>
-              <span className="text-slate-700">·</span>
+              <span className="text-slate-700">Â·</span>
               <span>Yahoo Finance</span>
-              <span className="text-slate-700">·</span>
+              <span className="text-slate-700">Â·</span>
               <span>BKAM Fixing</span>
-              <span className="text-slate-700">·</span>
+              <span className="text-slate-700">Â·</span>
               <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400 transition-colors">
                 jad2advisory.com
               </a>
@@ -1251,10 +1248,10 @@ function AppInner() {
               Market data from Yahoo Finance for educational purposes only. Not for commercial trading.
             </p>
             <p className="text-[10px] mt-2 text-slate-600 leading-relaxed max-w-3xl mx-auto">
-              JAD2 Advisory — Cabinet de conseil en management · Non établissement financier agréé BAM/AMMC ·
-              Loi n° 43-12 &amp; Dahir n° 1-13-21 · Les taux JAD2FX ne peuvent être utilisés comme
-              référence d'exécution conformément à la Méthodologie BKAM 2024 (§II) ·
-              Données personnelles : Loi marocaine 09-08 · CNDP Déclaration en cours
+              JAD2 Advisory â€” Cabinet de conseil en management Â· Non Ã©tablissement financier agrÃ©Ã© BAM/AMMC Â·
+              Loi nÂ° 43-12 &amp; Dahir nÂ° 1-13-21 Â· Les taux JAD2FX ne peuvent Ãªtre utilisÃ©s comme
+              rÃ©fÃ©rence d'exÃ©cution conformÃ©ment Ã  la MÃ©thodologie BKAM 2024 (Â§II) Â·
+              DonnÃ©es personnelles : Loi marocaine 09-08 Â· CNDP DÃ©claration en cours
             </p>
             <p className="text-xs mt-1.5 text-slate-600">{t('footer.copyright')}</p>
           </div>
@@ -1264,7 +1261,7 @@ function AppInner() {
   );
 }
 
-// ─── Root export ──────────────────────────────────────────────────────────────
+// â”€â”€â”€ Root export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function App() {
   return (
@@ -1279,3 +1276,4 @@ export default function App() {
     </ErrorBoundary>
   );
 }
+

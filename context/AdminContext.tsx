@@ -155,19 +155,51 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(config)); } catch {}
   }, [config]);
 
+  // P0-6: hydrate audit log from KV when admin is unlocked
+  useEffect(() => {
+    if (!isAdmin) return;
+    const base = (configRef.current.corsProxyUrl ?? '').replace(/\/$/, '');
+    if (!base) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch(`${base}/api/admin/audit`, {
+          method: 'GET',
+          credentials: 'include',
+          signal: AbortSignal.timeout(5_000),
+        });
+        if (cancelled || !res.ok) return;
+        const data = await res.json() as { entries: AuditEntry[] };
+        if (Array.isArray(data.entries) && data.entries.length) {
+          setAuditLog(data.entries);
+        }
+      } catch { /* offline */ }
+    })();
+    return () => { cancelled = true; };
+  }, [isAdmin]);
+
   const updateConfig = useCallback((patch: Partial<AdminConfig>) => {
     setConfigState(prev => ({ ...prev, ...patch }));
     const keys = Object.keys(patch).join(', ');
-    setAuditLog(prev => {
-      const entry: AuditEntry = {
-        id: String(++auditIdRef.current),
-        time: new Date().toISOString(),
-        action: 'CONFIG_UPDATE',
-        detail: `Fields updated: ${keys}`,
-        user: 'ADMIN',
-      };
-      return [entry, ...prev].slice(0, 200);
-    });
+    const entry: AuditEntry = {
+      id: String(++auditIdRef.current),
+      time: new Date().toISOString(),
+      action: 'CONFIG_UPDATE',
+      detail: `Fields updated: ${keys}`,
+      user: 'ADMIN',
+    };
+    setAuditLog(prev => [entry, ...prev].slice(0, 200));
+    // P0-6: persist to KV
+    const base = (configRef.current.corsProxyUrl ?? '').replace(/\/$/, '');
+    if (base) {
+      fetch(`${base}/api/admin/audit`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'CONFIG_UPDATE', detail: `Fields updated: ${keys}` }),
+        signal: AbortSignal.timeout(4_000),
+      }).catch(() => { /* offline */ });
+    }
   }, []);
 
   const resetConfig = useCallback(() => {
@@ -234,16 +266,25 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const clearBlotter = useCallback(() => setBlotter([]), []);
 
   const addAuditEntry = useCallback((action: string, detail: string) => {
-    setAuditLog(prev => {
-      const entry: AuditEntry = {
-        id: String(++auditIdRef.current),
-        time: new Date().toISOString(),
-        action,
-        detail,
-        user: 'ADMIN',
-      };
-      return [entry, ...prev].slice(0, 200);
-    });
+    const entry: AuditEntry = {
+      id: String(++auditIdRef.current),
+      time: new Date().toISOString(),
+      action,
+      detail,
+      user: 'ADMIN',
+    };
+    setAuditLog(prev => [entry, ...prev].slice(0, 200));
+    // P0-6: persist to worker KV (fire-and-forget; offline-safe)
+    const base = (configRef.current.corsProxyUrl ?? '').replace(/\/$/, '');
+    if (base) {
+      fetch(`${base}/api/admin/audit`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, detail }),
+        signal: AbortSignal.timeout(4_000),
+      }).catch(() => { /* offline → keep in-memory entry only */ });
+    }
   }, []);
 
   const clearAuditLog = useCallback(() => setAuditLog([]), []);

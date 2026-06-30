@@ -6,8 +6,9 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import { Bell, BellOff, X, AlertCircle } from 'lucide-react';
+import { Bell, BellOff, X, AlertCircle, Shield } from 'lucide-react';
 import { useWatchlist } from '../hooks/useWatchlist';
+import { useAdmin } from '../context/AdminContext';
 
 interface PriceAlert {
   code: string;
@@ -36,11 +37,26 @@ function setStored(alerts: PriceAlert[]) {
  */
 export default function PriceAlerts({ rates }: { rates: { currency: string; mid: number }[] }) {
   const { items } = useWatchlist();
+  const { config } = useAdmin();
   const [alerts, setAlerts] = useState<PriceAlert[]>(getStored);
   const [permission, setPermission] = useState<NotificationPermission>(
     typeof Notification !== 'undefined' ? Notification.permission : 'denied',
   );
   const lastRatesRef = useRef<Record<string, number>>({});
+
+  // P1-4: seed user-side alerts from admin-managed thresholds (only if missing locally)
+  useEffect(() => {
+    const adminThresholds = config.alertThresholds ?? [];
+    if (!adminThresholds.length) return;
+    setAlerts((prev) => {
+      const existing = new Set(prev.map((a) => a.code));
+      const additions: PriceAlert[] = adminThresholds
+        .filter((t) => t.enabled && !existing.has(t.pair))
+        .map((t) => ({ code: t.pair, above: t.max, below: t.min }));
+      if (!additions.length) return prev;
+      return [...prev, ...additions];
+    });
+  }, [config.alertThresholds]);
 
   // Persist
   useEffect(() => { setStored(alerts); }, [alerts]);

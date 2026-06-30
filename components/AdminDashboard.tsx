@@ -648,6 +648,81 @@ function AlertsTab() {
           </button>
         </div>
       </div>
+
+      {/* P1-1 — Band % (operator-controlled regulatory cage) */}
+      <BandSubPanel />
+    </div>
+  );
+}
+
+// P1-1 — Operator-controlled band % (regulatory cage around basket central parity)
+function BandSubPanel() {
+  const { config } = useAdmin();
+  const [bandPct, setBandPct] = useState<number | null>(null);
+  const [saving, setSaving]   = useState(false);
+  const [msg, setMsg]         = useState<string | null>(null);
+  const base = (config.corsProxyUrl ?? '').replace(/\/$/, '');
+
+  useEffect(() => {
+    if (!base) return;
+    fetch(`${base}/api/band-config`, { credentials: 'include', signal: AbortSignal.timeout(5_000) })
+      .then(r => r.json())
+      .then(d => { if (typeof d.bandPct === 'number') setBandPct(d.bandPct); })
+      .catch(() => { /* offline */ });
+  }, [base]);
+
+  const save = async (next: number) => {
+    if (!base) return;
+    setSaving(true);
+    setMsg(null);
+    try {
+      const res = await fetch(`${base}/api/admin/band`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bandPct: next }),
+        signal: AbortSignal.timeout(5_000),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setBandPct(next);
+      setMsg(`Bande mise à jour: ±${next.toFixed(2)}%`);
+      setTimeout(() => setMsg(null), 3000);
+    } catch (e) {
+      setMsg(`Erreur: ${String(e)}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="bg-navy-800 border border-navy-600 rounded p-4 space-y-2">
+      <p className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
+        <Activity size={11} /> Bande réglementaire ±%
+      </p>
+      <p className="text-[10px] text-slate-500 leading-snug">
+        Cage BKAM autour de la parité centrale du panier MAD (K=10,49 · 60% EUR / 40% USD).
+        Modifier cette valeur propage instantanément à la BkamBandsVisualizer.
+      </p>
+      <div className="flex items-center gap-3 flex-wrap">
+        <input
+          type="number"
+          step="0.1"
+          min="1"
+          max="10"
+          value={bandPct ?? 5}
+          onChange={(e) => setBandPct(parseFloat(e.target.value))}
+          className="w-24 bg-navy-900 border border-navy-600 text-white text-xs rounded px-2 py-1.5 focus:outline-none focus:border-gold-500 font-mono"
+        />
+        <span className="text-[10px] text-slate-400">%</span>
+        <button
+          onClick={() => bandPct != null && save(bandPct)}
+          disabled={saving || bandPct == null}
+          className="px-3 py-1.5 bg-gold-500 text-navy-900 text-xs font-bold rounded hover:bg-gold-400 transition disabled:opacity-50"
+        >
+          {saving ? 'Sauvegarde…' : 'Sauvegarder'}
+        </button>
+        {msg && <span className="text-[10px] text-emerald-400">{msg}</span>}
+      </div>
     </div>
   );
 }

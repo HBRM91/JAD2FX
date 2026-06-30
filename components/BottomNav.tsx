@@ -1,5 +1,5 @@
 import { Activity, TrendingUp, BarChart2, BookOpen, Menu, X, Search } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { ViewState } from '../types';
 
 interface Tab {
@@ -47,6 +47,16 @@ const MORE_ITEMS: { v: ViewState; l: string }[] = [
 export default function BottomNav({ view, navTo }: { view: ViewState; navTo: (v: ViewState) => void }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState('');
+
+  // P2-7: Escape closes the slide-up menu drawer
+  useEffect(() => {
+    if (typeof window === 'undefined' || !menuOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [menuOpen]);
 
   const onTab = (tab: Tab) => {
     if (tab.id === 'menu') { setMenuOpen(true); return; }

@@ -1,16 +1,16 @@
 /**
- * BkamBandsVisualizer — "The Cage & The Bird"
+ * BkamBandsVisualizer â€” "The Cage & The Bird"
  *
- * Visualises the BKAM ±5% intervention band for EUR/MAD and USD/MAD.
- * The "cage"  = the ±5% band around the basket central parity (K = 10.49).
+ * Visualises the BKAM Â±5% intervention band for EUR/MAD and USD/MAD.
+ * The "cage"  = the Â±5% band around the basket central parity (K = 10.49).
  * The "bird"  = today's live fixing / mid-rate.
  *
- * Basket formula:  USD/MAD_central = K / (w_EUR × EUR/USD + w_USD)
- *                  EUR/MAD_central = USD/MAD_central × EUR/USD
+ * Basket formula:  USD/MAD_central = K / (w_EUR Ã— EUR/USD + w_USD)
+ *                  EUR/MAD_central = USD/MAD_central Ã— EUR/USD
  *
  * BKAM widened the band in two phases:
- *   Jan 2018 → ±2.5%   (Phase I, controlled float)
- *   Mar 2020 → ±5%     (Phase II, enlarged float — current regime)
+ *   Jan 2018 â†’ Â±2.5%   (Phase I, controlled float)
+ *   Mar 2020 â†’ Â±5%     (Phase II, enlarged float â€” current regime)
  *
  * A NARROWING drift (bird near the floor) signals MAD strength vs basket.
  * A WIDENING drift (bird near the ceiling) signals MAD weakness vs basket.
@@ -23,6 +23,7 @@ import {
 } from 'recharts';
 import { AlertTriangle, TrendingUp, TrendingDown, Minus, RefreshCw, Info, Printer } from 'lucide-react';
 import { DEFAULT_BASKET_CONFIG } from '../constants';
+import { BKAM_LINKS } from '../constants/bkamLinks';
 import { useAdmin } from '../context/AdminContext';
 import FixingCalendar from './FixingCalendar';
 import ProvenanceChip from './ProvenanceChip';
@@ -30,15 +31,15 @@ import { computeDriftModel, DriftRegression, DriftPoint } from '../services/drif
 import { fetchDriftHistory, fetchBandConfig, driftStats, DriftHistoryPoint, BandAlert } from '../services/driftHistory';
 import CurrencyFlag from './CurrencyFlag';
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const K     = DEFAULT_BASKET_CONFIG.referenceBasketValue;
 const EUR_W = DEFAULT_BASKET_CONFIG.eurWeight;
 const USD_W = DEFAULT_BASKET_CONFIG.usdWeight;
-const BAND  = 0.05;   // ±5% current regime
-const PHASE1_BAND = 0.025; // ±2.5% phase I reference
+const BAND  = 0.05;   // Â±5% current regime
+const PHASE1_BAND = 0.025; // Â±2.5% phase I reference
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface BandState {
   spot: number;
@@ -47,7 +48,7 @@ interface BandState {
   lower: number;
   phase1Upper: number;
   phase1Lower: number;
-  utilPct: number;        // 0–100%, 50 = at central parity
+  utilPct: number;        // 0â€“100%, 50 = at central parity
   distToCeilingBps: number;
   distToFloorBps: number;
   distToCeilingPct: number;
@@ -72,7 +73,7 @@ function calcBand(spot: number, central: number): BandState {
   return { spot, central, upper, lower, phase1Upper, phase1Lower, utilPct, distToCeilingBps, distToFloorBps, distToCeilingPct, distToFloorPct, zone };
 }
 
-// ─── Sub: Horizontal Gauge ────────────────────────────────────────────────────
+// â”€â”€â”€ Sub: Horizontal Gauge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function BandGauge({ data, pair, countryCode }: { data: BandState; pair: string; countryCode: string }) {
   const pct = Math.max(1, Math.min(99, data.utilPct));
@@ -95,7 +96,7 @@ function BandGauge({ data, pair, countryCode }: { data: BandState; pair: string;
           <div>
             <p className="text-[13px] font-bold text-white font-mono">{pair}</p>
             <p className="text-[10px] text-navy-500 uppercase tracking-wider">
-              Panier {countryCode === 'eu' ? '60% EUR' : '40% USD'} · BKAM Phase II ±5%
+              Panier {countryCode === 'eu' ? '60% EUR' : '40% USD'} Â· BKAM Phase II Â±5%
             </p>
           </div>
         </div>
@@ -105,14 +106,14 @@ function BandGauge({ data, pair, countryCode }: { data: BandState; pair: string;
             data.zone === 'SAFE' ? 'text-emerald-400' : data.zone === 'CAUTION' ? 'text-amber-400' : 'text-red-400'
           }`}>
             <ZoneIcon size={10} />
-            {data.zone === 'SAFE' ? 'ZONE NEUTRE' : data.zone === 'CAUTION' ? 'APPROCHE LIMITE' : 'PROXIMITÉ BANDE'}
+            {data.zone === 'SAFE' ? 'ZONE NEUTRE' : data.zone === 'CAUTION' ? 'APPROCHE LIMITE' : 'PROXIMITÃ‰ BANDE'}
           </div>
         </div>
       </div>
 
       {/* Gauge track */}
       <div className="relative h-12 rounded-lg overflow-visible bg-navy-800 border border-navy-700">
-        {/* Full gradient background: red → amber → green → amber → red */}
+        {/* Full gradient background: red â†’ amber â†’ green â†’ amber â†’ red */}
         <div className="absolute inset-0 rounded-lg overflow-hidden">
           <div className="h-full w-full" style={{
             background: 'linear-gradient(to right, #ef4444 0%, #f59e0b 10%, #10b981 30%, #10b981 70%, #f59e0b 90%, #ef4444 100%)',
@@ -132,7 +133,7 @@ function BandGauge({ data, pair, countryCode }: { data: BandState; pair: string;
           </div>
         </div>
 
-        {/* The Bird — current rate indicator */}
+        {/* The Bird â€” current rate indicator */}
         <div
           className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-20 transition-all duration-700"
           style={{ left: `${pct}%` }}
@@ -141,7 +142,7 @@ function BandGauge({ data, pair, countryCode }: { data: BandState; pair: string;
             className="w-4 h-10 rounded-sm flex items-center justify-center shadow-lg"
             style={{ backgroundColor: birdColor, boxShadow: `0 0 8px ${birdColor}60` }}
           >
-            <span className="text-[14px] select-none" title="Position actuelle">🐦</span>
+            <span className="text-[14px] select-none" title="Position actuelle">ðŸ¦</span>
           </div>
         </div>
       </div>
@@ -150,10 +151,10 @@ function BandGauge({ data, pair, countryCode }: { data: BandState; pair: string;
       <div className="flex justify-between text-[9px] text-navy-500 font-mono px-0.5">
         <div className="text-left">
           <p className="font-bold text-red-400">{data.lower.toFixed(4)}</p>
-          <p>PLANCHER −5%</p>
+          <p>PLANCHER âˆ’5%</p>
         </div>
         <div className="text-center">
-          <p className="text-[8px] text-blue-400/70">±2.5% Phase I</p>
+          <p className="text-[8px] text-blue-400/70">Â±2.5% Phase I</p>
         </div>
         <div className="text-right">
           <p className="font-bold text-red-400">{data.upper.toFixed(4)}</p>
@@ -167,7 +168,7 @@ function BandGauge({ data, pair, countryCode }: { data: BandState; pair: string;
           { label: 'Utilisation', value: `${(Math.abs(data.utilPct - 50) * 2).toFixed(1)}%`, sub: 'de la bande', color: birdColor },
           { label: 'Dist. Plafond', value: `${data.distToCeilingBps} pb`, sub: `${data.distToCeilingPct}%`, color: data.utilPct > 70 ? '#f59e0b' : '#94a3b8' },
           { label: 'Dist. Plancher', value: `${data.distToFloorBps} pb`, sub: `${data.distToFloorPct}%`, color: data.utilPct < 30 ? '#f59e0b' : '#94a3b8' },
-          { label: 'Position', value: `${data.utilPct > 50 ? '+' : ''}${(data.spot - data.central).toFixed(4)}`, sub: 'vs parité', color: data.utilPct > 50 ? '#f59e0b' : '#10b981' },
+          { label: 'Position', value: `${data.utilPct > 50 ? '+' : ''}${(data.spot - data.central).toFixed(4)}`, sub: 'vs paritÃ©', color: data.utilPct > 50 ? '#f59e0b' : '#10b981' },
         ].map(m => (
           <div key={m.label} className="bg-navy-900 border border-navy-800 rounded px-2 py-1.5 text-center">
             <p className="text-[9px] text-navy-500 uppercase tracking-wider">{m.label}</p>
@@ -180,21 +181,21 @@ function BandGauge({ data, pair, countryCode }: { data: BandState; pair: string;
   );
 }
 
-// ─── Sub: Drift Chart ─────────────────────────────────────────────────────────
+// â”€â”€â”€ Sub: Drift Chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function DriftChart({ drift, loading }: { drift: DriftRegression | null; loading: boolean }) {
   if (loading) {
     return (
       <div className="h-40 flex items-center justify-center gap-2 text-navy-500 text-sm">
         <RefreshCw size={14} className="animate-spin" />
-        <span>Chargement dérive BKAM…</span>
+        <span>Chargement dÃ©rive BKAMâ€¦</span>
       </div>
     );
   }
   if (!drift || drift.points.length < 2) {
     return (
       <div className="h-40 flex items-center justify-center text-navy-600 text-sm">
-        Données de dérive non disponibles — vérifiez la connexion proxy.
+        DonnÃ©es de dÃ©rive non disponibles â€” vÃ©rifiez la connexion proxy.
       </div>
     );
   }
@@ -214,20 +215,20 @@ function DriftChart({ drift, loading }: { drift: DriftRegression | null; loading
       <div className="flex items-center justify-between">
         <div>
           <p className="text-[11px] font-bold text-white uppercase tracking-wider">
-            Dérive BKAM vs Parité Panier · {drift.points.length}j
+            DÃ©rive BKAM vs ParitÃ© Panier Â· {drift.points.length}j
           </p>
           <p className="text-[10px] text-navy-500">
-            (Fixing officiel − parité théorique) en points de base · Positif = MAD faible vs panier
+            (Fixing officiel âˆ’ paritÃ© thÃ©orique) en points de base Â· Positif = MAD faible vs panier
           </p>
         </div>
         <div className="flex items-center gap-2 bg-navy-900 border border-navy-800 rounded px-3 py-1.5">
           <TrendIcon size={12} style={{ color: trendColor }} />
           <div className="text-right">
             <p className="text-[10px] font-bold" style={{ color: trendColor }}>
-              {drift.trendDir === 'WIDENING' ? 'ÉLARGISSEMENT' : drift.trendDir === 'NARROWING' ? 'RESSERREMENT' : 'STABLE'}
+              {drift.trendDir === 'WIDENING' ? 'Ã‰LARGISSEMENT' : drift.trendDir === 'NARROWING' ? 'RESSERREMENT' : 'STABLE'}
             </p>
             <p className="text-[9px] text-navy-500">
-              β = {drift.beta >= 0 ? '+' : ''}{drift.beta.toFixed(1)} pb/j · R²={drift.r2.toFixed(2)}
+              Î² = {drift.beta >= 0 ? '+' : ''}{drift.beta.toFixed(1)} pb/j Â· RÂ²={drift.r2.toFixed(2)}
             </p>
           </div>
         </div>
@@ -242,7 +243,7 @@ function DriftChart({ drift, loading }: { drift: DriftRegression | null; loading
             <YAxis tick={{ fill: '#3D6491', fontSize: 9 }} unit=" pb" width={48} />
             <Tooltip
               contentStyle={{ background: '#0A1628', border: '1px solid #1C3558', borderRadius: 6, fontSize: 11 }}
-              formatter={((v: number, name: string) => [`${v} pb`, name === 'drift' ? 'Dérive réelle' : 'Tendance OLS']) as any}
+              formatter={((v: number, name: string) => [`${v} pb`, name === 'drift' ? 'DÃ©rive rÃ©elle' : 'Tendance OLS']) as any}
             />
             <ReferenceLine y={0} stroke="#D4AF37" strokeWidth={1} strokeDasharray="4 2" />
             <Area dataKey="drift" fill="#D4AF37" fillOpacity={0.1} stroke="#D4AF37" strokeWidth={1.5} dot={{ r: 3, fill: '#D4AF37' }} name="drift" />
@@ -251,15 +252,15 @@ function DriftChart({ drift, loading }: { drift: DriftRegression | null; loading
         </ResponsiveContainer>
       </div>
 
-      {/* Key stats — 6-cell grid (2 rows × 3) */}
+      {/* Key stats â€” 6-cell grid (2 rows Ã— 3) */}
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 text-center">
         {[
-          { label: 'Dérive actuelle', value: `${drift.latestDriftBps >= 0 ? '+' : ''}${drift.latestDriftBps.toFixed(0)} pb`, color: Math.abs(drift.latestDriftBps) > 20 ? '#f59e0b' : '#94a3b8', title: 'Dérive = fixing BKAM − parité panier (ECB EUR/USD exogène). Non-circulaire.' },
-          { label: 'Pente OLS β', value: `${drift.beta >= 0 ? '+' : ''}${drift.beta.toFixed(1)} pb/j`, color: trendColor, title: 'Pente de la régression OLS sur les N derniers jours. Positif = creusement de la dérive.' },
-          { label: 'R²', value: drift.r2.toFixed(2), color: drift.r2 > 0.7 ? '#10b981' : '#94a3b8', title: 'Coefficient de détermination du modèle OLS.' },
-          { label: 'Util. bande', value: `${drift.bandUtilLatest.toFixed(0)}%`, color: drift.bandUtilLatest > 65 || drift.bandUtilLatest < 35 ? '#f59e0b' : '#10b981', title: 'Utilisation actuelle de la bande ±5% BKAM. 50% = parité centrale.' },
-          { label: 'Util. moy.', value: `${drift.bandUtilAvg.toFixed(0)}%`, color: '#94a3b8', title: 'Utilisation moyenne de la bande sur la période.' },
-          { label: 'Source', value: drift.dataSource === 'BKAM_OFFICIAL' ? '✓ BKAM' : drift.dataSource === 'ECB_PROXY' ? 'ECB' : 'MIXTE', color: drift.dataSource === 'BKAM_OFFICIAL' ? '#10b981' : '#f59e0b', title: drift.dataSource === 'BKAM_OFFICIAL' ? 'Fixing interb. pondéré (Doc 1 §I.1.a)' : 'Proxy ECB/Frankfurter.' },
+          { label: 'DÃ©rive actuelle', value: `${drift.latestDriftBps >= 0 ? '+' : ''}${drift.latestDriftBps.toFixed(0)} pb`, color: Math.abs(drift.latestDriftBps) > 20 ? '#f59e0b' : '#94a3b8', title: 'DÃ©rive = fixing BKAM âˆ’ paritÃ© panier (ECB EUR/USD exogÃ¨ne). Non-circulaire.' },
+          { label: 'Pente OLS Î²', value: `${drift.beta >= 0 ? '+' : ''}${drift.beta.toFixed(1)} pb/j`, color: trendColor, title: 'Pente de la rÃ©gression OLS sur les N derniers jours. Positif = creusement de la dÃ©rive.' },
+          { label: 'RÂ²', value: drift.r2.toFixed(2), color: drift.r2 > 0.7 ? '#10b981' : '#94a3b8', title: 'Coefficient de dÃ©termination du modÃ¨le OLS.' },
+          { label: 'Util. bande', value: `${drift.bandUtilLatest.toFixed(0)}%`, color: drift.bandUtilLatest > 65 || drift.bandUtilLatest < 35 ? '#f59e0b' : '#10b981', title: 'Utilisation actuelle de la bande Â±5% BKAM. 50% = paritÃ© centrale.' },
+          { label: 'Util. moy.', value: `${drift.bandUtilAvg.toFixed(0)}%`, color: '#94a3b8', title: 'Utilisation moyenne de la bande sur la pÃ©riode.' },
+          { label: 'Source', value: drift.dataSource === 'BKAM_OFFICIAL' ? 'âœ“ BKAM' : drift.dataSource === 'ECB_PROXY' ? 'ECB' : 'MIXTE', color: drift.dataSource === 'BKAM_OFFICIAL' ? '#10b981' : '#f59e0b', title: drift.dataSource === 'BKAM_OFFICIAL' ? 'Fixing interb. pondÃ©rÃ© (Doc 1 Â§I.1.a)' : 'Proxy ECB/Frankfurter.' },
         ].map(m => (
           <div key={m.label} className="bg-navy-900 border border-navy-800 rounded px-2 py-1.5" title={m.title}>
             <p className="text-[9px] text-navy-500 uppercase tracking-wider">{m.label}</p>
@@ -270,15 +271,15 @@ function DriftChart({ drift, loading }: { drift: DriftRegression | null; loading
 
       {/* Method footnote per BKAM Doc 1 */}
       <p className="text-[8px] text-navy-700 font-mono leading-relaxed">
-        Dérive = (USD/MAD_BKAM − USD/MAD_basket) / USD/MAD_basket × 10 000 pb ·
-        Basket = K / (w_EUR × EUR/USD_ECB + w_USD), K=10.49 ·
-        Source: Doc 1 §I méthode principale (transactions &gt;12M USD, &gt;6 opérations, &gt;6 TM) ou méthode de substitution (cotations fermes 5 min)
+        DÃ©rive = (USD/MAD_BKAM âˆ’ USD/MAD_basket) / USD/MAD_basket Ã— 10 000 pb Â·
+        Basket = K / (w_EUR Ã— EUR/USD_ECB + w_USD), K=10.49 Â·
+        Source: Doc 1 Â§I mÃ©thode principale (transactions &gt;12M USD, &gt;6 opÃ©rations, &gt;6 TM) ou mÃ©thode de substitution (cotations fermes 5 min)
       </p>
     </div>
   );
 }
 
-// ─── Historical drift chart ───────────────────────────────────────────────────
+// â”€â”€â”€ Historical drift chart â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type HistDays = 30 | 60 | 90 | 180;
 
@@ -302,14 +303,14 @@ function HistoricalDriftChart({ corsProxyUrl }: { corsProxyUrl: string }) {
 
   if (loading) return (
     <div className="h-48 flex items-center justify-center gap-2 text-navy-500 text-xs">
-      <RefreshCw size={13} className="animate-spin" /> Chargement historique…
+      <RefreshCw size={13} className="animate-spin" /> Chargement historiqueâ€¦
     </div>
   );
   if (error || !data.length) return (
     <div className="h-48 flex items-center justify-center text-navy-600 text-xs text-center px-4">
       {error
-        ? 'Historique non disponible — le proxy doit être configuré et le cron doit avoir tourné au moins une fois.'
-        : `Aucun point d'historique pour les ${days} derniers jours. L'historique s'accumule au fil des jours ouvrés.`}
+        ? 'Historique non disponible â€” le proxy doit Ãªtre configurÃ© et le cron doit avoir tournÃ© au moins une fois.'
+        : `Aucun point d'historique pour les ${days} derniers jours. L'historique s'accumule au fil des jours ouvrÃ©s.`}
     </div>
   );
 
@@ -324,7 +325,7 @@ function HistoricalDriftChart({ corsProxyUrl }: { corsProxyUrl: string }) {
 
   const maxAbsDrift = Math.max(Math.abs(stats?.min ?? 0), Math.abs(stats?.max ?? 0), 20);
   const yDomain: [number, number] = [-Math.ceil(maxAbsDrift * 1.15), Math.ceil(maxAbsDrift * 1.15)];
-  // Alert thresholds in bps: ±5% band ≈ ±500 bps max; show ±100 bps caution lines
+  // Alert thresholds in bps: Â±5% band â‰ˆ Â±500 bps max; show Â±100 bps caution lines
   const cautionBps = 100;
 
   return (
@@ -333,10 +334,10 @@ function HistoricalDriftChart({ corsProxyUrl }: { corsProxyUrl: string }) {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <p className="text-[11px] font-bold text-white uppercase tracking-wider">
-            Historique de Dérive — {data.length} jours ouvrés
+            Historique de DÃ©rive â€” {data.length} jours ouvrÃ©s
           </p>
           <p className="text-[9px] text-navy-500">
-            Fixing BKAM officiel − parité panier théorique (EUR/USD ECB à l'heure du fixing)
+            Fixing BKAM officiel âˆ’ paritÃ© panier thÃ©orique (EUR/USD ECB Ã  l'heure du fixing)
           </p>
         </div>
         <div className="flex gap-1">
@@ -366,14 +367,14 @@ function HistoricalDriftChart({ corsProxyUrl }: { corsProxyUrl: string }) {
           <AlertTriangle size={12} className="flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-bold text-[10px]">
-              ⚠️ Alerte bande ({alert.severity}) — {new Date(alert.detectedAt).toLocaleDateString('fr-MA')}
+              âš ï¸ Alerte bande ({alert.severity}) â€” {new Date(alert.detectedAt).toLocaleDateString('fr-MA')}
             </p>
             <p className="text-[10px] opacity-90 leading-relaxed">{alert.message}</p>
           </div>
         </div>
       )}
 
-      {/* Chart — drift bps over time */}
+      {/* Chart â€” drift bps over time */}
       <div className="h-44">
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart data={chartData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
@@ -388,12 +389,12 @@ function HistoricalDriftChart({ corsProxyUrl }: { corsProxyUrl: string }) {
               contentStyle={{ background: '#0A1628', border: '1px solid #1C3558', borderRadius: 6, fontSize: 10 }}
               formatter={((v: number, name: string) => [
                 name === 'drift' ? `${v} pb` : name === 'util' ? `${v}%` : v.toFixed(4),
-                name === 'drift' ? 'Dérive (pb)' : name === 'util' ? 'Util. bande %' : name,
+                name === 'drift' ? 'DÃ©rive (pb)' : name === 'util' ? 'Util. bande %' : name,
               ]) as any}
               labelFormatter={((l: string, payload: any) => payload?.[0]?.payload?.date ?? l) as any}
             />
             {/* Zero line = at basket parity */}
-            <ReferenceLine y={0} stroke="#D4AF37" strokeWidth={1} strokeDasharray="4 2" label={{ value: 'Parité', fill: '#8a6a20', fontSize: 8 }} />
+            <ReferenceLine y={0} stroke="#D4AF37" strokeWidth={1} strokeDasharray="4 2" label={{ value: 'ParitÃ©', fill: '#8a6a20', fontSize: 8 }} />
             {/* Caution lines */}
             <ReferenceLine y={cautionBps}  stroke="#f59e0b" strokeWidth={0.5} strokeDasharray="3 3" />
             <ReferenceLine y={-cautionBps} stroke="#10b981" strokeWidth={0.5} strokeDasharray="3 3" />
@@ -415,12 +416,12 @@ function HistoricalDriftChart({ corsProxyUrl }: { corsProxyUrl: string }) {
         <div className="grid grid-cols-4 sm:grid-cols-7 gap-1.5 text-center">
           {[
             { label: 'Moy.', value: `${stats.mean >= 0 ? '+' : ''}${stats.mean.toFixed(0)}pb`, color: Math.abs(stats.mean) < 20 ? '#10b981' : '#f59e0b' },
-            { label: 'Écart-type', value: `${stats.stdDev.toFixed(0)}pb`, color: '#94a3b8' },
+            { label: 'Ã‰cart-type', value: `${stats.stdDev.toFixed(0)}pb`, color: '#94a3b8' },
             { label: 'Min', value: `${stats.min.toFixed(0)}pb`, color: '#10b981' },
             { label: 'Max', value: `${stats.max.toFixed(0)}pb`, color: '#f59e0b' },
             { label: 'Util. moy.', value: `${stats.avgBandUtil}%`, color: stats.avgBandUtil > 65 || stats.avgBandUtil < 35 ? '#f59e0b' : '#10b981' },
-            { label: '↑ MAD−', value: `${stats.positiveCount}j`, color: '#f59e0b', title: 'Jours MAD plus faible que panier' },
-            { label: '↓ MAD+', value: `${stats.negativeCount}j`, color: '#10b981', title: 'Jours MAD plus fort que panier' },
+            { label: 'â†‘ MADâˆ’', value: `${stats.positiveCount}j`, color: '#f59e0b', title: 'Jours MAD plus faible que panier' },
+            { label: 'â†“ MAD+', value: `${stats.negativeCount}j`, color: '#10b981', title: 'Jours MAD plus fort que panier' },
           ].map(m => (
             <div key={m.label} className="bg-navy-900 border border-navy-800 rounded px-1.5 py-1" title={m.title}>
               <p className="text-[8px] text-navy-500 uppercase tracking-wider leading-tight">{m.label}</p>
@@ -431,14 +432,14 @@ function HistoricalDriftChart({ corsProxyUrl }: { corsProxyUrl: string }) {
       )}
 
       <p className="text-[8px] text-navy-700 font-mono">
-        Bande assumée: ±{(bandPct * 100).toFixed(1)}% · Méthodologie: K/(w_EUR×EUR/USD_ECB+w_USD), K=10.49
-        · Les données s'accumulent quotidiennement via le cron BKAM à 09h00 Casablanca
+        Bande assumÃ©e: Â±{(bandPct * 100).toFixed(1)}% Â· MÃ©thodologie: K/(w_EURÃ—EUR/USD_ECB+w_USD), K=10.49
+        Â· Les donnÃ©es s'accumulent quotidiennement via le cron BKAM Ã  09h00 Casablanca
       </p>
     </div>
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function BkamBandsVisualizer({ compact = false }: { compact?: boolean }) {
   const { config, livePrices } = useAdmin();
@@ -476,47 +477,47 @@ export default function BkamBandsVisualizer({ compact = false }: { compact?: boo
 
   return (
     <div className="bg-navy-900 border border-navy-800 rounded-xl overflow-hidden">
-      {/* ── Header ────────────────────────────────────────────────── */}
+      {/* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="px-5 py-3 border-b border-navy-800 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-lg">🪤</span>
+          <span className="text-lg">ðŸª¤</span>
           <div>
             <h3 className="text-[11px] font-bold text-white uppercase tracking-[0.15em]">
-              La Cage & L'Oiseau — Bande BKAM ±5%
+              La Cage & L'Oiseau â€” Bande BKAM Â±5%
             </h3>
             <p className="text-[9px] text-navy-500">
-              Panier 60% EUR / 40% USD · K = {K} · Régime Phase II (mars 2020)
+              Panier 60% EUR / 40% USD Â· K = {K} Â· RÃ©gime Phase II (mars 2020)
             </p>
           </div>
         </div>
         <button
           onClick={() => setShowInfo(v => !v)}
           className="text-navy-500 hover:text-gold-400 transition-colors"
-          title="Méthodologie"
+          title="MÃ©thodologie"
         >
           <Info size={14} />
         </button>
       </div>
 
-      {/* ── Methodology note ──────────────────────────────────────── */}
+      {/* â”€â”€ Methodology note â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {showInfo && (
         <div className="px-5 py-3 bg-navy-950/40 border-b border-navy-800 text-[11px] text-navy-400 leading-relaxed space-y-1.5">
           <p>
-            <strong className="text-slate-300">Méthodologie de la bande :</strong> Bank Al-Maghrib gère le dirham dans une bande de ±5%
-            autour d'une parité centrale calculée par le panier de référence (60% EUR + 40% USD, valeur K = {K}).
+            <strong className="text-slate-300">MÃ©thodologie de la bande :</strong> Bank Al-Maghrib gÃ¨re le dirham dans une bande de Â±5%
+            autour d'une paritÃ© centrale calculÃ©e par le panier de rÃ©fÃ©rence (60% EUR + 40% USD, valeur K = {K}).
           </p>
           <p>
             <strong className="text-slate-300">Formule panier :</strong>{' '}
             <code className="bg-navy-800 px-1 rounded font-mono text-[10px]">
-              USD/MAD_central = K / (0,60 × EUR/USD + 0,40)
+              USD/MAD_central = K / (0,60 Ã— EUR/USD + 0,40)
             </code>
           </p>
           <p>
-            <strong className="text-slate-300">La dérive :</strong> Écart entre le fixing BKAM officiel et la parité théorique du panier en points de base.
-            Une dérive positive signifie que BKAM laisse le MAD se déprécier au-delà du panier.
+            <strong className="text-slate-300">La dÃ©rive :</strong> Ã‰cart entre le fixing BKAM officiel et la paritÃ© thÃ©orique du panier en points de base.
+            Une dÃ©rive positive signifie que BKAM laisse le MAD se dÃ©prÃ©cier au-delÃ  du panier.
           </p>
           <p className="text-[10px] text-navy-600">
-            Phase I (jan. 2018) : ±2,5% · Phase II (mars 2020) : ±5% (régime actuel).
+            Phase I (jan. 2018) : Â±2,5% Â· Phase II (mars 2020) : Â±5% (rÃ©gime actuel).
             Source : BKAM CoursVirement officiel.
           </p>
         </div>
@@ -526,7 +527,7 @@ export default function BkamBandsVisualizer({ compact = false }: { compact?: boo
         {!hasRates ? (
           <div className="text-center py-8 text-navy-600 text-sm">
             <RefreshCw size={20} className="animate-spin mx-auto mb-2 text-navy-700" />
-            Chargement des taux BKAM en cours…
+            Chargement des taux BKAM en coursâ€¦
           </div>
         ) : (
           <>
@@ -550,12 +551,12 @@ export default function BkamBandsVisualizer({ compact = false }: { compact?: boo
 
             {/* Basket parity breakdown */}
             <div>
-              <p className="text-[10px] font-bold text-white uppercase tracking-wider mb-3">Parité Théorique du Panier</p>
+              <p className="text-[10px] font-bold text-white uppercase tracking-wider mb-3">ParitÃ© ThÃ©orique du Panier</p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
-                  { label: 'EUR/USD implicite', value: eurUsd.toFixed(4), sub: 'EUR/MAD ÷ USD/MAD', color: 'text-blue-400' },
-                  { label: 'USD/MAD central', value: usdCentral.toFixed(4), sub: `K÷(0.6×${eurUsd.toFixed(3)}+0.4)`, color: 'text-gold-400' },
-                  { label: 'EUR/MAD central', value: eurCentral.toFixed(4), sub: `USD/MAD × ${eurUsd.toFixed(3)}`, color: 'text-gold-400' },
+                  { label: 'EUR/USD implicite', value: eurUsd.toFixed(4), sub: 'EUR/MAD Ã· USD/MAD', color: 'text-blue-400' },
+                  { label: 'USD/MAD central', value: usdCentral.toFixed(4), sub: `KÃ·(0.6Ã—${eurUsd.toFixed(3)}+0.4)`, color: 'text-gold-400' },
+                  { label: 'EUR/MAD central', value: eurCentral.toFixed(4), sub: `USD/MAD Ã— ${eurUsd.toFixed(3)}`, color: 'text-gold-400' },
                 ].map(m => (
                   <div key={m.label} className="bg-navy-950 border border-navy-800 rounded-lg p-3 text-center">
                     <p className="text-[9px] text-navy-500 uppercase tracking-wider">{m.label}</p>
@@ -566,7 +567,7 @@ export default function BkamBandsVisualizer({ compact = false }: { compact?: boo
               </div>
             </div>
 
-            {/* Drift chart (recent 7d) — only when not compact */}
+            {/* Drift chart (recent 7d) â€” only when not compact */}
             {!compact && (
               <>
                 <div className="border-t border-navy-800" />
@@ -574,7 +575,7 @@ export default function BkamBandsVisualizer({ compact = false }: { compact?: boo
               </>
             )}
 
-            {/* Historical drift — requires cron to have run at least once */}
+            {/* Historical drift â€” requires cron to have run at least once */}
             {!compact && config.corsProxyUrl && (
               <>
                 <div className="border-t border-navy-800" />
@@ -584,10 +585,10 @@ export default function BkamBandsVisualizer({ compact = false }: { compact?: boo
           </>
         )}
 
-        {/* P1.19 — Fixing calendar */}
+        {/* P1.19 â€” Fixing calendar */}
         <FixingCalendar />
 
-        {/* P2.24 — Print CTA */}
+        {/* P2.24 â€” Print CTA */}
         <div className="flex items-center justify-end gap-2">
           <button
             onClick={() => {
@@ -604,11 +605,11 @@ export default function BkamBandsVisualizer({ compact = false }: { compact?: boo
         <div className="flex items-start gap-2 bg-navy-950/50 border border-navy-800/60 rounded-lg px-3 py-2">
           <AlertTriangle size={11} className="text-amber-500/70 flex-shrink-0 mt-0.5" />
           <p className="text-[9px] text-navy-600 leading-relaxed">
-            Bandes calculées sur la base des taux indicatifs JAD2FX. Pour le fixing officiel quotidien, consultez{' '}
-            <a href="https://www.bkam.ma" target="_blank" rel="noopener noreferrer" className="text-blue-500/70 hover:text-blue-400 underline">
+            Bandes calculÃ©es sur la base des taux indicatifs JAD2FX. Pour le fixing officiel quotidien, consultez{' '}
+            <a href={BKAM_LINKS.mainSite} target="_blank" rel="noopener noreferrer" className="text-blue-500/70 hover:text-blue-400 underline">
               bkam.ma
             </a>
-            {' '}· Données à titre pédagogique uniquement — JAD2 Advisory, conseil stratégique & formation.
+            {' '}Â· DonnÃ©es Ã  titre pÃ©dagogique uniquement â€” JAD2 Advisory, conseil stratÃ©gique & formation.
           </p>
         </div>
       </div>

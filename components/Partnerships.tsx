@@ -1,19 +1,20 @@
 /**
- * P4.18 — Partnerships page.
+ * P4.18 â€” Partnerships page.
  * Institutional, academic, and media partners.
  */
 
 import { Handshake, Building2, GraduationCap, Newspaper, ExternalLink, Award } from 'lucide-react';
+import { BKAM_LINKS } from '../constants/bkamLinks';
 
 const PARTNERS = [
   {
-    category: 'Académique',
+    category: 'AcadÃ©mique',
     icon: GraduationCap,
     color: 'text-purple-400',
     items: [
-      { name: 'ISCAE Casablanca', desc: 'Master Banque & Finance — formation continue', url: 'https://www.iscae.ma' },
-      { name: 'ENCG Settat',       desc: 'Master Commerce International — module FX', url: 'https://www.encgsettat.ac.ma' },
-      { name: 'EMI Rabat',         desc: 'Ingénierie Financière — partenariat pédagogique', url: 'https://www.emi.ac.ma' },
+      { name: 'ISCAE Casablanca', desc: 'Master Banque & Finance â€” formation continue', url: 'https://www.iscae.ma' },
+      { name: 'ENCG Settat',       desc: 'Master Commerce International â€” module FX', url: 'https://www.encgsettat.ac.ma' },
+      { name: 'EMI Rabat',         desc: 'IngÃ©nierie FinanciÃ¨re â€” partenariat pÃ©dagogique', url: 'https://www.emi.ac.ma' },
     ],
   },
   {
@@ -21,21 +22,21 @@ const PARTNERS = [
     icon: Building2,
     color: 'text-gold-400',
     items: [
-      { name: 'Bank Al-Maghrib',         desc: 'Données officielles · Cours de change · BDT', url: 'https://www.bkam.ma' },
+      { name: 'Bank Al-Maghrib',         desc: 'DonnÃ©es officielles Â· Cours de change Â· BDT', url: BKAM_LINKS.mainSite },
       { name: 'Office des Changes',      desc: 'Circulaires, instructions, FAQ', url: 'https://www.oc.gov.ma' },
-      { name: 'HCP (Haut-Commissariat au Plan)', desc: 'Données macroéconomiques · IPC', url: 'https://www.hcp.ma' },
-      { name: 'AMMC',                     desc: 'Autorité Marocaine du Marché des Capitaux', url: 'https://www.ammc.ma' },
+      { name: 'HCP (Haut-Commissariat au Plan)', desc: 'DonnÃ©es macroÃ©conomiques Â· IPC', url: 'https://www.hcp.ma' },
+      { name: 'AMMC',                     desc: 'AutoritÃ© Marocaine du MarchÃ© des Capitaux', url: 'https://www.ammc.ma' },
     ],
   },
   {
-    category: 'Médias & Presse',
+    category: 'MÃ©dias & Presse',
     icon: Newspaper,
     color: 'text-blue-400',
     items: [
-      { name: 'Le Matin',     desc: 'Citations régulières sur le panier BKAM', url: 'https://www.lematin.ma' },
-      { name: 'L\'Économiste', desc: 'Analyses macroéconomiques citées', url: 'https://www.leconomiste.com' },
-      { name: 'Médias24',     desc: 'Couverture des évolutions du régime de change', url: 'https://www.medias24.com' },
-      { name: 'Yabiladi',     desc: 'Communauté MRE — change et transferts', url: 'https://www.yabiladi.com' },
+      { name: 'Le Matin',     desc: 'Citations rÃ©guliÃ¨res sur le panier BKAM', url: 'https://www.lematin.ma' },
+      { name: 'L\'Ã‰conomiste', desc: 'Analyses macroÃ©conomiques citÃ©es', url: 'https://www.leconomiste.com' },
+      { name: 'MÃ©dias24',     desc: 'Couverture des Ã©volutions du rÃ©gime de change', url: 'https://www.medias24.com' },
+      { name: 'Yabiladi',     desc: 'CommunautÃ© MRE â€” change et transferts', url: 'https://www.yabiladi.com' },
     ],
   },
   {
@@ -43,10 +44,10 @@ const PARTNERS = [
     icon: Award,
     color: 'text-emerald-400',
     items: [
-      { name: 'CGEM',              desc: 'Confédération Générale des Entreprises du Maroc', url: 'https://www.cgem.ma' },
+      { name: 'CGEM',              desc: 'ConfÃ©dÃ©ration GÃ©nÃ©rale des Entreprises du Maroc', url: 'https://www.cgem.ma' },
       { name: 'ASMEX',             desc: 'Association Marocaine des Exportateurs', url: 'https://www.asmex.ma' },
-      { name: 'FIMME',             desc: 'Fédération des Industries Métallurgiques', url: 'https://www.fimme.org' },
-      { name: 'FENIP',             desc: 'Fédération Nationale de l\'Industrie', url: 'https://www.fenip.com' },
+      { name: 'FIMME',             desc: 'FÃ©dÃ©ration des Industries MÃ©tallurgiques', url: 'https://www.fimme.org' },
+      { name: 'FENIP',             desc: 'FÃ©dÃ©ration Nationale de l\'Industrie', url: 'https://www.fenip.com' },
     ],
   },
 ];
@@ -56,14 +57,14 @@ export default function Partnerships() {
     <div className="space-y-4 max-w-3xl mx-auto">
       <div className="flex items-center gap-2">
         <Handshake size={14} className="text-gold-500" />
-        <h1 className="text-base font-bold text-white uppercase tracking-wider">Partenariats & Crédits</h1>
+        <h1 className="text-base font-bold text-white uppercase tracking-wider">Partenariats & CrÃ©dits</h1>
       </div>
 
       <div className="bg-navy-900 border border-navy-700 rounded-2xl p-5">
         <p className="text-[12px] text-slate-300 leading-relaxed">
-          JAD2FX s'appuie sur les données officielles de <strong>Bank Al-Maghrib</strong> et de l'<strong>Office des Changes</strong>.
-          Nos partenariats académiques et professionnels nous permettent de proposer une vision complète
-          de la gestion du risque de change au Maroc. Si vous êtes une institution et souhaitez
+          JAD2FX s'appuie sur les donnÃ©es officielles de <strong>Bank Al-Maghrib</strong> et de l'<strong>Office des Changes</strong>.
+          Nos partenariats acadÃ©miques et professionnels nous permettent de proposer une vision complÃ¨te
+          de la gestion du risque de change au Maroc. Si vous Ãªtes une institution et souhaitez
           un partenariat, contactez-nous.
         </p>
       </div>
@@ -102,7 +103,7 @@ export default function Partnerships() {
           href="mailto:partenariats@jad2advisory.com"
           className="text-[12px] text-gold-400 hover:text-gold-300 font-bold"
         >
-          partenariats@jad2advisory.com →
+          partenariats@jad2advisory.com â†’
         </a>
       </div>
     </div>

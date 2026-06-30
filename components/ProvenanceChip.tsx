@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Info, X } from 'lucide-react';
+import { BKAM_LINKS } from '../constants/bkamLinks';
 import { LiveRate } from '../types';
 
 interface ProvenanceMeta {
@@ -11,37 +12,37 @@ interface ProvenanceMeta {
 
 const PROVENANCE: Record<string, ProvenanceMeta> = {
   BKAM_OFFICIAL: {
-    source: 'Bank Al-Maghrib — Cours de change officiels',
+    source: 'Bank Al-Maghrib â€” Cours de change officiels',
     publishedAt: '12:30 / 16:15 Casablanca',
-    methodology: 'Doc 1 §I.1.a — Moyenne pondérée des transactions interbancaires',
-    url: 'https://www.bkam.ma',
+    methodology: 'Doc 1 Â§I.1.a â€” Moyenne pondÃ©rÃ©e des transactions interbancaires',
+    url: BKAM_LINKS.mainSite,
   },
   ECB_PROXY: {
     source: 'ECB / Frankfurter (fallback)',
     publishedAt: '~16:00 CET quotidien',
-    methodology: 'Taux de change BCE — proxy pour le calcul du panier',
+    methodology: 'Taux de change BCE â€” proxy pour le calcul du panier',
     url: 'https://www.frankfurter.app',
   },
   YAHOO_INTRADAY: {
-    source: 'Yahoo Finance — 1h intraday',
-    publishedAt: 'Continu pendant les heures de marché',
-    methodology: 'Ticks 1h agrégés depuis le carnet d\'ordres Yahoo',
+    source: 'Yahoo Finance â€” 1h intraday',
+    publishedAt: 'Continu pendant les heures de marchÃ©',
+    methodology: 'Ticks 1h agrÃ©gÃ©s depuis le carnet d\'ordres Yahoo',
   },
   END_OF_DAY: {
-    source: 'JAD2FX — Données fin de journée uniquement',
+    source: 'JAD2FX â€” DonnÃ©es fin de journÃ©e uniquement',
     publishedAt: '16:15 Casablanca',
-    methodology: 'Taux de référence (mid) du jour — pas d\'historique intraday disponible',
+    methodology: 'Taux de rÃ©fÃ©rence (mid) du jour â€” pas d\'historique intraday disponible',
   },
   CALCULATED: {
-    source: 'JAD2FX — Calcul interne',
+    source: 'JAD2FX â€” Calcul interne',
     publishedAt: 'Maintenant',
-    methodology: 'Mid calculé à partir de la formule panier BKAM et des taux ECB',
+    methodology: 'Mid calculÃ© Ã  partir de la formule panier BKAM et des taux ECB',
   },
 };
 
 /**
- * P1.21 — Data Provenance Chip
- * Click any rate → see its source, publication time, and methodology.
+ * P1.21 â€” Data Provenance Chip
+ * Click any rate â†’ see its source, publication time, and methodology.
  */
 export default function ProvenanceChip({ rate, isRTL }: { rate: LiveRate; isRTL?: boolean }) {
   const [open, setOpen] = useState(false);
@@ -52,7 +53,7 @@ export default function ProvenanceChip({ rate, isRTL }: { rate: LiveRate; isRTL?
       <button
         onClick={() => setOpen((o) => !o)}
         className="text-slate-500 hover:text-gold-400 transition-colors"
-        aria-label="Source de la donnée"
+        aria-label="Source de la donnÃ©e"
         title={`Source: ${meta.source}`}
       >
         <Info size={10} />
@@ -74,11 +75,11 @@ export default function ProvenanceChip({ rate, isRTL }: { rate: LiveRate; isRTL?
               <dd className="font-medium">{meta.source}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Publié</dt>
+              <dt className="text-slate-500">PubliÃ©</dt>
               <dd>{meta.publishedAt}</dd>
             </div>
             <div>
-              <dt className="text-slate-500">Méthodologie</dt>
+              <dt className="text-slate-500">MÃ©thodologie</dt>
               <dd className="leading-relaxed">{meta.methodology}</dd>
             </div>
             {rate.timestamp && (
@@ -89,7 +90,7 @@ export default function ProvenanceChip({ rate, isRTL }: { rate: LiveRate; isRTL?
             )}
             {rate.feedStatus && (
               <div>
-                <dt className="text-slate-500">État du flux</dt>
+                <dt className="text-slate-500">Ã‰tat du flux</dt>
                 <dd>
                   <span className={
                     rate.feedStatus === 'LIVE' ? 'text-emerald-400' :
@@ -97,7 +98,7 @@ export default function ProvenanceChip({ rate, isRTL }: { rate: LiveRate; isRTL?
                     rate.feedStatus === 'STALE' ? 'text-orange-400' :
                     'text-red-400'
                   }>
-                    ● {rate.feedStatus}
+                    â— {rate.feedStatus}
                   </span>
                 </dd>
               </div>
@@ -105,7 +106,7 @@ export default function ProvenanceChip({ rate, isRTL }: { rate: LiveRate; isRTL?
             {meta.url && (
               <div className="pt-1.5 border-t border-navy-800">
                 <a href={meta.url} target="_blank" rel="noopener noreferrer" className="text-gold-400 hover:text-gold-300 text-[10px]">
-                  ↗ Source officielle
+                  â†— Source officielle
                 </a>
               </div>
             )}

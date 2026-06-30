@@ -5,7 +5,7 @@ import {
   ArrowUp, ArrowDown, Eye, EyeOff, ChevronRight, Layers, Target,
 } from 'lucide-react';
 import { useAdmin } from '../context/AdminContext';
-import { BKAM_CURRENCIES } from '../constants';
+import { BKAM_CURRENCIES, COCKPIT_CURRENCIES } from '../constants';
 import { getDefaultCurve, applyCurveOverrides } from '../services/interestRates';
 import { computeForward } from '../services/forwardEngine';
 import { Skeleton } from './Skeleton';
@@ -190,7 +190,7 @@ export default function AdminCockpit({ navTo }: { navTo?: (v: any) => void }) {
   }, [paused]);
 
   // Pick 8 G10 + MAD pairs for the cockpit
-  const cockpitCurrencies = useMemo(() => ['EUR', 'USD', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'SEK'], []);
+  const cockpitCurrencies = useMemo(() => [...COCKPIT_CURRENCIES], []);
 
   const liveMap = useMemo(() => {
     const m: Record<string, { mid: number; change: number; spark: number[] }> = {};

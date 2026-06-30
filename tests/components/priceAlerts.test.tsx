@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '../../context/I18nContext';
+import { AdminProvider } from '../../context/AdminContext';
 import PriceAlerts from '../../components/PriceAlerts';
 
 /**
@@ -9,9 +10,11 @@ import PriceAlerts from '../../components/PriceAlerts';
 describe('PriceAlerts component (P2.29)', () => {
   it('renders without crashing on empty rates', () => {
     const { container } = render(
-      <I18nProvider>
-        <PriceAlerts rates={[]} />
-      </I18nProvider>,
+      <AdminProvider>
+        <I18nProvider>
+          <PriceAlerts rates={[]} />
+        </I18nProvider>
+      </AdminProvider>,
     );
     expect(container.firstChild).toBeTruthy();
   });
@@ -19,9 +22,11 @@ describe('PriceAlerts component (P2.29)', () => {
   it('handles zero rates without errors', () => {
     expect(() => {
       render(
-        <I18nProvider>
-          <PriceAlerts rates={[]} />
-        </I18nProvider>,
+        <AdminProvider>
+          <I18nProvider>
+            <PriceAlerts rates={[]} />
+          </I18nProvider>
+        </AdminProvider>,
       );
     }).not.toThrow();
   });

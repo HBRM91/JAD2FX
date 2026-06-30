@@ -791,7 +791,7 @@ async function sendDailyNewsletter(report, todayRates, env) {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Africa/Casablanca',
   });
 
-  // Build rates table rows
+  // Build rates table rows (P3-3 — see constants.ts for the cut map)
   const KEY_PAIRS = ['EUR', 'USD', 'GBP', 'SAR', 'AED'];
   const rateRows = KEY_PAIRS
     .filter(c => todayRates?.[c])
@@ -1447,6 +1447,7 @@ async function handleScheduled(env) {
   }
 
   // â”€â”€ 4. Build live rates context â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // P3-3 — see constants.ts for the cut map (RADAR_CURRENCIES_LIST)
   const RADAR_CURRENCIES = [
     { code: 'EUR', flag: 'ðŸ‡ªðŸ‡º', nameFr: 'Euro' },
     { code: 'USD', flag: 'ðŸ‡ºðŸ‡¸', nameFr: 'Dollar amÃ©ricain' },
@@ -3173,6 +3174,55 @@ async function fetchHijriYear(year) {
   return out;
 }
 
+// ─── P0-6 Admin audit log (persisted to KV) ──────────────────────────────────
+// Replaces the in-memory React buffer in AdminContext that was lost on every
+// refresh. Stored as a 200-entry ring in KV with 30-day TTL.
+async function handleAppendAudit(request, env, origin) {
+  if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
+  const raw = await readBodySafe(request);
+  let body = {};
+  try { body = JSON.parse(raw); } catch { return json({ error: 'Invalid JSON' }, 400, origin); }
+  const action = (body.action || '').toString().trim().slice(0, 80);
+  const detail = (body.detail || '').toString().trim().slice(0, 500);
+  if (!action) return json({ error: 'action required' }, 400, origin);
+
+  const entry = {
+    id: crypto.randomUUID().slice(0, 8),
+    time: new Date().toISOString(),
+    action,
+    detail,
+    user: 'ADMIN',
+  };
+
+  if (!env.REPORTS_KV) {
+    // No KV in dev — echo back so the client can still show it in-memory
+    return json({ ok: true, entry, persisted: false }, 201, origin);
+  }
+  try {
+    const existing = await env.REPORTS_KV.get('audit:log');
+    const list = existing ? JSON.parse(existing) : [];
+    list.unshift(entry);
+    const ring = list.slice(0, 200);
+    await env.REPORTS_KV.put('audit:log', JSON.stringify(ring), { expirationTtl: 60 * 60 * 24 * 30 });
+    return json({ ok: true, entry, persisted: true }, 201, origin);
+  } catch (e) {
+    return json({ ok: true, entry, persisted: false, error: String(e) }, 201, origin);
+  }
+}
+
+async function handleListAudit(request, env, origin) {
+  if (!env.REPORTS_KV) return json({ entries: [], source: 'no-kv' }, 200, origin);
+  const existing = await env.REPORTS_KV.get('audit:log');
+  const entries = existing ? JSON.parse(existing) : [];
+  return json({ entries, source: 'kv', total: entries.length }, 200, origin);
+}
+
+async function handleClearAudit(request, env, origin) {
+  if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
+  if (env.REPORTS_KV) await env.REPORTS_KV.delete('audit:log');
+  return json({ ok: true }, 200, origin);
+}
+
 async function handleHijri(request, env, origin) {
   const url = new URL(request.url);
   const year = parseInt(url.searchParams.get('year'), 10) || new Date().getFullYear();
@@ -3423,6 +3473,22 @@ export default {
       const denied = await adminGate(request, env, origin);
       if (denied) return denied;
       return handleRagAdmin(request, env, origin);
+    }
+    // ─── P0-6 Admin audit log (KV-persisted) ──────────────────────────────
+    if (pathname === '/api/admin/audit' && request.method === 'POST') {
+      const denied = await adminGate(request, env, origin);
+      if (denied) return denied;
+      return handleAppendAudit(request, env, origin);
+    }
+    if (pathname === '/api/admin/audit' && request.method === 'GET') {
+      const denied = await adminGate(request, env, origin);
+      if (denied) return denied;
+      return handleListAudit(request, env, origin);
+    }
+    if (pathname === '/api/admin/audit' && request.method === 'DELETE') {
+      const denied = await adminGate(request, env, origin);
+      if (denied) return denied;
+      return handleClearAudit(request, env, origin);
     }
     // â”€â”€ P1.12 RAG seed (env-protected init, no admin token required) â”€â”€â”€â”€â”€
     if (pathname === '/api/init/seed' && request.method === 'POST') {
