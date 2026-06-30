@@ -1,12 +1,12 @@
 import { Globe, TrendingUp, Award, TrendingDown } from 'lucide-react';
 
 /**
- * P1.10 — Sovereign spread module.
+ * P1.10 â€” Sovereign spread module.
  * Morocco 5Y CDS, EMBI+ Morocco, OAT vs Bund spread.
  * Synthetic data calibrated to Q2 2026 levels (real implementation needs Reuters/Bloomberg feed).
  */
 export default function SovereignPage() {
-  // Synthetic data — calibrated to Q2 2026
+  // Synthetic data â€” calibrated to Q2 2026
   const cds5Y = {
     morocco:    { bps: 92,  change: -3,  changePct: -3.2 },
     turkey:     { bps: 285, change: +12, changePct: +4.4 },
@@ -37,14 +37,14 @@ export default function SovereignPage() {
     <div className="space-y-4 max-w-4xl mx-auto">
       <div className="flex items-center gap-2">
         <Globe size={14} className="text-gold-500" />
-        <h1 className="text-base font-bold text-white uppercase tracking-wider">Spreads Souverains · Maroc</h1>
-        <span className="text-[10px] text-slate-500 ml-auto">P1.10 · CDS / EMBI / OAT-Bund</span>
+        <h1 className="text-base font-bold text-white uppercase tracking-wider">Spreads Souverains Â· Maroc</h1>
+        <span className="text-[10px] text-slate-500 ml-auto">P1.10 Â· CDS / EMBI / OAT-Bund</span>
       </div>
 
       <div className="flex items-start gap-2 p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
-        <span className="text-amber-400 text-xs">ℹ️</span>
+        <span className="text-amber-400 text-xs">â„¹ï¸</span>
         <p className="text-[10px] text-amber-200/80 leading-relaxed">
-          <strong>Données synthétiques indicatives.</strong> En production: souscription Reuters Eikon / Bloomberg pour les CDS 5Y, EMBI+ JP Morgan, OAT via BAM.
+          <strong>DonnÃ©es synthÃ©tiques indicatives.</strong> En production: souscription Reuters Eikon / Bloomberg pour les CDS 5Y, EMBI+ JP Morgan, OAT via BAM.
         </p>
       </div>
 
@@ -58,9 +58,9 @@ export default function SovereignPage() {
             <tr>
               <th className="px-2 py-1 text-left">Pays</th>
               <th className="px-2 py-1 text-right">Spread</th>
-              <th className="px-2 py-1 text-right">Δ 1j</th>
-              <th className="px-2 py-1 text-right">Δ %</th>
-              <th className="px-2 py-1 text-left">Interprétation</th>
+              <th className="px-2 py-1 text-right">Î” 1j</th>
+              <th className="px-2 py-1 text-right">Î” %</th>
+              <th className="px-2 py-1 text-left">InterprÃ©tation</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-navy-800">
@@ -70,7 +70,7 @@ export default function SovereignPage() {
                 <tr key={country} className={isMA ? 'bg-gold-500/5' : 'hover:bg-navy-800/30'}>
                   <td className="px-2 py-1.5 font-bold text-slate-200">
                     {country.charAt(0).toUpperCase() + country.slice(1)}
-                    {isMA && <span className="ml-1 text-[8px] text-gold-400">★</span>}
+                    {isMA && <span className="ml-1 text-[9px] text-gold-400">â˜…</span>}
                   </td>
                   <td className="px-2 py-1.5 text-right font-mono text-slate-200">{data.bps}</td>
                   <td className={`px-2 py-1.5 text-right font-mono ${data.change > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
@@ -99,8 +99,8 @@ export default function SovereignPage() {
             <tr>
               <th className="px-2 py-1 text-left">Pays</th>
               <th className="px-2 py-1 text-right">Spread</th>
-              <th className="px-2 py-1 text-right">Δ 1j</th>
-              <th className="px-2 py-1 text-right">Δ %</th>
+              <th className="px-2 py-1 text-right">Î” 1j</th>
+              <th className="px-2 py-1 text-right">Î” %</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-navy-800">
@@ -110,7 +110,7 @@ export default function SovereignPage() {
                 <tr key={country} className={isMA ? 'bg-gold-500/5' : 'hover:bg-navy-800/30'}>
                   <td className="px-2 py-1.5 font-bold text-slate-200">
                     {country.charAt(0).toUpperCase() + country.slice(1)}
-                    {isMA && <span className="ml-1 text-[8px] text-gold-400">★</span>}
+                    {isMA && <span className="ml-1 text-[9px] text-gold-400">â˜…</span>}
                   </td>
                   <td className="px-2 py-1.5 text-right font-mono text-slate-200">{data.bps}</td>
                   <td className={`px-2 py-1.5 text-right font-mono ${data.change > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
@@ -153,7 +153,7 @@ export default function SovereignPage() {
           </div>
         </div>
         <p className="text-[10px] text-slate-500 mt-3 italic">
-          Le spread OAT-Bund mesure la prime de risque souverain Maroc vs référence européenne (Bund = « risk-free »). Niveau 142 bps = Maroc investment grade cross-over.
+          Le spread OAT-Bund mesure la prime de risque souverain Maroc vs rÃ©fÃ©rence europÃ©enne (Bund = Â« risk-free Â»). Niveau 142 bps = Maroc investment grade cross-over.
         </p>
       </div>
 

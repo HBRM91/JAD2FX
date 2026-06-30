@@ -1,10 +1,10 @@
 /**
- * BKAM Parity Matrix — Dynamic cross-rate basket analysis
+ * BKAM Parity Matrix â€” Dynamic cross-rate basket analysis
  *
  * For every BKAM-published currency:
- *   basket_parity = USD/MAD_basket × (CCY/USD cross)
- *   drift_bps     = (BKAM_fixing − basket) / basket × 10 000
- *   band_util     = position in ±5% regulatory band (0–100%)
+ *   basket_parity = USD/MAD_basket Ã— (CCY/USD cross)
+ *   drift_bps     = (BKAM_fixing âˆ’ basket) / basket Ã— 10 000
+ *   band_util     = position in Â±5% regulatory band (0â€“100%)
  *
  * Data from KV database (populated daily by cron + enriched with ECB cross-rates).
  */
@@ -19,7 +19,7 @@ import CurrencyFlag from './CurrencyFlag';
 import { BKAM_CURRENCIES } from '../constants';
 import { EXTRA_CURRENCY_META } from '../services/bkamFixing';
 
-// ─── Types ────────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 interface EnrichedRate {
   libDevise: string;
@@ -47,7 +47,7 @@ interface HistoryPayload {
   totalDatesInDB: number;
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const ALL_META: Record<string, { nameFr: string; countryCode: string }> = {
   ...Object.fromEntries(BKAM_CURRENCIES.map(c => [c.code, { nameFr: c.nameFr, countryCode: c.countryCode }])),
@@ -64,7 +64,7 @@ function bandUtilColor(u: number): string {
 }
 
 function exportCSV(entry: DBEntry) {
-  const lines = ['Devise,Cours BKAM,Unité,Parité Panier,Dérive (bps),Util. Bande (%)'];
+  const lines = ['Devise,Cours BKAM,UnitÃ©,ParitÃ© Panier,DÃ©rive (bps),Util. Bande (%)'];
   for (const r of entry.rates) {
     if (r.basketParity == null) continue;
     lines.push(`${r.libDevise},${r.moyen},${r.uniteDevise},${r.basketParity ?? ''},${r.driftBps ?? ''},${r.bandUtilPct ?? ''}`);
@@ -76,7 +76,7 @@ function exportCSV(entry: DBEntry) {
   URL.revokeObjectURL(url);
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type TabId = 'drift-bar' | 'history' | 'scatter' | 'table';
 
@@ -93,7 +93,7 @@ export default function BkamParityMatrix() {
   const proxyUrl = config.corsProxyUrl?.replace(/\/$/, '') ?? '';
 
   const load = async () => {
-    if (!proxyUrl) { setError('Proxy URL non configuré'); setLoading(false); return; }
+    if (!proxyUrl) { setError('Proxy URL non configurÃ©'); setLoading(false); return; }
     setLoading(true); setError(null);
     try {
       const histRes = await fetch(`${proxyUrl}/api/bkam-rates/history?days=90`, { signal: AbortSignal.timeout(15_000) });
@@ -109,13 +109,13 @@ export default function BkamParityMatrix() {
         setError('Historique indisponible.');
       }
     } catch (e) {
-      setError('Impossible de charger les données. Vérifiez la configuration du proxy.');
+      setError('Impossible de charger les donnÃ©es. VÃ©rifiez la configuration du proxy.');
     } finally { setLoading(false); }
   };
 
   useEffect(() => { load(); }, [proxyUrl]);
 
-  // ── Sorted enriched rates for today ────────────────────────────────────────
+  // â”€â”€ Sorted enriched rates for today â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   // G10 canonical order (MAD-relevant), then EM, then Gulf pegs
   const G10_ORDER: Record<string, number> = {
     EUR: 1, USD: 2, GBP: 3, CHF: 4, JPY: 5, CAD: 6,
@@ -139,7 +139,7 @@ export default function BkamParityMatrix() {
 
   const displayed = showAll ? enrichedRates : enrichedRates.slice(0, 15);
 
-  // ── Historical trend data ───────────────────────────────────────────────────
+  // â”€â”€ Historical trend data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const trendData = useMemo(() => history.map(h => {
     const eur = h.rates?.find(r => r.libDevise === 'EUR');
     const usd = h.rates?.find(r => r.libDevise === 'USD');
@@ -159,7 +159,7 @@ export default function BkamParityMatrix() {
     };
   }), [history]);
 
-  // ── Scatter: drift vs band utilisation ─────────────────────────────────────
+  // â”€â”€ Scatter: drift vs band utilisation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const scatterData = enrichedRates.map(r => ({
     name: r.libDevise,
     drift: r.driftBps ?? 0,
@@ -168,7 +168,7 @@ export default function BkamParityMatrix() {
   }));
 
   const tabs: { id: TabId; label: string; icon: React.ElementType }[] = [
-    { id: 'drift-bar', label: 'Dérive par devise', icon: BarChart2 },
+    { id: 'drift-bar', label: 'DÃ©rive par devise', icon: BarChart2 },
     { id: 'history',   label: 'Tendance historique', icon: TrendingUp },
     { id: 'scatter',   label: 'Carte drift/bande', icon: Info },
     { id: 'table',     label: 'Tableau complet', icon: Minus },
@@ -180,23 +180,23 @@ export default function BkamParityMatrix() {
   return (
     <div className="space-y-5">
 
-      {/* ── Header ── */}
+      {/* â”€â”€ Header â”€â”€ */}
       <div className="bg-navy-900 border border-navy-700 rounded-2xl overflow-hidden">
         <div className="h-0.5 bg-gradient-to-r from-gold-700 via-gold-400 to-gold-700" />
         <div className="px-6 py-5 flex flex-wrap items-start justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold text-white uppercase tracking-widest flex items-center gap-2">
               <BarChart2 size={18} className="text-gold-400" />
-              Matrice de Parité Panier — {latest?.count ?? 0} Devises
+              Matrice de ParitÃ© Panier â€” {latest?.count ?? 0} Devises
             </h2>
             <p className="text-sm text-slate-400 mt-1">
-              Basket USD/MAD = K/(0.60×EUR/USD_ECB+0.40) · K=10.49 ·
-              Dérive = (BKAM_fixing − parité_panier) / parité × 10 000 bps
+              Basket USD/MAD = K/(0.60Ã—EUR/USD_ECB+0.40) Â· K=10.49 Â·
+              DÃ©rive = (BKAM_fixing âˆ’ paritÃ©_panier) / paritÃ© Ã— 10 000 bps
             </p>
             {latest && (
               <p className="text-[10px] text-slate-600 mt-1 font-mono">
-                Séance {latest.date} · ECB EUR/USD: {latest.ecbEurUsd?.toFixed(4)} ·
-                USD/MAD panier: {latest.usdMadBasket?.toFixed(4)} · Source: {latest.fetchedAt ? 'BKAM KV DB' : 'live'}
+                SÃ©ance {latest.date} Â· ECB EUR/USD: {latest.ecbEurUsd?.toFixed(4)} Â·
+                USD/MAD panier: {latest.usdMadBasket?.toFixed(4)} Â· Source: {latest.fetchedAt ? 'BKAM KV DB' : 'live'}
               </p>
             )}
           </div>
@@ -216,10 +216,10 @@ export default function BkamParityMatrix() {
         {latest && !loading && (
           <div className="px-6 py-3 border-t border-navy-800 grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { label: 'Dérive moyenne', value: avg.toFixed(1) + ' bps', color: driftColor(avg) },
-              { label: 'Plus grande dérive', value: worst ? worst.libDevise + ' ' + worst.driftBps?.toFixed(0) + ' bps' : '—', color: driftColor(worst?.driftBps ?? 0) },
-              { label: 'USD/MAD basket', value: latest.usdMadBasket?.toFixed(4) ?? '—', color: 'text-blue-400' },
-              { label: 'ECB EUR/USD', value: latest.ecbEurUsd?.toFixed(4) ?? '—', color: 'text-slate-300' },
+              { label: 'DÃ©rive moyenne', value: avg.toFixed(1) + ' bps', color: driftColor(avg) },
+              { label: 'Plus grande dÃ©rive', value: worst ? worst.libDevise + ' ' + worst.driftBps?.toFixed(0) + ' bps' : 'â€”', color: driftColor(worst?.driftBps ?? 0) },
+              { label: 'USD/MAD basket', value: latest.usdMadBasket?.toFixed(4) ?? 'â€”', color: 'text-blue-400' },
+              { label: 'ECB EUR/USD', value: latest.ecbEurUsd?.toFixed(4) ?? 'â€”', color: 'text-slate-300' },
             ].map(k => (
               <div key={k.label} className="bg-navy-800/40 rounded-lg px-3 py-2">
                 <p className="text-[9px] text-slate-500 uppercase tracking-wider">{k.label}</p>
@@ -235,7 +235,7 @@ export default function BkamParityMatrix() {
 
       {!loading && !error && latest && (
         <>
-          {/* ── Tab bar ── */}
+          {/* â”€â”€ Tab bar â”€â”€ */}
           <div className="flex items-center gap-1 bg-navy-900 border border-navy-700 rounded-xl p-1">
             {tabs.map(t => {
               const Icon = t.icon;
@@ -250,18 +250,18 @@ export default function BkamParityMatrix() {
             })}
           </div>
 
-          {/* ── Tab: Drift bar chart ── */}
+          {/* â”€â”€ Tab: Drift bar chart â”€â”€ */}
           {tab === 'drift-bar' && (
             <div className="bg-navy-900 border border-navy-700 rounded-2xl p-5 space-y-4">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">
-                  Dérive Fixing BKAM vs Parité Panier — {enrichedRates.length} Devises · {latest.date}
+                  DÃ©rive Fixing BKAM vs ParitÃ© Panier â€” {enrichedRates.length} Devises Â· {latest.date}
                 </h3>
                 <div className="flex items-center gap-1.5">
                   {(['g10', 'drift', 'band', 'alpha'] as const).map(s => (
                     <button key={s} onClick={() => setSortBy(s)}
                       className={`text-[9px] font-bold px-2 py-0.5 rounded border transition ${sortBy===s ? 'border-gold-600/60 bg-gold-500/10 text-gold-400' : 'border-navy-700 text-slate-500 hover:border-navy-600'}`}>
-                      {s === 'g10' ? 'G10↓' : s === 'drift' ? '|Dérive|↓' : s === 'band' ? 'Bande↓' : 'A→Z'}
+                      {s === 'g10' ? 'G10â†“' : s === 'drift' ? '|DÃ©rive|â†“' : s === 'band' ? 'Bandeâ†“' : 'Aâ†’Z'}
                     </button>
                   ))}
                 </div>
@@ -278,12 +278,12 @@ export default function BkamParityMatrix() {
                       contentStyle={{ background: '#081628', border: '1px solid #1C3558', borderRadius: 6, fontSize: 11 }}
                       formatter={((v: number, name: string) => [
                         name === 'driftBps' ? `${v.toFixed(1)} bps` : v.toFixed(4),
-                        name === 'driftBps' ? 'Dérive' : name,
+                        name === 'driftBps' ? 'DÃ©rive' : name,
                       ]) as any}
                       labelFormatter={((l: string) => {
                         const m = ALL_META[l];
                         const r = latest.rates.find(x => x.libDevise === l);
-                        return `${l} — ${m?.nameFr ?? ''}\nBKAM: ${r?.moyen} | Panier: ${r?.basketParity} | Bande: ${r?.bandUtilPct}%`;
+                        return `${l} â€” ${m?.nameFr ?? ''}\nBKAM: ${r?.moyen} | Panier: ${r?.basketParity} | Bande: ${r?.bandUtilPct}%`;
                       }) as any}
                     />
                     <ReferenceLine x={0} stroke="#D4AF37" strokeWidth={1} strokeDasharray="4 2" />
@@ -298,33 +298,33 @@ export default function BkamParityMatrix() {
               {enrichedRates.length > 15 && (
                 <button onClick={() => setShowAll(v => !v)}
                   className="w-full text-[10px] text-gold-500 hover:text-gold-300 py-1 border border-navy-800 rounded-lg transition">
-                  {showAll ? `Afficher moins` : `Afficher les ${enrichedRates.length - 15} devises supplémentaires ↓`}
+                  {showAll ? `Afficher moins` : `Afficher les ${enrichedRates.length - 15} devises supplÃ©mentaires â†“`}
                 </button>
               )}
               <p className="text-[9px] text-slate-700">
-                Négatif = MAD plus fort que la parité panier implique (BKAM maintient le MAD en bas de la bande).
-                Positif = MAD plus faible que la parité panier. Bande réglementaire ±5% (Phase II, mars 2020).
+                NÃ©gatif = MAD plus fort que la paritÃ© panier implique (BKAM maintient le MAD en bas de la bande).
+                Positif = MAD plus faible que la paritÃ© panier. Bande rÃ©glementaire Â±5% (Phase II, mars 2020).
               </p>
             </div>
           )}
 
-          {/* ── Tab: Historical trend ── */}
+          {/* â”€â”€ Tab: Historical trend â”€â”€ */}
           {tab === 'history' && (
             <div className="bg-navy-900 border border-navy-700 rounded-2xl p-5 space-y-5">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">
-                  Tendance Dérive EUR/MAD · USD/MAD · GBP/MAD — {history.length} séances
+                  Tendance DÃ©rive EUR/MAD Â· USD/MAD Â· GBP/MAD â€” {history.length} sÃ©ances
                 </h3>
                 <div className="flex items-center gap-3 text-[9px]">
                   <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-gold-400" /> BKAM Officiel</span>
                   <span className="flex items-center gap-1"><span className="inline-block w-4 h-0.5 bg-gold-400 opacity-50" style={{borderTop:'1px dashed'}} /> Panier ECB (continu)</span>
-                  <span className="text-slate-600">Points isolés = séances sans fixing BKAM (dérive N/A)</span>
+                  <span className="text-slate-600">Points isolÃ©s = sÃ©ances sans fixing BKAM (dÃ©rive N/A)</span>
                 </div>
               </div>
 
               {/* Drift bps over time */}
               <div>
-                <p className="text-[10px] text-slate-500 mb-2">Dérive fixing BKAM vs parité panier (bps)</p>
+                <p className="text-[10px] text-slate-500 mb-2">DÃ©rive fixing BKAM vs paritÃ© panier (bps)</p>
                 <div className="h-48">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={trendData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
@@ -334,7 +334,7 @@ export default function BkamParityMatrix() {
                       <Tooltip contentStyle={{ background: '#081628', border: '1px solid #1C3558', borderRadius: 6, fontSize: 11 }}
                         formatter={((v: number) => [`${v?.toFixed(1)} bps`]) as any} />
                       <Legend iconSize={8} wrapperStyle={{ fontSize: 10 }} />
-                      <ReferenceLine y={0} stroke="#D4AF37" strokeWidth={1} strokeDasharray="4 2" label={{ value: 'Parité', fill: '#8a6a20', fontSize: 8 }} />
+                      <ReferenceLine y={0} stroke="#D4AF37" strokeWidth={1} strokeDasharray="4 2" label={{ value: 'ParitÃ©', fill: '#8a6a20', fontSize: 8 }} />
                       <Line type="monotone" dataKey="eurDrift" stroke="#D4AF37" strokeWidth={2} dot={{ r: 3 }} name="EUR/MAD drift" />
                       <Line type="monotone" dataKey="usdDrift" stroke="#3b82f6" strokeWidth={2} dot={{ r: 3 }} name="USD/MAD drift" />
                       <Line type="monotone" dataKey="gbpDrift" stroke="#a78bfa" strokeWidth={1.5} dot={{ r: 2 }} name="GBP/MAD drift" />
@@ -345,7 +345,7 @@ export default function BkamParityMatrix() {
 
               {/* EUR/MAD fixing vs basket over time */}
               <div>
-                <p className="text-[10px] text-slate-500 mb-2">EUR/MAD — Fixing BKAM vs Parité Panier</p>
+                <p className="text-[10px] text-slate-500 mb-2">EUR/MAD â€” Fixing BKAM vs ParitÃ© Panier</p>
                 <div className="h-48">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={trendData} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
@@ -366,21 +366,21 @@ export default function BkamParityMatrix() {
             </div>
           )}
 
-          {/* ── Tab: Scatter drift vs band ── */}
+          {/* â”€â”€ Tab: Scatter drift vs band â”€â”€ */}
           {tab === 'scatter' && (
             <div className="bg-navy-900 border border-navy-700 rounded-2xl p-5 space-y-3">
               <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">
-                Carte Drift × Utilisation Bande — {scatterData.length} Devises · {latest.date}
+                Carte Drift Ã— Utilisation Bande â€” {scatterData.length} Devises Â· {latest.date}
               </h3>
               <p className="text-[10px] text-slate-500">
-                X: Dérive (bps) | Y: Position dans bande ±5% (50% = parité centrale) | Cercle = fixing BKAM
+                X: DÃ©rive (bps) | Y: Position dans bande Â±5% (50% = paritÃ© centrale) | Cercle = fixing BKAM
               </p>
               <div className="h-80">
                 <ResponsiveContainer width="100%" height="100%">
                   <ScatterChart margin={{ top: 16, right: 16, bottom: 16, left: 16 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#1C3558" />
-                    <XAxis type="number" dataKey="drift" name="Dérive" unit=" pb"
-                      tick={{ fill: '#3D6491', fontSize: 9 }} label={{ value: 'Dérive bps', fill: '#4E7EAC', fontSize: 9, position: 'insideBottom', offset: -8 }} />
+                    <XAxis type="number" dataKey="drift" name="DÃ©rive" unit=" pb"
+                      tick={{ fill: '#3D6491', fontSize: 9 }} label={{ value: 'DÃ©rive bps', fill: '#4E7EAC', fontSize: 9, position: 'insideBottom', offset: -8 }} />
                     <YAxis type="number" dataKey="band" name="Bande" unit="%"
                       tick={{ fill: '#3D6491', fontSize: 9 }} domain={[0, 100]}
                       label={{ value: 'Util. bande %', fill: '#4E7EAC', fontSize: 9, angle: -90, position: 'insideLeft' }} />
@@ -393,9 +393,9 @@ export default function BkamParityMatrix() {
                         const meta = ALL_META[d.name];
                         return (
                           <div className="p-2">
-                            <p className="font-bold text-white">{d.name}/MAD — {meta?.nameFr}</p>
+                            <p className="font-bold text-white">{d.name}/MAD â€” {meta?.nameFr}</p>
                             <p className="text-slate-400 text-[10px]">Fixing: {d.fixing}</p>
-                            <p className="text-[10px]" style={{ color: driftColor(d.drift) }}>Dérive: {d.drift?.toFixed(1)} bps</p>
+                            <p className="text-[10px]" style={{ color: driftColor(d.drift) }}>DÃ©rive: {d.drift?.toFixed(1)} bps</p>
                             <p className="text-[10px]" style={{ color: bandUtilColor(d.band) }}>Bande: {d.band?.toFixed(1)}%</p>
                           </div>
                         );
@@ -412,18 +412,18 @@ export default function BkamParityMatrix() {
                 </ResponsiveContainer>
               </div>
               <p className="text-[9px] text-slate-600">
-                Zone verte (|dérive| &lt;100 bps, bande 35–65%): MAD bien ancré sur la parité panier.
-                Zone rouge: MAD significativement écarté — surveiller l'évolution.
+                Zone verte (|dÃ©rive| &lt;100 bps, bande 35â€“65%): MAD bien ancrÃ© sur la paritÃ© panier.
+                Zone rouge: MAD significativement Ã©cartÃ© â€” surveiller l'Ã©volution.
               </p>
             </div>
           )}
 
-          {/* ── Tab: Full table ── */}
+          {/* â”€â”€ Tab: Full table â”€â”€ */}
           {tab === 'table' && (
             <div className="bg-navy-900 border border-navy-700 rounded-2xl overflow-hidden">
               <div className="px-5 py-3 border-b border-navy-800 flex items-center justify-between">
                 <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">
-                  Tableau Complet — {enrichedRates.length} Devises Enrichies · {latest.date}
+                  Tableau Complet â€” {enrichedRates.length} Devises Enrichies Â· {latest.date}
                 </h3>
                 <button onClick={() => exportCSV(latest)}
                   className="flex items-center gap-1 text-[9px] text-slate-400 hover:text-emerald-400 font-semibold border border-navy-700 hover:border-emerald-700 px-2 py-1 rounded transition">
@@ -436,8 +436,8 @@ export default function BkamParityMatrix() {
                     <tr className="bg-navy-800/40 text-[9px] text-slate-500 uppercase tracking-wider border-b border-navy-800">
                       <th className="text-left py-2.5 px-4">Devise</th>
                       <th className="text-right px-3">BKAM Fixing</th>
-                      <th className="text-right px-3">Parité Panier</th>
-                      <th className="text-right px-3">Dérive (bps)</th>
+                      <th className="text-right px-3">ParitÃ© Panier</th>
+                      <th className="text-right px-3">DÃ©rive (bps)</th>
                       <th className="text-right px-3">Util. Bande</th>
                       <th className="text-right px-4">Tendance</th>
                     </tr>
@@ -457,7 +457,7 @@ export default function BkamParityMatrix() {
                                 <p className="text-[9px] text-slate-500">{meta?.nameFr ?? ''}</p>
                               </div>
                               {r.uniteDevise !== 1 && (
-                                <span className="text-[8px] text-navy-500 bg-navy-800 px-1 rounded">×{r.uniteDevise}</span>
+                                <span className="text-[9px] text-navy-500 bg-navy-800 px-1 rounded">Ã—{r.uniteDevise}</span>
                               )}
                             </div>
                           </td>
@@ -465,12 +465,12 @@ export default function BkamParityMatrix() {
                             <span className="font-mono font-bold text-white text-[13px] tabular-nums">{r.moyen}</span>
                           </td>
                           <td className="py-2.5 px-3 text-right font-mono text-slate-400 text-[12px] tabular-nums">
-                            {r.basketParity?.toFixed(4) ?? '—'}
+                            {r.basketParity?.toFixed(4) ?? 'â€”'}
                           </td>
                           <td className="py-2.5 px-3 text-right">
                             <span className="font-mono font-bold text-[12px] tabular-nums"
                               style={{ color: driftColor(r.driftBps ?? 0) }}>
-                              {(r.driftBps ?? 0) > 0 ? '+' : ''}{r.driftBps?.toFixed(1) ?? '—'} pb
+                              {(r.driftBps ?? 0) > 0 ? '+' : ''}{r.driftBps?.toFixed(1) ?? 'â€”'} pb
                             </span>
                           </td>
                           <td className="py-2.5 px-3 text-right">
@@ -481,7 +481,7 @@ export default function BkamParityMatrix() {
                               </div>
                               <span className="text-[9px] font-mono tabular-nums"
                                 style={{ color: bandUtilColor(r.bandUtilPct ?? 50) }}>
-                                {r.bandUtilPct?.toFixed(0) ?? '—'}%
+                                {r.bandUtilPct?.toFixed(0) ?? 'â€”'}%
                               </span>
                             </div>
                           </td>
@@ -496,9 +496,9 @@ export default function BkamParityMatrix() {
               </div>
               <div className="px-5 py-2.5 border-t border-navy-800">
                 <p className="text-[9px] text-slate-600">
-                  Dérive = (Fixing BKAM − Parité panier ECB) / Parité × 10 000 bps ·
-                  Parité = USD/MAD_basket × (CCY/USD ECB ou peg officiel) ·
-                  Bande réglementaire ±5% (Phase II BKAM, mars 2020) · Loi 43-12
+                  DÃ©rive = (Fixing BKAM âˆ’ ParitÃ© panier ECB) / ParitÃ© Ã— 10 000 bps Â·
+                  ParitÃ© = USD/MAD_basket Ã— (CCY/USD ECB ou peg officiel) Â·
+                  Bande rÃ©glementaire Â±5% (Phase II BKAM, mars 2020) Â· Loi 43-12
                 </p>
               </div>
             </div>

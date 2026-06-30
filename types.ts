@@ -197,6 +197,10 @@ export interface AdminConfig {
   alertThresholds: { pair: string; min: number; max: number; enabled: boolean }[];
   tierCommissions: Record<ClientTier, TierConfig>;
   corsProxyUrl: string;
+  // P1-2: basket parameters — formerly hardcoded in worker. Shape mirrors
+  // BasketConfig (constants.ts DEFAULT_BASKET_CONFIG) so the same object
+  // shape flows from operator override to the basket-parity formula.
+  basket: { eurWeight: number; usdWeight: number; K: number; bandPct: number };
 }
 
 export interface BlotterEntry {

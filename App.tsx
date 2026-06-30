@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState, useRef, useCallback, Suspense, lazy } from 'react';
+import React, { useEffect, useState, useRef, useCallback, Suspense, lazy } from 'react';
 import { ViewState, LiveRate, LivePriceEntry } from './types';
 import { DEFAULT_BASKET_CONFIG, MARKET_NEWS, DISCLAIMER_TEXT, DISCLAIMER_SHORT, BKAM_CURRENCIES } from './constants';
 import { fetchAllMadRates } from './services/fxRates';
@@ -463,7 +463,7 @@ function AppInner() {
                 >
                   <Search size={11} />
                   <span>Rechercherâ€¦</span>
-                  <kbd className="hidden lg:flex items-center gap-0.5 ml-1 px-1 py-0.5 text-[8px] font-mono text-slate-500 bg-navy-800 border border-navy-700 rounded">âŒ˜K</kbd>
+                  <kbd className="hidden lg:flex items-center gap-0.5 ml-1 px-1 py-0.5 text-[9px] font-mono text-slate-500 bg-navy-800 border border-navy-700 rounded">âŒ˜K</kbd>
                 </button>
                 <button
                   onClick={() => setContactDrawerOpen(true)}
@@ -590,7 +590,7 @@ function AppInner() {
               (BKAM MÃ©thodologie 2024, Â§II) Â· Pour un cours ferme : votre banque domiciliataire agrÃ©Ã©e BAM
             </p>
             {isSimView && (
-              <p className="lg:hidden text-[8px] font-bold text-amber-300 uppercase tracking-widest mt-0.5">
+              <p className="lg:hidden text-[9px] font-bold text-amber-300 uppercase tracking-widest mt-0.5">
                 Mode Simulateur â€” RÃ©sultats Non-ExÃ©cutables Â· Usage PÃ©dagogique Uniquement
               </p>
             )}
@@ -717,23 +717,27 @@ function AppInner() {
               />
             )}
 
-            {/* â”€â”€ Trust bar (Task 2.2) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            {/* â”€â”€ Trust bar (Task 2.2) — P2-1: now clickable sector tiles â”€â”€â”€â”€â”€â”€â”€â”€ */}
             <div className="bg-navy-900/60 border border-navy-800 rounded-xl px-5 py-3">
               <p className="text-[9px] text-slate-600 uppercase tracking-wider text-center mb-2.5 font-bold">
                 Accompagne des entreprises dans leur gestion de change MAD
               </p>
-              <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+              <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
                 {[
-                  { sector: 'Ã‰quipementier automobile',  city: 'Tanger' },
-                  { sector: 'Importateur bois & papier', city: 'Casablanca' },
-                  { sector: 'Exportateur textile',        city: 'FÃ¨s-MeknÃ¨s' },
-                  { sector: 'OpÃ©rateur phosphates',       city: 'Khouribga' },
-                  { sector: 'Fintech europÃ©enne',         city: 'Corridor MENA' },
+                  { sector: 'Automobile',       city: 'Tanger',          view: 'SECTOR_AUTO'      },
+                  { sector: 'Textile',          city: 'Fès-Meknès',      view: 'SECTOR_TEXTILE'   },
+                  { sector: 'Phosphates',       city: 'Khouribga',       view: 'SECTOR_PHOSPHATE' },
+                  { sector: 'Agroalimentaire',  city: 'Casablanca',      view: 'SECTOR_AGRI'      },
+                  { sector: 'Nordique/Bois',    city: 'Tanger Med',      view: 'SECTOR_NORDIQUE'  },
                 ].map(c => (
-                  <div key={c.city} className="flex items-center gap-1.5 text-[10px] text-slate-600">
+                  <button
+                    key={c.view}
+                    onClick={() => navTo(c.view as ViewState)}
+                    className="flex items-center gap-1.5 text-[10px] text-slate-400 hover:text-gold-400 transition-colors px-1.5 py-0.5 rounded hover:bg-navy-800/60"
+                  >
                     <span className="w-1 h-1 rounded-full bg-gold-500/40 flex-shrink-0" />
-                    <span>{c.sector} Â· <em className="not-italic text-slate-700">{c.city}</em></span>
-                  </div>
+                    <span>{c.sector} · <em className="not-italic text-slate-500">{c.city}</em></span>
+                  </button>
                 ))}
               </div>
             </div>

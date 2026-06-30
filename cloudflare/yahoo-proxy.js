@@ -928,11 +928,11 @@ const GULF_PEGS = {           // CCY per 1 USD (official pegs)
   KWD: 0.30700, OMR: 0.38500, BHD: 0.37600, JOD: 0.70900,
 };
 
-function enrichBkamRates(rawRates, ecbEurUsd, ecbRates) {
+function enrichBkamRates(rawRates, ecbEurUsd, ecbRates, basket) {
   if (!rawRates?.length || !ecbEurUsd) return rawRates;
 
-  const K = 10.49, wEUR = 0.60, wUSD = 0.40;
-  const usdMadBasket = K / (wEUR * ecbEurUsd + wUSD);
+  const { K, eurWeight, usdWeight } = basket || BASKET_DEFAULT;
+  const usdMadBasket = K / (eurWeight * ecbEurUsd + usdWeight);
 
   // BKAM per-unit map (normalised to per 1 unit)
   const bkamMap = {};
@@ -982,15 +982,17 @@ function enrichBkamRates(rawRates, ecbEurUsd, ecbRates) {
 async function storeBkamRatesInKV(env, date, rawRates, ecbEurUsd, ecbRates) {
   if (!env.REPORTS_KV || !rawRates?.length) return;
 
+  // P1-2: read operator-tuned basket
+  const basket = await getBasketConfig(env.REPORTS_KV);
   // Enrich with basket parities for ALL currencies
-  const enrichedRates = enrichBkamRates(rawRates, ecbEurUsd, ecbRates);
+  const enrichedRates = enrichBkamRates(rawRates, ecbEurUsd, ecbRates, basket);
 
   const payload = {
     date,
     rates: enrichedRates,          // includes driftBps, basketParity, bandUtilPct
     rawRates,                       // original BKAM response preserved
     ecbEurUsd: ecbEurUsd ?? null,
-    usdMadBasket: ecbEurUsd ? +( (10.49 / (0.60 * ecbEurUsd + 0.40)).toFixed(4) ) : null,
+    usdMadBasket: ecbEurUsd ? +( (basket.K / (basket.eurWeight * ecbEurUsd + basket.usdWeight)).toFixed(4) ) : null,
     fetchedAt: new Date().toISOString(),
     count: rawRates.length,
   };
@@ -1047,11 +1049,13 @@ async function handleGetBkamRates(request, env, origin) {
     if (rawFromKV?.length) {
       const ecbRates = await fetchEcbRatesForDate(date);
       const ecbEurUsd = ecbRates?.USD ?? null;
+      const basket = await getBasketConfig(env.REPORTS_KV);
       await storeBkamRatesInKV(env, date, rawFromKV, ecbEurUsd, ecbRates);
-      const enriched = enrichBkamRates(rawFromKV, ecbEurUsd, ecbRates);
+      const enriched = enrichBkamRates(rawFromKV, ecbEurUsd, ecbRates, basket);
+      const { K, eurWeight, usdWeight } = basket;
       const payload = {
         date, rates: enriched, rawRates: rawFromKV, ecbEurUsd,
-        usdMadBasket: ecbEurUsd ? +((10.49 / (0.60 * ecbEurUsd + 0.40)).toFixed(4)) : null,
+        usdMadBasket: ecbEurUsd ? +((K / (eurWeight * ecbEurUsd + usdWeight)).toFixed(4)) : null,
         fetchedAt: new Date().toISOString(), count: rawFromKV.length,
       };
       return new Response(JSON.stringify(payload), {
@@ -1070,13 +1074,15 @@ async function handleGetBkamRates(request, env, origin) {
   if (!rawRates?.length) return json({ error: `No BKAM data for ${date}`, date }, 404, origin);
 
   const ecbEurUsd = ecbRates?.USD ?? null;
+  const basket = await getBasketConfig(env.REPORTS_KV);
   await storeBkamRatesInKV(env, date, rawRates, ecbEurUsd, ecbRates);
 
   // Return the enriched payload (same format as KV)
-  const enriched = enrichBkamRates(rawRates, ecbEurUsd, ecbRates);
+  const enriched = enrichBkamRates(rawRates, ecbEurUsd, ecbRates, basket);
+  const { K, eurWeight, usdWeight } = basket;
   const payload = {
     date, rates: enriched, rawRates, ecbEurUsd,
-    usdMadBasket: ecbEurUsd ? +((10.49 / (0.60 * ecbEurUsd + 0.40)).toFixed(4)) : null,
+    usdMadBasket: ecbEurUsd ? +((K / (eurWeight * ecbEurUsd + usdWeight)).toFixed(4)) : null,
     fetchedAt: new Date().toISOString(), count: rawRates.length,
   };
   return new Response(JSON.stringify(payload), {
@@ -1123,12 +1129,27 @@ const BAND_DEFAULT    = 0.05;  // BKAM Phase II Â±5% (current since Mar 2020)
 const BAND_ALERT_WINDOW = 10;  // days to look back for band change detection
 const DRIFT_HISTORY_TTL = 60 * 60 * 24 * 400; // 400-day KV TTL
 
+// P1-2: basket defaults (overridable via /api/admin/basket). Shape mirrors
+// the client-side BasketConfig (constants.ts DEFAULT_BASKET_CONFIG).
+const BASKET_DEFAULT = { eurWeight: 0.60, usdWeight: 0.40, K: 10.49, bandPct: 0.05 };
+
 async function getBandPct(kv) {
   if (!kv) return BAND_DEFAULT;
   try {
     const v = await kv.get('config:band_pct');
     return v ? parseFloat(v) : BAND_DEFAULT;
   } catch { return BAND_DEFAULT; }
+}
+
+// P1-2: read operator-tuned basket (overrides defaults)
+async function getBasketConfig(kv) {
+  if (!kv) return BASKET_DEFAULT;
+  try {
+    const v = await kv.get('config:basket');
+    if (!v) return BASKET_DEFAULT;
+    const parsed = JSON.parse(v);
+    return { ...BASKET_DEFAULT, ...parsed };
+  } catch { return BASKET_DEFAULT; }
 }
 
 async function getDriftIndex(kv) {
@@ -1159,10 +1180,10 @@ async function storeDailyDrift(env, date, todayRates) {
 
   if (!ecbEurUsd) { console.warn('[DRIFT] No ECB EUR/USD â€” skipping drift storage'); return; }
 
-  const K = 10.49, wEUR = 0.60, wUSD = 0.40;
+  const { K, eurWeight, usdWeight } = await getBasketConfig(env.REPORTS_KV);
   const bkamUsdMad  = todayRates['USD'];
   // Step 2 â€” Theoretical basket parity using ECB EUR/USD (non-circular)
-  const basketUsdMad = K / (wEUR * ecbEurUsd + wUSD);
+  const basketUsdMad = K / (eurWeight * ecbEurUsd + usdWeight);
   // Step 3 â€” Drift
   const driftBps = ((bkamUsdMad - basketUsdMad) / basketUsdMad) * 10_000;
 
@@ -1319,6 +1340,36 @@ async function handleGetBandConfig(env, origin) {
   const updatedAt = env.REPORTS_KV ? await env.REPORTS_KV.get('config:band_updated_at').catch(() => null) : null;
   const alert    = env.REPORTS_KV ? await env.REPORTS_KV.get('drift:band_alert').then(r => r ? JSON.parse(r) : null).catch(() => null) : null;
   return json({ bandPct, updatedAt, alert, phase: bandPct <= 0.025 ? 'Phase I' : bandPct <= 0.05 ? 'Phase II' : 'Phase III+' }, 200, origin);
+}
+
+// P1-2: GET /api/basket-config — public, returns operator-tuned basket params
+async function handleGetBasketConfig(env, origin) {
+  const basket   = await getBasketConfig(env.REPORTS_KV);
+  const updatedAt = env.REPORTS_KV ? await env.REPORTS_KV.get('config:basket_updated_at').catch(() => null) : null;
+  return json({ ...basket, updatedAt, defaults: BASKET_DEFAULT }, 200, origin);
+}
+
+// P1-2: POST /api/admin/basket — admin, updates basket params in KV
+async function handleUpdateBasket(request, env, origin) {
+  const denied = await adminGate(request, env, origin);
+  if (denied) return denied;
+  if (!env.REPORTS_KV) return json({ error: 'KV non configuré' }, 503, origin);
+
+  const rawBody = await readBodySafe(request);
+  let body;
+  try { body = JSON.parse(rawBody); } catch { return json({ error: 'JSON invalide' }, 400, origin); }
+
+  const eurWeight = typeof body.eurWeight === 'number' ? body.eurWeight : BASKET_DEFAULT.eurWeight;
+  const usdWeight = typeof body.usdWeight === 'number' ? body.usdWeight : BASKET_DEFAULT.usdWeight;
+  const K    = typeof body.K    === 'number' ? body.K    : BASKET_DEFAULT.K;
+  if (Math.abs(eurWeight + usdWeight - 1) > 0.001) return json({ error: 'eurWeight + usdWeight must equal 1.000' }, 400, origin);
+  if (eurWeight < 0.10 || eurWeight > 0.90) return json({ error: 'eurWeight must be 0.10–0.90' }, 400, origin);
+  if (K < 8.0 || K > 12.0) return json({ error: 'K must be 8.00–12.00' }, 400, origin);
+
+  const next = { eurWeight, usdWeight, K, bandPct: BASKET_DEFAULT.bandPct };
+  await env.REPORTS_KV.put('config:basket', JSON.stringify(next));
+  await env.REPORTS_KV.put('config:basket_updated_at', new Date().toISOString());
+  return json({ ok: true, basket: next, message: 'Panier mis à jour' }, 200, origin);
 }
 
 // POST /api/admin/band â€” admin only, update band assumption in KV
@@ -1509,9 +1560,9 @@ async function handleScheduled(env) {
   // Compute basket-derived band utilization for context
   let bandCtx = '';
   if (todayRates?.['EUR'] && todayRates?.['USD']) {
-    const K = 10.49, wEUR = 0.60, wUSD = 0.40;
+    const { K, eurWeight, usdWeight } = await getBasketConfig(env.REPORTS_KV);
     const eurUsd = todayRates['EUR'] / todayRates['USD'];
-    const centralUsd = K / (wEUR * eurUsd + wUSD);
+    const centralUsd = K / (eurWeight * eurUsd + usdWeight);
     const centralEur = centralUsd * eurUsd;
     const eurBand = ((todayRates['EUR'] - centralEur * 0.95) / (centralEur * 1.10)) * 100;
     const usdBand = ((todayRates['USD'] - centralUsd * 0.95) / (centralUsd * 1.10)) * 100;
@@ -1824,8 +1875,8 @@ function getISOWeek(d) {
 // Currencies sourced from ECB cross-rates; moyen/driftBps left null.
 function buildEcbOnlyRates(ecbEurUsd, ecbRates) {
   if (!ecbEurUsd) return [];
-  const K = 10.49, wEUR = 0.60, wUSD = 0.40;
-  const usdMadBasket = K / (wEUR * ecbEurUsd + wUSD);
+  const { K, eurWeight, usdWeight } = await getBasketConfig(env.REPORTS_KV);
+  const usdMadBasket = K / (eurWeight * ecbEurUsd + usdWeight);
 
   const rows = [];
 
@@ -1912,10 +1963,11 @@ async function handleBkamRatesBackfill(request, env, origin) {
         const ecbEurUsd2 = ecbRates?.USD ?? null;
         if (!ecbEurUsd2) return { date, status: 'no_bkam_data' };
         const ecbOnlyRates = buildEcbOnlyRates(ecbEurUsd2, ecbRates);
+        const b = await getBasketConfig(env.REPORTS_KV);
         const payload = {
           date, rates: ecbOnlyRates, rawRates: null,
           ecbEurUsd: ecbEurUsd2,
-          usdMadBasket: +((10.49 / (0.60 * ecbEurUsd2 + 0.40)).toFixed(4)),
+          usdMadBasket: +((b.K / (b.eurWeight * ecbEurUsd2 + b.usdWeight)).toFixed(4)),
           fetchedAt: new Date().toISOString(),
           count: ecbOnlyRates.length,
           source: 'ECB_ONLY',
@@ -2350,8 +2402,8 @@ async function handlePublicRates(request, env, origin) {
     if (fxRes.ok) {
       const data = await fxRes.json();
       const eurUsd = data.rates?.USD || 1.085;
-      const K = 10.49;
-      const usdMad = K / (0.6 * eurUsd + 0.4);
+      const { K, eurWeight, usdWeight } = BASKET_DEFAULT;
+      const usdMad = K / (eurWeight * eurUsd + usdWeight);
       const map = { EUR: usdMad * eurUsd, USD: usdMad };
       // Gulf pegs
       const gulfPegs = { SAR: 0.266667, AED: 0.272294, QAR: 0.274725, KWD: 3.25, OMR: 2.60869, BHD: 2.65957, JOD: 1.41044 };
@@ -3223,6 +3275,72 @@ async function handleClearAudit(request, env, origin) {
   return json({ ok: true }, 200, origin);
 }
 
+// ─── P1-6 Generic KV-backed content CRUD ─────────────────────────────────────
+// Replaces inline static arrays (glossary, articles, sectors, testimonials,
+// changelog, podcast, press, partnerships) with editable KV-backed records.
+// KV layout: documents:<collection>  →  JSON array of records (each with `id`)
+const CONTENT_COLLECTIONS = new Set([
+  'glossary', 'articles', 'sectors', 'testimonials',
+  'changelog', 'podcast', 'press', 'partnerships',
+]);
+const CONTENT_TTL = 60 * 60 * 24 * 90; // 90 days
+
+function contentKey(collection) { return `documents:${collection}`; }
+
+async function contentLoad(env, collection) {
+  if (!env.REPORTS_KV) return [];
+  try {
+    const raw = await env.REPORTS_KV.get(contentKey(collection));
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+async function contentSave(env, collection, records) {
+  if (!env.REPORTS_KV) return false;
+  await env.REPORTS_KV.put(contentKey(collection), JSON.stringify(records), { expirationTtl: CONTENT_TTL });
+  return true;
+}
+
+// GET /api/admin/content/:collection  → list
+// PUT /api/admin/content/:collection/:id  → upsert
+// DELETE /api/admin/content/:collection/:id  → remove
+async function handleContentList(request, env, origin, collection) {
+  const denied = await adminGate(request, env, origin);
+  if (denied) return denied;
+  if (!CONTENT_COLLECTIONS.has(collection)) return json({ error: `Unknown collection: ${collection}` }, 400, origin);
+  const records = await contentLoad(env, collection);
+  return json({ records, collection, total: records.length }, 200, origin);
+}
+
+async function handleContentUpsert(request, env, origin, collection, id) {
+  const denied = await adminGate(request, env, origin);
+  if (denied) return denied;
+  if (!CONTENT_COLLECTIONS.has(collection)) return json({ error: `Unknown collection: ${collection}` }, 400, origin);
+  if (!id) return json({ error: 'id required' }, 400, origin);
+
+  let body;
+  try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400, origin); }
+
+  const records = await contentLoad(env, collection);
+  const idx = records.findIndex((r) => r.id === id);
+  const record = { ...body, id };
+  if (idx >= 0) records[idx] = record; else records.unshift(record);
+  const ok = await contentSave(env, collection, records);
+  return json({ ok, record, total: records.length }, 200, origin);
+}
+
+async function handleContentDelete(request, env, origin, collection, id) {
+  const denied = await adminGate(request, env, origin);
+  if (denied) return denied;
+  if (!CONTENT_COLLECTIONS.has(collection)) return json({ error: `Unknown collection: ${collection}` }, 400, origin);
+  if (!id) return json({ error: 'id required' }, 400, origin);
+
+  const records = await contentLoad(env, collection);
+  const next = records.filter((r) => r.id !== id);
+  const ok = await contentSave(env, collection, next);
+  return json({ ok, total: next.length }, 200, origin);
+}
+
 async function handleHijri(request, env, origin) {
   const url = new URL(request.url);
   const year = parseInt(url.searchParams.get('year'), 10) || new Date().getFullYear();
@@ -3342,6 +3460,15 @@ export default {
     if (pathname === '/api/admin/band') {
       if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
       return handleUpdateBand(request, env, origin);
+    }
+    // P1-2: basket config (read public, write admin)
+    if (pathname === '/api/basket-config') {
+      if (request.method !== 'GET') return json({ error: 'GET only' }, 405, origin);
+      return handleGetBasketConfig(env, origin);
+    }
+    if (pathname === '/api/admin/basket') {
+      if (request.method !== 'POST') return json({ error: 'POST only' }, 405, origin);
+      return handleUpdateBasket(request, env, origin);
     }
 
     // â”€â”€ Newsletter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -3490,6 +3617,14 @@ export default {
       if (denied) return denied;
       return handleClearAudit(request, env, origin);
     }
+    // ─── P1-6 Generic content admin (glossary, articles, sectors, etc.) ───
+    const contentMatch = pathname.match(/^\/api\/admin\/content\/([a-z_]+)(?:\/([A-Za-z0-9_-]+))?$/);
+    if (contentMatch) {
+      const [, collection, id] = contentMatch;
+      if (request.method === 'GET' && !id)  return handleContentList(request, env, origin, collection);
+      if (request.method === 'PUT' && id)   return handleContentUpsert(request, env, origin, collection, id);
+      if (request.method === 'DELETE' && id) return handleContentDelete(request, env, origin, collection, id);
+    }
     // â”€â”€ P1.12 RAG seed (env-protected init, no admin token required) â”€â”€â”€â”€â”€
     if (pathname === '/api/init/seed' && request.method === 'POST') {
       const key = url.searchParams.get('key') ?? '';
@@ -3550,4 +3685,6 @@ export default {
     ctx.waitUntil(handleScheduled(env));
   },
 };
+
+
 

@@ -59,6 +59,8 @@ export const DEFAULT_ADMIN_CONFIG: AdminConfig = {
   ],
   tierCommissions: DEFAULT_TIER_COMMISSIONS,
   corsProxyUrl: process.env.CORS_PROXY_URL ?? 'https://jad2fx-yahoo-proxy.hamzaelbouhali.workers.dev',
+  // P1-2: basket parameters (formerly hardcoded in worker 5 places)
+  basket: { eurWeight: 0.60, usdWeight: 0.40, K: 10.49, bandPct: 0.05 },
 };
 
 const STORAGE_KEY    = 'jad2fx_admin_config';

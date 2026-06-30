@@ -10,7 +10,7 @@ import {
   Flame, Gem, Factory, Wheat,
 } from 'lucide-react';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const FMT_PRICE = (v: number, symbol: string) => {
   if (v >= 1000) return v.toFixed(2);
@@ -44,7 +44,7 @@ const CATEGORY_ACTIVE: Record<CommodityCategory, string> = {
 
 type FilterCategory = 'ALL' | CommodityCategory;
 
-// ─── Range bar ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Range bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function RangeBar({ low, high, current }: { low: number; high: number; current: number }) {
   const pct = high > low ? ((current - low) / (high - low)) * 100 : 50;
@@ -62,7 +62,7 @@ function RangeBar({ low, high, current }: { low: number; high: number; current: 
   );
 }
 
-// ─── Commodity Card ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Commodity Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function CommodityCard({ q }: { q: CommodityQuote }) {
   const { locale } = useI18n();
@@ -134,7 +134,7 @@ function CommodityCard({ q }: { q: CommodityQuote }) {
           </div>
         )}
         {q.timestamp && q.source === 'LIVE' && (
-          <p className="mt-1 text-[8px] text-slate-700 font-mono">
+          <p className="mt-1 text-[9px] text-slate-700 font-mono">
             {new Date(q.timestamp).toLocaleTimeString('fr-MA', { hour: '2-digit', minute: '2-digit' })}
           </p>
         )}
@@ -151,7 +151,7 @@ function CommodityCard({ q }: { q: CommodityQuote }) {
   );
 }
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const CommoditiesPage: React.FC = () => {
   const { config } = useAdmin();
@@ -200,7 +200,7 @@ const CommoditiesPage: React.FC = () => {
   return (
     <div className={`space-y-6 ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
 
-      {/* ── Header ── */}
+      {/* â”€â”€ Header â”€â”€ */}
       <div className="bg-navy-900 rounded-xl border border-navy-700 overflow-hidden">
         <div className="bg-navy-900 p-6 text-white relative overflow-hidden">
           <div className="absolute top-0 right-0 w-48 h-48 bg-gold-500 opacity-5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2" />
@@ -228,7 +228,7 @@ const CommoditiesPage: React.FC = () => {
             </div>
             <div className="mt-3 flex items-center gap-3 flex-wrap">
               <div className="text-[10px] text-amber-400 bg-amber-900/20 border border-amber-800/30 rounded px-2 py-1">
-                ⚠️ {t('common.indicative')}
+                âš ï¸ {t('common.indicative')}
               </div>
               <div className="text-[10px] text-slate-400">
                 USD/MAD: <span className="text-gold-400 font-mono font-bold">{usdMad.toFixed(4)}</span>
@@ -241,12 +241,12 @@ const CommoditiesPage: React.FC = () => {
         <div className="p-3 bg-navy-800/60 border-b border-navy-700 text-[10px] text-slate-500">
           {t('commodities.source')}
           {anyFallback && (
-            <span className="ml-2 text-amber-400 font-medium">· {t('commodities.fallbackNotice')}</span>
+            <span className="ml-2 text-amber-400 font-medium">Â· {t('commodities.fallbackNotice')}</span>
           )}
         </div>
       </div>
 
-      {/* ── Category filter ── */}
+      {/* â”€â”€ Category filter â”€â”€ */}
       <div className={`flex gap-2 flex-wrap ${isRTL ? 'flex-row-reverse' : ''}`}>
         {categories.map(cat => {
           const active = filter === cat.id;
@@ -274,7 +274,7 @@ const CommoditiesPage: React.FC = () => {
         })}
       </div>
 
-      {/* ── Commodity cards grid ── */}
+      {/* â”€â”€ Commodity cards grid â”€â”€ */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(6)].map((_, i) => (
@@ -295,18 +295,18 @@ const CommoditiesPage: React.FC = () => {
         </div>
       )}
 
-      {/* ── CORS proxy hint ── */}
+      {/* â”€â”€ CORS proxy hint â”€â”€ */}
       {anyFallback && (
         <div className="p-4 bg-amber-950/20 border border-amber-800/40 rounded-xl flex items-start gap-3">
           <AlertTriangle size={15} className="text-amber-400 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-amber-400">{t('common.offline')} — Yahoo Finance</p>
+            <p className="text-sm font-semibold text-amber-400">{t('common.offline')} â€” Yahoo Finance</p>
             <p className="text-xs text-amber-500 mt-0.5">{t('commodities.corsNote')}</p>
           </div>
         </div>
       )}
 
-      {/* ── Advisory CTA ── */}
+      {/* â”€â”€ Advisory CTA â”€â”€ */}
       <div className="bg-navy-900 rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Building2 size={20} className="text-gold-400 flex-shrink-0" />

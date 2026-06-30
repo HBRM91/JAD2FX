@@ -72,7 +72,8 @@ export default function BlogArticleView({ articleId, onBack, onShare }: Props) {
         />
       ) : (
         <div className="bg-navy-900/50 border border-navy-800 rounded-2xl p-6 text-center text-slate-500 text-[12px]">
-          Article complet bientôt disponible.
+          <p>Article complet bientôt disponible.</p>
+          <p className="mt-1 text-[10px] text-slate-600">Admins: remplissez <code className="font-mono text-gold-400">contentFr</code> via Admin &gt; Contenu &gt; Recherche.</p>
         </div>
       )}
 

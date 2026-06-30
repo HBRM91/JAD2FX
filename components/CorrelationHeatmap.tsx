@@ -2,9 +2,9 @@ import { Grid3X3, Info } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
 /**
- * P2.9 — G10-MAD correlation heatmap.
- * 14×14 matrix of rolling correlations (30D or 90D).
- * Synthetic — in production, would compute from BKAM + ECB historical time series.
+ * P2.9 â€” G10-MAD correlation heatmap.
+ * 14Ã—14 matrix of rolling correlations (30D or 90D).
+ * Synthetic â€” in production, would compute from BKAM + ECB historical time series.
  */
 
 const CURRENCIES = ['EUR', 'USD', 'GBP', 'JPY', 'CHF', 'CAD', 'SEK', 'NOK', 'DKK', 'AUD', 'NZD', 'SGD', 'HKD', 'CNY'];
@@ -35,7 +35,7 @@ function genCorrMatrix(): number[][] {
 }
 
 function colorForCorr(c: number): string {
-  // Red (positive correlation) → Blue (negative correlation)
+  // Red (positive correlation) â†’ Blue (negative correlation)
   // Intensity proportional to |c|
   const intensity = Math.min(1, Math.abs(c));
   if (c > 0) {
@@ -55,21 +55,21 @@ export default function CorrelationHeatmap() {
     <div className="space-y-4 max-w-4xl mx-auto">
       <div className="flex items-center gap-2">
         <Grid3X3 size={14} className="text-gold-500" />
-        <h1 className="text-base font-bold text-white uppercase tracking-wider">Matrice de Corrélation G10/MAD</h1>
-        <span className="text-[10px] text-slate-500 ml-auto">P2.9 · 14×14 · Pearson</span>
+        <h1 className="text-base font-bold text-white uppercase tracking-wider">Matrice de CorrÃ©lation G10/MAD</h1>
+        <span className="text-[10px] text-slate-500 ml-auto">P2.9 Â· 14Ã—14 Â· Pearson</span>
       </div>
 
       <div className="flex items-start gap-2 p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
         <Info size={12} className="text-amber-400 flex-shrink-0 mt-0.5" />
         <p className="text-[10px] text-amber-200/80 leading-relaxed">
-          Matrice pédagogique. Production: calculer sur série historique 90J des rendements quotidiens via /api/forex/history.
-          Lecture: <span className="text-red-400">rouge</span> = corrélation positive (les 2 bougent ensemble) · <span className="text-blue-400">bleu</span> = négative.
+          Matrice pÃ©dagogique. Production: calculer sur sÃ©rie historique 90J des rendements quotidiens via /api/forex/history.
+          Lecture: <span className="text-red-400">rouge</span> = corrÃ©lation positive (les 2 bougent ensemble) Â· <span className="text-blue-400">bleu</span> = nÃ©gative.
         </p>
       </div>
 
       {/* Window selector */}
       <div className="bg-navy-900 border border-navy-700 rounded-xl p-3 flex items-center gap-3">
-        <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Fenêtre</span>
+        <span className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">FenÃªtre</span>
         {([30, 90, 365] as const).map((w) => (
           <button
             key={w}
@@ -90,7 +90,7 @@ export default function CorrelationHeatmap() {
         <table className="border-collapse">
           <thead>
             <tr>
-              <th className="px-1 py-1 text-[8px] text-slate-500 text-right"></th>
+              <th className="px-1 py-1 text-[9px] text-slate-500 text-right"></th>
               {CURRENCIES.map((c) => (
                 <th key={c} className="px-1 py-1 text-[9px] text-slate-400 text-center font-mono min-w-[36px]">
                   {c}
@@ -124,10 +124,10 @@ export default function CorrelationHeatmap() {
       <div className="bg-navy-900/50 border border-navy-800 rounded-lg p-3 text-[10px] text-slate-500">
         <p><strong>Insights :</strong></p>
         <ul className="list-disc list-inside space-y-0.5 mt-1">
-          <li>Les devises scandinaves (SEK, NOK, DKK) sont fortement corrélées entre elles (région, économie, banques).</li>
-          <li>EUR est très corrélé avec la plupart des G10 (zone euro = 60% du panier MAD).</li>
-          <li>CNY et SGD: faible corrélation avec les G10 — utile pour diversification.</li>
-          <li>HKD: quasi-perfaitement corrélé avec USD (peg) — non affiché ici pour clarté.</li>
+          <li>Les devises scandinaves (SEK, NOK, DKK) sont fortement corrÃ©lÃ©es entre elles (rÃ©gion, Ã©conomie, banques).</li>
+          <li>EUR est trÃ¨s corrÃ©lÃ© avec la plupart des G10 (zone euro = 60% du panier MAD).</li>
+          <li>CNY et SGD: faible corrÃ©lation avec les G10 â€” utile pour diversification.</li>
+          <li>HKD: quasi-perfaitement corrÃ©lÃ© avec USD (peg) â€” non affichÃ© ici pour clartÃ©.</li>
         </ul>
       </div>
     </div>

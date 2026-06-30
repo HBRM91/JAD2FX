@@ -3,7 +3,7 @@ import {
   Shield, LogOut, Settings, Activity, BarChart2, TrendingUp,
   AlertTriangle, FileText, RefreshCw, Lock, Eye, EyeOff,
   ChevronDown, RotateCcw, Plus, Trash2, CheckCircle, XCircle,
-  ClipboardList, Bot, Send, Search, Mail, Key, Link2, Users,
+  ClipboardList, Bot, Send, Search, Mail, Key, Link2, Users, Target,
 } from 'lucide-react';
 import { BKAM_CURRENCIES } from '../constants';
 import { useAdmin, DEFAULT_TIER_COMMISSIONS } from '../context/AdminContext';
@@ -16,6 +16,7 @@ import NewsletterAdmin from './admin/NewsletterAdmin';
 import ApiKeyManagement from './admin/ApiKeyManagement';
 import BacklinkTracker from './admin/BacklinkTracker';
 import LeadsDashboard from './admin/LeadsDashboard';
+import ContentManager, { type ContentSchema } from './ContentManager';
 import CurrencyFlag from './CurrencyFlag';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -198,6 +199,119 @@ function SystemTab() {
         {config.corsProxyUrl && (
           <p className="text-[10px] text-emerald-400">✓ Proxy configured — commodities will use this URL</p>
         )}
+      </div>
+
+      {/* P1-2 — Basket parameters (operator-controlled BKAM regulatory formula) */}
+      <BasketSubPanel />
+    </div>
+  );
+}
+
+// P1-2 — operator-controlled basket (wEUR, wUSD, K)
+function BasketSubPanel() {
+  const { config, updateConfig } = useAdmin();
+  const [eur, setEur] = useState(config.basket.eurWeight);
+  const [usd, setUsd] = useState(config.basket.usdWeight);
+  const [K,   setK]   = useState(config.basket.K);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg]       = useState<string | null>(null);
+  const base = (config.corsProxyUrl ?? '').replace(/\/$/, '');
+
+  useEffect(() => {
+    setEur(config.basket.eurWeight);
+    setUsd(config.basket.usdWeight);
+    setK(config.basket.K);
+  }, [config.basket.eurWeight, config.basket.usdWeight, config.basket.K]);
+
+  const sum = eur + usd;
+  const valid = Math.abs(sum - 1) < 0.001 && eur >= 0.1 && eur <= 0.9 && K >= 8 && K <= 12;
+
+  const save = async () => {
+    if (!base) return;
+    setSaving(true);
+    setMsg(null);
+    try {
+      const res = await fetch(`${base}/api/admin/basket`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ eurWeight: eur, usdWeight: usd, K }),
+        signal: AbortSignal.timeout(5_000),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      // Mirror into client AdminConfig so the UI updates without a reload
+      updateConfig({ basket: { eurWeight: eur, usdWeight: usd, K, bandPct: config.basket.bandPct } });
+      setMsg('Panier mis à jour · propage à la prochaine requête /api/bkam-rates');
+      setTimeout(() => setMsg(null), 4000);
+    } catch (e) {
+      setMsg(`Erreur: ${String(e)}`);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="bg-navy-800 border border-navy-600 rounded p-4 space-y-3">
+      <div>
+        <p className="text-sm font-bold text-white flex items-center gap-1.5">
+          <Target size={12} className="text-gold-400" /> Panier MAD · Pondération + K
+        </p>
+        <p className="text-xs text-slate-500">Formule de la parité centrale : USD/MAD = K / (wEUR × EUR/USD + wUSD). Modifier propage aux vues BkamFixing/Bands/Parity.</p>
+      </div>
+      <div className="grid grid-cols-3 gap-3">
+        <div>
+          <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">wEUR</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0.10"
+            max="0.90"
+            value={eur}
+            onChange={(e) => setEur(parseFloat(e.target.value) || 0)}
+            className="w-full bg-navy-900 border border-navy-600 text-white text-sm font-mono rounded px-2 py-1.5 focus:outline-none focus:border-gold-500"
+          />
+        </div>
+        <div>
+          <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">wUSD</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0.10"
+            max="0.90"
+            value={usd}
+            onChange={(e) => setUsd(parseFloat(e.target.value) || 0)}
+            className="w-full bg-navy-900 border border-navy-600 text-white text-sm font-mono rounded px-2 py-1.5 focus:outline-none focus:border-gold-500"
+          />
+        </div>
+        <div>
+          <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">K</label>
+          <input
+            type="number"
+            step="0.01"
+            min="8.00"
+            max="12.00"
+            value={K}
+            onChange={(e) => setK(parseFloat(e.target.value) || 0)}
+            className="w-full bg-navy-900 border border-navy-600 text-white text-sm font-mono rounded px-2 py-1.5 focus:outline-none focus:border-gold-500"
+          />
+        </div>
+      </div>
+      <div className="flex items-center gap-3 text-[10px]">
+        <span className={sum === 1 ? 'text-emerald-400' : 'text-red-400'}>
+          Σ w = {sum.toFixed(2)} {sum === 1 ? '✓' : '(doit = 1.00)'}
+        </span>
+        <span className="text-slate-500">|</span>
+        <span className="text-slate-400">USD/MAD central ≈ K / ({eur.toFixed(2)} × EUR/USD + {usd.toFixed(2)})</span>
+      </div>
+      <div className="flex items-center gap-3">
+        <button
+          onClick={save}
+          disabled={!valid || saving}
+          className="px-3 py-1.5 bg-gold-500 text-navy-900 text-xs font-bold rounded hover:bg-gold-400 transition disabled:opacity-50"
+        >
+          {saving ? 'Sauvegarde…' : 'Sauvegarder'}
+        </button>
+        {msg && <span className="text-[10px] text-emerald-400">{msg}</span>}
       </div>
     </div>
   );
@@ -1195,7 +1309,114 @@ function ConsultantTab() {
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 
-type AdminTab = 'SYSTEM' | 'RATES' | 'CURVES' | 'FORWARDS' | 'SPREADS' | 'PRICING' | 'ALERTS' | 'BLOTTER' | 'AUDIT' | 'CONSULTANT' | 'REPORTS' | 'NEWSLETTER' | 'APIKEYS' | 'BACKLINKS' | 'LEADS';
+// P1-6 — Content admin tab. Generic KV CRUD over 8 collections.
+const CONTENT_SCHEMAS: { [k: string]: ContentSchema } = {
+  glossary: {
+    collection: 'glossary', label: 'Glossaire', itemLabel: 'Terme',
+    fields: [
+      { key: 'term',     label: 'Terme',          type: 'text',     required: true },
+      { key: 'slug',     label: 'Slug',           type: 'text',     required: true, hint: 'kebab-case' },
+      { key: 'category', label: 'Catégorie',      type: 'text' },
+      { key: 'shortFr',  label: 'Définition FR',  type: 'longtext', required: true },
+      { key: 'shortEn',  label: 'Définition EN',  type: 'longtext' },
+      { key: 'longFr',   label: 'Article FR',     type: 'longtext' },
+    ],
+  },
+  articles: {
+    collection: 'articles', label: 'Recherche', itemLabel: 'Article',
+    fields: [
+      { key: 'title',    label: 'Titre',     type: 'text',     required: true },
+      { key: 'slug',     label: 'Slug',      type: 'text',     required: true },
+      { key: 'excerpt',  label: 'Extrait',   type: 'longtext' },
+      { key: 'contentFr',label: 'Contenu FR',type: 'longtext', required: true },
+      { key: 'author',   label: 'Auteur',    type: 'text' },
+      { key: 'tags',     label: 'Tags',      type: 'tags' },
+    ],
+  },
+  sectors: {
+    collection: 'sectors', label: 'Secteurs', itemLabel: 'Secteur',
+    fields: [
+      { key: 'name',     label: 'Nom',           type: 'text',     required: true },
+      { key: 'slug',     label: 'Slug',          type: 'text',     required: true },
+      { key: 'summary',  label: 'Résumé',        type: 'longtext' },
+      { key: 'exposure', label: 'Exposition FX', type: 'longtext' },
+      { key: 'pairs',    label: 'Paires clés',   type: 'tags' },
+    ],
+  },
+  testimonials: {
+    collection: 'testimonials', label: 'Témoignages', itemLabel: 'Témoignage',
+    fields: [
+      { key: 'author',  label: 'Auteur',  type: 'text',     required: true },
+      { key: 'role',    label: 'Rôle',    type: 'text' },
+      { key: 'company', label: 'Société', type: 'text' },
+      { key: 'quote',   label: 'Citation',type: 'longtext', required: true },
+    ],
+  },
+  changelog: {
+    collection: 'changelog', label: 'Changelog', itemLabel: 'Entrée',
+    fields: [
+      { key: 'version', label: 'Version',  type: 'text',     required: true },
+      { key: 'date',    label: 'Date',     type: 'text',     required: true },
+      { key: 'title',   label: 'Titre',    type: 'text',     required: true },
+      { key: 'changes', label: 'Changements', type: 'longtext' },
+    ],
+  },
+  podcast: {
+    collection: 'podcast', label: 'Podcast', itemLabel: 'Épisode',
+    fields: [
+      { key: 'number',  label: 'N°',          type: 'text',     required: true },
+      { key: 'title',   label: 'Titre',       type: 'text',     required: true },
+      { key: 'date',    label: 'Date',        type: 'text' },
+      { key: 'duration',label: 'Durée',       type: 'text' },
+      { key: 'url',     label: 'URL audio',   type: 'url' },
+      { key: 'description', label: 'Description', type: 'longtext' },
+    ],
+  },
+  press: {
+    collection: 'press', label: 'Press kit', itemLabel: 'Asset',
+    fields: [
+      { key: 'name', label: 'Nom',   type: 'text', required: true },
+      { key: 'type', label: 'Type',  type: 'text' },
+      { key: 'url',  label: 'URL',   type: 'url' },
+      { key: 'description', label: 'Description', type: 'longtext' },
+    ],
+  },
+  partnerships: {
+    collection: 'partnerships', label: 'Partenaires', itemLabel: 'Partenaire',
+    fields: [
+      { key: 'name', label: 'Nom',   type: 'text', required: true },
+      { key: 'type', label: 'Type',  type: 'text' },
+      { key: 'url',  label: 'URL',   type: 'url' },
+      { key: 'description', label: 'Description', type: 'longtext' },
+    ],
+  },
+};
+
+function ContentTab() {
+  const [collection, setCollection] = useState<keyof typeof CONTENT_SCHEMAS>('glossary');
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 flex-wrap">
+        {Object.entries(CONTENT_SCHEMAS).map(([k, s]) => (
+          <button
+            key={k}
+            onClick={() => setCollection(k as keyof typeof CONTENT_SCHEMAS)}
+            className={`px-3 py-1.5 text-[11px] font-bold rounded transition ${
+              collection === k
+                ? 'bg-gold-500 text-navy-900'
+                : 'bg-navy-800 text-slate-300 hover:bg-navy-700'
+            }`}
+          >
+            {s.label}
+          </button>
+        ))}
+      </div>
+      <ContentManager schema={CONTENT_SCHEMAS[collection]} />
+    </div>
+  );
+}
+
+type AdminTab = 'SYSTEM' | 'RATES' | 'CURVES' | 'FORWARDS' | 'SPREADS' | 'PRICING' | 'ALERTS' | 'BLOTTER' | 'AUDIT' | 'CONSULTANT' | 'REPORTS' | 'NEWSLETTER' | 'APIKEYS' | 'BACKLINKS' | 'LEADS' | 'CONTENT';
 
 const TABS: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: 'SYSTEM',     label: 'System',     icon: Activity },
@@ -1213,6 +1434,7 @@ const TABS: { id: AdminTab; label: string; icon: React.ElementType }[] = [
   { id: 'APIKEYS',    label: 'API Keys',   icon: Key },
   { id: 'BACKLINKS',  label: 'SEO',        icon: Link2 },
   { id: 'LEADS',      label: 'Leads',      icon: Users },
+  { id: 'CONTENT',    label: 'Contenu',    icon: ClipboardList },
 ];
 
 export default function AdminDashboard() {
@@ -1292,10 +1514,11 @@ export default function AdminDashboard() {
           {activeTab === 'AUDIT'      && <AuditTab />}
           {activeTab === 'CONSULTANT' && <ConsultantTab />}
            {activeTab === 'REPORTS'    && <ReportsAdmin />}
-           {activeTab === 'NEWSLETTER' && <NewsletterAdmin />}
-           {activeTab === 'APIKEYS'    && <ApiKeyManagement />}
-            {activeTab === 'BACKLINKS'  && <BacklinkTracker />}
-            {activeTab === 'LEADS'      && <LeadsDashboard />}
+            {activeTab === 'NEWSLETTER' && <NewsletterAdmin />}
+            {activeTab === 'APIKEYS'    && <ApiKeyManagement />}
+             {activeTab === 'BACKLINKS'  && <BacklinkTracker />}
+             {activeTab === 'LEADS'      && <LeadsDashboard />}
+             {activeTab === 'CONTENT'    && <ContentTab />}
         </div>
       </div>
     </div>

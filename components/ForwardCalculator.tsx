@@ -24,7 +24,7 @@ import { useI18n } from '../context/I18nContext';
 import { logSimTelemetry } from '../services/telemetry';
 import TimeWindowSelector, { getStartDateForWindow, type TimeWindow } from './TimeWindowSelector';
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function fmt4(v: number) { return v.toFixed(4); }
 function fmt2(v: number) { return v.toFixed(2); }
@@ -34,7 +34,7 @@ function fmtMAD(v: number) { return new Intl.NumberFormat('fr-MA', { maximumFrac
 
 type Tab = 'PRICER' | 'CURVE' | 'MTM' | 'SPREADS';
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
+// â”€â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function TermRow({ label, value, unit, highlight, color }: {
   label: string; value: string; unit?: string; highlight?: boolean; color?: string;
@@ -59,8 +59,8 @@ function SpreadsTab({ spot, currency }: { spot: number; currency: string }) {
   return (
     <div className="space-y-4">
       <p className="text-[12px] text-slate-300 leading-relaxed">
-        Comparez les forwards 1M × 3M, 1M × 6M et 1M × 1Y. Le spread reflète l'évolution attendue des taux
-        directeurs sur l'horizon. Idéal pour comprendre la structure par terme (yield curve) du marché
+        Comparez les forwards 1M Ã— 3M, 1M Ã— 6M et 1M Ã— 1Y. Le spread reflÃ¨te l'Ã©volution attendue des taux
+        directeurs sur l'horizon. IdÃ©al pour comprendre la structure par terme (yield curve) du marchÃ©
         des changes pour votre devise.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -75,19 +75,19 @@ function SpreadsTab({ spot, currency }: { spot: number; currency: string }) {
           const color = spread > 0 ? 'text-emerald-400' : spread < 0 ? 'text-red-400' : 'text-slate-400';
           return (
             <div key={p.from + p.to} className="bg-navy-950 border border-navy-800 rounded-lg p-3">
-              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{p.from} × {p.to}</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{p.from} Ã— {p.to}</p>
               <p className={`text-xl font-mono font-bold ${color}`}>
                 {spread > 0 ? '+' : ''}{spread} <span className="text-[10px] text-slate-400">pips</span>
               </p>
               <p className="text-[10px] text-slate-500 mt-1">
-                {p.from} @ {a} → {p.to} @ {b}
+                {p.from} @ {a} â†’ {p.to} @ {b}
               </p>
             </div>
           );
         })}
       </div>
       <div className="bg-navy-950 border border-navy-800 rounded-lg p-3">
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Détails par tenor (forward points en pips)</p>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">DÃ©tails par tenor (forward points en pips)</p>
         <div className="grid grid-cols-4 gap-2">
           {near.map((n) => (
             <div key={n.tenor} className="text-center bg-navy-900 rounded p-2">
@@ -97,7 +97,7 @@ function SpreadsTab({ spot, currency }: { spot: number; currency: string }) {
           ))}
         </div>
         <p className="text-[10px] text-slate-500 mt-2 italic">
-          Forward points calculés sur la courbe de taux BAM. Pour vos opérations, contactez votre banque pour un cours ferme.
+          Forward points calculÃ©s sur la courbe de taux BAM. Pour vos opÃ©rations, contactez votre banque pour un cours ferme.
         </p>
       </div>
     </div>
@@ -121,7 +121,7 @@ function TabButton({ active, onClick, children }: {
   );
 }
 
-// ─── Printable Quote Sheet ────────────────────────────────────────────────────
+// â”€â”€â”€ Printable Quote Sheet â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function PrintQuoteModal({ quote, currency, tenor, notional, direction, settlement, locale, onClose }: {
   quote: ForwardQuote;
@@ -166,13 +166,13 @@ function PrintQuoteModal({ quote, currency, tenor, notional, direction, settleme
           <div className="bg-navy-950 text-white px-6 py-4 flex items-start justify-between">
             <div>
               <p className="text-gold-400 font-bold text-sm tracking-widest uppercase">JAD2 Advisory</p>
-              <p className="text-slate-400 text-[11px]">Conseil Stratégique & Formation · Risque de Change</p>
+              <p className="text-slate-400 text-[11px]">Conseil StratÃ©gique & Formation Â· Risque de Change</p>
               <p className="text-slate-500 text-[10px]">jad2advisory.com</p>
             </div>
             <div className="text-right text-[10px] text-slate-400">
               <p>{dateStr}</p>
               <p>{timeStr}</p>
-              <p className="font-mono mt-1 text-slate-500">Réf. FWD-{refNum}</p>
+              <p className="font-mono mt-1 text-slate-500">RÃ©f. FWD-{refNum}</p>
             </div>
           </div>
 
@@ -180,7 +180,7 @@ function PrintQuoteModal({ quote, currency, tenor, notional, direction, settleme
           <div className="bg-gold-500 text-navy-950 text-center py-2">
             <p className="text-xs font-bold uppercase tracking-widest">
               {locale === 'ar'
-                ? 'ورقة محاكاة عقد آجل'
+                ? 'ÙˆØ±Ù‚Ø© Ù…Ø­Ø§ÙƒØ§Ø© Ø¹Ù‚Ø¯ Ø¢Ø¬Ù„'
                 : locale === 'en'
                 ? 'Forward FX Simulation Sheet'
                 : 'Fiche de Simulation Forward FX'}
@@ -193,7 +193,7 @@ function PrintQuoteModal({ quote, currency, tenor, notional, direction, settleme
             <div className="border border-slate-200 rounded-lg overflow-hidden">
               <div className="bg-slate-50 px-4 py-2 border-b border-slate-200">
                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600">
-                  {locale === 'en' ? 'Transaction Parameters' : 'Paramètres de Transaction'}
+                  {locale === 'en' ? 'Transaction Parameters' : 'ParamÃ¨tres de Transaction'}
                 </p>
               </div>
               <div className="divide-y divide-slate-100">
@@ -206,7 +206,7 @@ function PrintQuoteModal({ quote, currency, tenor, notional, direction, settleme
                       : (locale === 'en' ? 'SELL FCY / BUY MAD' : 'VENTE FCY / ACHAT MAD'),
                   ],
                   [locale === 'en' ? 'Notional' : 'Notionnel', `${notional.toLocaleString('fr-FR')} ${currency}`],
-                  [locale === 'en' ? 'Tenor' : 'Échéance', `${quote.tenorLabel} (${quote.tenorDays} j)`],
+                  [locale === 'en' ? 'Tenor' : 'Ã‰chÃ©ance', `${quote.tenorLabel} (${quote.tenorDays} j)`],
                   [locale === 'en' ? 'Settlement Date' : 'Date de Valeur', settlement],
                 ] as [string, string][]).map(([k, v]) => (
                   <div key={k} className="flex items-center justify-between px-4 py-2">
@@ -255,7 +255,7 @@ function PrintQuoteModal({ quote, currency, tenor, notional, direction, settleme
             {/* Net cost */}
             <div className="border border-amber-200 bg-amber-50 rounded-lg p-4">
               <p className="text-[10px] font-bold uppercase tracking-widest text-slate-600 mb-2">
-                {locale === 'en' ? 'Indicative Net Cost' : 'Coût Net Indicatif'}
+                {locale === 'en' ? 'Indicative Net Cost' : 'CoÃ»t Net Indicatif'}
               </p>
               <div className="flex items-end gap-3 mb-2">
                 <p className="text-2xl font-mono font-bold text-slate-900">{fmtMAD(fwdCost)}</p>
@@ -275,7 +275,7 @@ function PrintQuoteModal({ quote, currency, tenor, notional, direction, settleme
               </div>
             </div>
 
-            {/* P3.6 — In-tool CTA after quote computed */}
+            {/* P3.6 â€” In-tool CTA after quote computed */}
             <div className="bg-gradient-to-r from-gold-500/10 to-navy-900 border border-gold-700/30 rounded-lg p-4 mt-3 flex items-start gap-3">
               <div className="flex-shrink-0 w-9 h-9 rounded-lg bg-gold-500/15 border border-gold-500/30 flex items-center justify-center">
                 <TrendingUp size={16} className="text-gold-400" />
@@ -287,14 +287,14 @@ function PrintQuoteModal({ quote, currency, tenor, notional, direction, settleme
                 <p className="text-[11px] text-slate-400 leading-snug mb-2">
                   {locale === 'en'
                     ? 'JAD2FX is pedagogical. For execution, your bank gives you a firm quote. We can help you structure the request and benchmark it.'
-                    : 'JAD2FX est pédagogique. Pour exécution, votre banque vous donne un cours ferme. On vous aide à structurer la demande et la benchmarker.'}
+                    : 'JAD2FX est pÃ©dagogique. Pour exÃ©cution, votre banque vous donne un cours ferme. On vous aide Ã  structurer la demande et la benchmarker.'}
                 </p>
                 <div className="flex gap-2 flex-wrap">
                   <button
                     onClick={() => { if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('jad2:open-contact')); }}
                     className="text-[10px] font-bold px-3 py-1.5 bg-gold-500 text-navy-950 rounded hover:bg-gold-400"
                   >
-                    {locale === 'en' ? '15min with expert →' : '15 min avec un expert →'}
+                    {locale === 'en' ? '15min with expert â†’' : '15 min avec un expert â†’'}
                   </button>
                   <button
                     onClick={() => {
@@ -319,13 +319,13 @@ function PrintQuoteModal({ quote, currency, tenor, notional, direction, settleme
             <div className="border border-orange-200 bg-orange-50 rounded-lg p-4">
               <p className="text-[10px] text-orange-800 leading-relaxed">
                 <strong>
-                  ⚠️{' '}
+                  âš ï¸{' '}
                   {locale === 'en' ? 'INDICATIVE SIMULATION ONLY' : 'SIMULATION INDICATIVE UNIQUEMENT'}
                 </strong>
-                {' — '}
+                {' â€” '}
                 {locale === 'en'
                   ? 'This document is produced for educational purposes by JAD2 Advisory (strategic consulting & FX risk management training). Data is indicative only and does not constitute a transaction offer or investment advice. For actual transactions, contact a Bank Al-Maghrib approved institution.'
-                  : "Ce document est produit à titre pédagogique par JAD2 Advisory (conseil stratégique & formation en gestion du risque de change). Ces données sont indicatives et ne constituent pas une offre de transaction ni un conseil en investissement. Pour l'exécution de vos opérations, adressez-vous à votre établissement bancaire habilité."}
+                  : "Ce document est produit Ã  titre pÃ©dagogique par JAD2 Advisory (conseil stratÃ©gique & formation en gestion du risque de change). Ces donnÃ©es sont indicatives et ne constituent pas une offre de transaction ni un conseil en investissement. Pour l'exÃ©cution de vos opÃ©rations, adressez-vous Ã  votre Ã©tablissement bancaire habilitÃ©."}
               </p>
             </div>
           </div>
@@ -336,7 +336,7 @@ function PrintQuoteModal({ quote, currency, tenor, notional, direction, settleme
               onClick={onClose}
               className="text-xs text-slate-500 hover:text-slate-800 transition px-3 py-1.5 rounded border border-slate-300 hover:border-slate-400"
             >
-              ← {locale === 'en' ? 'Close' : 'Fermer'}
+              â† {locale === 'en' ? 'Close' : 'Fermer'}
             </button>
             <button
               onClick={() => window.print()}
@@ -352,7 +352,7 @@ function PrintQuoteModal({ quote, currency, tenor, notional, direction, settleme
   );
 }
 
-// ─── MTM Calculator ───────────────────────────────────────────────────────────
+// â”€â”€â”€ MTM Calculator â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function MtmSection({ spot, currency }: { spot: number; currency: string }) {
   const { locale } = useI18n();
@@ -371,12 +371,12 @@ function MtmSection({ spot, currency }: { spot: number; currency: string }) {
     return { mtmMAD, pctMove, diff };
   }, [contractRate, contractNotional, contractSide, spot]);
 
-  const heading = locale === 'ar' ? 'تقييم العقد بالسوق (MTM)' : locale === 'en' ? 'Mark-to-Market (MTM)' : 'Valorisation au Marché (MTM)';
+  const heading = locale === 'ar' ? 'ØªÙ‚ÙŠÙŠÙ… Ø§Ù„Ø¹Ù‚Ø¯ Ø¨Ø§Ù„Ø³ÙˆÙ‚ (MTM)' : locale === 'en' ? 'Mark-to-Market (MTM)' : 'Valorisation au MarchÃ© (MTM)';
   const desc    = locale === 'ar'
-    ? 'أدخل معطيات العقد الآجل الأصلي لحساب الربح/الخسارة غير المحقق'
+    ? 'Ø£Ø¯Ø®Ù„ Ù…Ø¹Ø·ÙŠØ§Øª Ø§Ù„Ø¹Ù‚Ø¯ Ø§Ù„Ø¢Ø¬Ù„ Ø§Ù„Ø£ØµÙ„ÙŠ Ù„Ø­Ø³Ø§Ø¨ Ø§Ù„Ø±Ø¨Ø­/Ø§Ù„Ø®Ø³Ø§Ø±Ø© ØºÙŠØ± Ø§Ù„Ù…Ø­Ù‚Ù‚'
     : locale === 'en'
     ? 'Enter your existing forward contract details to compute unrealized P&L vs current spot'
-    : 'Saisissez les détails de votre contrat forward existant pour calculer la P&L latente vs le cours spot actuel';
+    : 'Saisissez les dÃ©tails de votre contrat forward existant pour calculer la P&L latente vs le cours spot actuel';
 
   return (
     <div className="space-y-5">
@@ -385,10 +385,10 @@ function MtmSection({ spot, currency }: { spot: number; currency: string }) {
         <AlertTriangle size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
         <p className="text-[11px] text-amber-400/90 leading-relaxed">
           {locale === 'ar'
-            ? 'نتائج تعليمية فقط — استخدم أسعار BKAM الرسمية لأي تقييم فعلي'
+            ? 'Ù†ØªØ§Ø¦Ø¬ ØªØ¹Ù„ÙŠÙ…ÙŠØ© ÙÙ‚Ø· â€” Ø§Ø³ØªØ®Ø¯Ù… Ø£Ø³Ø¹Ø§Ø± BKAM Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ù„Ø£ÙŠ ØªÙ‚ÙŠÙŠÙ… ÙØ¹Ù„ÙŠ'
             : locale === 'en'
-            ? 'Educational results only — use BKAM official fixing for any actual valuation'
-            : 'Résultats indicatifs à titre pédagogique — utilisez le fixing BKAM officiel pour toute valorisation réelle'}
+            ? 'Educational results only â€” use BKAM official fixing for any actual valuation'
+            : 'RÃ©sultats indicatifs Ã  titre pÃ©dagogique â€” utilisez le fixing BKAM officiel pour toute valorisation rÃ©elle'}
         </p>
       </div>
 
@@ -400,7 +400,7 @@ function MtmSection({ spot, currency }: { spot: number; currency: string }) {
           {/* Contract rate */}
           <div>
             <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">
-              {locale === 'ar' ? 'السعر الآجل المتعاقد عليه' : locale === 'en' ? 'Contracted Forward Rate' : 'Cours Forward Contracté'}
+              {locale === 'ar' ? 'Ø§Ù„Ø³Ø¹Ø± Ø§Ù„Ø¢Ø¬Ù„ Ø§Ù„Ù…ØªØ¹Ø§Ù‚Ø¯ Ø¹Ù„ÙŠÙ‡' : locale === 'en' ? 'Contracted Forward Rate' : 'Cours Forward ContractÃ©'}
             </label>
             <input
               type="number"
@@ -415,7 +415,7 @@ function MtmSection({ spot, currency }: { spot: number; currency: string }) {
           {/* Notional */}
           <div>
             <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">
-              {locale === 'ar' ? 'المبلغ الافتراضي' : locale === 'en' ? 'Notional' : 'Notionnel'} ({currency})
+              {locale === 'ar' ? 'Ø§Ù„Ù…Ø¨Ù„Øº Ø§Ù„Ø§ÙØªØ±Ø§Ø¶ÙŠ' : locale === 'en' ? 'Notional' : 'Notionnel'} ({currency})
             </label>
             <input
               type="number"
@@ -429,7 +429,7 @@ function MtmSection({ spot, currency }: { spot: number; currency: string }) {
           {/* Side */}
           <div>
             <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">
-              {locale === 'ar' ? 'اتجاه العقد' : locale === 'en' ? 'Contract Side' : 'Sens du Contrat'}
+              {locale === 'ar' ? 'Ø§ØªØ¬Ø§Ù‡ Ø§Ù„Ø¹Ù‚Ø¯' : locale === 'en' ? 'Contract Side' : 'Sens du Contrat'}
             </label>
             <div className="flex gap-2 h-9">
               {(['BUY', 'SELL'] as const).map(d => (
@@ -440,8 +440,8 @@ function MtmSection({ spot, currency }: { spot: number; currency: string }) {
                       : 'bg-navy-800 text-slate-400 border border-navy-600'
                   }`}>
                   {d === 'BUY'
-                    ? (locale === 'ar' ? 'شراء' : locale === 'en' ? 'BUY' : 'ACHAT')
-                    : (locale === 'ar' ? 'بيع' : locale === 'en' ? 'SELL' : 'VENTE')}
+                    ? (locale === 'ar' ? 'Ø´Ø±Ø§Ø¡' : locale === 'en' ? 'BUY' : 'ACHAT')
+                    : (locale === 'ar' ? 'Ø¨ÙŠØ¹' : locale === 'en' ? 'SELL' : 'VENTE')}
                 </button>
               ))}
             </div>
@@ -458,19 +458,19 @@ function MtmSection({ spot, currency }: { spot: number; currency: string }) {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               <div className="text-center">
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
-                  {locale === 'ar' ? 'السعر الآجل المتعاقد' : locale === 'en' ? 'Contracted Rate' : 'Cours Contracté'}
+                  {locale === 'ar' ? 'Ø§Ù„Ø³Ø¹Ø± Ø§Ù„Ø¢Ø¬Ù„ Ø§Ù„Ù…ØªØ¹Ø§Ù‚Ø¯' : locale === 'en' ? 'Contracted Rate' : 'Cours ContractÃ©'}
                 </p>
                 <p className="text-lg font-mono font-bold text-white">{fmt4(parseFloat(contractRate))}</p>
               </div>
               <div className="text-center">
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
-                  {locale === 'ar' ? 'السعر الفوري الحالي' : locale === 'en' ? 'Current Spot' : 'Spot Actuel'}
+                  {locale === 'ar' ? 'Ø§Ù„Ø³Ø¹Ø± Ø§Ù„ÙÙˆØ±ÙŠ Ø§Ù„Ø­Ø§Ù„ÙŠ' : locale === 'en' ? 'Current Spot' : 'Spot Actuel'}
                 </p>
                 <p className="text-lg font-mono font-bold text-gold-400">{fmt4(spot)}</p>
               </div>
               <div className="text-center">
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
-                  {locale === 'ar' ? 'التحرك %' : locale === 'en' ? 'Move %' : 'Mouvement %'}
+                  {locale === 'ar' ? 'Ø§Ù„ØªØ­Ø±Ùƒ %' : locale === 'en' ? 'Move %' : 'Mouvement %'}
                 </p>
                 <p className={`text-lg font-mono font-bold ${mtm.pctMove >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {mtm.pctMove >= 0 ? '+' : ''}{mtm.pctMove.toFixed(3)}%
@@ -478,7 +478,7 @@ function MtmSection({ spot, currency }: { spot: number; currency: string }) {
               </div>
               <div className="text-center">
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">
-                  {locale === 'ar' ? 'ر.غ. غير محقق (MAD)' : locale === 'en' ? 'Unrealised P&L (MAD)' : 'P&L Latente (MAD)'}
+                  {locale === 'ar' ? 'Ø±.Øº. ØºÙŠØ± Ù…Ø­Ù‚Ù‚ (MAD)' : locale === 'en' ? 'Unrealised P&L (MAD)' : 'P&L Latente (MAD)'}
                 </p>
                 <p className={`text-xl font-mono font-bold ${mtm.mtmMAD >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                   {mtm.mtmMAD >= 0 ? '+' : ''}{fmtMAD(mtm.mtmMAD)}
@@ -488,12 +488,12 @@ function MtmSection({ spot, currency }: { spot: number; currency: string }) {
 
             <p className="text-center text-[10px] text-slate-500 mt-4 border-t border-navy-800/50 pt-3">
               {mtm.mtmMAD >= 0
-                ? (locale === 'ar' ? '✅ الموقف في صالحك — قيمة السوق أعلى من السعر الآجل'
-                  : locale === 'en' ? '✅ In-the-money — current market is more favorable than contracted rate'
-                  : '✅ Gain latent — le marché actuel est plus favorable que votre cours forward contracté')
-                : (locale === 'ar' ? '❌ الموقف ضدك — قيمة السوق أقل من السعر الآجل'
-                  : locale === 'en' ? '❌ Out-of-the-money — current market is less favorable than contracted rate'
-                  : '❌ Perte latente — le marché actuel est moins favorable que votre cours forward contracté')
+                ? (locale === 'ar' ? 'âœ… Ø§Ù„Ù…ÙˆÙ‚Ù ÙÙŠ ØµØ§Ù„Ø­Ùƒ â€” Ù‚ÙŠÙ…Ø© Ø§Ù„Ø³ÙˆÙ‚ Ø£Ø¹Ù„Ù‰ Ù…Ù† Ø§Ù„Ø³Ø¹Ø± Ø§Ù„Ø¢Ø¬Ù„'
+                  : locale === 'en' ? 'âœ… In-the-money â€” current market is more favorable than contracted rate'
+                  : 'âœ… Gain latent â€” le marchÃ© actuel est plus favorable que votre cours forward contractÃ©')
+                : (locale === 'ar' ? 'âŒ Ø§Ù„Ù…ÙˆÙ‚Ù Ø¶Ø¯Ùƒ â€” Ù‚ÙŠÙ…Ø© Ø§Ù„Ø³ÙˆÙ‚ Ø£Ù‚Ù„ Ù…Ù† Ø§Ù„Ø³Ø¹Ø± Ø§Ù„Ø¢Ø¬Ù„'
+                  : locale === 'en' ? 'âŒ Out-of-the-money â€” current market is less favorable than contracted rate'
+                  : 'âŒ Perte latente â€” le marchÃ© actuel est moins favorable que votre cours forward contractÃ©')
               }
             </p>
           </div>
@@ -501,9 +501,9 @@ function MtmSection({ spot, currency }: { spot: number; currency: string }) {
 
         {!contractRate && (
           <div className="text-center py-6 text-slate-600 text-sm">
-            {locale === 'ar' ? 'أدخل السعر الآجل المتعاقد عليه لحساب MTM'
+            {locale === 'ar' ? 'Ø£Ø¯Ø®Ù„ Ø§Ù„Ø³Ø¹Ø± Ø§Ù„Ø¢Ø¬Ù„ Ø§Ù„Ù…ØªØ¹Ø§Ù‚Ø¯ Ø¹Ù„ÙŠÙ‡ Ù„Ø­Ø³Ø§Ø¨ MTM'
               : locale === 'en' ? 'Enter contracted forward rate to compute MTM'
-              : 'Saisissez le cours forward contracté pour calculer le MTM'}
+              : 'Saisissez le cours forward contractÃ© pour calculer le MTM'}
           </div>
         )}
       </div>
@@ -511,27 +511,27 @@ function MtmSection({ spot, currency }: { spot: number; currency: string }) {
       {/* Advisory CTA */}
       <div className="text-center p-4 bg-gold-500/5 border border-gold-700/30 rounded-xl">
         <p className="text-xs text-slate-400 mb-2">
-          {locale === 'ar' ? 'للحصول على تقييم MTM رسمي، تواصل مع مصرفك'
+          {locale === 'ar' ? 'Ù„Ù„Ø­ØµÙˆÙ„ Ø¹Ù„Ù‰ ØªÙ‚ÙŠÙŠÙ… MTM Ø±Ø³Ù…ÙŠØŒ ØªÙˆØ§ØµÙ„ Ù…Ø¹ Ù…ØµØ±ÙÙƒ'
             : locale === 'en' ? 'For official MTM valuation, contact your bank or JAD2 Advisory'
             : 'Pour une valorisation MTM officielle, contactez votre banque ou JAD2 Advisory'}
         </p>
         <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer"
            className="inline-flex items-center gap-2 px-4 py-2 bg-gold-500 hover:bg-gold-400 text-navy-900 text-xs font-bold rounded transition">
           <BookOpen size={12} />
-          JAD2 Advisory →
+          JAD2 Advisory â†’
         </a>
       </div>
     </div>
   );
 }
 
-// ─── P2.8 — Historical Comparison Section ─────────────────────────────────────
+// â”€â”€â”€ P2.8 â€” Historical Comparison Section â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 // Compare a currency's theoretical forward across multiple time windows.
 function HistoricalComparisonSection({ currency }: { currency: string }) {
   const [window, setWindow] = useState<TimeWindow>('1M');
   const startDate = useMemo(() => getStartDateForWindow(window), [window]);
 
-  // Theoretical forward points: change from spot = (r_dom - r_for) × days/360
+  // Theoretical forward points: change from spot = (r_dom - r_for) Ã— days/360
   const MAD_RATE = 0.0275;
   const CCY_RATES: Record<string, number> = { EUR: 0.04, USD: 0.0475, GBP: 0.045, JPY: 0.005, CHF: 0.0275, CAD: 0.038, AUD: 0.041, CNY: 0.0295 };
   const spotMap: Record<string, number> = { EUR: 10.85, USD: 9.95, GBP: 12.59, JPY: 6.66, CHF: 11.46, CAD: 7.32, AUD: 6.42, CNY: 1.37 };
@@ -550,7 +550,7 @@ function HistoricalComparisonSection({ currency }: { currency: string }) {
   return (
     <div className="space-y-4 mt-4">
       <div className="flex items-center gap-3 flex-wrap">
-        <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Fenêtre:</span>
+        <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">FenÃªtre:</span>
         <TimeWindowSelector value={window} onChange={setWindow} />
         <span className="text-[10px] text-slate-500">
           depuis {startDate.toLocaleDateString('fr-MA')}
@@ -562,10 +562,10 @@ function HistoricalComparisonSection({ currency }: { currency: string }) {
           <thead className="bg-navy-950">
             <tr className="text-[9px] text-slate-500 uppercase tracking-wider">
               <th className="px-3 py-2 text-left">Tenor</th>
-              <th className="px-3 py-2 text-right">Forward théorique</th>
+              <th className="px-3 py-2 text-right">Forward thÃ©orique</th>
               <th className="px-3 py-2 text-right">Points forward</th>
               <th className="px-3 py-2 text-right">Bande (r_d - r_f)</th>
-              <th className="px-3 py-2 text-right">Dans la fenêtre</th>
+              <th className="px-3 py-2 text-right">Dans la fenÃªtre</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-navy-800">
@@ -575,7 +575,7 @@ function HistoricalComparisonSection({ currency }: { currency: string }) {
                 <td className="px-3 py-2 text-right font-mono text-gold-400">{r.fwdRate.toFixed(4)}</td>
                 <td className="px-3 py-2 text-right font-mono text-emerald-400">{(r.fwdPoints >= 0 ? '+' : '')}{r.fwdPoints.toFixed(4)}</td>
                 <td className="px-3 py-2 text-right font-mono text-slate-400">{((MAD_RATE - rForeign) * 10000).toFixed(0)} bps</td>
-                <td className="px-3 py-2 text-right text-slate-400">{r.isInWindow ? '✓' : '—'}</td>
+                <td className="px-3 py-2 text-right text-slate-400">{r.isInWindow ? 'âœ“' : 'â€”'}</td>
               </tr>
             ))}
           </tbody>
@@ -583,14 +583,14 @@ function HistoricalComparisonSection({ currency }: { currency: string }) {
       </div>
 
       <p className="text-[10px] text-slate-500 leading-relaxed">
-        Forward théorique calculé par parité des taux d&apos;intérêt couverte (CIP): F = S × (1 + r_d × T) − S.
-        Taux domestiques: BAM 2.75% · Taux étranger variable par devise. Fenêtre sélectionnée met en surbrillance les maturités disponibles.
+        Forward thÃ©orique calculÃ© par paritÃ© des taux d&apos;intÃ©rÃªt couverte (CIP): F = S Ã— (1 + r_d Ã— T) âˆ’ S.
+        Taux domestiques: BAM 2.75% Â· Taux Ã©tranger variable par devise. FenÃªtre sÃ©lectionnÃ©e met en surbrillance les maturitÃ©s disponibles.
       </p>
     </div>
   );
 }
 
-// ─── Main Component ────────────────────────────────────────────────────────────
+// â”€â”€â”€ Main Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function ForwardCalculator() {
   const { config, livePrices, addBlotterEntry } = useAdmin();
@@ -651,7 +651,7 @@ export default function ForwardCalculator() {
       rate: quote.forwardRate,
       fwdPtsPips: quote.forwardPointsPips,
       notional: quote.notional,
-      details: `[SIM] ${direction} ${fmtMAD(notional)} ${currency} @ ${fmt4(quote.forwardRate)} (${fmtPips(quote.forwardPointsPips)} pips) — INDICATIF`,
+      details: `[SIM] ${direction} ${fmtMAD(notional)} ${currency} @ ${fmt4(quote.forwardRate)} (${fmtPips(quote.forwardPointsPips)} pips) â€” INDICATIF`,
     });
     logSimTelemetry(config.corsProxyUrl, quote.pair, 'FORWARD_SAVE', quote.tenorDays);
     setSaved(true);
@@ -659,8 +659,8 @@ export default function ForwardCalculator() {
   }, [quote, direction, notional, currency, addBlotterEntry, config.corsProxyUrl]);
 
   // Labels
-  const tabPricer = locale === 'ar' ? 'التسعير' : locale === 'en' ? 'Pricer' : 'Pricer';
-  const tabCurve  = locale === 'ar' ? 'المنحنى' : locale === 'en' ? 'Curve' : 'Courbe';
+  const tabPricer = locale === 'ar' ? 'Ø§Ù„ØªØ³Ø¹ÙŠØ±' : locale === 'en' ? 'Pricer' : 'Pricer';
+  const tabCurve  = locale === 'ar' ? 'Ø§Ù„Ù…Ù†Ø­Ù†Ù‰' : locale === 'en' ? 'Curve' : 'Courbe';
   const tabMtm    = locale === 'ar' ? 'MTM' : 'MTM';
 
   return (
@@ -668,23 +668,23 @@ export default function ForwardCalculator() {
       <ComplianceBanner toolName="Forward Calculator" />
 
       <div className="space-y-0">
-      {/* ── Bloomberg-style header ── */}
+      {/* â”€â”€ Bloomberg-style header â”€â”€ */}
       <div className="bg-navy-950 border border-navy-700 rounded-t-xl px-6 py-4">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <div>
             <div className="flex items-center gap-3 mb-1">
               <Calculator size={16} className="text-gold-500" />
               <h2 className="text-base font-bold text-white tracking-widest uppercase">
-                {locale === 'ar' ? 'حاسبة العقود الآجلة FX' : locale === 'en' ? 'FX Forward Calculator' : 'Calculateur Forward FX'}
+                {locale === 'ar' ? 'Ø­Ø§Ø³Ø¨Ø© Ø§Ù„Ø¹Ù‚ÙˆØ¯ Ø§Ù„Ø¢Ø¬Ù„Ø© FX' : locale === 'en' ? 'FX Forward Calculator' : 'Calculateur Forward FX'}
               </h2>
               <span className="text-[9px] font-bold bg-amber-700/30 text-amber-400 border border-amber-700/40 px-1.5 py-0.5 rounded uppercase tracking-wider">
-                {locale === 'ar' ? 'تعليمي' : locale === 'en' ? 'Indicative' : 'Indicatif'}
+                {locale === 'ar' ? 'ØªØ¹Ù„ÙŠÙ…ÙŠ' : locale === 'en' ? 'Indicative' : 'Indicatif'}
               </span>
             </div>
             <p className="text-slate-500 text-[11px]">
-              {locale === 'ar' ? 'معادلة CIP · استيفاء مكعب · 20 زوجاً BKAM'
-                : locale === 'en' ? 'CIP formula · Cubic interpolation · 20 BKAM pairs · Holiday-aware T+2 settlement'
-                : 'Formule CIP · Interpolation cubique · 20 paires BKAM · Date valeur T+2 corrigée des fériés'}
+              {locale === 'ar' ? 'Ù…Ø¹Ø§Ø¯Ù„Ø© CIP Â· Ø§Ø³ØªÙŠÙØ§Ø¡ Ù…ÙƒØ¹Ø¨ Â· 20 Ø²ÙˆØ¬Ø§Ù‹ BKAM'
+                : locale === 'en' ? 'CIP formula Â· Cubic interpolation Â· 20 BKAM pairs Â· Holiday-aware T+2 settlement'
+                : 'Formule CIP Â· Interpolation cubique Â· 20 paires BKAM Â· Date valeur T+2 corrigÃ©e des fÃ©riÃ©s'}
             </p>
           </div>
 
@@ -692,7 +692,7 @@ export default function ForwardCalculator() {
           {spot ? (
             <div className="bg-navy-800 border border-navy-600 rounded-lg px-4 py-2 text-right">
               <p className="text-[9px] text-slate-500 uppercase tracking-wider">
-                <span className="inline-flex items-center gap-1">{curInfo && <CurrencyFlag countryCode={curInfo.countryCode} size="xs" />} {currency}/MAD {locale === 'ar' ? 'فوري' : 'Spot'}</span>
+                <span className="inline-flex items-center gap-1">{curInfo && <CurrencyFlag countryCode={curInfo.countryCode} size="xs" />} {currency}/MAD {locale === 'ar' ? 'ÙÙˆØ±ÙŠ' : 'Spot'}</span>
               </p>
               <p className="text-xl font-mono font-bold text-gold-400">{fmt4(spot)}</p>
               {spotEntry?.changePercent !== undefined && spotEntry.changePercent !== 0 && (
@@ -705,28 +705,28 @@ export default function ForwardCalculator() {
             <div className="flex items-center gap-2 bg-amber-950/20 border border-amber-800/30 rounded-lg px-3 py-2">
               <RotateCw size={12} className="text-amber-400 animate-spin" />
               <p className="text-[11px] text-amber-400/90">
-                {locale === 'ar' ? 'جارٍ جلب الأسعار…'
-                  : locale === 'en' ? 'Fetching rates…'
-                  : 'Chargement des taux…'}
+                {locale === 'ar' ? 'Ø¬Ø§Ø±Ù Ø¬Ù„Ø¨ Ø§Ù„Ø£Ø³Ø¹Ø§Ø±â€¦'
+                  : locale === 'en' ? 'Fetching ratesâ€¦'
+                  : 'Chargement des tauxâ€¦'}
               </p>
             </div>
           )}
         </div>
 
-        {/* Tab bar — B4.1 PRICER is primary; others grouped under "Avancé" label */}
+        {/* Tab bar â€” B4.1 PRICER is primary; others grouped under "AvancÃ©" label */}
         <div className="flex items-center gap-1 mt-4 border-b border-navy-700">
           <TabButton active={activeTab === 'PRICER'} onClick={() => setActiveTab('PRICER')}>{tabPricer}</TabButton>
-          <span className="text-[9px] text-slate-600 uppercase tracking-wider px-2 ml-1">{locale === 'ar' ? 'متقدم' : 'Avancé'}</span>
+          <span className="text-[9px] text-slate-600 uppercase tracking-wider px-2 ml-1">{locale === 'ar' ? 'Ù…ØªÙ‚Ø¯Ù…' : 'AvancÃ©'}</span>
           <TabButton active={activeTab === 'CURVE'}  onClick={() => setActiveTab('CURVE')}>{tabCurve}</TabButton>
           <TabButton active={activeTab === 'MTM'}    onClick={() => setActiveTab('MTM')}>{tabMtm}</TabButton>
           <TabButton active={activeTab === 'SPREADS' as any} onClick={() => setActiveTab('SPREADS' as any)}>{locale === 'ar' ? '??????' : locale === 'en' ? 'Spreads' : 'Spreads'}</TabButton>
-          <TabButton active={activeTab === 'HISTORICAL' as any} onClick={() => setActiveTab('HISTORICAL' as any)}>{locale === 'ar' ? 'تاريخي' : locale === 'en' ? 'Historical' : 'Historique'}</TabButton>
+          <TabButton active={activeTab === 'HISTORICAL' as any} onClick={() => setActiveTab('HISTORICAL' as any)}>{locale === 'ar' ? 'ØªØ§Ø±ÙŠØ®ÙŠ' : locale === 'en' ? 'Historical' : 'Historique'}</TabButton>
         </div>
       </div>
 
       <div className="bg-navy-950/60 border border-t-0 border-navy-700 rounded-b-xl p-6">
 
-        {/* ── PRICER TAB ── */}
+        {/* â”€â”€ PRICER TAB â”€â”€ */}
         {activeTab === 'PRICER' && (
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
@@ -737,7 +737,7 @@ export default function ForwardCalculator() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">
-                    {locale === 'ar' ? 'العملة' : locale === 'en' ? 'Currency' : 'Devise'}
+                    {locale === 'ar' ? 'Ø§Ù„Ø¹Ù…Ù„Ø©' : locale === 'en' ? 'Currency' : 'Devise'}
                   </label>
                   <div className="relative">
                     <select
@@ -754,7 +754,7 @@ export default function ForwardCalculator() {
                 </div>
                 <div>
                   <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">
-                    {locale === 'ar' ? 'الاتجاه' : locale === 'en' ? 'Direction' : 'Sens'}
+                    {locale === 'ar' ? 'Ø§Ù„Ø§ØªØ¬Ø§Ù‡' : locale === 'en' ? 'Direction' : 'Sens'}
                   </label>
                   <div className="flex gap-2 h-9">
                     {(['BUY', 'SELL'] as const).map(d => (
@@ -765,8 +765,8 @@ export default function ForwardCalculator() {
                             : 'bg-navy-800 text-slate-400 border border-navy-600'
                         }`}>
                         {d === 'BUY'
-                          ? (locale === 'ar' ? 'شراء' : 'BUY')
-                          : (locale === 'ar' ? 'بيع' : 'SELL')}
+                          ? (locale === 'ar' ? 'Ø´Ø±Ø§Ø¡' : 'BUY')
+                          : (locale === 'ar' ? 'Ø¨ÙŠØ¹' : 'SELL')}
                       </button>
                     ))}
                   </div>
@@ -776,7 +776,7 @@ export default function ForwardCalculator() {
               {/* Tenor chips */}
               <div>
                 <label className="block text-[10px] text-slate-500 mb-2 uppercase tracking-wider">
-                  {locale === 'ar' ? 'الأجل' : locale === 'en' ? 'Tenor' : 'Échéance'}
+                  {locale === 'ar' ? 'Ø§Ù„Ø£Ø¬Ù„' : locale === 'en' ? 'Tenor' : 'Ã‰chÃ©ance'}
                 </label>
                 <div className="flex flex-wrap gap-1.5">
                   {([...STANDARD_TENORS, 'CUSTOM'] as string[]).map(t => (
@@ -793,7 +793,7 @@ export default function ForwardCalculator() {
                 {tenor === 'CUSTOM' && (
                   <div className="mt-2">
                     <label className="block text-[10px] text-slate-500 mb-1 uppercase tracking-wider">
-                      {locale === 'ar' ? 'تاريخ التسوية المخصص' : locale === 'en' ? 'Custom Settlement Date' : 'Date de Valeur Personnalisée'}
+                      {locale === 'ar' ? 'ØªØ§Ø±ÙŠØ® Ø§Ù„ØªØ³ÙˆÙŠØ© Ø§Ù„Ù…Ø®ØµØµ' : locale === 'en' ? 'Custom Settlement Date' : 'Date de Valeur PersonnalisÃ©e'}
                     </label>
                     <input type="date" value={customDate}
                       onChange={e => setCustomDate(e.target.value)}
@@ -801,10 +801,10 @@ export default function ForwardCalculator() {
                     />
                     <p className="text-[10px] text-slate-600 mt-1">
                       {locale === 'ar'
-                        ? 'التاريخ المطلوب للتسوية (بعد T+2 فوري)'
+                        ? 'Ø§Ù„ØªØ§Ø±ÙŠØ® Ø§Ù„Ù…Ø·Ù„ÙˆØ¨ Ù„Ù„ØªØ³ÙˆÙŠØ© (Ø¨Ø¹Ø¯ T+2 ÙÙˆØ±ÙŠ)'
                         : locale === 'en'
                         ? 'Target settlement date (after T+2 spot, holidays adjusted)'
-                        : 'Date de valeur souhaitée (après T+2 spot, fériés ajustés)'}
+                        : 'Date de valeur souhaitÃ©e (aprÃ¨s T+2 spot, fÃ©riÃ©s ajustÃ©s)'}
                     </p>
                   </div>
                 )}
@@ -813,7 +813,7 @@ export default function ForwardCalculator() {
               {/* Notional */}
               <div>
                 <label className="block text-[10px] text-slate-500 mb-1.5 uppercase tracking-wider">
-                  {locale === 'ar' ? 'المبلغ' : locale === 'en' ? 'Notional' : 'Notionnel'} ({currency})
+                  {locale === 'ar' ? 'Ø§Ù„Ù…Ø¨Ù„Øº' : locale === 'en' ? 'Notional' : 'Notionnel'} ({currency})
                 </label>
                 <input
                   type="number" value={notional}
@@ -822,15 +822,15 @@ export default function ForwardCalculator() {
                   className="w-full bg-navy-800 border border-navy-600 text-white text-sm rounded px-3 py-2 focus:outline-none focus:border-gold-500 font-mono"
                 />
                 <p className="text-[10px] text-slate-500 mt-1 font-mono">
-                  ≈ {new Intl.NumberFormat(locale === 'ar' ? 'ar-MA' : locale === 'en' ? 'en-GB' : 'fr-FR').format(notional)} {currency}
+                  â‰ˆ {new Intl.NumberFormat(locale === 'ar' ? 'ar-MA' : locale === 'en' ? 'en-GB' : 'fr-FR').format(notional)} {currency}
                 </p>
               </div>
 
               {config.forwardMarkupBps > 0 && (
                 <p className="text-[10px] text-amber-400 bg-amber-950/30 border border-amber-800/30 rounded px-2 py-1">
-                  {locale === 'ar' ? `هامش Admin: ${config.forwardMarkupBps} نقطة أساس مضافة`
+                  {locale === 'ar' ? `Ù‡Ø§Ù…Ø´ Admin: ${config.forwardMarkupBps} Ù†Ù‚Ø·Ø© Ø£Ø³Ø§Ø³ Ù…Ø¶Ø§ÙØ©`
                     : locale === 'en' ? `Admin markup: ${config.forwardMarkupBps} bps applied`
-                    : `Markup Admin: ${config.forwardMarkupBps} bps appliqués`}
+                    : `Markup Admin: ${config.forwardMarkupBps} bps appliquÃ©s`}
                 </p>
               )}
             </div>
@@ -843,7 +843,7 @@ export default function ForwardCalculator() {
                   <div className="bg-navy-900 border border-navy-700 rounded-xl p-5 flex-1">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-[10px] font-bold uppercase tracking-widest text-gold-500">
-                        <span className="inline-flex items-center gap-1.5">{curInfo && <CurrencyFlag countryCode={curInfo.countryCode} size="xs" />} {currency}/MAD — {locale === 'ar' ? 'عرض سعر آجل' : locale === 'en' ? 'Forward Quote' : 'Cotation Forward'}</span>
+                        <span className="inline-flex items-center gap-1.5">{curInfo && <CurrencyFlag countryCode={curInfo.countryCode} size="xs" />} {currency}/MAD â€” {locale === 'ar' ? 'Ø¹Ø±Ø¶ Ø³Ø¹Ø± Ø¢Ø¬Ù„' : locale === 'en' ? 'Forward Quote' : 'Cotation Forward'}</span>
                       </h3>
                       <span className="text-[9px] font-mono text-slate-500">{settlement}</span>
                     </div>
@@ -851,7 +851,7 @@ export default function ForwardCalculator() {
                     {/* Big forward rate */}
                     <div className="text-center border border-navy-700 rounded-lg py-4 mb-4 bg-navy-800/40">
                       <p className="text-[10px] text-slate-500 uppercase tracking-widest mb-1">
-                        {locale === 'ar' ? 'السعر الآجل' : locale === 'en' ? 'Forward Rate' : 'Cours Forward'}
+                        {locale === 'ar' ? 'Ø§Ù„Ø³Ø¹Ø± Ø§Ù„Ø¢Ø¬Ù„' : locale === 'en' ? 'Forward Rate' : 'Cours Forward'}
                       </p>
                       <p className="text-4xl font-mono font-bold text-gold-400">{fmt4(quote.forwardRate)}</p>
                       <p className={`text-sm font-mono font-bold mt-1 ${quote.forwardPointsPips >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -866,27 +866,27 @@ export default function ForwardCalculator() {
                     </div>
 
                     <div className="space-y-0">
-                      <TermRow label={locale === 'ar' ? 'السعر الفوري' : locale === 'en' ? 'Spot Rate' : 'Cours Spot'} value={fmt4(quote.spot)} unit="MAD" />
-                      <TermRow label={locale === 'ar' ? 'أيام الأجل' : locale === 'en' ? 'Tenor Days' : 'Jours Échéance'} value={String(quote.tenorDays)} unit="j" />
-                      <TermRow label={locale === 'ar' ? 'سعر MAD' : 'MAD Rate'} value={fmtPct(quote.madRate)} />
-                      <TermRow label={locale === 'ar' ? `سعر ${currency}` : `${currency} Rate`} value={fmtPct(quote.fcyRate)} />
-                      <TermRow label={locale === 'ar' ? 'تاريخ التسوية' : locale === 'en' ? 'Settlement' : 'Date Valeur'} value={settlement} />
+                      <TermRow label={locale === 'ar' ? 'Ø§Ù„Ø³Ø¹Ø± Ø§Ù„ÙÙˆØ±ÙŠ' : locale === 'en' ? 'Spot Rate' : 'Cours Spot'} value={fmt4(quote.spot)} unit="MAD" />
+                      <TermRow label={locale === 'ar' ? 'Ø£ÙŠØ§Ù… Ø§Ù„Ø£Ø¬Ù„' : locale === 'en' ? 'Tenor Days' : 'Jours Ã‰chÃ©ance'} value={String(quote.tenorDays)} unit="j" />
+                      <TermRow label={locale === 'ar' ? 'Ø³Ø¹Ø± MAD' : 'MAD Rate'} value={fmtPct(quote.madRate)} />
+                      <TermRow label={locale === 'ar' ? `Ø³Ø¹Ø± ${currency}` : `${currency} Rate`} value={fmtPct(quote.fcyRate)} />
+                      <TermRow label={locale === 'ar' ? 'ØªØ§Ø±ÙŠØ® Ø§Ù„ØªØ³ÙˆÙŠØ©' : locale === 'en' ? 'Settlement' : 'Date Valeur'} value={settlement} />
                     </div>
                   </div>
 
                   {/* Net cost box */}
                   <div className="bg-navy-900 border border-gold-700/40 rounded-xl px-5 py-4">
                     <p className="text-[10px] text-slate-400 uppercase tracking-widest mb-1">
-                      {locale === 'ar' ? 'الكلفة الصافية الاسترشادية للعقد الآجل'
+                      {locale === 'ar' ? 'Ø§Ù„ÙƒÙ„ÙØ© Ø§Ù„ØµØ§ÙÙŠØ© Ø§Ù„Ø§Ø³ØªØ±Ø´Ø§Ø¯ÙŠØ© Ù„Ù„Ø¹Ù‚Ø¯ Ø§Ù„Ø¢Ø¬Ù„'
                         : locale === 'en' ? 'Indicative Net Forward Cost'
-                        : 'Coût Net Indicatif Forward'}
+                        : 'CoÃ»t Net Indicatif Forward'}
                     </p>
                     <div className="flex items-end gap-3">
                       <p className="text-3xl font-mono font-bold text-gold-400">{fmtMAD(quote.netCostMAD)}</p>
                       <p className="text-sm text-slate-500 font-mono mb-0.5">MAD</p>
                     </div>
                     <p className="text-[10px] text-slate-500 mt-1 font-mono">
-                      {notional.toLocaleString()} {currency} · {tenor} · {direction}
+                      {notional.toLocaleString()} {currency} Â· {tenor} Â· {direction}
                     </p>
                   </div>
 
@@ -899,8 +899,8 @@ export default function ForwardCalculator() {
                           : 'bg-navy-800 hover:bg-navy-700 text-gold-400 border border-gold-600/40'
                       }`}>
                       {saved
-                        ? (locale === 'ar' ? '✓ تم الحفظ' : locale === 'en' ? '✓ Saved' : '✓ Enregistré')
-                        : (locale === 'ar' ? 'حفظ في الدفتر' : locale === 'en' ? 'Save to Blotter' : 'Enregistrer')}
+                        ? (locale === 'ar' ? 'âœ“ ØªÙ… Ø§Ù„Ø­ÙØ¸' : locale === 'en' ? 'âœ“ Saved' : 'âœ“ EnregistrÃ©')
+                        : (locale === 'ar' ? 'Ø­ÙØ¸ ÙÙŠ Ø§Ù„Ø¯ÙØªØ±' : locale === 'en' ? 'Save to Blotter' : 'Enregistrer')}
                     </button>
                     <button
                       onClick={() => setShowPrint(true)}
@@ -908,28 +908,28 @@ export default function ForwardCalculator() {
                       title={locale === 'en' ? 'Print / Export quote sheet' : 'Imprimer / Exporter la fiche'}
                     >
                       <Printer size={12} />
-                      {locale === 'ar' ? 'فيشة' : locale === 'en' ? 'Sheet' : 'Fiche'}
+                      {locale === 'ar' ? 'ÙÙŠØ´Ø©' : locale === 'en' ? 'Sheet' : 'Fiche'}
                     </button>
                     <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer"
                        className="flex-1 py-2.5 text-center text-xs font-bold bg-gold-500 hover:bg-gold-400 text-navy-900 rounded transition">
-                      {locale === 'ar' ? 'عرض حقيقي ← JAD2' : locale === 'en' ? 'Live Quote → JAD2' : 'JAD2 Advisory →'}
+                      {locale === 'ar' ? 'Ø¹Ø±Ø¶ Ø­Ù‚ÙŠÙ‚ÙŠ â† JAD2' : locale === 'en' ? 'Live Quote â†’ JAD2' : 'JAD2 Advisory â†’'}
                     </a>
                   </div>
 
                   <p className="text-[10px] text-amber-400/70 text-center">
-                    ⚠️ {locale === 'ar' ? 'نتائج تعليمية فقط' : locale === 'en' ? 'Educational simulation only' : 'Simulation indicative uniquement'}
+                    âš ï¸ {locale === 'ar' ? 'Ù†ØªØ§Ø¦Ø¬ ØªØ¹Ù„ÙŠÙ…ÙŠØ© ÙÙ‚Ø·' : locale === 'en' ? 'Educational simulation only' : 'Simulation indicative uniquement'}
                   </p>
                 </>
               ) : (
                 <div className="flex-1 flex items-center justify-center min-h-[300px] bg-navy-900 border border-navy-700 rounded-xl">
                   <p className="text-slate-500 text-sm text-center px-4">
                     {!spot
-                      ? (locale === 'ar' ? 'لا يوجد سعر — أضف بيانات أو اضبط في Admin'
-                        : locale === 'en' ? 'No spot rate — fetch prices or set override in Admin'
-                        : 'Pas de cours spot — actualisez ou configurez Admin')
-                      : (locale === 'ar' ? 'حدد معاملات الحساب'
+                      ? (locale === 'ar' ? 'Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø³Ø¹Ø± â€” Ø£Ø¶Ù Ø¨ÙŠØ§Ù†Ø§Øª Ø£Ùˆ Ø§Ø¶Ø¨Ø· ÙÙŠ Admin'
+                        : locale === 'en' ? 'No spot rate â€” fetch prices or set override in Admin'
+                        : 'Pas de cours spot â€” actualisez ou configurez Admin')
+                      : (locale === 'ar' ? 'Ø­Ø¯Ø¯ Ù…Ø¹Ø§Ù…Ù„Ø§Øª Ø§Ù„Ø­Ø³Ø§Ø¨'
                         : locale === 'en' ? 'Configure parameters above'
-                        : 'Configurez les paramètres ci-dessus')}
+                        : 'Configurez les paramÃ¨tres ci-dessus')}
                   </p>
                 </div>
               )}
@@ -937,7 +937,7 @@ export default function ForwardCalculator() {
           </div>
         )}
 
-        {/* ── CURVE TAB ── */}
+        {/* â”€â”€ CURVE TAB â”€â”€ */}
         {activeTab === 'CURVE' && (
           <div className="space-y-5">
             {curvePoints.length > 0 ? (
@@ -945,7 +945,7 @@ export default function ForwardCalculator() {
                 <div className="bg-navy-900 border border-navy-700 rounded-xl p-5">
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-gold-500 mb-4 flex items-center gap-2">
                     <TrendingUp size={12} />
-                    {currency}/MAD — {locale === 'ar' ? 'منحنى النقاط الآجلة (نقطة أساس / أجل)' : locale === 'en' ? 'Forward Points Curve (pips vs tenor)' : 'Courbe des Points Forward (pips vs échéance)'}
+                    {currency}/MAD â€” {locale === 'ar' ? 'Ù…Ù†Ø­Ù†Ù‰ Ø§Ù„Ù†Ù‚Ø§Ø· Ø§Ù„Ø¢Ø¬Ù„Ø© (Ù†Ù‚Ø·Ø© Ø£Ø³Ø§Ø³ / Ø£Ø¬Ù„)' : locale === 'en' ? 'Forward Points Curve (pips vs tenor)' : 'Courbe des Points Forward (pips vs Ã©chÃ©ance)'}
                   </h3>
                   <ResponsiveContainer width="100%" height={220}>
                     <LineChart data={curvePoints} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -970,13 +970,13 @@ export default function ForwardCalculator() {
                 <div className="bg-navy-900 border border-navy-700 rounded-xl p-5 overflow-x-auto">
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-gold-500 mb-4 flex items-center gap-2">
                     <Clock size={12} />
-                    {locale === 'ar' ? `المنحنى الكامل — ${currency}/MAD` : locale === 'en' ? `Full Curve — ${currency}/MAD` : `Courbe Complète — ${currency}/MAD`}
+                    {locale === 'ar' ? `Ø§Ù„Ù…Ù†Ø­Ù†Ù‰ Ø§Ù„ÙƒØ§Ù…Ù„ â€” ${currency}/MAD` : locale === 'en' ? `Full Curve â€” ${currency}/MAD` : `Courbe ComplÃ¨te â€” ${currency}/MAD`}
                   </h3>
                   <table className="w-full text-xs font-mono min-w-[600px]">
                     <thead>
                       <tr className="text-slate-500 uppercase text-[10px] border-b border-navy-700">
                         {[
-                          locale === 'en' ? 'Tenor' : 'Échéance',
+                          locale === 'en' ? 'Tenor' : 'Ã‰chÃ©ance',
                           locale === 'en' ? 'Days'  : 'Jours',
                           'MAD%', `${currency}%`,
                           locale === 'en' ? 'Spot'    : 'Spot',
@@ -994,11 +994,11 @@ export default function ForwardCalculator() {
                           <td className={`py-2 pr-3 font-bold ${row.tenor === tenor ? 'text-gold-400' : 'text-white'}`}>
                             {row.isInterpolated ? (
                               <span className="italic text-slate-400" title={
-                                locale === 'ar' ? 'معدل محسوب بالاستيفاء (ليس نقطة ارتكاز مباشرة)'
-                                : locale === 'en' ? 'Interpolated — not a direct curve knot'
-                                : 'Interpolé — pas de nœud direct sur la courbe'
+                                locale === 'ar' ? 'Ù…Ø¹Ø¯Ù„ Ù…Ø­Ø³ÙˆØ¨ Ø¨Ø§Ù„Ø§Ø³ØªÙŠÙØ§Ø¡ (Ù„ÙŠØ³ Ù†Ù‚Ø·Ø© Ø§Ø±ØªÙƒØ§Ø² Ù…Ø¨Ø§Ø´Ø±Ø©)'
+                                : locale === 'en' ? 'Interpolated â€” not a direct curve knot'
+                                : 'InterpolÃ© â€” pas de nÅ“ud direct sur la courbe'
                               }>
-                                {row.tenor}<sup className="text-[8px] text-amber-400 ml-0.5">*</sup>
+                                {row.tenor}<sup className="text-[9px] text-amber-400 ml-0.5">*</sup>
                               </span>
                             ) : row.tenor}
                           </td>
@@ -1024,28 +1024,28 @@ export default function ForwardCalculator() {
                     <p className="text-[10px] text-amber-400/60 mt-2 italic">
                       <sup>*</sup>{' '}
                       {locale === 'ar'
-                        ? 'يُحسب هذا الأجل بالاستيفاء التكعيبي الطبيعي — ليست نقطة ارتكاز مباشرة في منحنى MAD أو العملة الأجنبية'
+                        ? 'ÙŠÙØ­Ø³Ø¨ Ù‡Ø°Ø§ Ø§Ù„Ø£Ø¬Ù„ Ø¨Ø§Ù„Ø§Ø³ØªÙŠÙØ§Ø¡ Ø§Ù„ØªÙƒØ¹ÙŠØ¨ÙŠ Ø§Ù„Ø·Ø¨ÙŠØ¹ÙŠ â€” Ù„ÙŠØ³Øª Ù†Ù‚Ø·Ø© Ø§Ø±ØªÙƒØ§Ø² Ù…Ø¨Ø§Ø´Ø±Ø© ÙÙŠ Ù…Ù†Ø­Ù†Ù‰ MAD Ø£Ùˆ Ø§Ù„Ø¹Ù…Ù„Ø© Ø§Ù„Ø£Ø¬Ù†Ø¨ÙŠØ©'
                         : locale === 'en'
-                        ? 'Rate computed by natural cubic spline interpolation — not a direct knot in MAD or FCY base curve'
-                        : 'Taux calculé par interpolation spline cubique — aucun nœud direct dans la courbe MAD ou FCY'}
+                        ? 'Rate computed by natural cubic spline interpolation â€” not a direct knot in MAD or FCY base curve'
+                        : 'Taux calculÃ© par interpolation spline cubique â€” aucun nÅ“ud direct dans la courbe MAD ou FCY'}
                     </p>
                   )}
                 </div>
               </>
             ) : (
               <div className="flex items-center justify-center min-h-[250px] text-slate-500 text-sm">
-                {locale === 'ar' ? 'لا يوجد سعر فوري متاح' : locale === 'en' ? 'No spot rate available — fetch prices first' : 'Pas de cours spot disponible — actualisez les prix d\'abord'}
+                {locale === 'ar' ? 'Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø³Ø¹Ø± ÙÙˆØ±ÙŠ Ù…ØªØ§Ø­' : locale === 'en' ? 'No spot rate available â€” fetch prices first' : 'Pas de cours spot disponible â€” actualisez les prix d\'abord'}
               </div>
             )}
           </div>
         )}
 
-        {/* ── MTM TAB ── */}
+        {/* â”€â”€ MTM TAB â”€â”€ */}
         {activeTab === 'MTM' && (
           <MtmSection spot={spot} currency={currency} />
         )}
 
-        {/* ── HISTORICAL TAB (P2.8) ── */}
+        {/* â”€â”€ HISTORICAL TAB (P2.8) â”€â”€ */}
         {activeTab === ('HISTORICAL' as any) && (
           <HistoricalComparisonSection currency={currency} />
         )}

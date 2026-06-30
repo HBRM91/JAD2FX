@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { BKAM_CURRENCIES, CURRENCY_ORDER } from '../constants';
 import { useAdmin } from '../context/AdminContext';
 import { fetchBkamBBE, fetchBkamBBEDate, bbeToMadPerUnit, getLastNWorkingDays } from '../services/bkamApi';
@@ -359,11 +359,11 @@ const BilletsPage: React.FC = () => {
                       </td>
                       <td className="py-3 px-4 text-center">
                         {row.source === 'BKAM_OFFICIAL' ? (
-                          <span className="text-[8px] font-mono bg-emerald-950/30 text-emerald-400 border border-emerald-800/40 px-1.5 py-0.5 rounded">
+                          <span className="text-[9px] font-mono bg-emerald-950/30 text-emerald-400 border border-emerald-800/40 px-1.5 py-0.5 rounded">
                             BKAM
                           </span>
                         ) : (
-                          <span className="text-[8px] font-mono bg-amber-950/20 text-amber-500 border border-amber-800/30 px-1.5 py-0.5 rounded">
+                          <span className="text-[9px] font-mono bg-amber-950/20 text-amber-500 border border-amber-800/30 px-1.5 py-0.5 rounded">
                             CALC
                           </span>
                         )}

@@ -117,7 +117,7 @@ export default function PodcastPage() {
                 <p className="text-[11.5px] text-slate-400 leading-relaxed">{ep.description}</p>
                 {!ep.audioUrl && (
                   <p className="text-[10px] text-amber-400/80 mt-1.5 italic">
-                    ⏳ Épisode en post-production — bientôt disponible
+                    ⏳ Épisode en post-production — ou ajoutez l'URL via Admin &gt; Contenu &gt; Podcast
                   </p>
                 )}
               </div>

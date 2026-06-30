@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis,
   CartesianGrid, Tooltip, Legend, ResponsiveContainer, ReferenceLine,
@@ -59,7 +59,7 @@ function BandGauge({ bps, bandUtilPct }: { bps: number; bandUtilPct?: number }) 
           style={{ left: `${pct}%`, background: color }}
         />
       </div>
-      <div className="flex justify-between text-[8px] text-slate-600 mt-0.5 font-mono">
+      <div className="flex justify-between text-[9px] text-slate-600 mt-0.5 font-mono">
         <span>âˆ’{BAND_PCT}%</span><span>ParitÃ©</span><span>+{BAND_PCT}%</span>
       </div>
     </div>
@@ -302,11 +302,11 @@ export default function BkamFixing() {
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-[11px] font-bold text-white uppercase tracking-widest flex items-center gap-2">
                 {isOfficial ? (
-                  <span className="text-[8px] bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 px-2 py-0.5 rounded font-mono">
+                  <span className="text-[9px] bg-emerald-950/40 text-emerald-400 border border-emerald-800/40 px-2 py-0.5 rounded font-mono">
                     BKAM OFFICIEL
                   </span>
                 ) : (
-                  <span className="text-[8px] bg-amber-950/40 text-amber-400 border border-amber-800/40 px-2 py-0.5 rounded font-mono">
+                  <span className="text-[9px] bg-amber-950/40 text-amber-400 border border-amber-800/40 px-2 py-0.5 rounded font-mono">
                     ECB PROXY
                   </span>
                 )}
@@ -368,7 +368,7 @@ export default function BkamFixing() {
               </h3>
               <div className="flex items-center gap-2">
                 {isOfficial && (
-                  <span className="text-[8px] font-mono text-emerald-400 bg-emerald-950/30 border border-emerald-800/40 px-2 py-0.5 rounded">
+                  <span className="text-[9px] font-mono text-emerald-400 bg-emerald-950/30 border border-emerald-800/40 px-2 py-0.5 rounded">
                     âœ“ CoursVirement BKAM
                   </span>
                 )}

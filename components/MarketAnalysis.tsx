@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   TrendingUp, TrendingDown, Minus, RefreshCw,
   Globe, BarChart3, Cpu, ExternalLink,
@@ -54,8 +54,8 @@ function Chg({ pct }: { pct: number }) {
 
 function Badge({ live }: { live: boolean }) {
   return live
-    ? <span className="inline-flex items-center gap-0.5 text-[8px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 rounded px-1 py-0.5"><Wifi size={6} /> LIVE</span>
-    : <span className="inline-flex items-center gap-0.5 text-[8px] font-bold text-amber-400 bg-amber-950/60 border border-amber-800/50 rounded px-1 py-0.5"><WifiOff size={6} /> REF</span>;
+    ? <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 rounded px-1 py-0.5"><Wifi size={6} /> LIVE</span>
+    : <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-amber-400 bg-amber-950/60 border border-amber-800/50 rounded px-1 py-0.5"><WifiOff size={6} /> REF</span>;
 }
 
 interface G10Row { pair: string; rate: number; prev?: number; dec: number }
@@ -364,7 +364,7 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
                 <div key={label} className={`flex items-center justify-between px-4 py-2.5 ${primary ? 'bg-navy-800/25' : ''}`}>
                   <div className="flex items-center gap-2 min-w-0">
                     <span className="text-[11px] font-mono text-slate-400 w-28 shrink-0">{label}</span>
-                    {primary && <span className="text-[8px] font-bold text-gold-500 bg-gold-950/50 border border-gold-800/40 rounded px-1 shrink-0">PANIER</span>}
+                    {primary && <span className="text-[9px] font-bold text-gold-500 bg-gold-950/50 border border-gold-800/40 rounded px-1 shrink-0">PANIER</span>}
                   </div>
                   <div className="flex items-center gap-4 shrink-0">
                     <span className={`font-mono font-bold ${primary ? 'text-base text-white' : 'text-[13px] text-slate-200'}`}>
@@ -404,7 +404,7 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
                 <div key={label} className="bg-[#0b1a30] px-3 py-3">
                   <p className="text-[10px] text-slate-500 flex items-center gap-1"><CurrencyFlag countryCode={countryCode} size="xs" /> {label}</p>
                   <p className="text-sm font-mono font-bold text-white mt-0.5">{rate.toFixed(4)}</p>
-                  <p className="text-[8px] text-slate-700 mt-0.5 leading-tight">{note}</p>
+                  <p className="text-[9px] text-slate-700 mt-0.5 leading-tight">{note}</p>
                 </div>
               ))}
             </div>
@@ -422,7 +422,7 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
                 <div key={label} className="bg-[#0b1a30] px-3 py-3 flex items-center justify-between">
                   <div>
                     <p className="text-[10px] text-slate-500 flex items-center gap-1"><CurrencyFlag countryCode={countryCode} size="xs" /> {label}</p>
-                    <p className="text-[8px] text-slate-700 leading-tight">{note}</p>
+                    <p className="text-[9px] text-slate-700 leading-tight">{note}</p>
                   </div>
                   <p className="text-sm font-mono font-bold text-white">{rate.toFixed(4)}</p>
                 </div>
@@ -441,7 +441,7 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
                   <CurrencyFlag countryCode={countryCode} size="sm" />
                   <div>
                     <p className="text-[10px] font-mono text-slate-300">{label}</p>
-                    <p className="text-[8px] text-slate-600">{note}</p>
+                    <p className="text-[9px] text-slate-600">{note}</p>
                   </div>
                 </div>
                 <span className="font-mono text-[12px] text-slate-200">{rate.toFixed(2)}</span>
@@ -484,7 +484,7 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
                       <Chg pct={d.pct} />
                       <span className="text-[9px] text-slate-600">â‰ˆ{d.madEquiv.toFixed(1)} MAD</span>
                     </div>
-                    <p className="text-[8px] text-slate-700 mt-1.5 leading-tight">{note}</p>
+                    <p className="text-[9px] text-slate-700 mt-1.5 leading-tight">{note}</p>
                   </>
                 ) : (
                   <div className="flex items-center gap-1 text-slate-600 text-[10px] mt-2">
@@ -535,7 +535,7 @@ Terminer obligatoirement par: "âš ï¸ DonnÃ©es indicatives uniquement â
           <Cpu size={11} className="text-gold-400" />
           <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">SynthÃ¨se IA â€” Market Brief</span>
           {briefProv && (
-            <span className={`ml-2 text-[8px] font-bold px-1.5 py-0.5 rounded border ${PROVIDER_COLORS[briefProv]}`}>
+            <span className={`ml-2 text-[9px] font-bold px-1.5 py-0.5 rounded border ${PROVIDER_COLORS[briefProv]}`}>
               {PROVIDER_LABELS[briefProv]}
             </span>
           )}
