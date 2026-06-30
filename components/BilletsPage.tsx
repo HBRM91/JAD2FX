@@ -333,7 +333,7 @@ const BilletsPage: React.FC = () => {
                         </div>
                       </td>
                       <td className="py-3 px-3 text-center font-mono text-slate-400 text-[10px]">
-                        {row.bkamUnit === 1 ? '1' : `Ã—${row.bkamUnit}`}
+                        {row.bkamUnit === 1 ? '1' : `×${row.bkamUnit}`}
                       </td>
                       <td className="py-3 px-3 text-right">
                         <span className="font-mono font-bold text-emerald-400 text-[13px] tabular-nums">

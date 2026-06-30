@@ -241,7 +241,7 @@ const PILLARS: Pillar[] = [
         id: 'hedg-1',
         title: 'Le Forward de Change : mécanisme, coût et cadre réglementaire marocain (Circ. OC 01/2024)',
         excerpt:
-          'Le contrat à terme de change (forward) permet à une entreprise de fixer aujourd\'hui le taux de change applicable à une date future. Le taux forward résulte de la formule CIP (Covered Interest Parity) : F = S Ã— (1 + r_MAD)^T / (1 + r_Devise)^T. Les points de swap (F - S) reflètent le différentiel de taux d\'intérêt entre le MAD et la devise. En 2026, avec un taux MONIA de ~2,75%, les points forward EUR/MAD à 6 mois sont structurellement positifs (MAD moins cher en terme de taux). La Circulaire OC n°01/2024 autorise les entreprises à utiliser les forwards jusqu\'à 100% de leur exposition commerciale documentée.',
+          'Le contrat à terme de change (forward) permet à une entreprise de fixer aujourd\'hui le taux de change applicable à une date future. Le taux forward résulte de la formule CIP (Covered Interest Parity) : F = S × (1 + r_MAD)^T / (1 + r_Devise)^T. Les points de swap (F - S) reflètent le différentiel de taux d\'intérêt entre le MAD et la devise. En 2026, avec un taux MONIA de ~2,75%, les points forward EUR/MAD à 6 mois sont structurellement positifs (MAD moins cher en terme de taux). La Circulaire OC n°01/2024 autorise les entreprises à utiliser les forwards jusqu\'à 100% de leur exposition commerciale documentée.',
         readTime: '6 min',
         date: 'Juin 2026',
         tags: ['forward', 'CIP', 'points de swap', 'Circ 01/2024'],

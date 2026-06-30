@@ -3,7 +3,7 @@ import { useState, useMemo } from 'react';
 
 /**
  * P2.9 â€” G10-MAD correlation heatmap.
- * 14Ã—14 matrix of rolling correlations (30D or 90D).
+ * 14×14 matrix of rolling correlations (30D or 90D).
  * Synthetic â€” in production, would compute from BKAM + ECB historical time series.
  */
 
@@ -56,7 +56,7 @@ export default function CorrelationHeatmap() {
       <div className="flex items-center gap-2">
         <Grid3X3 size={14} className="text-gold-500" />
         <h1 className="text-base font-bold text-white uppercase tracking-wider">Matrice de Corrélation G10/MAD</h1>
-        <span className="text-[10px] text-slate-500 ml-auto">P2.9 · 14Ã—14 · Pearson</span>
+        <span className="text-[10px] text-slate-500 ml-auto">P2.9 · 14×14 · Pearson</span>
       </div>
 
       <div className="flex items-start gap-2 p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">

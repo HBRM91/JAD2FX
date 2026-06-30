@@ -94,7 +94,7 @@ export const SECTORS: SectorConfig[] = [
     keyRisk: 'Double exposition NOK : change + Brent',
     keyRiskDetail: 'Une hausse simultanée du Brent (+10%) et de NOK/MAD (+200 bps) â€” corrélation positive historique â€” peut augmenter la facture d\'importation de bois de 3 à 4% sur un trimestre. Les DKK ont un quasi-peg EUR (±2,25%) â€” exposition plus stable mais toujours non nulle.',
     ocRelevance: 'Circ. OC n°01/2024 + Convention UMA (TND/DZD/LYD)',
-    ocArticle: 'NOK/SEK/DKK : forwards EUR/NOK disponibles via banques agréées marocaines. Cross via EUR : banque calcule le taux implicite NOK/MAD = EUR/MAD Ã· EUR/NOK.',
+    ocArticle: 'NOK/SEK/DKK : forwards EUR/NOK disponibles via banques agréées marocaines. Cross via EUR : banque calcule le taux implicite NOK/MAD = EUR/MAD ÷ EUR/NOK.',
     watchpoints: [
       'NOK/MAD : surveiller corrélation Brent (double exposition énergie + change)',
       'EUR/NOK : principal déterminant du cross NOK/MAD',
@@ -116,7 +116,7 @@ export const SECTORS: SectorConfig[] = [
       { code: 'BRL', cc: 'br', role: 'Soja brésilien (concurrent USD)' },
     ],
     exposureType: 'Import USD matières premières agricoles (ICE/CBOT)',
-    keyRisk: 'Corrélation USD/MAD Ã— prix commodités',
+    keyRisk: 'Corrélation USD/MAD × prix commodités',
     keyRiskDetail: 'Un choc USD/MAD (+300 bps) coïncidant avec un choc blé (+15%) sur le marché Chicago â€” scénarios corrélés lors de crises (2022) â€” peut augmenter le coût de revient d\'une minoterie de 8 à 12% en une semaine. La couverture réglementaire OC permet maintenant de couvrir simultanément le change ET les prix matières premières (Circ. OC 01/2024, Art. 14).',
     ocRelevance: 'Circ. OC n°01/2024, Art. 12 & 14',
     ocArticle: 'Art. 14 autorise la couverture contre la fluctuation des prix de produits de base via marchés organisés internationaux. Les banques ouvrent des sous-comptes dédiés pour garantir traçabilité (dépôt de garantie, appels de marge).',
@@ -146,8 +146,8 @@ export const SECTORS: SectorConfig[] = [
     ocRelevance: 'Circ. 3/2019 · CDE/CPEC · IFRS 9',
     ocArticle: 'CDE/CPEC pour conservation 70% recettes export (Circ. 3/2019). Forwards 12-24M non accessibles directement â€” utiliser CCS ou options exotiques auprès de la BMCE. Hedge accounting IFRS 9 requis pour couverture >12 mois.',
     watchpoints: [
-      'USD/MAD : exposition directe et massive (volume Ã— variation)',
-      'Prix DAP/TSP (engrais) sur les marchés mondiaux : corrélation prix Ã— change',
+      'USD/MAD : exposition directe et massive (volume × variation)',
+      'Prix DAP/TSP (engrais) sur les marchés mondiaux : corrélation prix × change',
       'Spread OAT 10Y Maroc vs UST 10Y : indicateur souverain du risque de change',
       'Demande indienne et brésilienne (DAP) : impact sur le pricing power',
     ],

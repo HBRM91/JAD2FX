@@ -241,7 +241,7 @@ const CommoditiesPage: React.FC = () => {
         <div className="p-3 bg-navy-800/60 border-b border-navy-700 text-[10px] text-slate-500">
           {t('commodities.source')}
           {anyFallback && (
-            <span className="ml-2 text-amber-400 font-medium">Â· {t('commodities.fallbackNotice')}</span>
+            <span className="ml-2 text-amber-400 font-medium">· {t('commodities.fallbackNotice')}</span>
           )}
         </div>
       </div>

@@ -61,7 +61,7 @@ interface BandData {
 
 const CALENDAR_2026: CalendarEvent[] = [
   // FOMC â€” 8 meetings
-  { date: '2026-01-29', titleFr: 'FOMC â€” Décision Fed', titleEn: 'FOMC Rate Decision', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: '40% du panier MAD. Toute surpriÂ­se hawkish apprécie le USD/MAD.', noteEn: '40% of MAD basket. Hawkish surprise lifts USD/MAD.', },
+  { date: '2026-01-29', titleFr: 'FOMC â€” Décision Fed', titleEn: 'FOMC Rate Decision', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: '40% du panier MAD. Toute surpri­se hawkish apprécie le USD/MAD.', noteEn: '40% of MAD basket. Hawkish surprise lifts USD/MAD.', },
   { date: '2026-03-19', titleFr: 'FOMC â€” Décision + Dot Plot', titleEn: 'FOMC + SEP Projections', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', hasProjections: true, noteFr: 'Réunion avec projections économiques (dot plot). Impact USD élevé.', noteEn: 'Summary of Economic Projections â€” high USD volatility expected.', },
   { date: '2026-05-07', titleFr: 'FOMC â€” Décision Fed', titleEn: 'FOMC Rate Decision', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Réunion sans projections. Surveillez le statement et conférence Powell.', noteEn: 'No SEP. Watch statement language and Powell presser.', },
   { date: '2026-06-18', titleFr: 'FOMC â€” Décision + Dot Plot', titleEn: 'FOMC + SEP Projections', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', hasProjections: true, noteFr: 'Réunion mi-année avec dot plot. Pivot point clé pour H2 2026.', noteEn: 'Mid-year SEP â€” key pivot for H2 2026 USD direction.', },

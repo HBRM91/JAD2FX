@@ -9,10 +9,10 @@
  *
  * Levée Anticipée (Early Settlement):
  *   L'entreprise veut dénouer son forward avant l'échéance.
- *   Le gain/perte = (Cours spot actuel - Cours forward initial) Ã— Notionnel
+ *   Le gain/perte = (Cours spot actuel - Cours forward initial) × Notionnel
  *
  * Ingénierie de marge bancaire:
- *   Marge = |Cours communiqué par la banque - Cours théorique CIP| / Cours théorique Ã— 10 000 bps
+ *   Marge = |Cours communiqué par la banque - Cours théorique CIP| / Cours théorique × 10 000 bps
  */
 import React, { useState, useMemo } from 'react';
 import { Calculator, AlertTriangle, Info, TrendingDown, TrendingUp } from 'lucide-react';
@@ -106,7 +106,7 @@ export default function ForwardExtension() {
     const matDate  = new Date(originalMaturity);
     const daysLeft = daysBetween(today, matDate);
 
-    // P&L = (spot - original) Ã— notional for a BUY forward
+    // P&L = (spot - original) × notional for a BUY forward
     const pnl = direction === 'BUY'
       ? (spot - orig) * not    // If you bought at orig and spot is now higher → loss at early termination
       : (orig - spot) * not;   // If you sold at orig and spot is now lower → loss at early termination

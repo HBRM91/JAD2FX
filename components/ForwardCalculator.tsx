@@ -59,7 +59,7 @@ function SpreadsTab({ spot, currency }: { spot: number; currency: string }) {
   return (
     <div className="space-y-4">
       <p className="text-[12px] text-slate-300 leading-relaxed">
-        Comparez les forwards 1M Ã— 3M, 1M Ã— 6M et 1M Ã— 1Y. Le spread reflète l'évolution attendue des taux
+        Comparez les forwards 1M × 3M, 1M × 6M et 1M × 1Y. Le spread reflète l'évolution attendue des taux
         directeurs sur l'horizon. Idéal pour comprendre la structure par terme (yield curve) du marché
         des changes pour votre devise.
       </p>
@@ -75,7 +75,7 @@ function SpreadsTab({ spot, currency }: { spot: number; currency: string }) {
           const color = spread > 0 ? 'text-emerald-400' : spread < 0 ? 'text-red-400' : 'text-slate-400';
           return (
             <div key={p.from + p.to} className="bg-navy-950 border border-navy-800 rounded-lg p-3">
-              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{p.from} Ã— {p.to}</p>
+              <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">{p.from} × {p.to}</p>
               <p className={`text-xl font-mono font-bold ${color}`}>
                 {spread > 0 ? '+' : ''}{spread} <span className="text-[10px] text-slate-400">pips</span>
               </p>
@@ -531,7 +531,7 @@ function HistoricalComparisonSection({ currency }: { currency: string }) {
   const [window, setWindow] = useState<TimeWindow>('1M');
   const startDate = useMemo(() => getStartDateForWindow(window), [window]);
 
-  // Theoretical forward points: change from spot = (r_dom - r_for) Ã— days/360
+  // Theoretical forward points: change from spot = (r_dom - r_for) × days/360
   const MAD_RATE = 0.0275;
   const CCY_RATES: Record<string, number> = { EUR: 0.04, USD: 0.0475, GBP: 0.045, JPY: 0.005, CHF: 0.0275, CAD: 0.038, AUD: 0.041, CNY: 0.0295 };
   const spotMap: Record<string, number> = { EUR: 10.85, USD: 9.95, GBP: 12.59, JPY: 6.66, CHF: 11.46, CAD: 7.32, AUD: 6.42, CNY: 1.37 };
@@ -583,7 +583,7 @@ function HistoricalComparisonSection({ currency }: { currency: string }) {
       </div>
 
       <p className="text-[10px] text-slate-500 leading-relaxed">
-        Forward théorique calculé par parité des taux d&apos;intérêt couverte (CIP): F = S Ã— (1 + r_d Ã— T) âˆ’ S.
+        Forward théorique calculé par parité des taux d&apos;intérêt couverte (CIP): F = S × (1 + r_d × T) âˆ’ S.
         Taux domestiques: BAM 2.75% · Taux étranger variable par devise. Fenêtre sélectionnée met en surbrillance les maturités disponibles.
       </p>
     </div>

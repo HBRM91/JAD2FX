@@ -50,7 +50,7 @@ function buildSessions(ramadan: boolean): Session[] {
     {
       city: 'Casablanca', cityAr: 'Ø§Ù„Ø¯Ø§Ø± Ø§Ù„Ø¨ÙŠØ¶Ø§Ø¡', cityFr: 'Casablanca',
       tz: 'Africa/Casablanca',
-      // Doc 1 §I footnote Â¹Â²: Ramadan 09:15â€“13:15; standard 08:30â€“15:30
+      // Doc 1 §I footnote ¹²: Ramadan 09:15â€“13:15; standard 08:30â€“15:30
       open:    ramadan ? 9  : 8,  openMin:  ramadan ? 15 : 30,
       close:   ramadan ? 13 : 15, closeMin: ramadan ? 15 : 30,
       color: 'text-gold-400',

@@ -262,7 +262,7 @@ export default function BkamFixing() {
                 ? <>Taux de change virements (CoursVirement) publiés par Bank Al-Maghrib à 16h15. Parité panier&nbsp;:
                     <span className="font-mono text-gold-600 mx-1">USD/MAD = K/(w<sub>EUR</sub>·EUR/USD<sub>BCE</sub> + w<sub>USD</sub>)</span>
                     avec K=10,49 · w<sub>EUR</sub>=0,60 · w<sub>USD</sub>=0,40.
-                    Dérive = <span className="font-mono text-gold-600 mx-1">(Fixing<sub>BKAM</sub>âˆ’Parité)/Parité Ã— 10 000 pb</span>.
+                    Dérive = <span className="font-mono text-gold-600 mx-1">(Fixing<sub>BKAM</sub>âˆ’Parité)/Parité × 10 000 pb</span>.
                     Art.&nbsp;3, Circ.&nbsp;LC/BKAM/2018/2 â€” non contractuel.</>
                 : 'Aucun proxy configuré â€” données BCE/Frankfurter utilisées comme proxy indicatif. Configurez un proxy CORS dans Admin pour accéder aux fixing officiels BKAM.'}
               {' '}
@@ -322,7 +322,7 @@ export default function BkamFixing() {
                 sub={isOfficial ? '▸ Cours officiel' : 'â‰ˆ Proxy indicatif'}
                 color="text-white"
               />
-              <StatCard label="EUR/MAD Parité Panier" value={fmt4(latest.eurMad_basket)} sub="K/(0.60Ã—EUR/USD+0.40)" color="text-slate-400" />
+              <StatCard label="EUR/MAD Parité Panier" value={fmt4(latest.eurMad_basket)} sub="K/(0.60×EUR/USD+0.40)" color="text-slate-400" />
               <StatCard
                 label="Dérive EUR/MAD"
                 value={fmtBps(latest.eurMad_div_bps)}
@@ -419,7 +419,7 @@ export default function BkamFixing() {
                               <p className="font-bold text-white text-[12px]">{c.code}/MAD</p>
                               <p className="text-[9px] text-slate-500">
                                 {locale === 'ar' ? c.nameAr : locale === 'en' ? c.name : c.nameFr}
-                                {c.bkamUnit !== 1 && <span className="ml-1 text-navy-500">Ã—{c.bkamUnit}</span>}
+                                {c.bkamUnit !== 1 && <span className="ml-1 text-navy-500">×{c.bkamUnit}</span>}
                               </p>
                             </div>
                           </div>
@@ -462,7 +462,7 @@ export default function BkamFixing() {
                               <p className="font-bold text-white text-[12px]">{code}/MAD</p>
                               <p className="text-[9px] text-slate-500">
                                 {locale === 'en' ? meta.name : meta.nameFr}
-                                {meta.unit !== 1 && <span className="ml-1 text-navy-500">Ã—{meta.unit}</span>}
+                                {meta.unit !== 1 && <span className="ml-1 text-navy-500">×{meta.unit}</span>}
                                 <span className="ml-1.5 text-[7px] text-navy-600 font-mono">BKAM+</span>
                               </p>
                             </div>
@@ -562,7 +562,7 @@ export default function BkamFixing() {
                 </ResponsiveContainer>
               </div>
               <p className="text-[9px] text-slate-600">
-                Dérive = (Fixing {isOfficial ? 'BKAM' : 'ECB'} âˆ’ Parité panier) / Parité panier Ã— 10 000 bps ·
+                Dérive = (Fixing {isOfficial ? 'BKAM' : 'ECB'} âˆ’ Parité panier) / Parité panier × 10 000 bps ·
                 K=10,49 · Panier 60% EUR / 40% USD · Bande réglementaire ±{BAND_PCT}% (500 bps)
               </p>
                 </>

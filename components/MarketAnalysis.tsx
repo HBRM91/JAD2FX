@@ -202,7 +202,7 @@ Terminer obligatoirement par: "âš ï¸ Données indicatives uniquement â�
       prev: prevRates ? usdMadFromEurUsd(prevRates['USD'] ?? eu) * (prevRates['USD'] ?? eu) / (prevRates['GBP'] ?? 0.860) : undefined },
     { label: 'CHF / MAD', rate: usdMad * eu / (rates['CHF'] ?? 0.945),
       prev: prevRates ? usdMadFromEurUsd(prevRates['USD'] ?? eu) * (prevRates['USD'] ?? eu) / (prevRates['CHF'] ?? 0.945) : undefined },
-    { label: 'JPY Ã—100 / MAD', rate: usdMad * eu / (rates['JPY'] ?? 162.5) * 100,
+    { label: 'JPY ×100 / MAD', rate: usdMad * eu / (rates['JPY'] ?? 162.5) * 100,
       prev: prevRates ? usdMadFromEurUsd(prevRates['USD'] ?? eu) * (prevRates['USD'] ?? eu) / (prevRates['JPY'] ?? 162.5) * 100 : undefined },
     { label: 'CAD / MAD', rate: usdMad * eu / (rates['CAD'] ?? 1.480),
       prev: prevRates ? usdMadFromEurUsd(prevRates['USD'] ?? eu) * (prevRates['USD'] ?? eu) / (prevRates['CAD'] ?? 1.480) : undefined },
@@ -539,7 +539,7 @@ Terminer obligatoirement par: "âš ï¸ Données indicatives uniquement â�
               {PROVIDER_LABELS[briefProv]}
             </span>
           )}
-          <span className="text-[9px] text-slate-600 ml-1">Synth�se IA</span>
+          <span className="text-[9px] text-slate-600 ml-1">Synthèse IA</span>
           <span className="ml-auto text-slate-500">
             {briefOpen ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </span>

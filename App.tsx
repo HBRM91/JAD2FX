@@ -914,7 +914,7 @@ function AppInner() {
                   {[
                     { label: 'Devises Cotées', value: '14', sub: 'par BKAM', color: 'text-gold-400' },
                     { label: 'Devises Totales', value: String(BKAM_CURRENCIES.length), sub: `+${BKAM_CURRENCIES.length - 14} dérivées`, color: 'text-blue-400' },
-                    { label: 'Mise Ã  Jour', value: 'Live', sub: 'en continu', color: 'text-emerald-400' },
+                    { label: 'Mise à Jour', value: 'Live', sub: 'en continu', color: 'text-emerald-400' },
                     { label: 'Accès', value: 'Gratuit', sub: 'pédagogique', color: 'text-purple-400' },
                   ].map(stat => (
                     <div key={stat.label} className="bg-navy-900 border border-navy-700 rounded-xl p-3.5 text-center flex flex-col items-center">
@@ -1094,7 +1094,7 @@ function AppInner() {
                     `Données indicatives sur ${BKAM_CURRENCIES.length} devises (14 cotées BKAM + ${BKAM_CURRENCIES.length - 14} dérivées par taux croisés)`,
                     'Simulateur pédagogique de forwards (formule CIP) et de swaps de change',
                     'Référentiel réglementaire Office des Changes (circulaires, instructions, FAQs)',
-                    'Courbes de taux MONIA interpolées Ã  titre informatif et pédagogique',
+                    'Courbes de taux MONIA interpolées à titre informatif et pédagogique',
                     'Market Report hebdomadaire généré par IA',
                   ].map(f => (
                     <li key={f} className="flex items-start gap-2">
@@ -1116,7 +1116,7 @@ function AppInner() {
                   <p className="text-[11px] text-amber-400/90">
                     ℹï¸ <strong className="text-amber-300">JAD2 Advisory fournit exclusivement</strong>{' '}
                     conseil stratégique et formation en gestion du risque de change â€” sans exécution de transactions de change ni conseil en investissement.
-                    Pour vos opérations, adressez-vous Ã  un établissement bancaire agréé.
+                    Pour vos opérations, adressez-vous à un établissement bancaire agréé.
                   </p>
                 </div>
 
@@ -1188,7 +1188,7 @@ function AppInner() {
               onClick={() => setContactDrawerOpen(true)}
               className="flex-shrink-0 px-5 py-2 bg-gold-500 text-navy-950 text-sm font-bold rounded hover:bg-gold-400 transition-colors"
             >
-              Parler Ã  un expert â†’
+              Parler à un expert â†’
             </button>
           </div>
         </div>
@@ -1256,7 +1256,7 @@ function AppInner() {
             <p className="text-[10px] mt-2 text-slate-600 leading-relaxed max-w-3xl mx-auto">
               JAD2 Advisory â€” Cabinet de conseil en management · Non établissement financier agréé BAM/AMMC ·
               Loi n° 43-12 &amp; Dahir n° 1-13-21 · Les taux JAD2FX ne peuvent être utilisés comme
-              référence d'exécution conformément Ã  la Méthodologie BKAM 2024 (§II) ·
+              référence d'exécution conformément à la Méthodologie BKAM 2024 (§II) ·
               Données personnelles : Loi marocaine 09-08 · CNDP Déclaration en cours
             </p>
             <p className="text-xs mt-1.5 text-slate-600">{t('footer.copyright')}</p>

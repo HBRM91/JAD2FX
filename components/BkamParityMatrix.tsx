@@ -2,8 +2,8 @@
  * BKAM Parity Matrix â€” Dynamic cross-rate basket analysis
  *
  * For every BKAM-published currency:
- *   basket_parity = USD/MAD_basket Ã— (CCY/USD cross)
- *   drift_bps     = (BKAM_fixing âˆ’ basket) / basket Ã— 10 000
+ *   basket_parity = USD/MAD_basket × (CCY/USD cross)
+ *   drift_bps     = (BKAM_fixing âˆ’ basket) / basket × 10 000
  *   band_util     = position in ±5% regulatory band (0â€“100%)
  *
  * Data from KV database (populated daily by cron + enriched with ECB cross-rates).
@@ -190,8 +190,8 @@ export default function BkamParityMatrix() {
               Matrice de Parité Panier â€” {latest?.count ?? 0} Devises
             </h2>
             <p className="text-sm text-slate-400 mt-1">
-              Basket USD/MAD = K/(0.60Ã—EUR/USD_ECB+0.40) · K=10.49 ·
-              Dérive = (BKAM_fixing âˆ’ parité_panier) / parité Ã— 10 000 bps
+              Basket USD/MAD = K/(0.60×EUR/USD_ECB+0.40) · K=10.49 ·
+              Dérive = (BKAM_fixing âˆ’ parité_panier) / parité × 10 000 bps
             </p>
             {latest && (
               <p className="text-[10px] text-slate-600 mt-1 font-mono">
@@ -370,7 +370,7 @@ export default function BkamParityMatrix() {
           {tab === 'scatter' && (
             <div className="bg-navy-900 border border-navy-700 rounded-2xl p-5 space-y-3">
               <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">
-                Carte Drift Ã— Utilisation Bande â€” {scatterData.length} Devises · {latest.date}
+                Carte Drift × Utilisation Bande â€” {scatterData.length} Devises · {latest.date}
               </h3>
               <p className="text-[10px] text-slate-500">
                 X: Dérive (bps) | Y: Position dans bande ±5% (50% = parité centrale) | Cercle = fixing BKAM
@@ -457,7 +457,7 @@ export default function BkamParityMatrix() {
                                 <p className="text-[9px] text-slate-500">{meta?.nameFr ?? ''}</p>
                               </div>
                               {r.uniteDevise !== 1 && (
-                                <span className="text-[9px] text-navy-500 bg-navy-800 px-1 rounded">Ã—{r.uniteDevise}</span>
+                                <span className="text-[9px] text-navy-500 bg-navy-800 px-1 rounded">×{r.uniteDevise}</span>
                               )}
                             </div>
                           </td>
@@ -496,8 +496,8 @@ export default function BkamParityMatrix() {
               </div>
               <div className="px-5 py-2.5 border-t border-navy-800">
                 <p className="text-[9px] text-slate-600">
-                  Dérive = (Fixing BKAM âˆ’ Parité panier ECB) / Parité Ã— 10 000 bps ·
-                  Parité = USD/MAD_basket Ã— (CCY/USD ECB ou peg officiel) ·
+                  Dérive = (Fixing BKAM âˆ’ Parité panier ECB) / Parité × 10 000 bps ·
+                  Parité = USD/MAD_basket × (CCY/USD ECB ou peg officiel) ·
                   Bande réglementaire ±5% (Phase II BKAM, mars 2020) · Loi 43-12
                 </p>
               </div>
