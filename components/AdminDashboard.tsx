@@ -3,7 +3,7 @@ import {
   Shield, LogOut, Settings, Activity, BarChart2, TrendingUp,
   AlertTriangle, FileText, RefreshCw, Lock, Eye, EyeOff,
   ChevronDown, RotateCcw, Plus, Trash2, CheckCircle, XCircle,
-  ClipboardList, Bot, Send, Search, Mail, Key, Link2, Users, Target,
+  ClipboardList, Bot, Send, Search, Mail, Key, Link2, Users, Target, Database,
 } from 'lucide-react';
 import { BKAM_CURRENCIES } from '../constants';
 import { useAdmin, DEFAULT_TIER_COMMISSIONS } from '../context/AdminContext';
@@ -203,6 +203,19 @@ function SystemTab() {
 
       {/* P1-2 — Basket parameters (operator-controlled BKAM regulatory formula) */}
       <BasketSubPanel />
+
+      {/* P1-7 — Cron schedule documentation (Cloudflare infra, not runtime-editable) */}
+      <div className="bg-navy-800 border border-navy-700 rounded p-3 space-y-1">
+        <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold flex items-center gap-1.5">
+          <Database size={10} /> Cron (infra)
+        </p>
+        <p className="text-[10px] text-slate-500 leading-relaxed">
+          Schedule <code className="text-gold-400 font-mono">0 16 * * 1-5</code> (Mon–Fri 16:00 UTC = 17:00 Casablanca).
+          Refreshes: <code className="font-mono">bkam:virement:*</code> rates, <code className="font-mono">drift:*</code> index, <code className="font-mono">vol:surface:latest</code>,
+          <code className="font-mono">bank:quotes:latest</code>. Hardcoded in <code className="font-mono">cloudflare/wrangler.toml</code>; not runtime-editable
+          (Cloudflare cron is infra, not app config).
+        </p>
+      </div>
     </div>
   );
 }
