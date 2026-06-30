@@ -261,7 +261,7 @@ const BilletsPage: React.FC = () => {
             ? 'Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ø£Ø¯Ù†Ø§Ù‡ Ù‡ÙŠ Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ø§Ù„ØªÙŠ ØªÙ†Ø´Ø±Ù‡Ø§ ÙŠÙˆÙ…ÙŠØ§Ù‹ Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨. ØªÙØ·Ø¨ÙÙ‘Ù‚ Ø§Ù„Ø¨Ù†ÙˆÙƒ Ø§Ù„ØªØ¬Ø§Ø±ÙŠØ© Ø§Ù„Ù…Ø¹ØªÙ…Ø¯Ø© Ù‡ÙˆØ§Ù…Ø´Ù‡Ø§ Ø§Ù„Ø®Ø§ØµØ© Ø¹Ù„Ù‰ Ù‡Ø°Ù‡ Ø§Ù„Ø£Ø³Ø¹Ø§Ø±. Ù„Ù„Ø­ØµÙˆÙ„ Ø¹Ù„Ù‰ Ø§Ù„Ø³Ø¹Ø± Ø§Ù„Ù…Ø·Ø¨ÙŽÙ‘Ù‚ ÙØ¹Ù„ÙŠØ§Ù‹ Ø¹Ù„Ù‰ Ø¹Ù…Ù„ÙŠØªÙƒØŒ ØªÙˆØ§ØµÙ„ Ù…Ø¹ Ø¨Ù†ÙƒÙƒ Ø§Ù„Ù…Ø¹ØªÙ…Ø¯ Ù„Ø¯Ù‰ Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨.'
             : locale === 'en'
             ? 'The rates below are the official daily rates published by Bank Al-Maghrib. Licensed commercial banks apply their own commercial margins above these rates. For the exact rate applicable to your transaction, contact your BAM-licensed bank.'
-            : 'Les cours ci-dessous sont les taux officiels quotidiens publiés par Bank Al-Maghrib. Les banques commerciales agréées appliquent leurs propres marges commerciales sur la base de ces cours. Pour le taux effectivement applicable Ã  votre opération, contactez votre établissement bancaire agréé par Bank Al-Maghrib.'}
+            : 'Les cours ci-dessous sont les taux officiels quotidiens publiés par Bank Al-Maghrib. Les banques commerciales agréées appliquent leurs propres marges commerciales sur la base de ces cours. Pour le taux effectivement applicable à votre opération, contactez votre établissement bancaire agréé par Bank Al-Maghrib.'}
         </p>
       </div>
 
@@ -383,7 +383,7 @@ const BilletsPage: React.FC = () => {
               ? 'Ø§Ù„Ù…ØµØ¯Ø±: Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨ â€” CoursBBE (Ø£ÙˆØ±Ø§Ù‚ Ù†Ù‚Ø¯ÙŠØ© Ø£Ø¬Ù†Ø¨ÙŠØ©) · Ù…Ù†Ø´ÙˆØ± ÙŠÙˆÙ…ÙŠØ§Ù‹ ÙÙŠ 08:30 ØµØ¨Ø§Ø­Ø§Ù‹ · Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ù„Ø§ ØªØ´Ù…Ù„ Ø§Ù„Ø¹Ù…ÙˆÙ„Ø§Øª Ø§Ù„ØªØ¬Ø§Ø±ÙŠØ© Ù„Ù„Ø¨Ù†ÙˆÙƒ'
               : locale === 'en'
               ? 'Source: Bank Al-Maghrib â€” CoursB.B.E · Published daily at 08:30 Casablanca · Official rates do not include commercial bank margins'
-              : 'Source: Bank Al-Maghrib â€” CoursB.B.E (Billets de Banque Étrangers) · Publié quotidiennement Ã  08h30 · Ces cours ne comprennent pas les marges commerciales des banques'}
+              : 'Source: Bank Al-Maghrib â€” CoursB.B.E (Billets de Banque Étrangers) · Publié quotidiennement à 08h30 · Ces cours ne comprennent pas les marges commerciales des banques'}
           </p>
           <a
             href={BKAM_LINKS.fixingBanknotes}
@@ -422,7 +422,7 @@ const BilletsPage: React.FC = () => {
                 ? 'ØªÙØ·Ø¨ÙÙ‘Ù‚ Ø§Ù„Ø¨Ù†ÙˆÙƒ Ø§Ù„ØªØ¬Ø§Ø±ÙŠØ© Ø§Ù„Ù…Ø¹ØªÙ…Ø¯Ø© Ù…Ù† Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨ Ù‡ÙˆØ§Ù…Ø´Ù‡Ø§ Ø§Ù„Ø®Ø§ØµØ© ÙÙˆÙ‚ Ù‡Ø°Ù‡ Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø±Ø³Ù…ÙŠØ©. Ù„Ù„Ø§Ø·Ù„Ø§Ø¹ Ø¹Ù„Ù‰ Ø§Ù„Ø³Ø¹Ø± Ø§Ù„ÙØ¹Ù„ÙŠ Ø§Ù„Ù…Ø·Ø¨ÙŽÙ‘Ù‚ØŒ ØªÙˆØ§ØµÙ„ Ù…Ø¨Ø§Ø´Ø±Ø© Ù…Ø¹ Ø¨Ù†ÙƒÙƒ.'
                 : locale === 'en'
                 ? 'Licensed commercial banks apply their own margins above these official rates. Contact your bank directly for the rate applicable to your specific transaction.'
-                : 'Les banques commerciales agréées appliquent leurs propres marges commerciales au-dessus de ces cours. Pour le cours applicable Ã  votre opération, contactez directement votre banque.',
+                : 'Les banques commerciales agréées appliquent leurs propres marges commerciales au-dessus de ces cours. Pour le cours applicable à votre opération, contactez directement votre banque.',
               icon: 'ðŸ¦',
             },
             {
@@ -452,7 +452,7 @@ const BilletsPage: React.FC = () => {
           ? 'JAD2FX ÙŠØ¹ÙŠØ¯ Ù†Ø´Ø± Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ù„Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨ Ù„Ø£ØºØ±Ø§Ø¶ ØªØ¹Ù„ÙŠÙ…ÙŠØ© ÙˆØ¥Ø¹Ù„Ø§Ù…ÙŠØ© ÙØ­Ø³Ø¨. Ù‡Ø°Ù‡ Ø§Ù„Ø£Ø³Ø¹Ø§Ø± Ù„Ø§ ØªÙ…Ø«Ù„ Ø¹Ø±ÙˆØ¶Ø§Ù‹ Ù‚Ø§Ø¨Ù„Ø© Ù„Ù„ØªÙ†ÙÙŠØ°. JAD2 Advisory Ù„ÙŠØ³Øª Ù…Ø¤Ø³Ø³Ø© Ù…Ø±Ø®ØµØ© Ù„ØªÙ‚Ø¯ÙŠÙ… Ø®Ø¯Ù…Ø§Øª Ø§Ù„Ø§Ø³ØªØ«Ù…Ø§Ø± ÙˆÙ„Ø§ ØªÙÙ†ÙÙÙ‘Ø° Ø¹Ù…Ù„ÙŠØ§Øª ØµØ±Ù Ø§Ù„Ø¹Ù…Ù„Ø§Øª. Ù„Ø£ÙŠ Ø¹Ù…Ù„ÙŠØ© ØµØ±ÙØŒ ØªÙˆØ§ØµÙ„ Ù…Ø¹ Ø¨Ù†Ùƒ Ù…Ø¹ØªÙ…Ø¯ Ù„Ø¯Ù‰ Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨.'
           : locale === 'en'
           ? 'JAD2FX reproduces official Bank Al-Maghrib rates for educational and informational purposes only. These rates do not constitute executable offers. JAD2 Advisory is not a licensed investment service provider and does not execute currency transactions. For any exchange transaction, contact a BAM-licensed bank.'
-          : 'JAD2FX reproduit les cours officiels de Bank Al-Maghrib Ã  titre éducatif et informatif uniquement. Ces cours ne constituent pas des offres exécutables. JAD2 Advisory n\'est pas habilitée Ã  fournir des services d\'investissement et n\'exécute aucune transaction de change. Pour toute opération de change, adressez-vous Ã  un établissement de crédit agréé par Bank Al-Maghrib.'}
+          : 'JAD2FX reproduit les cours officiels de Bank Al-Maghrib à titre éducatif et informatif uniquement. Ces cours ne constituent pas des offres exécutables. JAD2 Advisory n\'est pas habilitée à fournir des services d\'investissement et n\'exécute aucune transaction de change. Pour toute opération de change, adressez-vous à un établissement de crédit agréé par Bank Al-Maghrib.'}
       </p>
     </div>
   );

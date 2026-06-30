@@ -36,13 +36,13 @@ const PROVENANCE: Record<string, ProvenanceMeta> = {
   CALCULATED: {
     source: 'JAD2FX â€” Calcul interne',
     publishedAt: 'Maintenant',
-    methodology: 'Mid calculé Ã  partir de la formule panier BKAM et des taux ECB',
+    methodology: 'Mid calculé à partir de la formule panier BKAM et des taux ECB',
   },
 };
 
 /**
  * P1.21 â€” Data Provenance Chip
- * Click any rate â†’ see its source, publication time, and methodology.
+ * Click any rate → see its source, publication time, and methodology.
  */
 export default function ProvenanceChip({ rate, isRTL }: { rate: LiveRate; isRTL?: boolean }) {
   const [open, setOpen] = useState(false);

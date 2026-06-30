@@ -56,6 +56,26 @@ const ar: Record<string, string> = {
   'common.retry': 'إعادة المحاولة',
   'common.noData': 'لا توجد بيانات',
 
+  // Navigation extras
+  'nav.contact': 'تواصل',
+  'nav.other': 'المزيد',
+  'nav.home.label': 'الرئيسية',
+
+  // App UI
+  'app.readMore': '▼ قراءة المزيد',
+  'app.readLess': '▲ طي',
+  'app.searchPlaceholder': 'بحث…',
+  'app.auditCta': 'تدقيق مجاني',
+  'app.loadingView': 'جارٍ تحميل',
+
+  // Compliance banners
+  'compliance.ratesIndicative': 'أسعار JAD2FX استرشادية صرفاً — لا تُستخدم لعمليات الصرف (منهجية BKAM 2024، §II) · للسعر الرسمي: بنكك المعتمد لدى BAM',
+  'compliance.simulatorMode': 'وضع المحاكاة — نتائج غير قابلة للتنفيذ · للأغراض التعليمية فقط',
+
+  // Breadcrumb
+  'breadcrumb.home': 'الرئيسية',
+  'breadcrumb.admin': 'الإدارة',
+
   // Billets page
   'billets.title': 'مكتب الصرف — أسعار الأوراق النقدية',
   'billets.subtitle': 'أسعار صرف الأوراق النقدية لـ 24 عملة · شراء/بيع استرشادي',

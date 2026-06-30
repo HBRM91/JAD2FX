@@ -80,7 +80,7 @@ function SpreadsTab({ spot, currency }: { spot: number; currency: string }) {
                 {spread > 0 ? '+' : ''}{spread} <span className="text-[10px] text-slate-400">pips</span>
               </p>
               <p className="text-[10px] text-slate-500 mt-1">
-                {p.from} @ {a} â†’ {p.to} @ {b}
+                {p.from} @ {a} → {p.to} @ {b}
               </p>
             </div>
           );
@@ -287,14 +287,14 @@ function PrintQuoteModal({ quote, currency, tenor, notional, direction, settleme
                 <p className="text-[11px] text-slate-400 leading-snug mb-2">
                   {locale === 'en'
                     ? 'JAD2FX is pedagogical. For execution, your bank gives you a firm quote. We can help you structure the request and benchmark it.'
-                    : 'JAD2FX est pédagogique. Pour exécution, votre banque vous donne un cours ferme. On vous aide Ã  structurer la demande et la benchmarker.'}
+                    : 'JAD2FX est pédagogique. Pour exécution, votre banque vous donne un cours ferme. On vous aide à structurer la demande et la benchmarker.'}
                 </p>
                 <div className="flex gap-2 flex-wrap">
                   <button
                     onClick={() => { if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('jad2:open-contact')); }}
                     className="text-[10px] font-bold px-3 py-1.5 bg-gold-500 text-navy-950 rounded hover:bg-gold-400"
                   >
-                    {locale === 'en' ? '15min with expert â†’' : '15 min avec un expert â†’'}
+                    {locale === 'en' ? '15min with expert →' : '15 min avec un expert →'}
                   </button>
                   <button
                     onClick={() => {
@@ -325,7 +325,7 @@ function PrintQuoteModal({ quote, currency, tenor, notional, direction, settleme
                 {' â€” '}
                 {locale === 'en'
                   ? 'This document is produced for educational purposes by JAD2 Advisory (strategic consulting & FX risk management training). Data is indicative only and does not constitute a transaction offer or investment advice. For actual transactions, contact a Bank Al-Maghrib approved institution.'
-                  : "Ce document est produit Ã  titre pédagogique par JAD2 Advisory (conseil stratégique & formation en gestion du risque de change). Ces données sont indicatives et ne constituent pas une offre de transaction ni un conseil en investissement. Pour l'exécution de vos opérations, adressez-vous Ã  votre établissement bancaire habilité."}
+                  : "Ce document est produit à titre pédagogique par JAD2 Advisory (conseil stratégique & formation en gestion du risque de change). Ces données sont indicatives et ne constituent pas une offre de transaction ni un conseil en investissement. Pour l'exécution de vos opérations, adressez-vous à votre établissement bancaire habilité."}
               </p>
             </div>
           </div>
@@ -388,7 +388,7 @@ function MtmSection({ spot, currency }: { spot: number; currency: string }) {
             ? 'Ù†ØªØ§Ø¦Ø¬ ØªØ¹Ù„ÙŠÙ…ÙŠØ© ÙÙ‚Ø· â€” Ø§Ø³ØªØ®Ø¯Ù… Ø£Ø³Ø¹Ø§Ø± BKAM Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ù„Ø£ÙŠ ØªÙ‚ÙŠÙŠÙ… ÙØ¹Ù„ÙŠ'
             : locale === 'en'
             ? 'Educational results only â€” use BKAM official fixing for any actual valuation'
-            : 'Résultats indicatifs Ã  titre pédagogique â€” utilisez le fixing BKAM officiel pour toute valorisation réelle'}
+            : 'Résultats indicatifs à titre pédagogique â€” utilisez le fixing BKAM officiel pour toute valorisation réelle'}
         </p>
       </div>
 
@@ -518,7 +518,7 @@ function MtmSection({ spot, currency }: { spot: number; currency: string }) {
         <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer"
            className="inline-flex items-center gap-2 px-4 py-2 bg-gold-500 hover:bg-gold-400 text-navy-900 text-xs font-bold rounded transition">
           <BookOpen size={12} />
-          JAD2 Advisory â†’
+          JAD2 Advisory →
         </a>
       </div>
     </div>
@@ -912,7 +912,7 @@ export default function ForwardCalculator() {
                     </button>
                     <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer"
                        className="flex-1 py-2.5 text-center text-xs font-bold bg-gold-500 hover:bg-gold-400 text-navy-900 rounded transition">
-                      {locale === 'ar' ? 'Ø¹Ø±Ø¶ Ø­Ù‚ÙŠÙ‚ÙŠ â† JAD2' : locale === 'en' ? 'Live Quote â†’ JAD2' : 'JAD2 Advisory â†’'}
+                      {locale === 'ar' ? 'Ø¹Ø±Ø¶ Ø­Ù‚ÙŠÙ‚ÙŠ â† JAD2' : locale === 'en' ? 'Live Quote → JAD2' : 'JAD2 Advisory →'}
                     </a>
                   </div>
 

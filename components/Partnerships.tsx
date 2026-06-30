@@ -103,7 +103,7 @@ export default function Partnerships() {
           href="mailto:partenariats@jad2advisory.com"
           className="text-[12px] text-gold-400 hover:text-gold-300 font-bold"
         >
-          partenariats@jad2advisory.com â†’
+          partenariats@jad2advisory.com →
         </a>
       </div>
     </div>

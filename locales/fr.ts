@@ -42,6 +42,38 @@ const fr: Record<string, string> = {
   'common.fallback': 'Données par défaut',
   'common.live': 'En direct',
   'common.offline': 'Hors ligne',
+  'common.export': 'Exporter',
+  'common.search': 'Rechercher',
+  'common.filter': 'Filtrer',
+  'common.save': 'Enregistrer',
+  'common.cancel': 'Annuler',
+  'common.confirm': 'Confirmer',
+  'common.back': 'Retour',
+  'common.next': 'Suivant',
+  'common.previous': 'Précédent',
+  'common.error': 'Erreur',
+  'common.retry': 'Réessayer',
+  'common.noData': 'Aucune donnée disponible',
+
+  // Navigation extras
+  'nav.contact': 'Contact',
+  'nav.other': 'Autre',
+  'nav.home.label': 'Accueil',
+
+  // App UI
+  'app.readMore': '▼ Lire la suite',
+  'app.readLess': '▲ Réduire',
+  'app.searchPlaceholder': 'Rechercher…',
+  'app.auditCta': 'Audit Gratuit',
+  'app.loadingView': 'Chargement de',
+
+  // Compliance banners
+  'compliance.ratesIndicative': 'Taux JAD2FX strictement indicatifs – non utilisables pour des opérations de change (BKAM Méthodologie 2024, §II) · Pour un cours ferme : votre banque domiciliataire agréée BAM',
+  'compliance.simulatorMode': 'Mode Simulateur – Résultats Non-Exécutables · Usage Pédagogique Uniquement',
+
+  // Breadcrumb
+  'breadcrumb.home': 'Accueil',
+  'breadcrumb.admin': 'Administration',
 
   // Billets page
   'billets.title': 'Bureau de Change — Cours Billets de Banque',

@@ -35,7 +35,7 @@ function genCorrMatrix(): number[][] {
 }
 
 function colorForCorr(c: number): string {
-  // Red (positive correlation) â†’ Blue (negative correlation)
+  // Red (positive correlation) → Blue (negative correlation)
   // Intensity proportional to |c|
   const intensity = Math.min(1, Math.abs(c));
   if (c > 0) {

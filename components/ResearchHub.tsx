@@ -45,11 +45,11 @@ interface Pillar {
 
 const DISCLAIMERS = {
   short:
-    'JAD2FX est un outil pédagogique. Données Ã  titre informatif. JAD2 Advisory n\'est pas habilitée Ã  fournir des services d\'investissement.',
+    'JAD2FX est un outil pédagogique. Données à titre informatif. JAD2 Advisory n\'est pas habilitée à fournir des services d\'investissement.',
   standard:
     'Cette publication est strictement informative et pédagogique. Elle ne constitue pas un conseil en investissement, ni une recommandation d\'achat, de vente ou de couverture. JAD2 Advisory est enregistrée sous déclaration simplifiée. Les décisions de change relèvent de la seule responsabilité de l\'entreprise et de ses conseillers bancaires agréés BAM.',
   long:
-    'Cet outil est fourni Ã  titre pédagogique et ne constitue pas un conseil en investissement, en gestion de portefeuille, ou en trésorerie. Les résultats dépendent des hypothèses saisies par l\'utilisateur. JAD2 Advisory décline toute responsabilité quant aux décisions prises sur la base de cet outil. Pour toute opération de change, adressez-vous Ã  un établissement de crédit agréé par Bank Al-Maghrib.',
+    'Cet outil est fourni à titre pédagogique et ne constitue pas un conseil en investissement, en gestion de portefeuille, ou en trésorerie. Les résultats dépendent des hypothèses saisies par l\'utilisateur. JAD2 Advisory décline toute responsabilité quant aux décisions prises sur la base de cet outil. Pour toute opération de change, adressez-vous à un établissement de crédit agréé par Bank Al-Maghrib.',
 };
 
 // â”€â”€â”€ Pillar data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -73,7 +73,7 @@ const PILLARS: Pillar[] = [
         id: 'bam-1',
         title: 'Le mécanisme de fixing du dirham : séance MIC de 11h30 et publication officielle',
         excerpt:
-          'Bank Al-Maghrib publie chaque jour ouvré Ã  12h30 les cours officiels de référence issus de la séance du Marché Interbancaire des Changes (MIC) ouverte Ã  11h30. Ces taux â€” dits "cours virements" â€” constituent le référentiel légal pour toutes les opérations de change au Maroc. Le taux central résulte de l\'équilibre offre/demande dans le corridor de ±5% autour de la parité panier théorique K=10,49. Hors séance, BKAM peut intervenir discrétionnairement pour stabiliser le cours.',
+          'Bank Al-Maghrib publie chaque jour ouvré à 12h30 les cours officiels de référence issus de la séance du Marché Interbancaire des Changes (MIC) ouverte à 11h30. Ces taux â€” dits "cours virements" â€” constituent le référentiel légal pour toutes les opérations de change au Maroc. Le taux central résulte de l\'équilibre offre/demande dans le corridor de ±5% autour de la parité panier théorique K=10,49. Hors séance, BKAM peut intervenir discrétionnairement pour stabiliser le cours.',
         readTime: '3 min',
         date: 'Juin 2026',
         tags: ['BKAM', 'MIC', 'fixing', 'dirham'],
@@ -82,7 +82,7 @@ const PILLARS: Pillar[] = [
         id: 'bam-2',
         title: 'Comparatif régional : MAD, TND, EGP, TRY â€” quatre ancrages, quatre trajectoires',
         excerpt:
-          'La comparaison des régimes de change régionaux éclaire la spécificité marocaine. Le dinar tunisien (TND) flotte librement depuis 2016, générant une volatilité structurelle supérieure. La livre égyptienne (EGP) a subi deux dévaluations significatives (2016, 2022) liées au manque de réserves. La livre turque (TRY) reflète une politique monétaire sous contrainte politique. Le dirham marocain, ancré Ã  un panier EUR/USD supervisé par BKAM, affiche la volatilité la plus faible de la région â€” un avantage structurel pour la planification de trésorerie.',
+          'La comparaison des régimes de change régionaux éclaire la spécificité marocaine. Le dinar tunisien (TND) flotte librement depuis 2016, générant une volatilité structurelle supérieure. La livre égyptienne (EGP) a subi deux dévaluations significatives (2016, 2022) liées au manque de réserves. La livre turque (TRY) reflète une politique monétaire sous contrainte politique. Le dirham marocain, ancré à un panier EUR/USD supervisé par BKAM, affiche la volatilité la plus faible de la région â€” un avantage structurel pour la planification de trésorerie.',
         readTime: '4 min',
         date: 'Juin 2026',
         tags: ['MAD', 'TND', 'EGP', 'TRY', 'comparatif'],
@@ -108,7 +108,7 @@ const PILLARS: Pillar[] = [
         id: 'oc-1',
         title: 'Seuils de déclaration 2026 : tableau complet des obligations OC pour les entreprises',
         excerpt:
-          'L\'Office des Changes impose des obligations déclaratives différenciées selon le montant et la nature des opérations. Les importations supérieures Ã  100 000 MAD requièrent une domiciliation bancaire préalable. Les exportations de services sont soumises Ã  un rapatriement dans les 60 jours suivant l\'encaissement. Les transferts de dividendes Ã  des actionnaires étrangers sont libres pour les investissements régulièrement constitués (visa de change obtenu Ã  l\'entrée). JAD2FX compile ces seuils Ã  titre informatif â€” consultez l\'Office des Changes pour toute interprétation.',
+          'L\'Office des Changes impose des obligations déclaratives différenciées selon le montant et la nature des opérations. Les importations supérieures à 100 000 MAD requièrent une domiciliation bancaire préalable. Les exportations de services sont soumises à un rapatriement dans les 60 jours suivant l\'encaissement. Les transferts de dividendes à des actionnaires étrangers sont libres pour les investissements régulièrement constitués (visa de change obtenu à l\'entrée). JAD2FX compile ces seuils à titre informatif â€” consultez l\'Office des Changes pour toute interprétation.',
         readTime: '5 min',
         date: 'Juin 2026',
         tags: ['OC', 'déclaration', 'seuils', 'conformité'],
@@ -117,7 +117,7 @@ const PILLARS: Pillar[] = [
         id: 'oc-2',
         title: 'CPEC & CDE 2026 : conditions d\'ouverture et utilisation des comptes en devises',
         excerpt:
-          'Le Compte Professionnel en Devises (CPEC) est accessible aux exportateurs ayant réalisé plus de 5 millions MAD de recettes en devises sur l\'exercice précédent. Il permet de conserver jusqu\'Ã  70% des recettes d\'exportation rapatriées et de les utiliser pour régler importations, frais de mission et dividendes. Le plafond de solde est limité Ã  6 mois de recettes d\'exportation. Le Compte en Devises Étranger (CDE) suit des règles distinctes pour les non-résidents. Source : Instruction OC n°01/2020.',
+          'Le Compte Professionnel en Devises (CPEC) est accessible aux exportateurs ayant réalisé plus de 5 millions MAD de recettes en devises sur l\'exercice précédent. Il permet de conserver jusqu\'à 70% des recettes d\'exportation rapatriées et de les utiliser pour régler importations, frais de mission et dividendes. Le plafond de solde est limité à 6 mois de recettes d\'exportation. Le Compte en Devises Étranger (CDE) suit des règles distinctes pour les non-résidents. Source : Instruction OC n°01/2020.',
         readTime: '4 min',
         date: 'Juin 2026',
         tags: ['CPEC', 'CDE', 'comptes devises', 'exportateurs'],
@@ -126,7 +126,7 @@ const PILLARS: Pillar[] = [
         id: 'oc-3',
         title: 'Compliance OC : checklist trimestrielle pour les PME exportatrices',
         excerpt:
-          'Les obligations trimestrielles de conformité couvrent : (1) déclaration des encaissements d\'exportation dans les délais impartis (150 jours pour les biens, 60 jours pour les services), (2) cession obligatoire de 30% des recettes en devises, (3) mise Ã  jour des domiciliations bancaires pour les importations récurrentes, (4) rapport d\'activité CPEC si applicable. La non-conformité expose l\'entreprise Ã  des pénalités de 5% par mois de retard sur les montants non rapatriés. Source : OC / IGOC 2024.',
+          'Les obligations trimestrielles de conformité couvrent : (1) déclaration des encaissements d\'exportation dans les délais impartis (150 jours pour les biens, 60 jours pour les services), (2) cession obligatoire de 30% des recettes en devises, (3) mise à jour des domiciliations bancaires pour les importations récurrentes, (4) rapport d\'activité CPEC si applicable. La non-conformité expose l\'entreprise à des pénalités de 5% par mois de retard sur les montants non rapatriés. Source : OC / IGOC 2024.',
         readTime: '4 min',
         date: 'Juin 2026',
         tags: ['PME', 'checklist', 'trimestriel', 'IGOC'],
@@ -152,7 +152,7 @@ const PILLARS: Pillar[] = [
         id: 'macro-1',
         title: 'Le régime de change marocain : comprendre le flottement administré en 5 points clés',
         excerpt:
-          'Le dirham marocain opère sous un régime de "flottement administré" depuis janvier 2018 (Phase I : bande ±2,5%) élargi Ã  ±5% en mars 2020 (Phase II). Ce régime combine la prévisibilité d\'un ancrage (panier 60% EUR / 40% USD) et la flexibilité d\'une bande d\'absorption des chocs. BKAM intervient discrétionnairement sur le Marché Interbancaire des Changes pour maintenir le cours dans le corridor. Les réserves officielles â€” Ã  6 mois d\'importations â€” constituent le capital d\'intervention. La Phase III (bande élargie) est conditionnée Ã  l\'inflation < 2% et aux réserves > 5 mois.',
+          'Le dirham marocain opère sous un régime de "flottement administré" depuis janvier 2018 (Phase I : bande ±2,5%) élargi à ±5% en mars 2020 (Phase II). Ce régime combine la prévisibilité d\'un ancrage (panier 60% EUR / 40% USD) et la flexibilité d\'une bande d\'absorption des chocs. BKAM intervient discrétionnairement sur le Marché Interbancaire des Changes pour maintenir le cours dans le corridor. Les réserves officielles â€” à 6 mois d\'importations â€” constituent le capital d\'intervention. La Phase III (bande élargie) est conditionnée à l\'inflation < 2% et aux réserves > 5 mois.',
         readTime: '5 min',
         date: 'Juin 2026',
         tags: ['régime', 'flottement', 'bandes', 'BKAM', 'Phase II'],
@@ -170,7 +170,7 @@ const PILLARS: Pillar[] = [
         id: 'macro-3',
         title: 'Inflation et taux directeur BKAM : le triangle de politique monétaire marocain',
         excerpt:
-          'Bank Al-Maghrib opère avec un double mandat implicite : stabilité des prix (cible d\'inflation ~2%) et soutien Ã  la croissance. Le taux directeur actuel (2,75% en 2025) reflète un cycle de relâchement monétaire initié après le choc inflationniste post-COVID. La transmission Ã  l\'économie réelle passe par les taux interbancaires (MONIA) et les spreads bancaires sur crédits. Pour les trésoriers, le taux directeur BKAM constitue le plancher théorique pour le calcul des points de swap MAD dans les opérations de change Ã  terme.',
+          'Bank Al-Maghrib opère avec un double mandat implicite : stabilité des prix (cible d\'inflation ~2%) et soutien à la croissance. Le taux directeur actuel (2,75% en 2025) reflète un cycle de relâchement monétaire initié après le choc inflationniste post-COVID. La transmission à l\'économie réelle passe par les taux interbancaires (MONIA) et les spreads bancaires sur crédits. Pour les trésoriers, le taux directeur BKAM constitue le plancher théorique pour le calcul des points de swap MAD dans les opérations de change à terme.',
         readTime: '4 min',
         date: 'Juin 2026',
         tags: ['inflation', 'taux directeur', 'MONIA', 'politique monétaire'],
@@ -205,7 +205,7 @@ const PILLARS: Pillar[] = [
         id: 'sec-2',
         title: 'Couronnes nordiques (NOK/SEK/DKK) : l\'exposition méconnue des importateurs de bois et matières premières',
         excerpt:
-          'Les importateurs marocains de bois, papier, pâte Ã  papier et équipements industriels scandinaves font face Ã  une exposition NOK/SEK/DKK structurellement sous-couverte. Ces trois devises â€” toutes cotées par BKAM â€” affichent une corrélation EUR de 60-75% mais intègrent une prime spécifique : la NOK est liée au Brent (économie pétrolière norvégienne), créant une double exposition pour les importateurs exposés simultanément aux hydrocarbures. Une appréciation NOK de 200 bps impacte mécaniquement les coûts d\'importation bois-construction, packaging et papier.',
+          'Les importateurs marocains de bois, papier, pâte à papier et équipements industriels scandinaves font face à une exposition NOK/SEK/DKK structurellement sous-couverte. Ces trois devises â€” toutes cotées par BKAM â€” affichent une corrélation EUR de 60-75% mais intègrent une prime spécifique : la NOK est liée au Brent (économie pétrolière norvégienne), créant une double exposition pour les importateurs exposés simultanément aux hydrocarbures. Une appréciation NOK de 200 bps impacte mécaniquement les coûts d\'importation bois-construction, packaging et papier.',
         readTime: '4 min',
         date: 'Juin 2026',
         tags: ['NOK', 'SEK', 'DKK', 'bois', 'matières premières'],
@@ -241,7 +241,7 @@ const PILLARS: Pillar[] = [
         id: 'hedg-1',
         title: 'Le Forward de Change : mécanisme, coût et cadre réglementaire marocain (Circ. OC 01/2024)',
         excerpt:
-          'Le contrat Ã  terme de change (forward) permet Ã  une entreprise de fixer aujourd\'hui le taux de change applicable Ã  une date future. Le taux forward résulte de la formule CIP (Covered Interest Parity) : F = S Ã— (1 + r_MAD)^T / (1 + r_Devise)^T. Les points de swap (F - S) reflètent le différentiel de taux d\'intérêt entre le MAD et la devise. En 2026, avec un taux MONIA de ~2,75%, les points forward EUR/MAD Ã  6 mois sont structurellement positifs (MAD moins cher en terme de taux). La Circulaire OC n°01/2024 autorise les entreprises Ã  utiliser les forwards jusqu\'Ã  100% de leur exposition commerciale documentée.',
+          'Le contrat à terme de change (forward) permet à une entreprise de fixer aujourd\'hui le taux de change applicable à une date future. Le taux forward résulte de la formule CIP (Covered Interest Parity) : F = S Ã— (1 + r_MAD)^T / (1 + r_Devise)^T. Les points de swap (F - S) reflètent le différentiel de taux d\'intérêt entre le MAD et la devise. En 2026, avec un taux MONIA de ~2,75%, les points forward EUR/MAD à 6 mois sont structurellement positifs (MAD moins cher en terme de taux). La Circulaire OC n°01/2024 autorise les entreprises à utiliser les forwards jusqu\'à 100% de leur exposition commerciale documentée.',
         readTime: '6 min',
         date: 'Juin 2026',
         tags: ['forward', 'CIP', 'points de swap', 'Circ 01/2024'],
@@ -250,7 +250,7 @@ const PILLARS: Pillar[] = [
         id: 'hedg-2',
         title: 'Swap de change : structure Near/Far legs et utilisation comme outil de trésorerie',
         excerpt:
-          'Le swap de change combine deux opérations de sens inverse : une vente (ou achat) au comptant (leg Near) et un rachat (ou revente) Ã  terme (leg Far). Pour un importateur ayant encaissé une remise en EUR mais ne devant payer son fournisseur qu\'Ã  90 jours, le swap permet de placer les EUR jusqu\'Ã  l\'échéance sans les convertir immédiatement. Les points de swap payés/reçus reflètent le coût de portage du MAD vs. la devise. La Circulaire OC n°01/2024 autorise les swaps aux entreprises résidentes disposant d\'une exposition commerciale documentée. Pour toute opération, contactez votre banque domiciliataire agréée par Bank Al-Maghrib.',
+          'Le swap de change combine deux opérations de sens inverse : une vente (ou achat) au comptant (leg Near) et un rachat (ou revente) à terme (leg Far). Pour un importateur ayant encaissé une remise en EUR mais ne devant payer son fournisseur qu\'à 90 jours, le swap permet de placer les EUR jusqu\'à l\'échéance sans les convertir immédiatement. Les points de swap payés/reçus reflètent le coût de portage du MAD vs. la devise. La Circulaire OC n°01/2024 autorise les swaps aux entreprises résidentes disposant d\'une exposition commerciale documentée. Pour toute opération, contactez votre banque domiciliataire agréée par Bank Al-Maghrib.',
         readTime: '5 min',
         date: 'Juin 2026',
         tags: ['swap', 'Near leg', 'Far leg', 'trésorerie'],
@@ -259,7 +259,7 @@ const PILLARS: Pillar[] = [
         id: 'hedg-3',
         title: 'Options de change plain vanilla : mécanisme des puts et calls pour les entreprises marocaines',
         excerpt:
-          'La Circulaire OC n°01/2024 officialise l\'accès des entreprises marocaines aux options de change vanilla (puts EUR pour les importateurs, calls EUR pour les exportateurs). Une option de change confère le droit â€” et non l\'obligation â€” d\'acheter ou de vendre une devise Ã  un prix fixé (strike). Le coût (prime) dépend de la volatilité implicite EUR/MAD, du tenor et de la moneyness. Contrairement au forward, l\'option préserve la capacité Ã  bénéficier d\'un mouvement favorable. Les options exotiques, binaires et Ã  effet de levier restent interdites. Source : Circ. OC n°01/2024.',
+          'La Circulaire OC n°01/2024 officialise l\'accès des entreprises marocaines aux options de change vanilla (puts EUR pour les importateurs, calls EUR pour les exportateurs). Une option de change confère le droit â€” et non l\'obligation â€” d\'acheter ou de vendre une devise à un prix fixé (strike). Le coût (prime) dépend de la volatilité implicite EUR/MAD, du tenor et de la moneyness. Contrairement au forward, l\'option préserve la capacité à bénéficier d\'un mouvement favorable. Les options exotiques, binaires et à effet de levier restent interdites. Source : Circ. OC n°01/2024.',
         readTime: '5 min',
         date: 'Juin 2026',
         tags: ['options', 'put', 'call', 'vanilla', 'prime'],
@@ -285,7 +285,7 @@ const PILLARS: Pillar[] = [
         id: 'hist-1',
         title: 'Mars 2020 : L\'impact du choc COVID sur EUR/MAD et la réponse de Bank Al-Maghrib',
         excerpt:
-          'En mars 2020, la crise COVID a provoqué un choc de liquidité mondial sans précédent. Le EUR/MAD est passé de 10,65 Ã  11,20 (+5,2%) en 10 jours ouvrés sous l\'effet de la fuite vers les actifs refuges (USD, CHF) et de l\'effondrement des recettes de change marocaines (tourisme, MRE, phosphates). BKAM a déployé ses instruments de stabilisation (interventions directes, swap de liquidité en devises) pour contenir la volatilité dans la bande ±2,5% alors applicable. Les entreprises non couvertes importatrices ont enregistré un impact mécanique de +5% sur leur facture devise â€” une leçon sur la valeur de la visibilité Ã  terme.',
+          'En mars 2020, la crise COVID a provoqué un choc de liquidité mondial sans précédent. Le EUR/MAD est passé de 10,65 à 11,20 (+5,2%) en 10 jours ouvrés sous l\'effet de la fuite vers les actifs refuges (USD, CHF) et de l\'effondrement des recettes de change marocaines (tourisme, MRE, phosphates). BKAM a déployé ses instruments de stabilisation (interventions directes, swap de liquidité en devises) pour contenir la volatilité dans la bande ±2,5% alors applicable. Les entreprises non couvertes importatrices ont enregistré un impact mécanique de +5% sur leur facture devise â€” une leçon sur la valeur de la visibilité à terme.',
         readTime: '5 min',
         date: 'Juin 2026',
         tags: ['COVID', 'Mars 2020', 'EUR/MAD', 'choc liquidité'],
@@ -294,7 +294,7 @@ const PILLARS: Pillar[] = [
         id: 'hist-2',
         title: 'Dix ans de EUR/MAD (2015-2025) : les cinq régimes de volatilité et leurs déclencheurs macro',
         excerpt:
-          'L\'analyse décennale du EUR/MAD révèle cinq régimes distincts : (1) 2015-2017 : stabilité sous ancrage fixe pré-réforme, volatilité historiquement basse ; (2) 2018-2019 : introduction du flottement (Phase I ±2,5%), légère volatilité d\'adaptation ; (3) 2020 : choc COVID, pic de volatilité, intervention BKAM ; (4) 2021-2022 : choc inflationniste post-COVID, pression sur les matières premières, EUR/MAD sous tension ; (5) 2023-2025 : normalisation graduelle, réserves BKAM robustes (6 mois d\'import), volatilité revenue Ã  des niveaux pré-COVID. La volatilité réalisée du EUR/MAD reste structurellement inférieure Ã  celle des devises émergentes comparables (TND, EGP, TRY).',
+          'L\'analyse décennale du EUR/MAD révèle cinq régimes distincts : (1) 2015-2017 : stabilité sous ancrage fixe pré-réforme, volatilité historiquement basse ; (2) 2018-2019 : introduction du flottement (Phase I ±2,5%), légère volatilité d\'adaptation ; (3) 2020 : choc COVID, pic de volatilité, intervention BKAM ; (4) 2021-2022 : choc inflationniste post-COVID, pression sur les matières premières, EUR/MAD sous tension ; (5) 2023-2025 : normalisation graduelle, réserves BKAM robustes (6 mois d\'import), volatilité revenue à des niveaux pré-COVID. La volatilité réalisée du EUR/MAD reste structurellement inférieure à celle des devises émergentes comparables (TND, EGP, TRY).',
         readTime: '6 min',
         date: 'Juin 2026',
         tags: ['EUR/MAD', 'historique', '2015-2025', 'volatilité'],
@@ -339,7 +339,7 @@ const PILLARS: Pillar[] = [
         id: 'tool-2',
         title: 'Simulateur Forward EUR/MAD : estimez le coût théorique de votre couverture',
         excerpt:
-          'Le simulateur Forward intégré Ã  JAD2FX calcule le taux Ã  terme EUR/MAD en appliquant la formule CIP Ã  partir des données BKAM/ECB en temps réel. Le taux forward est purement indicatif et ne constitue pas une offre commerciale. Il permet d\'estimer l\'écart entre le cours spot et le cours terme pour une maturité donnée (1M, 3M, 6M, 12M), et de comprendre comment le différentiel de taux MONIA/EURIBOR se traduit en points de swap. Pour un taux ferme et exécutable, contactez votre banque commerciale agréée par Bank Al-Maghrib.',
+          'Le simulateur Forward intégré à JAD2FX calcule le taux à terme EUR/MAD en appliquant la formule CIP à partir des données BKAM/ECB en temps réel. Le taux forward est purement indicatif et ne constitue pas une offre commerciale. Il permet d\'estimer l\'écart entre le cours spot et le cours terme pour une maturité donnée (1M, 3M, 6M, 12M), et de comprendre comment le différentiel de taux MONIA/EURIBOR se traduit en points de swap. Pour un taux ferme et exécutable, contactez votre banque commerciale agréée par Bank Al-Maghrib.',
         readTime: '3 min',
         date: 'Juin 2026',
         tags: ['simulateur', 'forward', 'CIP', 'MONIA', 'EURIBOR'],
@@ -348,7 +348,7 @@ const PILLARS: Pillar[] = [
         id: 'tool-3',
         title: 'Checklist de conformité OC : les 10 vérifications trimestrielles pour les exportateurs marocains',
         excerpt:
-          'La checklist trimestrielle de conformité Office des Changes pour les exportateurs couvre : (1) Vérification des délais de rapatriement (150j biens, 60j services), (2) Cession obligatoire 30% des recettes, (3) Solde CPEC < 6 mois recettes, (4) Mise Ã  jour des domiciliations d\'exportation, (5) Déclaration des prestations de services >50 000 MAD, (6) Conformité des contrats-cadres pour les clients récurrents, (7) Rapprochement des relevés devises avec les déclarations douanières, (8) Archivage documentaire 5 ans minimum, (9) Mise Ã  jour des mandats bancaires si changement de signataire, (10) Auto-évaluation des risques de change non couverts. Source : IGOC 2024 / Office des Changes.',
+          'La checklist trimestrielle de conformité Office des Changes pour les exportateurs couvre : (1) Vérification des délais de rapatriement (150j biens, 60j services), (2) Cession obligatoire 30% des recettes, (3) Solde CPEC < 6 mois recettes, (4) Mise à jour des domiciliations d\'exportation, (5) Déclaration des prestations de services >50 000 MAD, (6) Conformité des contrats-cadres pour les clients récurrents, (7) Rapprochement des relevés devises avec les déclarations douanières, (8) Archivage documentaire 5 ans minimum, (9) Mise à jour des mandats bancaires si changement de signataire, (10) Auto-évaluation des risques de change non couverts. Source : IGOC 2024 / Office des Changes.',
         readTime: '5 min',
         date: 'Juin 2026',
         tags: ['checklist', 'conformité', 'OC', 'exportateurs', 'IGOC'],
@@ -437,7 +437,7 @@ function PillarCTA({ pillar, onAction }: {
       <p className="text-[11px] text-slate-400 mb-4 leading-relaxed">
         {pillar.ctaType === 'newsletter' && 'Restez informé des dernières analyses sur ce pilier. Publication hebdomadaire â€” sans conseil d\'investissement.'}
         {pillar.ctaType === 'contact' && 'Nos équipes peuvent vous accompagner sur ce pilier dans un cadre de conseil stratégique ou de formation.'}
-        {pillar.ctaType === 'nav' && 'Accédez directement aux outils de simulation JAD2FX pour estimer vos couvertures Ã  titre indicatif.'}
+        {pillar.ctaType === 'nav' && 'Accédez directement aux outils de simulation JAD2FX pour estimer vos couvertures à titre indicatif.'}
       </p>
       <button
         onClick={() => onAction(pillar.ctaType, pillar.ctaNav)}
@@ -518,7 +518,7 @@ function NewsletterSignup() {
       )}
 
       <p className="text-[10px] text-slate-600 mt-3 leading-relaxed">
-        Données pédagogiques uniquement · Aucune recommandation d'investissement · Désabonnement Ã  tout moment
+        Données pédagogiques uniquement · Aucune recommandation d'investissement · Désabonnement à tout moment
       </p>
     </div>
   );

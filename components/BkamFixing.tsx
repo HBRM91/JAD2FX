@@ -259,7 +259,7 @@ export default function BkamFixing() {
             <Info size={11} className="text-navy-400 mt-0.5 flex-shrink-0" />
             <p className="text-[10px] text-slate-500 leading-relaxed">
               {isOfficial
-                ? <>Taux de change virements (CoursVirement) publiés par Bank Al-Maghrib Ã  16h15. Parité panier&nbsp;:
+                ? <>Taux de change virements (CoursVirement) publiés par Bank Al-Maghrib à 16h15. Parité panier&nbsp;:
                     <span className="font-mono text-gold-600 mx-1">USD/MAD = K/(w<sub>EUR</sub>·EUR/USD<sub>BCE</sub> + w<sub>USD</sub>)</span>
                     avec K=10,49 · w<sub>EUR</sub>=0,60 · w<sub>USD</sub>=0,40.
                     Dérive = <span className="font-mono text-gold-600 mx-1">(Fixing<sub>BKAM</sub>âˆ’Parité)/Parité Ã— 10 000 pb</span>.
@@ -575,7 +575,7 @@ export default function BkamFixing() {
       {/* â”€â”€ Legal â”€â”€ */}
       <p className="text-[9px] text-slate-700 leading-relaxed text-center">
         Les taux présentés sur cette page sont {isOfficial ? 'les cours officiels CoursVirement publiés par Bank Al-Maghrib' : 'des estimations indicatives basées sur les données BCE'}.
-        Ils ne constituent pas des prix de transaction. Pour toute opération de change, adressez-vous Ã  un établissement de crédit agréé par Bank Al-Maghrib (Art. 3, LC/BKAM/2018/2).
+        Ils ne constituent pas des prix de transaction. Pour toute opération de change, adressez-vous à un établissement de crédit agréé par Bank Al-Maghrib (Art. 3, LC/BKAM/2018/2).
         JAD2 Advisory â€” non établissement financier (Loi n° 43-12).
       </p>
     </div>

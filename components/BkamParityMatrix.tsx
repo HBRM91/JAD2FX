@@ -261,7 +261,7 @@ export default function BkamParityMatrix() {
                   {(['g10', 'drift', 'band', 'alpha'] as const).map(s => (
                     <button key={s} onClick={() => setSortBy(s)}
                       className={`text-[9px] font-bold px-2 py-0.5 rounded border transition ${sortBy===s ? 'border-gold-600/60 bg-gold-500/10 text-gold-400' : 'border-navy-700 text-slate-500 hover:border-navy-600'}`}>
-                      {s === 'g10' ? 'G10â†“' : s === 'drift' ? '|Dérive|â†“' : s === 'band' ? 'Bandeâ†“' : 'Aâ†’Z'}
+                      {s === 'g10' ? 'G10â†“' : s === 'drift' ? '|Dérive|â†“' : s === 'band' ? 'Bandeâ†“' : 'A→Z'}
                     </button>
                   ))}
                 </div>

@@ -108,8 +108,8 @@ export default function ForwardExtension() {
 
     // P&L = (spot - original) Ã— notional for a BUY forward
     const pnl = direction === 'BUY'
-      ? (spot - orig) * not    // If you bought at orig and spot is now higher â†’ loss at early termination
-      : (orig - spot) * not;   // If you sold at orig and spot is now lower â†’ loss at early termination
+      ? (spot - orig) * not    // If you bought at orig and spot is now higher → loss at early termination
+      : (orig - spot) * not;   // If you sold at orig and spot is now lower → loss at early termination
 
     // Remaining value of the forward (time value via CIP estimate)
     let remainingForwardRate: number | null = null;
@@ -298,7 +298,7 @@ export default function ForwardExtension() {
             <AlertTriangle size={12} className="text-amber-400 flex-shrink-0 mt-0.5" />
             <p className="text-[11px] text-amber-300/80 leading-snug">
               {prorResult.cost > 0
-                ? `La prorogation coûte ${fmtMAD(prorResult.cost)} MAD car les points forward sont positifs (MAD plus cher Ã  terme). Pour dénouement effectif, contactez votre établissement bancaire agréé par Bank Al-Maghrib.`
+                ? `La prorogation coûte ${fmtMAD(prorResult.cost)} MAD car les points forward sont positifs (MAD plus cher à terme). Pour dénouement effectif, contactez votre établissement bancaire agréé par Bank Al-Maghrib.`
                 : `La prorogation génère un gain apparent de ${fmtMAD(Math.abs(prorResult.cost))} MAD. Les conditions exactes dépendent des taux interbancaires au moment de l'opération avec votre banque agréée BAM.`}
             </p>
           </div>
@@ -329,12 +329,12 @@ export default function ForwardExtension() {
             <div className="p-3 bg-navy-800 border border-navy-700 rounded-lg">
               <p className="text-[10px] text-slate-500 mb-1">Cours forward indicatif pour la durée résiduelle de {leveeResult.daysLeft} jours</p>
               <p className="text-sm font-mono font-bold text-white">{fmt4(leveeResult.remainingForwardRate)}</p>
-              <p className="text-[9px] text-slate-600 mt-0.5">Calculé par CIP â€” Ã  titre pédagogique uniquement</p>
+              <p className="text-[9px] text-slate-600 mt-0.5">Calculé par CIP â€” à titre pédagogique uniquement</p>
             </div>
           )}
           <p className="text-[10px] text-slate-600">
             La levée anticipée entraîne un dénouement du forward au cours spot courant. Le gain ou la perte
-            est réglé avec votre banque domiciliataire agréée par Bank Al-Maghrib Ã  la date de levée.
+            est réglé avec votre banque domiciliataire agréée par Bank Al-Maghrib à la date de levée.
           </p>
         </div>
       )}
@@ -367,10 +367,10 @@ export default function ForwardExtension() {
           <div className="flex items-start gap-2 p-3 bg-amber-500/5 border border-amber-700/20 rounded-lg">
             <Info size={12} className="text-amber-400 flex-shrink-0 mt-0.5" />
             <p className="text-[10px] text-amber-300/70 leading-relaxed">
-              Le taux CIP théorique est calculé Ã  partir des taux MONIA interpolés. La marge estimée est
+              Le taux CIP théorique est calculé à partir des taux MONIA interpolés. La marge estimée est
               purement indicative â€” la banque intègre également sa liquidité interne, le risque contrepartie
-              et ses coûts opérationnels. Cette analyse est fournie Ã  titre éducatif uniquement.
-              Pour toute opération, adressez-vous Ã  votre établissement bancaire agréé par Bank Al-Maghrib.
+              et ses coûts opérationnels. Cette analyse est fournie à titre éducatif uniquement.
+              Pour toute opération, adressez-vous à votre établissement bancaire agréé par Bank Al-Maghrib.
             </p>
           </div>
         </div>

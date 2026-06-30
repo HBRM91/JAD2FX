@@ -7,7 +7,7 @@ const DISCLAIMER_POINTS = [
   "Les taux de change affichés sont <strong>indicatifs et pédagogiques uniquement</strong> â€” ils ne constituent pas des prix de transaction fermes ni des cours officiels Bank Al-Maghrib.",
   "JAD2 Advisory est un cabinet de <strong>conseil stratégique et de formation</strong> en gestion du risque de change. Il ne fournit pas de conseil en investissement et n'exécute aucune transaction de change.",
   "Les simulations de forwards et de swaps sont des <strong>outils pédagogiques</strong> basés sur la formule CIP. Elles ne constituent pas une offre commerciale d'instruments financiers.",
-  "Pour toute opération de change, adressez-vous exclusivement Ã  un <strong>établissement de crédit agréé par Bank Al-Maghrib</strong>.",
+  "Pour toute opération de change, adressez-vous exclusivement à un <strong>établissement de crédit agréé par Bank Al-Maghrib</strong>.",
 ];
 
 export default function DisclaimerModal() {

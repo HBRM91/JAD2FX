@@ -48,7 +48,7 @@ export default function MoneyMarketPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <KPI label="Taux directeur BAM" value={`${(mad.policyRate * 100).toFixed(2)}%`} sub="Policy rate" color="text-gold-400" />
             <KPI label="MONIA" value={`${(mad.overnightRate * 100).toFixed(2)}%`} sub="Overnight" color="text-emerald-400" />
-            <KPI label="Réserves oblig." value={`${(mad.reserveRequirementPct * 100).toFixed(1)}%`} sub="Dépôts Ã  vue" color="text-blue-400" />
+            <KPI label="Réserves oblig." value={`${(mad.reserveRequirementPct * 100).toFixed(1)}%`} sub="Dépôts à vue" color="text-blue-400" />
             <KPI label="Réserves de change" value={`${mad.fxReservesUSDbn} Mds$`} sub={`${reserveCoverage} mois d'imports`} color="text-amber-400" />
           </div>
 
@@ -172,7 +172,7 @@ export default function MoneyMarketPage() {
               })}
             </div>
             <p className="text-[9px] text-slate-500 mt-2 italic">
-              Sources: Bank Al-Maghrib (Rapport Annuel 2024), HCP, Office des Changes. Mis Ã  jour annuellement.
+              Sources: Bank Al-Maghrib (Rapport Annuel 2024), HCP, Office des Changes. Mis à jour annuellement.
             </p>
           </div>
 

@@ -22,7 +22,7 @@ const REGULATIONS: RegDoc[] = [
   {
     id: 'circ-2017-01',
     title: 'Circular n°2017/01 â€” Exchange Control Regulations for Imports & Exports',
-    titleFr: 'Circulaire n°2017/01 â€” Réglementation des Changes Ã  l\'Import/Export',
+    titleFr: 'Circulaire n°2017/01 â€” Réglementation des Changes à l\'Import/Export',
     titleAr: 'Ù…Ù†Ø´ÙˆØ± Ø±Ù‚Ù… 2017/01 â€” Ø£Ø­ÙƒØ§Ù… Ø§Ù„ØµØ±Ù Ø§Ù„Ù…ØªØ¹Ù„Ù‚Ø© Ø¨Ø§Ù„Ø§Ø³ØªÙŠØ±Ø§Ø¯ ÙˆØ§Ù„ØªØµØ¯ÙŠØ±',
     date: '2017-01-01',
     category: 'OC_CIRC',
@@ -108,7 +108,7 @@ const REGULATIONS: RegDoc[] = [
     category: 'BKAM_NOTE',
     url: BKAM_LINKS.methodologyTCRE,
     summary: "Official methodology for computing the MAD fixing rate from the EUR/USD basket (60/40 weighting) and BKAM's 14-currency panel.",
-    summaryFr: 'Méthodologie officielle du calcul du cours de référence MAD Ã  partir du panier EUR/USD (pondération 60/40) et panel 14 devises BKAM.',
+    summaryFr: 'Méthodologie officielle du calcul du cours de référence MAD à partir du panier EUR/USD (pondération 60/40) et panel 14 devises BKAM.',
     summaryAr: 'Ø§Ù„Ù…Ù†Ù‡Ø¬ÙŠØ© Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ù„Ø­Ø³Ø§Ø¨ Ø³Ø¹Ø± ØµØ±Ù Ø§Ù„Ø¯Ø±Ù‡Ù… Ø§Ù„Ù…Ø±Ø¬Ø¹ÙŠ Ù…Ù† Ø³Ù„Ø© Ø§Ù„ÙŠÙˆØ±Ùˆ/Ø§Ù„Ø¯ÙˆÙ„Ø§Ø± (ØªØ±Ø¬ÙŠØ­ 60/40) ÙˆÙ„Ø¬Ù†Ø© 14 Ø¹Ù…Ù„Ø© Ù„Ø¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨.',
     tags: ['fixing', 'méthodologie', 'panier', 'EUR/USD', 'MAD'],
   },
@@ -121,7 +121,7 @@ const REGULATIONS: RegDoc[] = [
     category: 'BKAM_NOTE',
     url: BKAM_LINKS.regimeDeChange,
     summary: 'BKAM widens MAD fluctuation band from ±0.3% to ±2.5% against the EUR/USD basket, marking Morocco\'s move toward greater FX flexibility.',
-    summaryFr: 'Élargissement du taux de fluctuation du dirham de ±0,3% Ã  ±2,5% par rapport au panier EUR/USD â€” passage vers plus de flexibilité.',
+    summaryFr: 'Élargissement du taux de fluctuation du dirham de ±0,3% à ±2,5% par rapport au panier EUR/USD â€” passage vers plus de flexibilité.',
     summaryAr: 'ØªÙˆØ³ÙŠØ¹ Ù‡Ø§Ù…Ø´ ØªØ°Ø¨Ø°Ø¨ Ø§Ù„Ø¯Ø±Ù‡Ù… Ù…Ù† ±0.3% Ø¥Ù„Ù‰ ±2.5% Ù…Ù‚Ø§Ø¨Ù„ Ø³Ù„Ø© Ø§Ù„ÙŠÙˆØ±Ùˆ/Ø§Ù„Ø¯ÙˆÙ„Ø§Ø± â€” Ø§Ù„ØªØ­ÙˆÙ„ Ù†Ø­Ùˆ Ù…Ø±ÙˆÙ†Ø© Ø£ÙƒØ¨Ø±.',
     tags: ['flexibilité', 'bande', 'fluctuation', 'regime change', '2018'],
   },
@@ -180,7 +180,7 @@ export default function RegulationsPage() {
     ? 'Ù‡Ø°Ù‡ Ø§Ù„Ù‚Ø§Ø¦Ù…Ø© Ù„Ù„Ø£ØºØ±Ø§Ø¶ Ø§Ù„ØªØ¹Ù„ÙŠÙ…ÙŠØ© ÙÙ‚Ø·. ØªØ­Ù‚Ù‚ Ø¯Ø§Ø¦Ù…Ù‹Ø§ Ù…Ù† Ø§Ù„Ø¥ØµØ¯Ø§Ø±Ø§Øª Ø§Ù„Ø±Ø³Ù…ÙŠØ© Ø§Ù„Ø£Ø­Ø¯Ø« Ø¹Ù„Ù‰ Ù…ÙˆØ§Ù‚Ø¹ Ù…ÙƒØªØ¨ Ø§Ù„ØµØ±Ù ÙˆØ¨Ù†Ùƒ Ø§Ù„Ù…ØºØ±Ø¨.'
     : locale === 'en'
     ? 'This list is for educational purposes only. Always verify against the latest official versions on oc.gov.ma and bkam.ma.'
-    : 'Cette liste est fournie Ã  titre informatif. Vérifiez toujours les versions officielles les plus récentes sur oc.gov.ma et bkam.ma.';
+    : 'Cette liste est fournie à titre informatif. Vérifiez toujours les versions officielles les plus récentes sur oc.gov.ma et bkam.ma.';
 
   const categories = Object.keys(CATEGORY_META) as Category[];
 

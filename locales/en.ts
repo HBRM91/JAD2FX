@@ -42,6 +42,38 @@ const en: Record<string, string> = {
   'common.fallback': 'Reference data',
   'common.live': 'Live',
   'common.offline': 'Offline',
+  'common.export': 'Export',
+  'common.search': 'Search',
+  'common.filter': 'Filter',
+  'common.save': 'Save',
+  'common.cancel': 'Cancel',
+  'common.confirm': 'Confirm',
+  'common.back': 'Back',
+  'common.next': 'Next',
+  'common.previous': 'Previous',
+  'common.error': 'Error',
+  'common.retry': 'Retry',
+  'common.noData': 'No data available',
+
+  // Navigation extras
+  'nav.contact': 'Contact',
+  'nav.other': 'More',
+  'nav.home.label': 'Home',
+
+  // App UI
+  'app.readMore': '▼ Read more',
+  'app.readLess': '▲ Collapse',
+  'app.searchPlaceholder': 'Search…',
+  'app.auditCta': 'Free Audit',
+  'app.loadingView': 'Loading',
+
+  // Compliance banners
+  'compliance.ratesIndicative': 'JAD2FX rates are strictly indicative – not usable for FX transactions (BKAM Methodology 2024, §II) · For a firm rate: your BAM-approved bank',
+  'compliance.simulatorMode': 'Simulator Mode – Non-Executable Results · Educational Use Only',
+
+  // Breadcrumb
+  'breadcrumb.home': 'Home',
+  'breadcrumb.admin': 'Administration',
 
   // Billets page
   'billets.title': 'Bureau de Change — Banknote Exchange Rates',

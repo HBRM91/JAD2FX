@@ -40,9 +40,9 @@ export const SECTORS: SectorConfig[] = [
       { code: 'USD', cc: 'us', role: 'Matières premières acier & plastiques' },
       { code: 'CNY', cc: 'cn', role: 'Composants électroniques' },
     ],
-    exposureType: 'Import (JPY/USD) â†’ Production MAD â†’ Export EUR',
+    exposureType: 'Import (JPY/USD) → Production MAD → Export EUR',
     keyRisk: 'Volatilité EUR/JPY non couverte',
-    keyRiskDetail: 'Une appréciation du JPY de 100 bps renchérit les inputs technologiques de ~0.8% sur la facture totale. Sans couverture EUR/JPY, la marge brute d\'un équipementier de rang 2 (marges 8â€“12%) peut se contracter de 15 Ã  25% sur un choc de change de 500 bps.',
+    keyRiskDetail: 'Une appréciation du JPY de 100 bps renchérit les inputs technologiques de ~0.8% sur la facture totale. Sans couverture EUR/JPY, la marge brute d\'un équipementier de rang 2 (marges 8â€“12%) peut se contracter de 15 à 25% sur un choc de change de 500 bps.',
     ocRelevance: 'Circ. OC n°01/2024, Art. 12',
     ocArticle: 'Forwards et options vanille autorisés pour import récurrent. Maturité max 12 mois. Documentation : bon de commande ou facture pro forma suffisant pour les PME.',
     watchpoints: [
@@ -65,11 +65,11 @@ export const SECTORS: SectorConfig[] = [
       { code: 'EUR', cc: 'eu', role: 'Recettes export UE (65% CA export)' },
       { code: 'CNY', cc: 'cn', role: 'Fils synthétiques & matières premières' },
     ],
-    exposureType: 'Import USD (coton) + Export EUR (confection) â†’ Gap net USD',
+    exposureType: 'Import USD (coton) + Export EUR (confection) → Gap net USD',
     keyRisk: 'Exposition USD/MAD nette non compensée',
-    keyRiskDetail: 'Un importateur de coton pur (sans revenus USD) exposé Ã  1M USD annuel supporte un risque de change de ~60 000 MAD par 100 bps de mouvement USD/MAD. La saisonnalité Q1 (achats) vs Q3 (exports) crée un décalage temporel d\'exposition de 120 Ã  150 jours.',
+    keyRiskDetail: 'Un importateur de coton pur (sans revenus USD) exposé à 1M USD annuel supporte un risque de change de ~60 000 MAD par 100 bps de mouvement USD/MAD. La saisonnalité Q1 (achats) vs Q3 (exports) crée un décalage temporel d\'exposition de 120 à 150 jours.',
     ocRelevance: 'Circ. OC n°01/2024 + Circ. n°2/2012',
-    ocArticle: 'Couverture import coton : forward achat USD autorisé jusqu\'Ã  100% du carnet de commandes documenté. Domiciliation obligatoire pour importations >100 000 MAD.',
+    ocArticle: 'Couverture import coton : forward achat USD autorisé jusqu\'à 100% du carnet de commandes documenté. Domiciliation obligatoire pour importations >100 000 MAD.',
     watchpoints: [
       'USD/MAD : exposition directe sur achats coton (marché ICE, coton = 100% USD)',
       'EUR/USD : détermine la compétitivité prix des exports vers l\'UE',
@@ -90,9 +90,9 @@ export const SECTORS: SectorConfig[] = [
       { code: 'SEK', cc: 'se', role: 'Équipements industriels suédois (Volvo, SKF)' },
       { code: 'DKK', cc: 'dk', role: 'Pharmaceutique & agroalimentaire danois' },
     ],
-    exposureType: 'Import NOK/SEK/DKK â€” non cotées directement BKAM â†’ cross via EUR',
+    exposureType: 'Import NOK/SEK/DKK â€” non cotées directement BKAM → cross via EUR',
     keyRisk: 'Double exposition NOK : change + Brent',
-    keyRiskDetail: 'Une hausse simultanée du Brent (+10%) et de NOK/MAD (+200 bps) â€” corrélation positive historique â€” peut augmenter la facture d\'importation de bois de 3 Ã  4% sur un trimestre. Les DKK ont un quasi-peg EUR (±2,25%) â€” exposition plus stable mais toujours non nulle.',
+    keyRiskDetail: 'Une hausse simultanée du Brent (+10%) et de NOK/MAD (+200 bps) â€” corrélation positive historique â€” peut augmenter la facture d\'importation de bois de 3 à 4% sur un trimestre. Les DKK ont un quasi-peg EUR (±2,25%) â€” exposition plus stable mais toujours non nulle.',
     ocRelevance: 'Circ. OC n°01/2024 + Convention UMA (TND/DZD/LYD)',
     ocArticle: 'NOK/SEK/DKK : forwards EUR/NOK disponibles via banques agréées marocaines. Cross via EUR : banque calcule le taux implicite NOK/MAD = EUR/MAD Ã· EUR/NOK.',
     watchpoints: [
@@ -117,7 +117,7 @@ export const SECTORS: SectorConfig[] = [
     ],
     exposureType: 'Import USD matières premières agricoles (ICE/CBOT)',
     keyRisk: 'Corrélation USD/MAD Ã— prix commodités',
-    keyRiskDetail: 'Un choc USD/MAD (+300 bps) coïncidant avec un choc blé (+15%) sur le marché Chicago â€” scénarios corrélés lors de crises (2022) â€” peut augmenter le coût de revient d\'une minoterie de 8 Ã  12% en une semaine. La couverture réglementaire OC permet maintenant de couvrir simultanément le change ET les prix matières premières (Circ. OC 01/2024, Art. 14).',
+    keyRiskDetail: 'Un choc USD/MAD (+300 bps) coïncidant avec un choc blé (+15%) sur le marché Chicago â€” scénarios corrélés lors de crises (2022) â€” peut augmenter le coût de revient d\'une minoterie de 8 à 12% en une semaine. La couverture réglementaire OC permet maintenant de couvrir simultanément le change ET les prix matières premières (Circ. OC 01/2024, Art. 14).',
     ocRelevance: 'Circ. OC n°01/2024, Art. 12 & 14',
     ocArticle: 'Art. 14 autorise la couverture contre la fluctuation des prix de produits de base via marchés organisés internationaux. Les banques ouvrent des sous-comptes dédiés pour garantir traçabilité (dépôt de garantie, appels de marge).',
     watchpoints: [
@@ -298,7 +298,7 @@ export default function SectorLanding({ sectorId, navTo, onContact }: Props) {
       </div>
 
       <p className="text-[9px] text-slate-700 text-center leading-relaxed">
-        Analyse sectorielle indicative Ã  vocation pédagogique â€” JAD2 Advisory (non établissement financier agréé BAM, Loi n° 43-12).
+        Analyse sectorielle indicative à vocation pédagogique â€” JAD2 Advisory (non établissement financier agréé BAM, Loi n° 43-12).
         Les niveaux de risque et estimations sont basés sur des données historiques indicatives.
       </p>
     </div>

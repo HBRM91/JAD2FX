@@ -84,12 +84,12 @@ const CALENDAR_2026: CalendarEvent[] = [
   { date: '2026-09-16', titleFr: 'BKAM â€” Conseil de Politique Monétaire', titleEn: 'BKAM Monetary Policy Board', type: 'BKAM', currency: 'MAD', countryCode: 'ma', impact: 'DIRECT', noteFr: 'Réunion Q3 + revue FMI potential (Article IV). Haute attention.', noteEn: 'Q3 meeting + potential IMF Article IV review. High attention.', },
   { date: '2026-12-15', titleFr: 'BKAM â€” Conseil de Politique Monétaire', titleEn: 'BKAM Monetary Policy Board', type: 'BKAM', currency: 'MAD', countryCode: 'ma', impact: 'DIRECT', noteFr: 'Dernière réunion 2026. Rapport annuel + orientations 2027.', noteEn: 'Final 2026 meeting. Annual report and 2027 guidance.', },
   // US NFP â€” monthly
-  { date: '2026-01-09', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Indicateur emploi US décisif pour la trajectoire Fed â†’ USD/MAD.', noteEn: 'Key US labor indicator driving Fed path and USD/MAD.', },
+  { date: '2026-01-09', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Indicateur emploi US décisif pour la trajectoire Fed → USD/MAD.', noteEn: 'Key US labor indicator driving Fed path and USD/MAD.', },
   { date: '2026-02-06', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Impact USD immédiat ±0.3â€“0.8% sur surprise. Prudence en couverture.', noteEn: 'Immediate USD impact ±0.3â€“0.8% on surprise. Hedge with caution.', },
   { date: '2026-03-06', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Précède la réunion FOMC du 19 mars. Influence directe sur la décision.', noteEn: 'Precedes Mar 19 FOMC. Direct influence on rate decision.', },
   { date: '2026-04-03', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Vendredi saint (potentiel). Vérifier calendrier bancaire avant couverture.', noteEn: 'Potential Good Friday proximity. Check banking calendar.', },
   { date: '2026-05-08', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Décalé au 2ème vendredi (1er mai = Fête du Travail).', noteEn: 'Delayed to 2nd Friday (May 1 = Labor Day holiday).', },
-  { date: '2026-06-05', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Précède BCE du 4 juin. Semaine Ã  haut risque de volatilité MAD.', noteEn: 'Follows ECB Jun 4. High-volatility week for MAD.', },
+  { date: '2026-06-05', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Précède BCE du 4 juin. Semaine à haut risque de volatilité MAD.', noteEn: 'Follows ECB Jun 4. High-volatility week for MAD.', },
   { date: '2026-07-02', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Veille 4 juillet (liquidité réduite). Volatilité accrue possible.', noteEn: 'Day before July 4th (reduced liquidity). Elevated volatility.', },
   { date: '2026-08-07', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Période estivale â€” liquidité internationale plus faible qu\'en hiver.', noteEn: 'Summer period â€” thinner international liquidity than winter.', },
   { date: '2026-09-04', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Précède FOMC 17 sept + BKAM 16 sept. Semaine clé pour MAD.', noteEn: 'Precedes Sep 17 FOMC + Sep 16 BKAM. Critical MAD week.', },
@@ -148,20 +148,20 @@ function computeSentiment(livePrices: LivePriceEntry[]): SentimentResult {
   const drivers: string[] = [];
 
   // EUR change: 60% basket weight
-  if (eur.changePercent > 0.25) { score += 20; drivers.push('EUR â†‘â†‘ (pression panier 60%)'); }
-  else if (eur.changePercent > 0.08) { score += 10; drivers.push('EUR â†‘ (panier 60%)'); }
+  if (eur.changePercent > 0.25) { score += 20; drivers.push('EUR →→ (pression panier 60%)'); }
+  else if (eur.changePercent > 0.08) { score += 10; drivers.push('EUR → (panier 60%)'); }
   else if (eur.changePercent < -0.25) { score -= 20; drivers.push('EUR â†“â†“ (soutien panier 60%)'); }
   else if (eur.changePercent < -0.08) { score -= 10; drivers.push('EUR â†“ (panier 60%)'); }
 
   // USD change: 40% basket weight
-  if (usd.changePercent > 0.25) { score += 15; drivers.push('USD â†‘â†‘ (pression panier 40%)'); }
-  else if (usd.changePercent > 0.08) { score += 7; drivers.push('USD â†‘ (panier 40%)'); }
+  if (usd.changePercent > 0.25) { score += 15; drivers.push('USD →→ (pression panier 40%)'); }
+  else if (usd.changePercent > 0.08) { score += 7; drivers.push('USD → (panier 40%)'); }
   else if (usd.changePercent < -0.25) { score -= 15; drivers.push('USD â†“â†“ (soutien panier 40%)'); }
   else if (usd.changePercent < -0.08) { score -= 7; drivers.push('USD â†“ (panier 40%)'); }
 
   // GBP signal (trade partner)
   if (gbp && Math.abs(gbp.changePercent) > 0.15) {
-    drivers.push(`GBP ${gbp.changePercent > 0 ? 'â†‘' : 'â†“'} (signal risque global)`);
+    drivers.push(`GBP ${gbp.changePercent > 0 ? '→' : 'â†“'} (signal risque global)`);
   }
 
   score = Math.max(5, Math.min(95, score));
@@ -327,7 +327,7 @@ function NewsletterSignup({ proxyUrl }: { proxyUrl: string }) {
       <CheckCircle size={18} className="text-emerald-400 flex-shrink-0" />
       <div>
         <p className="text-sm font-bold text-emerald-300">Inscription confirmée</p>
-        <p className="text-xs text-emerald-400/80">Vous recevrez le briefing chaque matin Ã  09h00 Casablanca.</p>
+        <p className="text-xs text-emerald-400/80">Vous recevrez le briefing chaque matin à 09h00 Casablanca.</p>
       </div>
     </div>
   );
@@ -384,7 +384,7 @@ function FunnelCTA({ variant = 'default' }: { variant?: 'default' | 'compact' | 
       </p>
       <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer"
         className="flex-shrink-0 text-[11px] font-bold text-gold-400 hover:text-gold-300 transition-colors whitespace-nowrap">
-        jad2advisory.com â†’
+        jad2advisory.com →
       </a>
     </div>
   );
@@ -393,12 +393,12 @@ function FunnelCTA({ variant = 'default' }: { variant?: 'default' | 'compact' | 
     <div className="p-4 bg-amber-500/5 border border-amber-500/20 rounded-xl">
       <p className="text-xs font-semibold text-amber-300 mb-1">Un événement macro vous interpelle ?</p>
       <p className="text-[11px] text-amber-400/80 leading-relaxed mb-2">
-        JAD2 Advisory aide les équipes financières Ã  comprendre l'impact des décisions de politique monétaire
+        JAD2 Advisory aide les équipes financières à comprendre l'impact des décisions de politique monétaire
         sur les flux de change MAD et la réglementation Office des Changes.
       </p>
       <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer"
         className="text-[11px] font-bold text-amber-300 hover:text-amber-200 transition-colors">
-        Discuter avec un expert â†’ jad2advisory.com
+        Discuter avec un expert → jad2advisory.com
       </a>
     </div>
   );
@@ -416,7 +416,7 @@ function FunnelCTA({ variant = 'default' }: { variant?: 'default' | 'compact' | 
         <div className="flex gap-2 flex-shrink-0">
           <a href="https://jad2advisory.com/contact" target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-1.5 bg-gold-500 text-navy-950 font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-gold-400 transition-colors">
-            Parler Ã  un expert
+            Parler à un expert
           </a>
         </div>
       </div>
@@ -564,9 +564,9 @@ function PrintLayout({
       {/* Footer */}
       <div className="briefing-print-footer">
         <p>
-          Données indicatives Ã  titre éducatif uniquement · Non contractuelles · Non exécutables ·
+          Données indicatives à titre éducatif uniquement · Non contractuelles · Non exécutables ·
           JAD2 Advisory n'est pas un prestataire de services d'investissement ·
-          Pour toute opération de change, adressez-vous Ã  un établissement de crédit agréé par Bank Al-Maghrib ·
+          Pour toute opération de change, adressez-vous à un établissement de crédit agréé par Bank Al-Maghrib ·
           jad2advisory.com
         </p>
         <p>© JAD2 Advisory · Casablanca, Maroc · {new Date().getFullYear()}</p>
@@ -783,12 +783,12 @@ export default function MorningBriefing() {
                 value: eurBand ? `${eurBand.utilPct.toFixed(0)}%` : 'â€”',
                 change: 0,
                 color: eurBand ? (eurBand.utilPct > 65 ? 'text-red-400' : eurBand.utilPct < 35 ? 'text-emerald-400' : 'text-gold-400') : 'text-slate-400',
-                countryCode: '', customSub: eurBand ? (eurBand.utilPct > 65 ? 'Zone Attention â†’' : eurBand.utilPct < 35 ? 'Zone Attention â†' : 'Zone Neutre') : '',
+                countryCode: '', customSub: eurBand ? (eurBand.utilPct > 65 ? 'Zone Attention →' : eurBand.utilPct < 35 ? 'Zone Attention â†' : 'Zone Neutre') : '',
               },
               {
                 label: 'Sentiment',
                 sub: sentiment.bias,
-                value: sentiment.score > 65 ? 'â†‘ MAD' : sentiment.score < 35 ? 'â†“ MAD' : 'â†’ MAD',
+                value: sentiment.score > 65 ? '→ MAD' : sentiment.score < 35 ? 'â†“ MAD' : '→ MAD',
                 change: 0,
                 color: sentiment.bias === 'BEARISH' ? 'text-red-400' : sentiment.bias === 'BULLISH' ? 'text-emerald-400' : 'text-gold-400',
                 countryCode: '', customSub: sentiment.label,
@@ -802,7 +802,7 @@ export default function MorningBriefing() {
                   </div>
                   {item.change !== 0 && (
                     <span className={`text-[10px] font-mono font-bold ${item.change > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                      {item.change > 0 ? 'â†‘' : 'â†“'}{Math.abs(item.change).toFixed(3)}%
+                      {item.change > 0 ? '→' : 'â†“'}{Math.abs(item.change).toFixed(3)}%
                     </span>
                   )}
                 </div>
@@ -941,10 +941,10 @@ export default function MorningBriefing() {
               <div className="mt-4 p-3 bg-navy-950/60 border border-navy-700 rounded-lg">
                 <p className="text-[10px] text-slate-400 leading-relaxed">
                   {sentiment.bias === 'BEARISH'
-                    ? 'Contexte défavorable MAD. Les importateurs devraient prioriser les couvertures Ã  terme Ã  court terme. Les exportateurs peuvent attendre un retournement.'
+                    ? 'Contexte défavorable MAD. Les importateurs devraient prioriser les couvertures à terme à court terme. Les exportateurs peuvent attendre un retournement.'
                     : sentiment.bias === 'BULLISH'
-                    ? 'Contexte favorable MAD. Les importateurs bénéficient de taux avantageux pour les achats de devises Ã  terme. Fenêtre de couverture opportune.'
-                    : 'Contexte stable MAD. Fenêtre neutre pour les opérations de couverture. Surveiller les données macro Ã  venir.'
+                    ? 'Contexte favorable MAD. Les importateurs bénéficient de taux avantageux pour les achats de devises à terme. Fenêtre de couverture opportune.'
+                    : 'Contexte stable MAD. Fenêtre neutre pour les opérations de couverture. Surveiller les données macro à venir.'
                   }
                 </p>
               </div>
@@ -1005,10 +1005,10 @@ export default function MorningBriefing() {
                   title: 'Contexte EUR â€” Flux Import/Export',
                   body: eurBand
                     ? eurBand.utilPct > 60
-                      ? `EUR/MAD Ã  ${eurBand.utilPct.toFixed(0)}% de la bande BKAM â€” dynamique d'appréciation EUR visible. Contexte Ã  surveiller pour les entreprises ayant des flux en EUR. Consultez votre banque domiciliataire.`
+                      ? `EUR/MAD à ${eurBand.utilPct.toFixed(0)}% de la bande BKAM â€” dynamique d'appréciation EUR visible. Contexte à surveiller pour les entreprises ayant des flux en EUR. Consultez votre banque domiciliataire.`
                       : eurBand.utilPct < 40
-                      ? `EUR/MAD en zone basse (${eurBand.utilPct.toFixed(0)}%) â€” MAD en position relative favorable par rapport Ã  l'EUR. Éclairage pédagogique : comprendre ce contexte aide Ã  anticiper vos flux. Votre banque agréée peut vous accompagner.`
-                      : `EUR/MAD en zone neutre (${eurBand.utilPct.toFixed(0)}%) â€” stabilité relative du panier. Contexte propice pour comprendre et planifier vos flux de change EUR. Adressez-vous Ã  votre banque pour toute opération.`
+                      ? `EUR/MAD en zone basse (${eurBand.utilPct.toFixed(0)}%) â€” MAD en position relative favorable par rapport à l'EUR. Éclairage pédagogique : comprendre ce contexte aide à anticiper vos flux. Votre banque agréée peut vous accompagner.`
+                      : `EUR/MAD en zone neutre (${eurBand.utilPct.toFixed(0)}%) â€” stabilité relative du panier. Contexte propice pour comprendre et planifier vos flux de change EUR. Adressez-vous à votre banque pour toute opération.`
                     : 'Données de bande non disponibles.',
                 },
                 {
@@ -1020,7 +1020,7 @@ export default function MorningBriefing() {
                     sentiment.bias === 'BEARISH'
                       ? 'La pression sur le panier MAD mérite d\'être intégrée dans votre lecture des flux EUR/USD. À contextualiser avec votre banque domiciliataire.'
                       : sentiment.bias === 'BULLISH'
-                      ? 'Le MAD affiche une dynamique positive par rapport au panier. Contexte favorable Ã  la compréhension de vos flux de change. Pour toute opération, consultez votre banque agréée BAM.'
+                      ? 'Le MAD affiche une dynamique positive par rapport au panier. Contexte favorable à la compréhension de vos flux de change. Pour toute opération, consultez votre banque agréée BAM.'
                       : 'Pas de pression directionnelle nette sur le MAD. Contexte de stabilité relative. Votre banque peut vous accompagner dans l\'anticipation de vos flux.'
                   }`,
                 },
@@ -1028,7 +1028,7 @@ export default function MorningBriefing() {
                   priority: nextEvent?.impact === 'DIRECT' ? 'BKAM' : nextEvent?.impact === 'HIGH' ? 'ÉLEVÉE' : 'MODÉRÉE',
                   priorityColor: nextEvent?.impact === 'DIRECT' ? 'text-gold-400' : nextEvent?.impact === 'HIGH' ? 'text-red-400' : 'text-amber-400',
                   icon: Calendar,
-                  title: 'Prochain Événement Macro Ã  Surveiller',
+                  title: 'Prochain Événement Macro à Surveiller',
                   body: nextEvent
                     ? `${nextEvent.titleFr} â€” J-${daysUntil(nextEvent.date)} (${new Date(nextEvent.date).toLocaleDateString('fr-MA', { day: 'numeric', month: 'long' })}). ${nextEvent.noteFr}`
                     : 'Aucun événement majeur dans les 60 prochains jours.',
@@ -1099,7 +1099,7 @@ export default function MorningBriefing() {
                 <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Recevoir ce briefing chaque matin</h3>
               </div>
               <p className="text-xs text-slate-400 mb-3 leading-relaxed">
-                Inscrivez-vous pour recevoir le Morning Briefing FX quotidien Ã  09h00 Casablanca.
+                Inscrivez-vous pour recevoir le Morning Briefing FX quotidien à 09h00 Casablanca.
                 Données indicatives uniquement · Contenu éducatif · Non contractuel.
               </p>
               <NewsletterSignup proxyUrl={config.corsProxyUrl} />
@@ -1194,7 +1194,7 @@ export default function MorningBriefing() {
             <div className="text-center py-20 space-y-4">
               <FileText size={32} className="text-slate-600 mx-auto" />
               <p className="text-slate-400 text-sm">Aucune analyse publiée disponible.</p>
-              <p className="text-slate-500 text-xs">Le rapport hebdomadaire est généré automatiquement Ã  09h00 Casablanca (Lundiâ€“Vendredi).</p>
+              <p className="text-slate-500 text-xs">Le rapport hebdomadaire est généré automatiquement à 09h00 Casablanca (Lundiâ€“Vendredi).</p>
             </div>
           ) : (
             <>
@@ -1258,7 +1258,7 @@ export default function MorningBriefing() {
               </div>
 
               <div className="text-[10px] text-slate-600 text-center">
-                Analyse générée par IA Ã  partir des données BKAM, ECB et sources web Tavily.
+                Analyse générée par IA à partir des données BKAM, ECB et sources web Tavily.
                 À titre informatif uniquement â€” non contractuel â€” JAD2 Advisory.
               </div>
 
@@ -1282,9 +1282,9 @@ export default function MorningBriefing() {
       {/* ╔╔ Footer ╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔ */}
       <div className="bg-navy-950/50 border border-navy-800 rounded-lg p-4">
         <p className="text-[10px] text-slate-600 text-center leading-relaxed">
-          Morning Briefing JAD2FX â€” Données indicatives Ã  titre éducatif uniquement · Cours BKAM / ECB Frankfurter · Non exécutables ·
+          Morning Briefing JAD2FX â€” Données indicatives à titre éducatif uniquement · Cours BKAM / ECB Frankfurter · Non exécutables ·
           Ce contenu ne constitue pas un conseil en investissement ni une recommandation de transaction de change ·
-          Pour toute opération, adressez-vous Ã  un établissement de crédit agréé par Bank Al-Maghrib ·{' '}
+          Pour toute opération, adressez-vous à un établissement de crédit agréé par Bank Al-Maghrib ·{' '}
           <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400">jad2advisory.com</a>
         </p>
       </div>
