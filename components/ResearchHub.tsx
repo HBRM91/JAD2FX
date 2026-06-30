@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { ViewState } from '../types';
 import { useAdmin } from '../context/AdminContext';
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Article {
   id: string;
@@ -41,7 +41,7 @@ interface Pillar {
   disclaimerLevel: 'short' | 'standard' | 'long';
 }
 
-// â”€â”€â”€ Disclaimer texts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Disclaimer texts ─────────────────────────────────────────────────────────
 
 const DISCLAIMERS = {
   short:
@@ -52,10 +52,10 @@ const DISCLAIMERS = {
     'Cet outil est fourni à titre pédagogique et ne constitue pas un conseil en investissement, en gestion de portefeuille, ou en trésorerie. Les résultats dépendent des hypothèses saisies par l\'utilisateur. JAD2 Advisory décline toute responsabilité quant aux décisions prises sur la base de cet outil. Pour toute opération de change, adressez-vous à un établissement de crédit agréé par Bank Al-Maghrib.',
 };
 
-// â”€â”€â”€ Pillar data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Pillar data ──────────────────────────────────────────────────────────────
 
 const PILLARS: Pillar[] = [
-  // â”€â”€ Pillar 1 â€” BAM Watch â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Pillar 1 — BAM Watch ──────────────────────────────────────────────────
   {
     id: 'bam-watch',
     name: 'BAM Watch',
@@ -73,16 +73,16 @@ const PILLARS: Pillar[] = [
         id: 'bam-1',
         title: 'Le mécanisme de fixing du dirham : séance MIC de 11h30 et publication officielle',
         excerpt:
-          'Bank Al-Maghrib publie chaque jour ouvré à 12h30 les cours officiels de référence issus de la séance du Marché Interbancaire des Changes (MIC) ouverte à 11h30. Ces taux â€” dits "cours virements" â€” constituent le référentiel légal pour toutes les opérations de change au Maroc. Le taux central résulte de l\'équilibre offre/demande dans le corridor de ±5% autour de la parité panier théorique K=10,49. Hors séance, BKAM peut intervenir discrétionnairement pour stabiliser le cours.',
+          'Bank Al-Maghrib publie chaque jour ouvré à 12h30 les cours officiels de référence issus de la séance du Marché Interbancaire des Changes (MIC) ouverte à 11h30. Ces taux — dits "cours virements" — constituent le référentiel légal pour toutes les opérations de change au Maroc. Le taux central résulte de l\'équilibre offre/demande dans le corridor de ±5% autour de la parité panier théorique K=10,49. Hors séance, BKAM peut intervenir discrétionnairement pour stabiliser le cours.',
         readTime: '3 min',
         date: 'Juin 2026',
         tags: ['BKAM', 'MIC', 'fixing', 'dirham'],
       },
       {
         id: 'bam-2',
-        title: 'Comparatif régional : MAD, TND, EGP, TRY â€” quatre ancrages, quatre trajectoires',
+        title: 'Comparatif régional : MAD, TND, EGP, TRY — quatre ancrages, quatre trajectoires',
         excerpt:
-          'La comparaison des régimes de change régionaux éclaire la spécificité marocaine. Le dinar tunisien (TND) flotte librement depuis 2016, générant une volatilité structurelle supérieure. La livre égyptienne (EGP) a subi deux dévaluations significatives (2016, 2022) liées au manque de réserves. La livre turque (TRY) reflète une politique monétaire sous contrainte politique. Le dirham marocain, ancré à un panier EUR/USD supervisé par BKAM, affiche la volatilité la plus faible de la région â€” un avantage structurel pour la planification de trésorerie.',
+          'La comparaison des régimes de change régionaux éclaire la spécificité marocaine. Le dinar tunisien (TND) flotte librement depuis 2016, générant une volatilité structurelle supérieure. La livre égyptienne (EGP) a subi deux dévaluations significatives (2016, 2022) liées au manque de réserves. La livre turque (TRY) reflète une politique monétaire sous contrainte politique. Le dirham marocain, ancré à un panier EUR/USD supervisé par BKAM, affiche la volatilité la plus faible de la région — un avantage structurel pour la planification de trésorerie.',
         readTime: '4 min',
         date: 'Juin 2026',
         tags: ['MAD', 'TND', 'EGP', 'TRY', 'comparatif'],
@@ -90,7 +90,7 @@ const PILLARS: Pillar[] = [
     ],
   },
 
-  // â”€â”€ Pillar 2 â€” Réglementaire & Office des Changes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Pillar 2 — Réglementaire & Office des Changes ─────────────────────────
   {
     id: 'reglementaire',
     name: 'Réglementaire & OC',
@@ -108,7 +108,7 @@ const PILLARS: Pillar[] = [
         id: 'oc-1',
         title: 'Seuils de déclaration 2026 : tableau complet des obligations OC pour les entreprises',
         excerpt:
-          'L\'Office des Changes impose des obligations déclaratives différenciées selon le montant et la nature des opérations. Les importations supérieures à 100 000 MAD requièrent une domiciliation bancaire préalable. Les exportations de services sont soumises à un rapatriement dans les 60 jours suivant l\'encaissement. Les transferts de dividendes à des actionnaires étrangers sont libres pour les investissements régulièrement constitués (visa de change obtenu à l\'entrée). JAD2FX compile ces seuils à titre informatif â€” consultez l\'Office des Changes pour toute interprétation.',
+          'L\'Office des Changes impose des obligations déclaratives différenciées selon le montant et la nature des opérations. Les importations supérieures à 100 000 MAD requièrent une domiciliation bancaire préalable. Les exportations de services sont soumises à un rapatriement dans les 60 jours suivant l\'encaissement. Les transferts de dividendes à des actionnaires étrangers sont libres pour les investissements régulièrement constitués (visa de change obtenu à l\'entrée). JAD2FX compile ces seuils à titre informatif — consultez l\'Office des Changes pour toute interprétation.',
         readTime: '5 min',
         date: 'Juin 2026',
         tags: ['OC', 'déclaration', 'seuils', 'conformité'],
@@ -134,7 +134,7 @@ const PILLARS: Pillar[] = [
     ],
   },
 
-  // â”€â”€ Pillar 3 â€” Macro & Monétaire â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Pillar 3 — Macro & Monétaire ─────────────────────────────────────────
   {
     id: 'macro',
     name: 'Macro & Monétaire',
@@ -152,7 +152,7 @@ const PILLARS: Pillar[] = [
         id: 'macro-1',
         title: 'Le régime de change marocain : comprendre le flottement administré en 5 points clés',
         excerpt:
-          'Le dirham marocain opère sous un régime de "flottement administré" depuis janvier 2018 (Phase I : bande ±2,5%) élargi à ±5% en mars 2020 (Phase II). Ce régime combine la prévisibilité d\'un ancrage (panier 60% EUR / 40% USD) et la flexibilité d\'une bande d\'absorption des chocs. BKAM intervient discrétionnairement sur le Marché Interbancaire des Changes pour maintenir le cours dans le corridor. Les réserves officielles â€” à 6 mois d\'importations â€” constituent le capital d\'intervention. La Phase III (bande élargie) est conditionnée à l\'inflation < 2% et aux réserves > 5 mois.',
+          'Le dirham marocain opère sous un régime de "flottement administré" depuis janvier 2018 (Phase I : bande ±2,5%) élargi à ±5% en mars 2020 (Phase II). Ce régime combine la prévisibilité d\'un ancrage (panier 60% EUR / 40% USD) et la flexibilité d\'une bande d\'absorption des chocs. BKAM intervient discrétionnairement sur le Marché Interbancaire des Changes pour maintenir le cours dans le corridor. Les réserves officielles — à 6 mois d\'importations — constituent le capital d\'intervention. La Phase III (bande élargie) est conditionnée à l\'inflation < 2% et aux réserves > 5 mois.',
         readTime: '5 min',
         date: 'Juin 2026',
         tags: ['régime', 'flottement', 'bandes', 'BKAM', 'Phase II'],
@@ -161,7 +161,7 @@ const PILLARS: Pillar[] = [
         id: 'macro-2',
         title: 'Les trois moteurs du MAD : BCE, Fed, et la balance des paiements marocaine',
         excerpt:
-          'La valeur du dirham résulte de l\'interaction de trois forces : (1) la politique monétaire de la BCE (60% du panier â€” chaque hausse BCE apprécie mécaniquement le MAD si EUR/USD monte), (2) la Fed (40% du panier â€” un USD fort compresse le MAD via le mécanisme inverse), (3) la balance des paiements marocaine (exportations OCP + phosphates en USD, remises MRE en EUR, facture pétrolière en USD). La position nette en devises du Maroc â€” structurellement déficitaire sur les importations énergétiques â€” crée une pression de dépréciation endémique partiellement compensée par les MRE (9+ Mds EUR/an).',
+          'La valeur du dirham résulte de l\'interaction de trois forces : (1) la politique monétaire de la BCE (60% du panier — chaque hausse BCE apprécie mécaniquement le MAD si EUR/USD monte), (2) la Fed (40% du panier — un USD fort compresse le MAD via le mécanisme inverse), (3) la balance des paiements marocaine (exportations OCP + phosphates en USD, remises MRE en EUR, facture pétrolière en USD). La position nette en devises du Maroc — structurellement déficitaire sur les importations énergétiques — crée une pression de dépréciation endémique partiellement compensée par les MRE (9+ Mds EUR/an).',
         readTime: '5 min',
         date: 'Juin 2026',
         tags: ['BCE', 'Fed', 'balance paiements', 'MRE', 'OCP'],
@@ -178,7 +178,7 @@ const PILLARS: Pillar[] = [
     ],
   },
 
-  // â”€â”€ Pillar 4 â€” Profils Sectoriels FX â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Pillar 4 — Profils Sectoriels FX ─────────────────────────────────────
   {
     id: 'sectoriel',
     name: 'Profils Sectoriels FX',
@@ -194,9 +194,9 @@ const PILLARS: Pillar[] = [
     articles: [
       {
         id: 'sec-1',
-        title: 'Secteur Automobile â€” Renault, BYD, Stellantis : l\'exposition EUR/JPY/USD des équipementiers marocains',
+        title: 'Secteur Automobile — Renault, BYD, Stellantis : l\'exposition EUR/JPY/USD des équipementiers marocains',
         excerpt:
-          'L\'industrie automobile marocaine (Tanger Med, Kénitra) génère une exposition de change structurellement bi-devises : les composants technologiques européens (moteurs, électronique) sont facturés en EUR, les technologies asiatiques (batteries, semi-conducteurs) en JPY/USD, tandis que les revenus d\'exportation vers l\'UE arrivent en EUR. Les équipementiers de rang 2 et 3 supportent la volatilité EUR/JPY â€” une paire non cotée directement par BKAM mais dérivable via les cross-rates. Une appréciation du JPY de 100 bps renchérit mécaniquement les inputs technologiques.',
+          'L\'industrie automobile marocaine (Tanger Med, Kénitra) génère une exposition de change structurellement bi-devises : les composants technologiques européens (moteurs, électronique) sont facturés en EUR, les technologies asiatiques (batteries, semi-conducteurs) en JPY/USD, tandis que les revenus d\'exportation vers l\'UE arrivent en EUR. Les équipementiers de rang 2 et 3 supportent la volatilité EUR/JPY — une paire non cotée directement par BKAM mais dérivable via les cross-rates. Une appréciation du JPY de 100 bps renchérit mécaniquement les inputs technologiques.',
         readTime: '5 min',
         date: 'Juin 2026',
         tags: ['automobile', 'EUR/JPY', 'équipementiers', 'Tanger Med'],
@@ -205,7 +205,7 @@ const PILLARS: Pillar[] = [
         id: 'sec-2',
         title: 'Couronnes nordiques (NOK/SEK/DKK) : l\'exposition méconnue des importateurs de bois et matières premières',
         excerpt:
-          'Les importateurs marocains de bois, papier, pâte à papier et équipements industriels scandinaves font face à une exposition NOK/SEK/DKK structurellement sous-couverte. Ces trois devises â€” toutes cotées par BKAM â€” affichent une corrélation EUR de 60-75% mais intègrent une prime spécifique : la NOK est liée au Brent (économie pétrolière norvégienne), créant une double exposition pour les importateurs exposés simultanément aux hydrocarbures. Une appréciation NOK de 200 bps impacte mécaniquement les coûts d\'importation bois-construction, packaging et papier.',
+          'Les importateurs marocains de bois, papier, pâte à papier et équipements industriels scandinaves font face à une exposition NOK/SEK/DKK structurellement sous-couverte. Ces trois devises — toutes cotées par BKAM — affichent une corrélation EUR de 60-75% mais intègrent une prime spécifique : la NOK est liée au Brent (économie pétrolière norvégienne), créant une double exposition pour les importateurs exposés simultanément aux hydrocarbures. Une appréciation NOK de 200 bps impacte mécaniquement les coûts d\'importation bois-construction, packaging et papier.',
         readTime: '4 min',
         date: 'Juin 2026',
         tags: ['NOK', 'SEK', 'DKK', 'bois', 'matières premières'],
@@ -214,7 +214,7 @@ const PILLARS: Pillar[] = [
         id: 'sec-3',
         title: 'Secteur Textile & Habillement : cartographie de l\'exposition EUR/USD des importateurs et exportateurs',
         excerpt:
-          'L\'industrie textile marocaine présente une exposition bi-monétaire asymétrique : les matières premières (coton en USD, fils synthétiques en EUR) génèrent des besoins en devises, tandis que 65% des exportations finales vers l\'UE arrivent en EUR. Les transformateurs pure-players â€” achetant en EUR et vendant en EUR â€” bénéficient d\'une couverture naturelle partielle. Les importateurs de coton brut (facturé en USD) sans revenus correspondants en USD subissent une exposition nette USD/MAD non compensée. La saisonnalité Q1 (importations) vs Q3 (exportations) crée un décalage temporel qui structure le besoin en liquidité devise.',
+          'L\'industrie textile marocaine présente une exposition bi-monétaire asymétrique : les matières premières (coton en USD, fils synthétiques en EUR) génèrent des besoins en devises, tandis que 65% des exportations finales vers l\'UE arrivent en EUR. Les transformateurs pure-players — achetant en EUR et vendant en EUR — bénéficient d\'une couverture naturelle partielle. Les importateurs de coton brut (facturé en USD) sans revenus correspondants en USD subissent une exposition nette USD/MAD non compensée. La saisonnalité Q1 (importations) vs Q3 (exportations) crée un décalage temporel qui structure le besoin en liquidité devise.',
         readTime: '5 min',
         date: 'Juin 2026',
         tags: ['textile', 'habillement', 'coton', 'EUR/USD'],
@@ -222,7 +222,7 @@ const PILLARS: Pillar[] = [
     ],
   },
 
-  // â”€â”€ Pillar 5 â€” Éducation Hedging â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Pillar 5 — Éducation Hedging ─────────────────────────────────────────
   {
     id: 'hedging',
     name: 'Éducation Hedging',
@@ -259,7 +259,7 @@ const PILLARS: Pillar[] = [
         id: 'hedg-3',
         title: 'Options de change plain vanilla : mécanisme des puts et calls pour les entreprises marocaines',
         excerpt:
-          'La Circulaire OC n°01/2024 officialise l\'accès des entreprises marocaines aux options de change vanilla (puts EUR pour les importateurs, calls EUR pour les exportateurs). Une option de change confère le droit â€” et non l\'obligation â€” d\'acheter ou de vendre une devise à un prix fixé (strike). Le coût (prime) dépend de la volatilité implicite EUR/MAD, du tenor et de la moneyness. Contrairement au forward, l\'option préserve la capacité à bénéficier d\'un mouvement favorable. Les options exotiques, binaires et à effet de levier restent interdites. Source : Circ. OC n°01/2024.',
+          'La Circulaire OC n°01/2024 officialise l\'accès des entreprises marocaines aux options de change vanilla (puts EUR pour les importateurs, calls EUR pour les exportateurs). Une option de change confère le droit — et non l\'obligation — d\'acheter ou de vendre une devise à un prix fixé (strike). Le coût (prime) dépend de la volatilité implicite EUR/MAD, du tenor et de la moneyness. Contrairement au forward, l\'option préserve la capacité à bénéficier d\'un mouvement favorable. Les options exotiques, binaires et à effet de levier restent interdites. Source : Circ. OC n°01/2024.',
         readTime: '5 min',
         date: 'Juin 2026',
         tags: ['options', 'put', 'call', 'vanilla', 'prime'],
@@ -267,7 +267,7 @@ const PILLARS: Pillar[] = [
     ],
   },
 
-  // â”€â”€ Pillar 6 â€” Analyse Historique â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Pillar 6 — Analyse Historique ────────────────────────────────────────
   {
     id: 'historique',
     name: 'Analyse Historique',
@@ -285,7 +285,7 @@ const PILLARS: Pillar[] = [
         id: 'hist-1',
         title: 'Mars 2020 : L\'impact du choc COVID sur EUR/MAD et la réponse de Bank Al-Maghrib',
         excerpt:
-          'En mars 2020, la crise COVID a provoqué un choc de liquidité mondial sans précédent. Le EUR/MAD est passé de 10,65 à 11,20 (+5,2%) en 10 jours ouvrés sous l\'effet de la fuite vers les actifs refuges (USD, CHF) et de l\'effondrement des recettes de change marocaines (tourisme, MRE, phosphates). BKAM a déployé ses instruments de stabilisation (interventions directes, swap de liquidité en devises) pour contenir la volatilité dans la bande ±2,5% alors applicable. Les entreprises non couvertes importatrices ont enregistré un impact mécanique de +5% sur leur facture devise â€” une leçon sur la valeur de la visibilité à terme.',
+          'En mars 2020, la crise COVID a provoqué un choc de liquidité mondial sans précédent. Le EUR/MAD est passé de 10,65 à 11,20 (+5,2%) en 10 jours ouvrés sous l\'effet de la fuite vers les actifs refuges (USD, CHF) et de l\'effondrement des recettes de change marocaines (tourisme, MRE, phosphates). BKAM a déployé ses instruments de stabilisation (interventions directes, swap de liquidité en devises) pour contenir la volatilité dans la bande ±2,5% alors applicable. Les entreprises non couvertes importatrices ont enregistré un impact mécanique de +5% sur leur facture devise — une leçon sur la valeur de la visibilité à terme.',
         readTime: '5 min',
         date: 'Juin 2026',
         tags: ['COVID', 'Mars 2020', 'EUR/MAD', 'choc liquidité'],
@@ -303,7 +303,7 @@ const PILLARS: Pillar[] = [
         id: 'hist-3',
         title: 'Crise de change 2022 : comment les importateurs marocains ont navigué la flambée EUR/MAD',
         excerpt:
-          'La flambée des prix des matières premières post-Ukraine (mars 2022) a coïncidé avec un EUR/USD historiquement bas (parité en juillet 2022), créant un choc atypique sur le MAD : l\'EUR affaibli réduisait mécaniquement la pression du panier européen, mais la hausse des prix en USD des hydrocarbures et céréales alourdissait simultanément la facture d\'importation. Les entreprises disposant d\'un compte CPEC ont pu utiliser leurs réserves en devises pour lisser l\'impact. Cette période illustre la complexité de l\'exposition nette MAD pour les entreprises bi-devises. Note : Cette analyse est rétrospective et descriptive â€” elle ne constitue pas un conseil de gestion applicable aux situations futures.',
+          'La flambée des prix des matières premières post-Ukraine (mars 2022) a coïncidé avec un EUR/USD historiquement bas (parité en juillet 2022), créant un choc atypique sur le MAD : l\'EUR affaibli réduisait mécaniquement la pression du panier européen, mais la hausse des prix en USD des hydrocarbures et céréales alourdissait simultanément la facture d\'importation. Les entreprises disposant d\'un compte CPEC ont pu utiliser leurs réserves en devises pour lisser l\'impact. Cette période illustre la complexité de l\'exposition nette MAD pour les entreprises bi-devises. Note : Cette analyse est rétrospective et descriptive — elle ne constitue pas un conseil de gestion applicable aux situations futures.',
         readTime: '5 min',
         date: 'Juin 2026',
         tags: ['2022', 'Ukraine', 'matières premières', 'CPEC'],
@@ -311,7 +311,7 @@ const PILLARS: Pillar[] = [
     ],
   },
 
-  // â”€â”€ Pillar 7 â€” Outils & Templates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Pillar 7 — Outils & Templates ────────────────────────────────────────
   {
     id: 'outils',
     name: 'Outils & Templates',
@@ -357,7 +357,7 @@ const PILLARS: Pillar[] = [
   },
 ];
 
-// â”€â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function ArticleCard({ article, badgeCategory, badgeColor }: {
   article: Article;
@@ -435,7 +435,7 @@ function PillarCTA({ pillar, onAction }: {
         </div>
       </div>
       <p className="text-[11px] text-slate-400 mb-4 leading-relaxed">
-        {pillar.ctaType === 'newsletter' && 'Restez informé des dernières analyses sur ce pilier. Publication hebdomadaire â€” sans conseil d\'investissement.'}
+        {pillar.ctaType === 'newsletter' && 'Restez informé des dernières analyses sur ce pilier. Publication hebdomadaire — sans conseil d\'investissement.'}
         {pillar.ctaType === 'contact' && 'Nos équipes peuvent vous accompagner sur ce pilier dans un cadre de conseil stratégique ou de formation.'}
         {pillar.ctaType === 'nav' && 'Accédez directement aux outils de simulation JAD2FX pour estimer vos couvertures à titre indicatif.'}
       </p>
@@ -452,7 +452,7 @@ function PillarCTA({ pillar, onAction }: {
   );
 }
 
-// â”€â”€â”€ Newsletter signup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Newsletter signup ────────────────────────────────────────────────────────
 
 function NewsletterSignup() {
   const { config } = useAdmin();
@@ -524,7 +524,7 @@ function NewsletterSignup() {
   );
 }
 
-// â”€â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main component ───────────────────────────────────────────────────────────
 
 interface ResearchHubProps {
   navTo: (v: ViewState) => void;
@@ -580,7 +580,7 @@ export default function ResearchHub({ navTo }: ResearchHubProps) {
   return (
     <div className="space-y-6">
 
-      {/* â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Header ──────────────────────────────────────────────────────────── */}
       <div className="bg-navy-900 border border-navy-700 rounded-xl p-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
           <div className="w-11 h-11 rounded-xl bg-gold-500/10 border border-gold-700/40 flex items-center justify-center flex-shrink-0">
@@ -589,7 +589,7 @@ export default function ResearchHub({ navTo }: ResearchHubProps) {
           <div className="flex-1">
             <h2 className="text-xl font-bold text-white tracking-wide">Intelligence de Marché JAD2FX</h2>
             <p className="text-slate-400 text-[12px] mt-1 leading-relaxed">
-              7 piliers d'analyse â€” BAM Watch · Réglementaire OC · Macro & Monétaire · Profils Sectoriels · Éducation Hedging · Analyse Historique · Outils & Templates
+              7 piliers d'analyse — BAM Watch · Réglementaire OC · Macro & Monétaire · Profils Sectoriels · Éducation Hedging · Analyse Historique · Outils & Templates
             </p>
           </div>
         </div>
@@ -607,7 +607,7 @@ export default function ResearchHub({ navTo }: ResearchHubProps) {
         </div>
       </div>
 
-      {/* â”€â”€ Global search results â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Global search results ────────────────────────────────────────────── */}
       {search.trim() && globalSearchResults.length > 0 && (
         <div className="bg-navy-900 border border-navy-700 rounded-xl overflow-hidden">
           <div className="px-5 py-3 border-b border-navy-700 flex items-center gap-2">
@@ -641,11 +641,11 @@ export default function ResearchHub({ navTo }: ResearchHubProps) {
         <div className="text-center py-8 text-slate-500 text-sm">Aucun résultat pour "{search}"</div>
       )}
 
-      {/* â”€â”€ Main layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Main layout ──────────────────────────────────────────────────────── */}
       {!search.trim() && (
         <div className="flex flex-col lg:flex-row gap-5">
 
-          {/* â”€â”€â”€ Pillar sidebar (left on desktop, top on mobile) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* ─── Pillar sidebar (left on desktop, top on mobile) ─────────────── */}
           <div className="lg:w-56 flex-shrink-0">
             {/* Mobile: horizontal pill grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:hidden gap-2 mb-4">
@@ -704,7 +704,7 @@ export default function ResearchHub({ navTo }: ResearchHubProps) {
             </div>
           </div>
 
-          {/* â”€â”€â”€ Article feed (right on desktop) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* ─── Article feed (right on desktop) ────────────────────────────── */}
           <div className="flex-1 min-w-0 space-y-5">
 
             {/* Pillar header card */}
@@ -751,10 +751,10 @@ export default function ResearchHub({ navTo }: ResearchHubProps) {
         </div>
       )}
 
-      {/* â”€â”€ Newsletter signup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Newsletter signup ─────────────────────────────────────────────── */}
       <NewsletterSignup />
 
-      {/* â”€â”€ Footer disclaimer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+      {/* ── Footer disclaimer ─────────────────────────────────────────────── */}
       <div className="text-center py-2">
         <p className="text-[10px] text-navy-600">
           Intelligence de Marché JAD2FX · Données pédagogiques indicatives · Aucun conseil en investissement ·{' '}

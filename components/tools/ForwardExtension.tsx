@@ -1,11 +1,11 @@
 /**
- * Prorogation & Levée Anticipée â€” Extension et dénouement anticipé de forward
+ * Prorogation & Levée Anticipée — Extension et dénouement anticipé de forward
  *
  * Prorogation (Rollover):
  *   L'entreprise souhaite repousser la date d'échéance d'un forward existant.
  *   La banque dénoue le forward initial au cours spot courant, puis rebooke
  *   un nouveau forward pour la période d'extension.
- *   Nouveau cours â‰ˆ Cours spot actuel + Points forward pour la période d'extension
+ *   Nouveau cours ≈ Cours spot actuel + Points forward pour la période d'extension
  *
  * Levée Anticipée (Early Settlement):
  *   L'entreprise veut dénouer son forward avant l'échéance.
@@ -48,7 +48,7 @@ export default function ForwardExtension() {
   // Prorogation only
   const [newMaturity, setNewMaturity] = useState('');
 
-  // Levée only â€” uses originalMaturity as "today"
+  // Levée only — uses originalMaturity as "today"
 
   // Marge only
   const [bankRate, setBankRate]       = useState('');
@@ -59,7 +59,7 @@ export default function ForwardExtension() {
     return e?.mid ?? null;
   }, [livePrices, currency]);
 
-  // â”€â”€ Prorogation calculation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Prorogation calculation ──────────────────────────────────────────────────
   const prorResult = useMemo(() => {
     if (mode !== 'prorogation') return null;
     if (!spot || !originalRate || !originalMaturity || !newMaturity) return null;
@@ -94,7 +94,7 @@ export default function ForwardExtension() {
     } catch { return null; }
   }, [mode, spot, originalRate, originalMaturity, newMaturity, newMaturity, currency, direction, notional, config]);
 
-  // â”€â”€ Levée Anticipée â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Levée Anticipée ──────────────────────────────────────────────────────────
   const leveeResult = useMemo(() => {
     if (mode !== 'levee') return null;
     if (!spot || !originalRate || !originalMaturity) return null;
@@ -121,7 +121,7 @@ export default function ForwardExtension() {
     return { daysLeft, pnl, spot, orig, remainingForwardRate };
   }, [mode, spot, originalRate, originalMaturity, direction, notional, currency, config]);
 
-  // â”€â”€ Marge bancaire â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Marge bancaire ───────────────────────────────────────────────────────────
   const margeResult = useMemo(() => {
     if (mode !== 'marge') return null;
     if (!spot || !bankRate || !tenor) return null;
@@ -161,7 +161,7 @@ export default function ForwardExtension() {
           <div className="flex items-center gap-2 mb-1">
             <Calculator size={15} className="text-purple-400" />
             <span className="text-[9px] font-bold text-purple-400 uppercase tracking-[0.2em] bg-purple-500/10 border border-purple-500/25 px-2 py-0.5 rounded">
-              Gestion Forward â€” Opérations Post-Booking
+              Gestion Forward — Opérations Post-Booking
             </span>
           </div>
           <h2 className="text-lg font-serif font-bold text-white mb-1">
@@ -277,10 +277,10 @@ export default function ForwardExtension() {
         )}
       </div>
 
-      {/* â”€â”€ Prorogation result â”€â”€ */}
+      {/* ── Prorogation result ── */}
       {mode === 'prorogation' && prorResult && (
         <div className="bg-navy-900 border border-purple-700/30 rounded-xl p-5 space-y-4">
-          <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">Résultat â€” Prorogation de {prorResult.extensionDays} jours</p>
+          <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">Résultat — Prorogation de {prorResult.extensionDays} jours</p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
               { label: 'Taux initial', value: fmt4(parseFloat(originalRate)), color: 'text-slate-400' },
@@ -305,11 +305,11 @@ export default function ForwardExtension() {
         </div>
       )}
 
-      {/* â”€â”€ Levée anticipée result â”€â”€ */}
+      {/* ── Levée anticipée result ── */}
       {mode === 'levee' && leveeResult && (
         <div className="bg-navy-900 border border-purple-700/30 rounded-xl p-5 space-y-4">
           <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">
-            Résultat â€” Levée Anticipée ({leveeResult.daysLeft} jours avant échéance)
+            Résultat — Levée Anticipée ({leveeResult.daysLeft} jours avant échéance)
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {[
@@ -329,7 +329,7 @@ export default function ForwardExtension() {
             <div className="p-3 bg-navy-800 border border-navy-700 rounded-lg">
               <p className="text-[10px] text-slate-500 mb-1">Cours forward indicatif pour la durée résiduelle de {leveeResult.daysLeft} jours</p>
               <p className="text-sm font-mono font-bold text-white">{fmt4(leveeResult.remainingForwardRate)}</p>
-              <p className="text-[9px] text-slate-600 mt-0.5">Calculé par CIP â€” à titre pédagogique uniquement</p>
+              <p className="text-[9px] text-slate-600 mt-0.5">Calculé par CIP — à titre pédagogique uniquement</p>
             </div>
           )}
           <p className="text-[10px] text-slate-600">
@@ -339,11 +339,11 @@ export default function ForwardExtension() {
         </div>
       )}
 
-      {/* â”€â”€ Marge bancaire result â”€â”€ */}
+      {/* ── Marge bancaire result ── */}
       {mode === 'marge' && margeResult && (
         <div className="bg-navy-900 border border-purple-700/30 rounded-xl p-5 space-y-4">
           <p className="text-[9px] text-slate-500 uppercase tracking-wider font-bold">
-            Analyse de Marge â€” Forward {margeResult.days} jours
+            Analyse de Marge — Forward {margeResult.days} jours
           </p>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
@@ -368,7 +368,7 @@ export default function ForwardExtension() {
             <Info size={12} className="text-amber-400 flex-shrink-0 mt-0.5" />
             <p className="text-[10px] text-amber-300/70 leading-relaxed">
               Le taux CIP théorique est calculé à partir des taux MONIA interpolés. La marge estimée est
-              purement indicative â€” la banque intègre également sa liquidité interne, le risque contrepartie
+              purement indicative — la banque intègre également sa liquidité interne, le risque contrepartie
               et ses coûts opérationnels. Cette analyse est fournie à titre éducatif uniquement.
               Pour toute opération, adressez-vous à votre établissement bancaire agréé par Bank Al-Maghrib.
             </p>
@@ -379,7 +379,7 @@ export default function ForwardExtension() {
       <p className="text-[9px] text-slate-700 text-center leading-relaxed">
         Calculs indicatifs basés sur les taux CIP JAD2FX (non exécutables). Les taux effectifs dépendent
         des conditions de marché au moment de l'opération avec votre banque agréée BAM.
-        JAD2 Advisory â€” non établissement financier agréé (Loi n° 43-12).
+        JAD2 Advisory — non établissement financier agréé (Loi n° 43-12).
       </p>
     </div>
   );

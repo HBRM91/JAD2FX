@@ -1,5 +1,5 @@
 /**
- * P4.18 â€” Partnerships page.
+ * P4.18 — Partnerships page.
  * Institutional, academic, and media partners.
  */
 
@@ -12,9 +12,9 @@ const PARTNERS = [
     icon: GraduationCap,
     color: 'text-purple-400',
     items: [
-      { name: 'ISCAE Casablanca', desc: 'Master Banque & Finance â€” formation continue', url: 'https://www.iscae.ma' },
-      { name: 'ENCG Settat',       desc: 'Master Commerce International â€” module FX', url: 'https://www.encgsettat.ac.ma' },
-      { name: 'EMI Rabat',         desc: 'Ingénierie Financière â€” partenariat pédagogique', url: 'https://www.emi.ac.ma' },
+      { name: 'ISCAE Casablanca', desc: 'Master Banque & Finance — formation continue', url: 'https://www.iscae.ma' },
+      { name: 'ENCG Settat',       desc: 'Master Commerce International — module FX', url: 'https://www.encgsettat.ac.ma' },
+      { name: 'EMI Rabat',         desc: 'Ingénierie Financière — partenariat pédagogique', url: 'https://www.emi.ac.ma' },
     ],
   },
   {
@@ -36,7 +36,7 @@ const PARTNERS = [
       { name: 'Le Matin',     desc: 'Citations régulières sur le panier BKAM', url: 'https://www.lematin.ma' },
       { name: 'L\'Économiste', desc: 'Analyses macroéconomiques citées', url: 'https://www.leconomiste.com' },
       { name: 'Médias24',     desc: 'Couverture des évolutions du régime de change', url: 'https://www.medias24.com' },
-      { name: 'Yabiladi',     desc: 'Communauté MRE â€” change et transferts', url: 'https://www.yabiladi.com' },
+      { name: 'Yabiladi',     desc: 'Communauté MRE — change et transferts', url: 'https://www.yabiladi.com' },
     ],
   },
   {

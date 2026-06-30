@@ -1,5 +1,5 @@
 /**
- * Morning Briefing â€” Chief Strategist FX Dashboard
+ * Morning Briefing — Chief Strategist FX Dashboard
  * Institutional-grade daily briefing for corporate treasury.
  * Publishes at 09:00 Casablanca (matches Worker cron).
  */
@@ -18,7 +18,7 @@ import { MarketReport, LivePriceEntry } from '../types';
 import { DEFAULT_BASKET_CONFIG, BKAM_CURRENCIES } from '../constants';
 import CurrencyFlag from './CurrencyFlag';
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 type BriefingTab = 'OVERVIEW' | 'CALENDAR' | 'ANALYSIS';
 type NlStatus = 'idle' | 'loading' | 'success' | 'error';
@@ -39,7 +39,7 @@ interface CalendarEvent {
 interface SentimentResult {
   label: string;
   labelEn: string;
-  score: number;       // 0â€“100 (higher = more MAD depreciation pressure)
+  score: number;       // 0–100 (higher = more MAD depreciation pressure)
   bias: 'BULLISH' | 'BEARISH' | 'NEUTRAL'; // for MAD (BULLISH = MAD strengthening)
   drivers: string[];
 }
@@ -52,64 +52,64 @@ interface BandData {
   central: number;
   lower: number;
   upper: number;
-  utilPct: number;       // 0â€“100 position in band
+  utilPct: number;       // 0–100 position in band
   driftBps: number;      // current vs central in bps
   change24h: number;
 }
 
-// â”€â”€â”€ 2026 Economic Calendar (key macro events impacting MAD) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── 2026 Economic Calendar (key macro events impacting MAD) ─────────────────
 
 const CALENDAR_2026: CalendarEvent[] = [
-  // FOMC â€” 8 meetings
-  { date: '2026-01-29', titleFr: 'FOMC â€” Décision Fed', titleEn: 'FOMC Rate Decision', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: '40% du panier MAD. Toute surpri­se hawkish apprécie le USD/MAD.', noteEn: '40% of MAD basket. Hawkish surprise lifts USD/MAD.', },
-  { date: '2026-03-19', titleFr: 'FOMC â€” Décision + Dot Plot', titleEn: 'FOMC + SEP Projections', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', hasProjections: true, noteFr: 'Réunion avec projections économiques (dot plot). Impact USD élevé.', noteEn: 'Summary of Economic Projections â€” high USD volatility expected.', },
-  { date: '2026-05-07', titleFr: 'FOMC â€” Décision Fed', titleEn: 'FOMC Rate Decision', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Réunion sans projections. Surveillez le statement et conférence Powell.', noteEn: 'No SEP. Watch statement language and Powell presser.', },
-  { date: '2026-06-18', titleFr: 'FOMC â€” Décision + Dot Plot', titleEn: 'FOMC + SEP Projections', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', hasProjections: true, noteFr: 'Réunion mi-année avec dot plot. Pivot point clé pour H2 2026.', noteEn: 'Mid-year SEP â€” key pivot for H2 2026 USD direction.', },
-  { date: '2026-07-30', titleFr: 'FOMC â€” Décision Fed', titleEn: 'FOMC Rate Decision', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Réunion été. Sensible aux données emploi du mois précédent.', noteEn: 'Summer meeting. Highly sensitive to prior NFP print.', },
-  { date: '2026-09-17', titleFr: 'FOMC â€” Décision + Dot Plot', titleEn: 'FOMC + SEP Projections', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', hasProjections: true, noteFr: 'Dot plot Q3 â€” réévaluation trajectoire taux. Décisif pour T4.', noteEn: 'Q3 SEP â€” recalibration of rate path. Decisive for Q4.', },
-  { date: '2026-11-05', titleFr: 'FOMC â€” Décision Fed', titleEn: 'FOMC Rate Decision', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Réunion post-élections (si applicable). Risque politique élevé.', noteEn: 'Post-election meeting (if applicable). Elevated political risk.', },
-  { date: '2026-12-17', titleFr: 'FOMC â€” Décision + Dot Plot', titleEn: 'FOMC + SEP Projections', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', hasProjections: true, noteFr: 'Dernière réunion 2026. Dot plot définit les attentes 2027.', noteEn: 'Final 2026 meeting. SEP sets 2027 expectations.', },
-  // ECB â€” 8 meetings
-  { date: '2026-01-30', titleFr: 'BCE â€” Conseil des gouverneurs', titleEn: 'ECB Governing Council', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'EUR = 60% panier MAD. La BCE est le principal driver externe du MAD.', noteEn: 'EUR = 60% of MAD basket. ECB is the primary external MAD driver.', },
-  { date: '2026-03-05', titleFr: 'BCE â€” Conseil des gouverneurs', titleEn: 'ECB Governing Council', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'Réunion de printemps. Projections macroéconomiques trimestrielles.', noteEn: 'Spring meeting with quarterly macroeconomic projections.', },
-  { date: '2026-04-23', titleFr: 'BCE â€” Conseil des gouverneurs', titleEn: 'ECB Governing Council', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'Réunion sans projections. Focus sur inflation zone euro.', noteEn: 'No projections. Focus on eurozone inflation trajectory.', },
-  { date: '2026-06-04', titleFr: 'BCE â€” Conseil + Projections', titleEn: 'ECB Governing Council + Projections', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'Projections Q2. Impact majeur sur EUR/MAD et panier BKAM.', noteEn: 'Q2 projections. Major EUR/MAD and BKAM basket impact.', },
-  { date: '2026-07-23', titleFr: 'BCE â€” Conseil des gouverneurs', titleEn: 'ECB Governing Council', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'Réunion estivale. Historiquement plus calme, sauf choc exogène.', noteEn: 'Summer meeting. Historically quieter unless exogenous shock.', },
-  { date: '2026-09-10', titleFr: 'BCE â€” Conseil + Projections', titleEn: 'ECB Governing Council + Projections', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'Projections Q3 post-été. Point d\'inflexion potentiel EUR/USD.', noteEn: 'Post-summer Q3 projections. Potential EUR/USD inflection.', },
-  { date: '2026-10-29', titleFr: 'BCE â€” Conseil des gouverneurs', titleEn: 'ECB Governing Council', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'Avant-dernière réunion. Orientations pour fin d\'année.', noteEn: 'Penultimate meeting. Sets year-end EUR guidance.', },
-  { date: '2026-12-10', titleFr: 'BCE â€” Conseil + Projections', titleEn: 'ECB Governing Council + Projections', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'Dernière réunion + projections 2027. Orientations long terme EUR.', noteEn: 'Final meeting + 2027 projections. Long-term EUR direction.', },
-  // BKAM â€” 4 quarterly meetings
-  { date: '2026-03-18', titleFr: 'BKAM â€” Conseil de Politique Monétaire', titleEn: 'BKAM Monetary Policy Board', type: 'BKAM', currency: 'MAD', countryCode: 'ma', impact: 'DIRECT', noteFr: 'Décision directe sur taux directeur MAD et bandes de fluctuation.', noteEn: 'Direct MAD key rate and fluctuation band decision.', },
-  { date: '2026-06-17', titleFr: 'BKAM â€” Conseil de Politique Monétaire', titleEn: 'BKAM Monetary Policy Board', type: 'BKAM', currency: 'MAD', countryCode: 'ma', impact: 'DIRECT', noteFr: 'Réunion mi-année. Revue des réserves et politique de change.', noteEn: 'Mid-year review of reserves and exchange rate policy.', },
-  { date: '2026-09-16', titleFr: 'BKAM â€” Conseil de Politique Monétaire', titleEn: 'BKAM Monetary Policy Board', type: 'BKAM', currency: 'MAD', countryCode: 'ma', impact: 'DIRECT', noteFr: 'Réunion Q3 + revue FMI potential (Article IV). Haute attention.', noteEn: 'Q3 meeting + potential IMF Article IV review. High attention.', },
-  { date: '2026-12-15', titleFr: 'BKAM â€” Conseil de Politique Monétaire', titleEn: 'BKAM Monetary Policy Board', type: 'BKAM', currency: 'MAD', countryCode: 'ma', impact: 'DIRECT', noteFr: 'Dernière réunion 2026. Rapport annuel + orientations 2027.', noteEn: 'Final 2026 meeting. Annual report and 2027 guidance.', },
-  // US NFP â€” monthly
-  { date: '2026-01-09', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Indicateur emploi US décisif pour la trajectoire Fed → USD/MAD.', noteEn: 'Key US labor indicator driving Fed path and USD/MAD.', },
-  { date: '2026-02-06', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Impact USD immédiat ±0.3â€“0.8% sur surprise. Prudence en couverture.', noteEn: 'Immediate USD impact ±0.3â€“0.8% on surprise. Hedge with caution.', },
-  { date: '2026-03-06', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Précède la réunion FOMC du 19 mars. Influence directe sur la décision.', noteEn: 'Precedes Mar 19 FOMC. Direct influence on rate decision.', },
-  { date: '2026-04-03', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Vendredi saint (potentiel). Vérifier calendrier bancaire avant couverture.', noteEn: 'Potential Good Friday proximity. Check banking calendar.', },
-  { date: '2026-05-08', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Décalé au 2ème vendredi (1er mai = Fête du Travail).', noteEn: 'Delayed to 2nd Friday (May 1 = Labor Day holiday).', },
-  { date: '2026-06-05', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Précède BCE du 4 juin. Semaine à haut risque de volatilité MAD.', noteEn: 'Follows ECB Jun 4. High-volatility week for MAD.', },
-  { date: '2026-07-02', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Veille 4 juillet (liquidité réduite). Volatilité accrue possible.', noteEn: 'Day before July 4th (reduced liquidity). Elevated volatility.', },
-  { date: '2026-08-07', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Période estivale â€” liquidité internationale plus faible qu\'en hiver.', noteEn: 'Summer period â€” thinner international liquidity than winter.', },
-  { date: '2026-09-04', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Précède FOMC 17 sept + BKAM 16 sept. Semaine clé pour MAD.', noteEn: 'Precedes Sep 17 FOMC + Sep 16 BKAM. Critical MAD week.', },
-  { date: '2026-10-02', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Début T4. Orientations sur trimestre final USD.', noteEn: 'Q4 kickoff. Sets USD direction for final quarter.', },
-  { date: '2026-11-06', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Post-FOMC 5 nov. Confirme ou infirme décision Fed.', noteEn: 'Day after Nov 5 FOMC. Confirms or challenges Fed decision.', },
-  { date: '2026-12-04', titleFr: 'NFP â€” Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Avant FOMC 17 déc. Décisif pour la décision de décembre.', noteEn: 'Before Dec 17 FOMC. Decisive for December rate decision.', },
-  // US CPI â€” monthly
-  { date: '2026-01-14', titleFr: 'IPC USA â€” Inflation américaine', titleEn: 'US CPI Release', type: 'CPI_US', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Indicateur inflation Fed. Surprise hawkish = USD fort = MAD sous pression.', noteEn: 'Fed inflation gauge. Hawkish surprise = strong USD = MAD pressure.', },
-  { date: '2026-02-11', titleFr: 'IPC USA â€” Inflation américaine', titleEn: 'US CPI Release', type: 'CPI_US', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Impact immédiat EUR/USD et USD/MAD dans les 30 min suivant la publication.', noteEn: 'Immediate EUR/USD and USD/MAD impact within 30 min of release.', },
-  { date: '2026-03-11', titleFr: 'IPC USA â€” Inflation américaine', titleEn: 'US CPI Release', type: 'CPI_US', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Avant FOMC 19 mars. Donnée critique pour la décision de taux.', noteEn: 'Before Mar 19 FOMC. Critical input for rate decision.', },
-  { date: '2026-04-15', titleFr: 'IPC USA â€” Inflation américaine', titleEn: 'US CPI Release', type: 'CPI_US', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Mi-Q2. Calibre les attentes pour réunion FOMC mai.', noteEn: 'Mid-Q2. Calibrates expectations for May FOMC.', },
-  { date: '2026-05-13', titleFr: 'IPC USA â€” Inflation américaine', titleEn: 'US CPI Release', type: 'CPI_US', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Post-FOMC mai. Valide ou contredit la posture Fed.', noteEn: 'Post-May FOMC. Validates or challenges Fed stance.', },
-  { date: '2026-06-10', titleFr: 'IPC USA â€” Inflation américaine', titleEn: 'US CPI Release', type: 'CPI_US', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Avant FOMC 18 juin + BCE 4 juin. Semaine triple impact.', noteEn: 'Before Jun 18 FOMC + Jun 4 ECB. Triple-impact week.', },
+  // FOMC — 8 meetings
+  { date: '2026-01-29', titleFr: 'FOMC — Décision Fed', titleEn: 'FOMC Rate Decision', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: '40% du panier MAD. Toute surpri­se hawkish apprécie le USD/MAD.', noteEn: '40% of MAD basket. Hawkish surprise lifts USD/MAD.', },
+  { date: '2026-03-19', titleFr: 'FOMC — Décision + Dot Plot', titleEn: 'FOMC + SEP Projections', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', hasProjections: true, noteFr: 'Réunion avec projections économiques (dot plot). Impact USD élevé.', noteEn: 'Summary of Economic Projections — high USD volatility expected.', },
+  { date: '2026-05-07', titleFr: 'FOMC — Décision Fed', titleEn: 'FOMC Rate Decision', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Réunion sans projections. Surveillez le statement et conférence Powell.', noteEn: 'No SEP. Watch statement language and Powell presser.', },
+  { date: '2026-06-18', titleFr: 'FOMC — Décision + Dot Plot', titleEn: 'FOMC + SEP Projections', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', hasProjections: true, noteFr: 'Réunion mi-année avec dot plot. Pivot point clé pour H2 2026.', noteEn: 'Mid-year SEP — key pivot for H2 2026 USD direction.', },
+  { date: '2026-07-30', titleFr: 'FOMC — Décision Fed', titleEn: 'FOMC Rate Decision', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Réunion été. Sensible aux données emploi du mois précédent.', noteEn: 'Summer meeting. Highly sensitive to prior NFP print.', },
+  { date: '2026-09-17', titleFr: 'FOMC — Décision + Dot Plot', titleEn: 'FOMC + SEP Projections', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', hasProjections: true, noteFr: 'Dot plot Q3 — réévaluation trajectoire taux. Décisif pour T4.', noteEn: 'Q3 SEP — recalibration of rate path. Decisive for Q4.', },
+  { date: '2026-11-05', titleFr: 'FOMC — Décision Fed', titleEn: 'FOMC Rate Decision', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Réunion post-élections (si applicable). Risque politique élevé.', noteEn: 'Post-election meeting (if applicable). Elevated political risk.', },
+  { date: '2026-12-17', titleFr: 'FOMC — Décision + Dot Plot', titleEn: 'FOMC + SEP Projections', type: 'FOMC', currency: 'USD', countryCode: 'us', impact: 'HIGH', hasProjections: true, noteFr: 'Dernière réunion 2026. Dot plot définit les attentes 2027.', noteEn: 'Final 2026 meeting. SEP sets 2027 expectations.', },
+  // ECB — 8 meetings
+  { date: '2026-01-30', titleFr: 'BCE — Conseil des gouverneurs', titleEn: 'ECB Governing Council', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'EUR = 60% panier MAD. La BCE est le principal driver externe du MAD.', noteEn: 'EUR = 60% of MAD basket. ECB is the primary external MAD driver.', },
+  { date: '2026-03-05', titleFr: 'BCE — Conseil des gouverneurs', titleEn: 'ECB Governing Council', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'Réunion de printemps. Projections macroéconomiques trimestrielles.', noteEn: 'Spring meeting with quarterly macroeconomic projections.', },
+  { date: '2026-04-23', titleFr: 'BCE — Conseil des gouverneurs', titleEn: 'ECB Governing Council', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'Réunion sans projections. Focus sur inflation zone euro.', noteEn: 'No projections. Focus on eurozone inflation trajectory.', },
+  { date: '2026-06-04', titleFr: 'BCE — Conseil + Projections', titleEn: 'ECB Governing Council + Projections', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'Projections Q2. Impact majeur sur EUR/MAD et panier BKAM.', noteEn: 'Q2 projections. Major EUR/MAD and BKAM basket impact.', },
+  { date: '2026-07-23', titleFr: 'BCE — Conseil des gouverneurs', titleEn: 'ECB Governing Council', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'Réunion estivale. Historiquement plus calme, sauf choc exogène.', noteEn: 'Summer meeting. Historically quieter unless exogenous shock.', },
+  { date: '2026-09-10', titleFr: 'BCE — Conseil + Projections', titleEn: 'ECB Governing Council + Projections', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'Projections Q3 post-été. Point d\'inflexion potentiel EUR/USD.', noteEn: 'Post-summer Q3 projections. Potential EUR/USD inflection.', },
+  { date: '2026-10-29', titleFr: 'BCE — Conseil des gouverneurs', titleEn: 'ECB Governing Council', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'Avant-dernière réunion. Orientations pour fin d\'année.', noteEn: 'Penultimate meeting. Sets year-end EUR guidance.', },
+  { date: '2026-12-10', titleFr: 'BCE — Conseil + Projections', titleEn: 'ECB Governing Council + Projections', type: 'ECB', currency: 'EUR', countryCode: 'eu', impact: 'HIGH', noteFr: 'Dernière réunion + projections 2027. Orientations long terme EUR.', noteEn: 'Final meeting + 2027 projections. Long-term EUR direction.', },
+  // BKAM — 4 quarterly meetings
+  { date: '2026-03-18', titleFr: 'BKAM — Conseil de Politique Monétaire', titleEn: 'BKAM Monetary Policy Board', type: 'BKAM', currency: 'MAD', countryCode: 'ma', impact: 'DIRECT', noteFr: 'Décision directe sur taux directeur MAD et bandes de fluctuation.', noteEn: 'Direct MAD key rate and fluctuation band decision.', },
+  { date: '2026-06-17', titleFr: 'BKAM — Conseil de Politique Monétaire', titleEn: 'BKAM Monetary Policy Board', type: 'BKAM', currency: 'MAD', countryCode: 'ma', impact: 'DIRECT', noteFr: 'Réunion mi-année. Revue des réserves et politique de change.', noteEn: 'Mid-year review of reserves and exchange rate policy.', },
+  { date: '2026-09-16', titleFr: 'BKAM — Conseil de Politique Monétaire', titleEn: 'BKAM Monetary Policy Board', type: 'BKAM', currency: 'MAD', countryCode: 'ma', impact: 'DIRECT', noteFr: 'Réunion Q3 + revue FMI potential (Article IV). Haute attention.', noteEn: 'Q3 meeting + potential IMF Article IV review. High attention.', },
+  { date: '2026-12-15', titleFr: 'BKAM — Conseil de Politique Monétaire', titleEn: 'BKAM Monetary Policy Board', type: 'BKAM', currency: 'MAD', countryCode: 'ma', impact: 'DIRECT', noteFr: 'Dernière réunion 2026. Rapport annuel + orientations 2027.', noteEn: 'Final 2026 meeting. Annual report and 2027 guidance.', },
+  // US NFP — monthly
+  { date: '2026-01-09', titleFr: 'NFP — Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Indicateur emploi US décisif pour la trajectoire Fed → USD/MAD.', noteEn: 'Key US labor indicator driving Fed path and USD/MAD.', },
+  { date: '2026-02-06', titleFr: 'NFP — Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Impact USD immédiat ±0.3–0.8% sur surprise. Prudence en couverture.', noteEn: 'Immediate USD impact ±0.3–0.8% on surprise. Hedge with caution.', },
+  { date: '2026-03-06', titleFr: 'NFP — Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Précède la réunion FOMC du 19 mars. Influence directe sur la décision.', noteEn: 'Precedes Mar 19 FOMC. Direct influence on rate decision.', },
+  { date: '2026-04-03', titleFr: 'NFP — Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Vendredi saint (potentiel). Vérifier calendrier bancaire avant couverture.', noteEn: 'Potential Good Friday proximity. Check banking calendar.', },
+  { date: '2026-05-08', titleFr: 'NFP — Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Décalé au 2ème vendredi (1er mai = Fête du Travail).', noteEn: 'Delayed to 2nd Friday (May 1 = Labor Day holiday).', },
+  { date: '2026-06-05', titleFr: 'NFP — Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Précède BCE du 4 juin. Semaine à haut risque de volatilité MAD.', noteEn: 'Follows ECB Jun 4. High-volatility week for MAD.', },
+  { date: '2026-07-02', titleFr: 'NFP — Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Veille 4 juillet (liquidité réduite). Volatilité accrue possible.', noteEn: 'Day before July 4th (reduced liquidity). Elevated volatility.', },
+  { date: '2026-08-07', titleFr: 'NFP — Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Période estivale — liquidité internationale plus faible qu\'en hiver.', noteEn: 'Summer period — thinner international liquidity than winter.', },
+  { date: '2026-09-04', titleFr: 'NFP — Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Précède FOMC 17 sept + BKAM 16 sept. Semaine clé pour MAD.', noteEn: 'Precedes Sep 17 FOMC + Sep 16 BKAM. Critical MAD week.', },
+  { date: '2026-10-02', titleFr: 'NFP — Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Début T4. Orientations sur trimestre final USD.', noteEn: 'Q4 kickoff. Sets USD direction for final quarter.', },
+  { date: '2026-11-06', titleFr: 'NFP — Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Post-FOMC 5 nov. Confirme ou infirme décision Fed.', noteEn: 'Day after Nov 5 FOMC. Confirms or challenges Fed decision.', },
+  { date: '2026-12-04', titleFr: 'NFP — Emplois non-agricoles USA', titleEn: 'US Non-Farm Payrolls', type: 'NFP', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Avant FOMC 17 déc. Décisif pour la décision de décembre.', noteEn: 'Before Dec 17 FOMC. Decisive for December rate decision.', },
+  // US CPI — monthly
+  { date: '2026-01-14', titleFr: 'IPC USA — Inflation américaine', titleEn: 'US CPI Release', type: 'CPI_US', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Indicateur inflation Fed. Surprise hawkish = USD fort = MAD sous pression.', noteEn: 'Fed inflation gauge. Hawkish surprise = strong USD = MAD pressure.', },
+  { date: '2026-02-11', titleFr: 'IPC USA — Inflation américaine', titleEn: 'US CPI Release', type: 'CPI_US', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Impact immédiat EUR/USD et USD/MAD dans les 30 min suivant la publication.', noteEn: 'Immediate EUR/USD and USD/MAD impact within 30 min of release.', },
+  { date: '2026-03-11', titleFr: 'IPC USA — Inflation américaine', titleEn: 'US CPI Release', type: 'CPI_US', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Avant FOMC 19 mars. Donnée critique pour la décision de taux.', noteEn: 'Before Mar 19 FOMC. Critical input for rate decision.', },
+  { date: '2026-04-15', titleFr: 'IPC USA — Inflation américaine', titleEn: 'US CPI Release', type: 'CPI_US', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Mi-Q2. Calibre les attentes pour réunion FOMC mai.', noteEn: 'Mid-Q2. Calibrates expectations for May FOMC.', },
+  { date: '2026-05-13', titleFr: 'IPC USA — Inflation américaine', titleEn: 'US CPI Release', type: 'CPI_US', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Post-FOMC mai. Valide ou contredit la posture Fed.', noteEn: 'Post-May FOMC. Validates or challenges Fed stance.', },
+  { date: '2026-06-10', titleFr: 'IPC USA — Inflation américaine', titleEn: 'US CPI Release', type: 'CPI_US', currency: 'USD', countryCode: 'us', impact: 'HIGH', noteFr: 'Avant FOMC 18 juin + BCE 4 juin. Semaine triple impact.', noteEn: 'Before Jun 18 FOMC + Jun 4 ECB. Triple-impact week.', },
   // Eurozone CPI (flash, end of month)
-  { date: '2026-01-30', titleFr: 'IPC Zone Euro (flash)', titleEn: 'Eurozone CPI Flash', type: 'CPI_EU', currency: 'EUR', countryCode: 'eu', impact: 'MEDIUM', noteFr: 'Mêmes dates que BCE â€” confluence. Inflation = mandataire BCE = EUR.', noteEn: 'Same day as ECB meeting â€” confluence. Inflation = ECB mandate = EUR.', },
+  { date: '2026-01-30', titleFr: 'IPC Zone Euro (flash)', titleEn: 'Eurozone CPI Flash', type: 'CPI_EU', currency: 'EUR', countryCode: 'eu', impact: 'MEDIUM', noteFr: 'Mêmes dates que BCE — confluence. Inflation = mandataire BCE = EUR.', noteEn: 'Same day as ECB meeting — confluence. Inflation = ECB mandate = EUR.', },
   { date: '2026-03-31', titleFr: 'IPC Zone Euro (flash)', titleEn: 'Eurozone CPI Flash', type: 'CPI_EU', currency: 'EUR', countryCode: 'eu', impact: 'MEDIUM', noteFr: 'Flash estimé fin mars. Impact EUR/MAD modéré si dans ligne consensus.', noteEn: 'Flash estimate end of March. Moderate EUR/MAD impact if in-line.', },
-  { date: '2026-04-30', titleFr: 'IPC Zone Euro (flash)', titleEn: 'Eurozone CPI Flash', type: 'CPI_EU', currency: 'EUR', countryCode: 'eu', impact: 'MEDIUM', noteFr: 'Avant réunion BCE 23 avril â€” influence directe sur décision.', noteEn: 'Before Apr 23 ECB â€” direct influence on decision.', },
+  { date: '2026-04-30', titleFr: 'IPC Zone Euro (flash)', titleEn: 'Eurozone CPI Flash', type: 'CPI_EU', currency: 'EUR', countryCode: 'eu', impact: 'MEDIUM', noteFr: 'Avant réunion BCE 23 avril — influence directe sur décision.', noteEn: 'Before Apr 23 ECB — direct influence on decision.', },
 ];
 
-// â”€â”€â”€ Calculation helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Calculation helpers ──────────────────────────────────────────────────────
 
 function getBandData(livePrices: LivePriceEntry[]): BandData[] {
   const K = DEFAULT_BASKET_CONFIG.referenceBasketValue;
@@ -150,18 +150,18 @@ function computeSentiment(livePrices: LivePriceEntry[]): SentimentResult {
   // EUR change: 60% basket weight
   if (eur.changePercent > 0.25) { score += 20; drivers.push('EUR →→ (pression panier 60%)'); }
   else if (eur.changePercent > 0.08) { score += 10; drivers.push('EUR → (panier 60%)'); }
-  else if (eur.changePercent < -0.25) { score -= 20; drivers.push('EUR â†“â†“ (soutien panier 60%)'); }
-  else if (eur.changePercent < -0.08) { score -= 10; drivers.push('EUR â†“ (panier 60%)'); }
+  else if (eur.changePercent < -0.25) { score -= 20; drivers.push('EUR ↓↓ (soutien panier 60%)'); }
+  else if (eur.changePercent < -0.08) { score -= 10; drivers.push('EUR ↓ (panier 60%)'); }
 
   // USD change: 40% basket weight
   if (usd.changePercent > 0.25) { score += 15; drivers.push('USD →→ (pression panier 40%)'); }
   else if (usd.changePercent > 0.08) { score += 7; drivers.push('USD → (panier 40%)'); }
-  else if (usd.changePercent < -0.25) { score -= 15; drivers.push('USD â†“â†“ (soutien panier 40%)'); }
-  else if (usd.changePercent < -0.08) { score -= 7; drivers.push('USD â†“ (panier 40%)'); }
+  else if (usd.changePercent < -0.25) { score -= 15; drivers.push('USD ↓↓ (soutien panier 40%)'); }
+  else if (usd.changePercent < -0.08) { score -= 7; drivers.push('USD ↓ (panier 40%)'); }
 
   // GBP signal (trade partner)
   if (gbp && Math.abs(gbp.changePercent) > 0.15) {
-    drivers.push(`GBP ${gbp.changePercent > 0 ? '→' : 'â†“'} (signal risque global)`);
+    drivers.push(`GBP ${gbp.changePercent > 0 ? '→' : '↓'} (signal risque global)`);
   }
 
   score = Math.max(5, Math.min(95, score));
@@ -182,7 +182,7 @@ function getKeyLevels(mid: number, centralParity: number) {
   };
 }
 
-// â”€â”€â”€ Upcoming calendar events â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Upcoming calendar events ─────────────────────────────────────────────────
 
 function getUpcomingEvents(days = 45): CalendarEvent[] {
   const now = new Date();
@@ -203,7 +203,7 @@ function daysUntil(dateStr: string): number {
   return Math.ceil((target.getTime() - today.getTime()) / 86400000);
 }
 
-// â”€â”€â”€ Sub-components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function ImpactBadge({ impact }: { impact: CalendarEvent['impact'] }) {
   const map = {
@@ -240,10 +240,10 @@ function BandGauge({ data, locale }: { data: BandData; locale: string }) {
   const zone = data.utilPct < 20 ? 'DANGER_LOW' : data.utilPct > 80 ? 'DANGER_HIGH' : data.utilPct < 35 ? 'CAUTION_LOW' : data.utilPct > 65 ? 'CAUTION_HIGH' : 'NEUTRAL';
   const zoneColor = zone === 'NEUTRAL' ? 'text-emerald-400' : zone.startsWith('CAUTION') ? 'text-amber-400' : 'text-red-400';
   const zoneLabel = zone === 'NEUTRAL'
-    ? (locale === 'ar' ? 'Ù…Ø­Ø§ÙŠØ¯' : locale === 'en' ? 'Neutral' : 'Zone Neutre')
+    ? (locale === 'ar' ? 'محايد' : locale === 'en' ? 'Neutral' : 'Zone Neutre')
     : zone.startsWith('CAUTION')
-      ? (locale === 'ar' ? 'ØªÙ†Ø¨ÙŠÙ‡' : locale === 'en' ? 'Caution' : 'Zone Attention')
-      : (locale === 'ar' ? 'Ø®Ø·Ø±' : locale === 'en' ? 'Danger' : 'Zone Danger');
+      ? (locale === 'ar' ? 'تنبيه' : locale === 'en' ? 'Caution' : 'Zone Attention')
+      : (locale === 'ar' ? 'خطر' : locale === 'en' ? 'Danger' : 'Zone Danger');
   const driftSign = data.driftBps > 0 ? '+' : '';
 
   return (
@@ -266,7 +266,7 @@ function BandGauge({ data, locale }: { data: BandData; locale: string }) {
         {/* Caution zones */}
         <div className="absolute inset-y-0 left-[20%] w-[15%] bg-amber-900/30" />
         <div className="absolute inset-y-0 right-[20%] w-[15%] bg-amber-900/30" />
-        {/* Neutral zone (35â€“65%) */}
+        {/* Neutral zone (35–65%) */}
         <div className="absolute inset-y-0 left-[35%] w-[30%] bg-emerald-900/20" />
         {/* Center parity line */}
         <div className="absolute inset-y-0 left-1/2 w-px bg-gold-500/60" />
@@ -282,19 +282,19 @@ function BandGauge({ data, locale }: { data: BandData; locale: string }) {
       {/* Labels */}
       <div className="flex items-center justify-between text-[9px] font-mono text-slate-600">
         <span>{data.lower.toFixed(3)}</span>
-        <span className="text-navy-500">{locale === 'ar' ? 'Ø§Ù„ØªØ¹Ø§Ø¯Ù„' : locale === 'en' ? 'Parity' : 'Parité'} {data.central.toFixed(3)}</span>
+        <span className="text-navy-500">{locale === 'ar' ? 'التعادل' : locale === 'en' ? 'Parity' : 'Parité'} {data.central.toFixed(3)}</span>
         <span>{data.upper.toFixed(3)}</span>
       </div>
       {/* Drift */}
       <div className="flex items-center gap-3 text-[10px] text-slate-400">
-        <span>{locale === 'ar' ? 'Ø§Ù„Ø³Ø¹Ø± Ø§Ù„Ø­Ø§Ù„ÙŠ:' : locale === 'en' ? 'Current:' : 'Cours:'} <span className="font-mono font-bold text-white">{data.current.toFixed(4)}</span></span>
-        <span>{locale === 'ar' ? 'Ø§Ù„Ø§Ù†Ø­Ø±Ø§Ù:' : locale === 'en' ? 'Drift:' : 'Dérive:'} <span className={`font-mono font-bold ${data.driftBps > 0 ? 'text-red-400' : data.driftBps < 0 ? 'text-emerald-400' : 'text-slate-400'}`}>{driftSign}{data.driftBps} bps</span></span>
+        <span>{locale === 'ar' ? 'السعر الحالي:' : locale === 'en' ? 'Current:' : 'Cours:'} <span className="font-mono font-bold text-white">{data.current.toFixed(4)}</span></span>
+        <span>{locale === 'ar' ? 'الانحراف:' : locale === 'en' ? 'Drift:' : 'Dérive:'} <span className={`font-mono font-bold ${data.driftBps > 0 ? 'text-red-400' : data.driftBps < 0 ? 'text-emerald-400' : 'text-slate-400'}`}>{driftSign}{data.driftBps} bps</span></span>
       </div>
     </div>
   );
 }
 
-// â”€â”€â”€ Newsletter subscription form â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Newsletter subscription form ────────────────────────────────────────────
 
 function NewsletterSignup({ proxyUrl }: { proxyUrl: string }) {
   const [email, setEmail] = useState('');
@@ -352,7 +352,7 @@ function NewsletterSignup({ proxyUrl }: { proxyUrl: string }) {
           {status === 'loading' ? 'Inscription...' : 'S\'inscrire'}
         </button>
       </div>
-      {/* CNDP-compliant consent â€” Loi 09-08 / GDPR Art. 6(1)(a) */}
+      {/* CNDP-compliant consent — Loi 09-08 / GDPR Art. 6(1)(a) */}
       <label className="flex items-start gap-2.5 cursor-pointer">
         <input
           type="checkbox"
@@ -373,7 +373,7 @@ function NewsletterSignup({ proxyUrl }: { proxyUrl: string }) {
   );
 }
 
-// â”€â”€â”€ Funnel CTA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Funnel CTA ───────────────────────────────────────────────────────────────
 
 function FunnelCTA({ variant = 'default' }: { variant?: 'default' | 'compact' | 'calendar' }) {
   if (variant === 'compact') return (
@@ -424,7 +424,7 @@ function FunnelCTA({ variant = 'default' }: { variant?: 'default' | 'compact' | 
   );
 }
 
-// â”€â”€â”€ Print-only document layout â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Print-only document layout ───────────────────────────────────────────────
 
 function PrintLayout({
   casaDate, livePrices, bandData, sentiment, report, upcoming,
@@ -444,7 +444,7 @@ function PrintLayout({
       {/* Header */}
       <div className="briefing-print-header">
         <div>
-          <div className="briefing-print-logo">JAD2FX â€” MORNING BRIEFING</div>
+          <div className="briefing-print-logo">JAD2FX — MORNING BRIEFING</div>
           <div className="briefing-print-sub">by JAD2 Advisory · Casablanca, Maroc</div>
         </div>
         <div style={{ textAlign: 'right' }}>
@@ -575,7 +575,7 @@ function PrintLayout({
   );
 }
 
-// â”€â”€â”€ Markdown renderer (minimal) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Markdown renderer (minimal) ─────────────────────────────────────────────
 
 function MarkdownSection({ content }: { content: string }) {
   if (!content?.trim()) return null;
@@ -595,7 +595,7 @@ function MarkdownSection({ content }: { content: string }) {
   );
 }
 
-// â”€â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function MorningBriefing() {
   const { config, livePrices } = useAdmin();
@@ -626,7 +626,7 @@ export default function MorningBriefing() {
 
   useEffect(() => { loadReport(); }, [loadReport]);
 
-  // Always fetch rates locally on mount â€” ensures Morning Briefing is never blank
+  // Always fetch rates locally on mount — ensures Morning Briefing is never blank
   // (livePrices from AdminContext may be empty or stale during first render)
   useEffect(() => {
     setRatesLoading(true);
@@ -651,7 +651,7 @@ export default function MorningBriefing() {
       .finally(() => setRatesLoading(false));
   }, [config.corsProxyUrl]); // fires on mount and when proxy changes; no livePrices dep
 
-  // â”€â”€ Computed analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Computed analytics ──────────────────────────────────────────────────────
   const effectivePrices = livePrices.length > 0 ? livePrices : localPrices;
   const bandData   = getBandData(effectivePrices);
   const sentiment  = computeSentiment(effectivePrices);
@@ -708,7 +708,7 @@ export default function MorningBriefing() {
                 </span>
                 {isFixingHour && (
                   <span className="text-[9px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 rounded uppercase animate-pulse">
-                    âš¡ HEURE FIXING BKAM
+                    ⚡ HEURE FIXING BKAM
                   </span>
                 )}
               </div>
@@ -763,32 +763,32 @@ export default function MorningBriefing() {
       {tab === 'OVERVIEW' && (
         <div className="space-y-5">
 
-          {/* â”€â”€ KPI bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* ── KPI bar ───────────────────────────────────────────────────── */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
             {[
               {
                 label: 'EUR/MAD', sub: 'Panier 60%',
-                value: eurEntry ? eurEntry.mid.toFixed(4) : 'â€”',
+                value: eurEntry ? eurEntry.mid.toFixed(4) : '—',
                 change: eurEntry?.changePercent ?? 0,
                 color: 'text-purple-400', countryCode: 'eu',
               },
               {
                 label: 'USD/MAD', sub: 'Panier 40%',
-                value: usdEntry ? usdEntry.mid.toFixed(4) : 'â€”',
+                value: usdEntry ? usdEntry.mid.toFixed(4) : '—',
                 change: usdEntry?.changePercent ?? 0,
                 color: 'text-blue-400', countryCode: 'us',
               },
               {
                 label: 'Bande EUR', sub: `Utilisation BKAM`,
-                value: eurBand ? `${eurBand.utilPct.toFixed(0)}%` : 'â€”',
+                value: eurBand ? `${eurBand.utilPct.toFixed(0)}%` : '—',
                 change: 0,
                 color: eurBand ? (eurBand.utilPct > 65 ? 'text-red-400' : eurBand.utilPct < 35 ? 'text-emerald-400' : 'text-gold-400') : 'text-slate-400',
-                countryCode: '', customSub: eurBand ? (eurBand.utilPct > 65 ? 'Zone Attention →' : eurBand.utilPct < 35 ? 'Zone Attention â†' : 'Zone Neutre') : '',
+                countryCode: '', customSub: eurBand ? (eurBand.utilPct > 65 ? 'Zone Attention →' : eurBand.utilPct < 35 ? 'Zone Attention ←' : 'Zone Neutre') : '',
               },
               {
                 label: 'Sentiment',
                 sub: sentiment.bias,
-                value: sentiment.score > 65 ? '→ MAD' : sentiment.score < 35 ? 'â†“ MAD' : '→ MAD',
+                value: sentiment.score > 65 ? '→ MAD' : sentiment.score < 35 ? '↓ MAD' : '→ MAD',
                 change: 0,
                 color: sentiment.bias === 'BEARISH' ? 'text-red-400' : sentiment.bias === 'BULLISH' ? 'text-emerald-400' : 'text-gold-400',
                 countryCode: '', customSub: sentiment.label,
@@ -802,7 +802,7 @@ export default function MorningBriefing() {
                   </div>
                   {item.change !== 0 && (
                     <span className={`text-[10px] font-mono font-bold ${item.change > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
-                      {item.change > 0 ? '→' : 'â†“'}{Math.abs(item.change).toFixed(3)}%
+                      {item.change > 0 ? '→' : '↓'}{Math.abs(item.change).toFixed(3)}%
                     </span>
                   )}
                 </div>
@@ -812,12 +812,12 @@ export default function MorningBriefing() {
             ))}
           </div>
 
-          {/* â”€â”€ Full rates strip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* ── Full rates strip ──────────────────────────────────────────── */}
           <div className="bg-navy-900 border border-navy-700 rounded-xl overflow-hidden">
             <div className="px-5 py-3 border-b border-navy-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Activity size={13} className="text-gold-500" />
-                <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Taux de Change Indicatifs â€” Séance en cours</h3>
+                <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Taux de Change Indicatifs — Séance en cours</h3>
               </div>
               <span className="text-[9px] text-slate-500 font-mono">{effectivePrices.length} paires · ECB / BKAM{ratesLoading ? ' · chargement…' : ''}</span>
             </div>
@@ -825,13 +825,13 @@ export default function MorningBriefing() {
               <table className="w-full min-w-[700px]">
                 <thead>
                   <tr className="bg-navy-950/50 text-[9px] uppercase tracking-widest text-slate-500 border-b border-navy-800">
-                    <th className="text-left px-4 py-2.5">{L('Paire', 'Pair', 'Ø§Ù„Ø²ÙˆØ¬')}</th>
-                    <th className="text-right px-3 py-2.5">{L('Achat', 'Bid', 'Ø´Ø±Ø§Ø¡')}</th>
-                    <th className="text-right px-3 py-2.5">{L('Vente', 'Ask', 'Ø¨ÙŠØ¹')}</th>
+                    <th className="text-left px-4 py-2.5">{L('Paire', 'Pair', 'الزوج')}</th>
+                    <th className="text-right px-3 py-2.5">{L('Achat', 'Bid', 'شراء')}</th>
+                    <th className="text-right px-3 py-2.5">{L('Vente', 'Ask', 'بيع')}</th>
                     <th className="text-right px-3 py-2.5">Mid</th>
-                    <th className="text-right px-3 py-2.5">{L('Var. 24h', 'Change 24h', 'Ø§Ù„ØªØºÙŠØ± 24Ø³')}</th>
-                    <th className="text-right px-3 py-2.5">{L('Écart', 'Spread', 'Ø§Ù„ÙØ§Ø±Ù‚')}</th>
-                    <th className="text-right px-4 py-2.5">{L('Bande BKAM', 'BKAM Band', 'Ù†Ø·Ø§Ù‚ BKAM')}</th>
+                    <th className="text-right px-3 py-2.5">{L('Var. 24h', 'Change 24h', 'التغير 24س')}</th>
+                    <th className="text-right px-3 py-2.5">{L('Écart', 'Spread', 'الفارق')}</th>
+                    <th className="text-right px-4 py-2.5">{L('Bande BKAM', 'BKAM Band', 'نطاق BKAM')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -874,7 +874,7 @@ export default function MorningBriefing() {
                               </div>
                               <span className="text-[9px] font-mono text-slate-400 w-6 text-right">{band.utilPct.toFixed(0)}%</span>
                             </div>
-                          ) : <span className="text-slate-600 text-[10px]">â€”</span>}
+                          ) : <span className="text-slate-600 text-[10px]">—</span>}
                         </td>
                       </tr>
                     );
@@ -884,7 +884,7 @@ export default function MorningBriefing() {
             </div>
           </div>
 
-          {/* â”€â”€ 3-col analytics â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* ── 3-col analytics ──────────────────────────────────────────── */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
             {/* BKAM band gauges */}
@@ -897,7 +897,7 @@ export default function MorningBriefing() {
                 {bandData.map(b => <BandGauge key={b.currency} data={b} locale={locale} />)}
               </div>
               <p className="text-[9px] text-slate-600 mt-4">
-                Zone neutre 35â€“65% · Zone attention 20â€“35% & 65â€“80% · Zone danger &lt;20% & &gt;80%
+                Zone neutre 35–65% · Zone attention 20–35% & 65–80% · Zone danger &lt;20% & &gt;80%
               </p>
             </div>
 
@@ -968,11 +968,11 @@ export default function MorningBriefing() {
                   </div>
                   <div className="space-y-1">
                     {[
-                      { key: 'r2', label: 'R2 â€” Plafond cage BKAM', color: 'text-red-400', bg: 'bg-red-900/20 border-red-800/40' },
-                      { key: 'r1', label: 'R1 â€” Résistance 1%', color: 'text-amber-400', bg: 'bg-amber-900/20 border-amber-800/40' },
-                      { key: 'mid', label: 'MID â€” Cours actuel', color: 'text-white', bg: 'bg-navy-800 border-navy-600' },
-                      { key: 's1', label: 'S1 â€” Support 1%', color: 'text-blue-400', bg: 'bg-blue-900/20 border-blue-800/40' },
-                      { key: 's2', label: 'S2 â€” Plancher cage BKAM', color: 'text-emerald-400', bg: 'bg-emerald-900/20 border-emerald-800/40' },
+                      { key: 'r2', label: 'R2 — Plafond cage BKAM', color: 'text-red-400', bg: 'bg-red-900/20 border-red-800/40' },
+                      { key: 'r1', label: 'R1 — Résistance 1%', color: 'text-amber-400', bg: 'bg-amber-900/20 border-amber-800/40' },
+                      { key: 'mid', label: 'MID — Cours actuel', color: 'text-white', bg: 'bg-navy-800 border-navy-600' },
+                      { key: 's1', label: 'S1 — Support 1%', color: 'text-blue-400', bg: 'bg-blue-900/20 border-blue-800/40' },
+                      { key: 's2', label: 'S2 — Plancher cage BKAM', color: 'text-emerald-400', bg: 'bg-emerald-900/20 border-emerald-800/40' },
                     ].map(level => (
                       <div key={level.key} className={`flex items-center justify-between px-2 py-1.5 rounded border text-[10px] ${level.bg}`}>
                         <span className="text-slate-400 truncate">{level.label}</span>
@@ -985,16 +985,16 @@ export default function MorningBriefing() {
                 </div>
               ))}
               <p className="text-[9px] text-slate-600 mt-3">
-                Niveaux pédagogiques â€” non exécutables · Pour toute opération : banque agréée BAM
+                Niveaux pédagogiques — non exécutables · Pour toute opération : banque agréée BAM
               </p>
             </div>
           </div>
 
-          {/* â”€â”€ Corporate insights â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* ── Corporate insights ────────────────────────────────────────── */}
           <div className="bg-navy-900 border border-navy-700 rounded-xl p-5">
             <div className="flex items-center gap-2 mb-4">
               <Building2 size={13} className="text-gold-500" />
-              <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Actions Prioritaires â€” Trésorerie Corporate</h3>
+              <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Actions Prioritaires — Trésorerie Corporate</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[
@@ -1002,21 +1002,21 @@ export default function MorningBriefing() {
                   priority: eurBand && eurBand.utilPct > 60 ? 'ÉLEVÉE' : eurBand && eurBand.utilPct < 40 ? 'FAIBLE' : 'MODÉRÉE',
                   priorityColor: eurBand && eurBand.utilPct > 60 ? 'text-red-400' : eurBand && eurBand.utilPct < 40 ? 'text-emerald-400' : 'text-amber-400',
                   icon: Shield,
-                  title: 'Contexte EUR â€” Flux Import/Export',
+                  title: 'Contexte EUR — Flux Import/Export',
                   body: eurBand
                     ? eurBand.utilPct > 60
-                      ? `EUR/MAD à ${eurBand.utilPct.toFixed(0)}% de la bande BKAM â€” dynamique d'appréciation EUR visible. Contexte à surveiller pour les entreprises ayant des flux en EUR. Consultez votre banque domiciliataire.`
+                      ? `EUR/MAD à ${eurBand.utilPct.toFixed(0)}% de la bande BKAM — dynamique d'appréciation EUR visible. Contexte à surveiller pour les entreprises ayant des flux en EUR. Consultez votre banque domiciliataire.`
                       : eurBand.utilPct < 40
-                      ? `EUR/MAD en zone basse (${eurBand.utilPct.toFixed(0)}%) â€” MAD en position relative favorable par rapport à l'EUR. Éclairage pédagogique : comprendre ce contexte aide à anticiper vos flux. Votre banque agréée peut vous accompagner.`
-                      : `EUR/MAD en zone neutre (${eurBand.utilPct.toFixed(0)}%) â€” stabilité relative du panier. Contexte propice pour comprendre et planifier vos flux de change EUR. Adressez-vous à votre banque pour toute opération.`
+                      ? `EUR/MAD en zone basse (${eurBand.utilPct.toFixed(0)}%) — MAD en position relative favorable par rapport à l'EUR. Éclairage pédagogique : comprendre ce contexte aide à anticiper vos flux. Votre banque agréée peut vous accompagner.`
+                      : `EUR/MAD en zone neutre (${eurBand.utilPct.toFixed(0)}%) — stabilité relative du panier. Contexte propice pour comprendre et planifier vos flux de change EUR. Adressez-vous à votre banque pour toute opération.`
                     : 'Données de bande non disponibles.',
                 },
                 {
                   priority: sentiment.bias === 'BEARISH' ? 'ÉLEVÉE' : sentiment.bias === 'BULLISH' ? 'FAVORABLE' : 'MODÉRÉE',
                   priorityColor: sentiment.bias === 'BEARISH' ? 'text-red-400' : sentiment.bias === 'BULLISH' ? 'text-emerald-400' : 'text-amber-400',
                   icon: TrendingUp,
-                  title: 'Dynamique MAD â€” Éclairage Pédagogique',
-                  body: `Sentiment composite ${sentiment.score}/100 â€” ${sentiment.label.toLowerCase()}. ${
+                  title: 'Dynamique MAD — Éclairage Pédagogique',
+                  body: `Sentiment composite ${sentiment.score}/100 — ${sentiment.label.toLowerCase()}. ${
                     sentiment.bias === 'BEARISH'
                       ? 'La pression sur le panier MAD mérite d\'être intégrée dans votre lecture des flux EUR/USD. À contextualiser avec votre banque domiciliataire.'
                       : sentiment.bias === 'BULLISH'
@@ -1030,7 +1030,7 @@ export default function MorningBriefing() {
                   icon: Calendar,
                   title: 'Prochain Événement Macro à Surveiller',
                   body: nextEvent
-                    ? `${nextEvent.titleFr} â€” J-${daysUntil(nextEvent.date)} (${new Date(nextEvent.date).toLocaleDateString('fr-MA', { day: 'numeric', month: 'long' })}). ${nextEvent.noteFr}`
+                    ? `${nextEvent.titleFr} — J-${daysUntil(nextEvent.date)} (${new Date(nextEvent.date).toLocaleDateString('fr-MA', { day: 'numeric', month: 'long' })}). ${nextEvent.noteFr}`
                     : 'Aucun événement majeur dans les 60 prochains jours.',
                 },
               ].map(item => (
@@ -1046,15 +1046,15 @@ export default function MorningBriefing() {
             </div>
           </div>
 
-          {/* â”€â”€ Funnel CTA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* ── Funnel CTA ───────────────────────────────────────────────── */}
           <FunnelCTA variant="compact" />
 
-          {/* â”€â”€ Upcoming events preview â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* ── Upcoming events preview ───────────────────────────────────── */}
           <div className="bg-navy-900 border border-navy-700 rounded-xl overflow-hidden">
             <div className="px-5 py-3 border-b border-navy-800 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Calendar size={13} className="text-gold-500" />
-                <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Prochains Événements â€” Impact MAD</h3>
+                <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Prochains Événements — Impact MAD</h3>
               </div>
               <button onClick={() => setTab('CALENDAR')} className="text-[10px] text-gold-400 hover:text-gold-300 transition-colors flex items-center gap-1">
                 Voir tout <ChevronRight size={10} />
@@ -1091,7 +1091,7 @@ export default function MorningBriefing() {
             </div>
           </div>
 
-          {/* â”€â”€ Newsletter signup strip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* ── Newsletter signup strip ──────────────────────────────────── */}
           {config.corsProxyUrl && (
             <div className="bg-navy-900 border border-navy-700 rounded-xl p-5">
               <div className="flex items-center gap-2 mb-3">
@@ -1106,7 +1106,7 @@ export default function MorningBriefing() {
             </div>
           )}
 
-          {/* â”€â”€ Full advisory CTA â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+          {/* ── Full advisory CTA ─────────────────────────────────────────── */}
           <FunnelCTA />
         </div>
       )}
@@ -1116,14 +1116,14 @@ export default function MorningBriefing() {
         <div className="space-y-4">
           <div className="bg-navy-900 border border-navy-700 rounded-xl overflow-hidden">
             <div className="px-5 py-3 border-b border-navy-800">
-              <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Calendrier Macro 2026 â€” Impact sur le Dirham MAD</h3>
-              <p className="text-[10px] text-slate-500 mt-0.5">FOMC · BCE · BKAM · NFP · IPC â€” Événements majeurs affectant EUR/MAD et USD/MAD</p>
+              <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Calendrier Macro 2026 — Impact sur le Dirham MAD</h3>
+              <p className="text-[10px] text-slate-500 mt-0.5">FOMC · BCE · BKAM · NFP · IPC — Événements majeurs affectant EUR/MAD et USD/MAD</p>
             </div>
 
             {/* Legend */}
             <div className="px-5 py-2.5 border-b border-navy-800 flex flex-wrap gap-3 text-[9px] font-bold">
               {[
-                { color: 'bg-gold-500/30 text-gold-300', label: 'BKAM â€” DIRECT MAD' },
+                { color: 'bg-gold-500/30 text-gold-300', label: 'BKAM — DIRECT MAD' },
                 { color: 'bg-red-500/20 text-red-300', label: 'HIGH IMPACT' },
                 { color: 'bg-amber-500/15 text-amber-300', label: 'MEDIUM IMPACT' },
               ].map(l => (
@@ -1173,7 +1173,7 @@ export default function MorningBriefing() {
           <div className="bg-amber-900/10 border border-amber-700/30 rounded-lg p-3">
             <p className="text-[10px] text-amber-400/90 flex items-start gap-1.5">
               <Info size={11} className="flex-shrink-0 mt-0.5" />
-              Calendrier indicatif 2026 â€” Dates susceptibles d'être révisées. Source: FRB/Fed, BCE, BKAM. Les dates NFP peuvent être décalées en cas de jours fériés américains. Pour les dates définitives, consultez federalreserve.gov, ecb.europa.eu, bkam.ma.
+              Calendrier indicatif 2026 — Dates susceptibles d'être révisées. Source: FRB/Fed, BCE, BKAM. Les dates NFP peuvent être décalées en cas de jours fériés américains. Pour les dates définitives, consultez federalreserve.gov, ecb.europa.eu, bkam.ma.
             </p>
           </div>
 
@@ -1194,7 +1194,7 @@ export default function MorningBriefing() {
             <div className="text-center py-20 space-y-4">
               <FileText size={32} className="text-slate-600 mx-auto" />
               <p className="text-slate-400 text-sm">Aucune analyse publiée disponible.</p>
-              <p className="text-slate-500 text-xs">Le rapport hebdomadaire est généré automatiquement à 09h00 Casablanca (Lundiâ€“Vendredi).</p>
+              <p className="text-slate-500 text-xs">Le rapport hebdomadaire est généré automatiquement à 09h00 Casablanca (Lundi–Vendredi).</p>
             </div>
           ) : (
             <>
@@ -1228,7 +1228,7 @@ export default function MorningBriefing() {
               {report.radarData?.length > 0 && (
                 <div className="bg-navy-900 border border-navy-700 rounded-xl overflow-hidden">
                   <div className="px-5 py-3 border-b border-navy-800">
-                    <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Radar Devises â€” Analyse Éditoriale</h3>
+                    <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">Radar Devises — Analyse Éditoriale</h3>
                   </div>
                   <div className="p-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
                     {report.radarData.map(r => (
@@ -1259,7 +1259,7 @@ export default function MorningBriefing() {
 
               <div className="text-[10px] text-slate-600 text-center">
                 Analyse générée par IA à partir des données BKAM, ECB et sources web Tavily.
-                À titre informatif uniquement â€” non contractuel â€” JAD2 Advisory.
+                À titre informatif uniquement — non contractuel — JAD2 Advisory.
               </div>
 
               {/* Analysis tab funnel */}
@@ -1282,7 +1282,7 @@ export default function MorningBriefing() {
       {/* ╔╔ Footer ╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔╔ */}
       <div className="bg-navy-950/50 border border-navy-800 rounded-lg p-4">
         <p className="text-[10px] text-slate-600 text-center leading-relaxed">
-          Morning Briefing JAD2FX â€” Données indicatives à titre éducatif uniquement · Cours BKAM / ECB Frankfurter · Non exécutables ·
+          Morning Briefing JAD2FX — Données indicatives à titre éducatif uniquement · Cours BKAM / ECB Frankfurter · Non exécutables ·
           Ce contenu ne constitue pas un conseil en investissement ni une recommandation de transaction de change ·
           Pour toute opération, adressez-vous à un établissement de crédit agréé par Bank Al-Maghrib ·{' '}
           <a href="https://jad2advisory.com" target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400">jad2advisory.com</a>

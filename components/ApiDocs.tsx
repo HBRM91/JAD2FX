@@ -2,7 +2,7 @@
 import { useState } from 'react';
 
 /**
- * P4.19 â€” Developer API documentation.
+ * P4.19 — Developer API documentation.
  * OpenAPI spec, code examples (curl, JS, Python), rate limits.
  */
 

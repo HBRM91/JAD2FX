@@ -16,12 +16,12 @@ import {
 import CurrencyFlag from './CurrencyFlag';
 import { BKAM_LINKS } from '../constants/bkamLinks';
 
-// â”€â”€â”€ Constants â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const BAND_PCT = 5.0;
 const BAND_BPS = 500;
 
-// â”€â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const fmt4 = (v: number) => v.toFixed(4);
 const fmtBps = (v: number) => (v >= 0 ? '+' : '') + v.toFixed(1) + ' bps';
@@ -40,10 +40,10 @@ function divBg(bps: number): string {
     : 'bg-red-950/20 border-red-800/40';
 }
 
-// â”€â”€â”€ Band gauge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Band gauge ───────────────────────────────────────────────────────────────
 
 function BandGauge({ bps, bandUtilPct }: { bps: number; bandUtilPct?: number }) {
-  // bandUtilPct: 0â€“100% position in ±5% band (pre-computed by Worker); fallback from bps
+  // bandUtilPct: 0–100% position in ±5% band (pre-computed by Worker); fallback from bps
   const pct   = bandUtilPct != null
     ? Math.min(Math.max(bandUtilPct, 1), 99)
     : Math.min(Math.max((bps / BAND_BPS) * 50 + 50, 1), 99);
@@ -60,13 +60,13 @@ function BandGauge({ bps, bandUtilPct }: { bps: number; bandUtilPct?: number }) 
         />
       </div>
       <div className="flex justify-between text-[9px] text-slate-600 mt-0.5 font-mono">
-        <span>âˆ’{BAND_PCT}%</span><span>Parité</span><span>+{BAND_PCT}%</span>
+        <span>−{BAND_PCT}%</span><span>Parité</span><span>+{BAND_PCT}%</span>
       </div>
     </div>
   );
 }
 
-// â”€â”€â”€ Stat card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Stat card ────────────────────────────────────────────────────────────────
 
 function StatCard({ label, value, sub, color = 'text-white' }: {
   label: string; value: string; sub?: string; color?: string;
@@ -80,7 +80,7 @@ function StatCard({ label, value, sub, color = 'text-white' }: {
   );
 }
 
-// â”€â”€â”€ CSV export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── CSV export ───────────────────────────────────────────────────────────────
 
 function exportCSV(row: FixingDayRow) {
   const lines: string[] = [
@@ -115,7 +115,7 @@ function exportCSV(row: FixingDayRow) {
   URL.revokeObjectURL(url);
 }
 
-// â”€â”€â”€ Custom divergence bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Custom divergence bar ────────────────────────────────────────────────────
 
 function DivBar(props: { x?: number; y?: number; width?: number; height?: number; value?: number }) {
   const { x = 0, y = 0, width = 0, height = 0, value = 0 } = props;
@@ -123,7 +123,7 @@ function DivBar(props: { x?: number; y?: number; width?: number; height?: number
   return <rect x={x} y={y} width={width} height={height} fill={color} rx={2} />;
 }
 
-// â”€â”€â”€ Main component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function BkamFixing() {
   const { config } = useAdmin();
@@ -144,7 +144,7 @@ export default function BkamFixing() {
     try {
       const data = await fetchFixingHistory(
         5,
-        proxyUrl,                                              // â† CRITICAL: pass proxy URL
+        proxyUrl,                                              // ← CRITICAL: pass proxy URL
         dateMode === 'specific' && selectedDate ? selectedDate : undefined,
       );
       if (dateMode === 'specific' && selectedDate && data.length === 0) {
@@ -184,7 +184,7 @@ export default function BkamFixing() {
   return (
     <div className={`space-y-5 ${isRTL ? 'text-right' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
 
-      {/* â”€â”€ Header â”€â”€ */}
+      {/* ── Header ── */}
       <div className="bg-navy-900 border border-navy-700 rounded-2xl overflow-hidden">
         <div className="h-0.5 bg-gradient-to-r from-gold-700 via-gold-400 to-gold-700" />
         <div className="px-6 py-5">
@@ -192,7 +192,7 @@ export default function BkamFixing() {
             <div>
               <h2 className="text-xl font-bold text-white flex items-center gap-2 uppercase tracking-widest">
                 <Database size={18} className="text-gold-400" />
-                Fixing Officiel BKAM â€” Parité MAD
+                Fixing Officiel BKAM — Parité MAD
               </h2>
               <p className="text-slate-400 text-sm mt-1">
                 {isOfficial
@@ -203,7 +203,7 @@ export default function BkamFixing() {
                 <div className="flex items-center gap-1.5 mt-1.5">
                   <CheckCircle size={11} className="text-emerald-400" />
                   <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-wide">
-                    BKAM CoursVirement Officiel â€” Données authentiques
+                    BKAM CoursVirement Officiel — Données authentiques
                   </span>
                 </div>
               )}
@@ -226,7 +226,7 @@ export default function BkamFixing() {
                     onClick={() => { setSelectedDate(''); setDateMode('recent'); }}
                     className="text-slate-500 hover:text-white text-xs ml-1"
                   >
-                    âœ•
+                    ✕
                   </button>
                 )}
               </div>
@@ -262,20 +262,20 @@ export default function BkamFixing() {
                 ? <>Taux de change virements (CoursVirement) publiés par Bank Al-Maghrib à 16h15. Parité panier&nbsp;:
                     <span className="font-mono text-gold-600 mx-1">USD/MAD = K/(w<sub>EUR</sub>·EUR/USD<sub>BCE</sub> + w<sub>USD</sub>)</span>
                     avec K=10,49 · w<sub>EUR</sub>=0,60 · w<sub>USD</sub>=0,40.
-                    Dérive = <span className="font-mono text-gold-600 mx-1">(Fixing<sub>BKAM</sub>âˆ’Parité)/Parité × 10 000 pb</span>.
-                    Art.&nbsp;3, Circ.&nbsp;LC/BKAM/2018/2 â€” non contractuel.</>
-                : 'Aucun proxy configuré â€” données BCE/Frankfurter utilisées comme proxy indicatif. Configurez un proxy CORS dans Admin pour accéder aux fixing officiels BKAM.'}
+                    Dérive = <span className="font-mono text-gold-600 mx-1">(Fixing<sub>BKAM</sub>−Parité)/Parité × 10 000 pb</span>.
+                    Art.&nbsp;3, Circ.&nbsp;LC/BKAM/2018/2 — non contractuel.</>
+                : 'Aucun proxy configuré — données BCE/Frankfurter utilisées comme proxy indicatif. Configurez un proxy CORS dans Admin pour accéder aux fixing officiels BKAM.'}
               {' '}
               <a href={BKAM_LINKS.fixingTransfer}
                 target="_blank" rel="noopener noreferrer" className="text-gold-600 hover:text-gold-400">
-                Cours officiels BKAM â†—
+                Cours officiels BKAM ↗
               </a>
             </p>
           </div>
         </div>
       </div>
 
-      {/* â”€â”€ Loading â”€â”€ */}
+      {/* ── Loading ── */}
       {loading && (
         <div className="flex flex-col items-center justify-center py-16 gap-3">
           <RefreshCw size={28} className="text-gold-500 animate-spin" />
@@ -283,7 +283,7 @@ export default function BkamFixing() {
         </div>
       )}
 
-      {/* â”€â”€ Error â”€â”€ */}
+      {/* ── Error ── */}
       {error && !loading && (
         <div className="bg-red-950/20 border border-red-800/40 rounded-xl p-4 flex items-start gap-3">
           <AlertTriangle size={16} className="text-red-400 mt-0.5 flex-shrink-0" />
@@ -294,10 +294,10 @@ export default function BkamFixing() {
         </div>
       )}
 
-      {/* â”€â”€ Data â”€â”€ */}
+      {/* ── Data ── */}
       {!loading && !error && latest && (
         <>
-          {/* â”€â”€ Latest snapshot â”€â”€ */}
+          {/* ── Latest snapshot ── */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-[11px] font-bold text-white uppercase tracking-widest flex items-center gap-2">
@@ -319,7 +319,7 @@ export default function BkamFixing() {
               <StatCard
                 label={isOfficial ? 'EUR/MAD Fixing BKAM' : 'EUR/MAD (ECB Proxy)'}
                 value={fmt4(latest.eurMad_ecb)}
-                sub={isOfficial ? '▸ Cours officiel' : 'â‰ˆ Proxy indicatif'}
+                sub={isOfficial ? '▸ Cours officiel' : '≈ Proxy indicatif'}
                 color="text-white"
               />
               <StatCard label="EUR/MAD Parité Panier" value={fmt4(latest.eurMad_basket)} sub="K/(0.60×EUR/USD+0.40)" color="text-slate-400" />
@@ -332,7 +332,7 @@ export default function BkamFixing() {
               <StatCard
                 label={isOfficial ? 'USD/MAD Fixing BKAM' : 'USD/MAD (ECB Proxy)'}
                 value={fmt4(latest.usdMad_ecb)}
-                sub={isOfficial ? '▸ Cours officiel' : 'â‰ˆ Proxy indicatif'}
+                sub={isOfficial ? '▸ Cours officiel' : '≈ Proxy indicatif'}
                 color="text-white"
               />
               <StatCard
@@ -343,7 +343,7 @@ export default function BkamFixing() {
             </div>
           </div>
 
-          {/* â”€â”€ Divergence alert â”€â”€ */}
+          {/* ── Divergence alert ── */}
           {(Math.abs(latest.eurMad_div_bps) > 100 || Math.abs(latest.usdMad_div_bps) > 100) && (
             <div className={`border rounded-xl p-4 flex items-start gap-3 ${divBg(Math.max(Math.abs(latest.eurMad_div_bps), Math.abs(latest.usdMad_div_bps)))}`}>
               <AlertTriangle size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
@@ -358,18 +358,18 @@ export default function BkamFixing() {
             </div>
           )}
 
-          {/* â”€â”€ Full rate table â”€â”€ */}
+          {/* ── Full rate table ── */}
           <div className="bg-navy-900 border border-navy-700 rounded-2xl overflow-hidden">
             <div className="px-5 py-3 border-b border-navy-800 flex items-center justify-between">
               <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">
                 {isOfficial
-                  ? `Cours Officiels BKAM â€” ${latest.rawBkamRates?.length ?? 0} Devises · ${latest.date}`
-                  : 'Cours Indicatifs (ECB Proxy) â€” 24 Devises'}
+                  ? `Cours Officiels BKAM — ${latest.rawBkamRates?.length ?? 0} Devises · ${latest.date}`
+                  : 'Cours Indicatifs (ECB Proxy) — 24 Devises'}
               </h3>
               <div className="flex items-center gap-2">
                 {isOfficial && (
                   <span className="text-[9px] font-mono text-emerald-400 bg-emerald-950/30 border border-emerald-800/40 px-2 py-0.5 rounded">
-                    âœ“ CoursVirement BKAM
+                    ✓ CoursVirement BKAM
                   </span>
                 )}
                 <button onClick={() => exportCSV(latest)}
@@ -432,17 +432,17 @@ export default function BkamFixing() {
                           </span>
                         </td>
                         <td className="py-2.5 px-3 text-right font-mono text-[12px] text-slate-500 tabular-nums">
-                          {basketRate ? fmt4(basketRate) : 'â€”'}
+                          {basketRate ? fmt4(basketRate) : '—'}
                         </td>
                         <td className="py-2.5 px-3 text-right">
                           {divBps !== null ? (
                             <span className={`font-mono text-[11px] font-bold tabular-nums ${divColor(divBps)}`}>
                               {fmtBps(divBps)}
                             </span>
-                          ) : <span className="text-slate-700 text-[10px]">â€”</span>}
+                          ) : <span className="text-slate-700 text-[10px]">—</span>}
                         </td>
                         <td className="py-2.5 px-4 w-32">
-                          {divBps !== null ? <BandGauge bps={divBps} bandUtilPct={bandUtil ?? undefined} /> : <span className="text-slate-700 text-[9px]">â€”</span>}
+                          {divBps !== null ? <BandGauge bps={divBps} bandUtilPct={bandUtil ?? undefined} /> : <span className="text-slate-700 text-[9px]">—</span>}
                         </td>
                       </tr>
                     );
@@ -473,9 +473,9 @@ export default function BkamFixing() {
                             {fmt4(rate)}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 text-right text-slate-700 text-[10px]">â€”</td>
-                        <td className="py-2.5 px-3 text-right text-slate-700 text-[10px]">â€”</td>
-                        <td className="py-2.5 px-4 text-slate-700 text-[9px]">â€”</td>
+                        <td className="py-2.5 px-3 text-right text-slate-700 text-[10px]">—</td>
+                        <td className="py-2.5 px-3 text-right text-slate-700 text-[10px]">—</td>
+                        <td className="py-2.5 px-4 text-slate-700 text-[9px]">—</td>
                       </tr>
                     );
                   })}
@@ -492,12 +492,12 @@ export default function BkamFixing() {
               <a href={BKAM_LINKS.fixingTransfer}
                 target="_blank" rel="noopener noreferrer"
                 className="text-[9px] text-gold-600 hover:text-gold-400 ml-auto">
-                Cours officiels BKAM â†—
+                Cours officiels BKAM ↗
               </a>
             </div>
           </div>
 
-          {/* â”€â”€ Trend chart (B4.2 collapsed by default) â”€â”€ */}
+          {/* ── Trend chart (B4.2 collapsed by default) ── */}
           {rows.length >= 2 && dateMode === 'recent' && (
             <div className="bg-navy-900 border border-navy-700 rounded-2xl p-5 space-y-4">
               <button
@@ -506,7 +506,7 @@ export default function BkamFixing() {
                 aria-expanded={showTrend}
               >
                 <h3 className="text-[11px] font-bold text-white uppercase tracking-widest">
-                  Tendance 5 Jours â€” EUR/MAD & USD/MAD vs Parité Panier
+                  Tendance 5 Jours — EUR/MAD & USD/MAD vs Parité Panier
                 </h3>
                 <ChevronDown size={14} className={`text-slate-400 transition-transform ${showTrend ? 'rotate-180' : ''}`} />
               </button>
@@ -537,7 +537,7 @@ export default function BkamFixing() {
               </div>
 
               <h3 className="text-[11px] font-bold text-white uppercase tracking-widest pt-2">
-                Dérive Fixing vs Panier (bps) â€” {isOfficial ? 'Données BKAM Officielles' : 'Proxy ECB'}
+                Dérive Fixing vs Panier (bps) — {isOfficial ? 'Données BKAM Officielles' : 'Proxy ECB'}
               </h3>
               <div className="h-40">
                 <ResponsiveContainer width="100%" height="100%">
@@ -562,7 +562,7 @@ export default function BkamFixing() {
                 </ResponsiveContainer>
               </div>
               <p className="text-[9px] text-slate-600">
-                Dérive = (Fixing {isOfficial ? 'BKAM' : 'ECB'} âˆ’ Parité panier) / Parité panier × 10 000 bps ·
+                Dérive = (Fixing {isOfficial ? 'BKAM' : 'ECB'} − Parité panier) / Parité panier × 10 000 bps ·
                 K=10,49 · Panier 60% EUR / 40% USD · Bande réglementaire ±{BAND_PCT}% (500 bps)
               </p>
                 </>
@@ -572,11 +572,11 @@ export default function BkamFixing() {
         </>
       )}
 
-      {/* â”€â”€ Legal â”€â”€ */}
+      {/* ── Legal ── */}
       <p className="text-[9px] text-slate-700 leading-relaxed text-center">
         Les taux présentés sur cette page sont {isOfficial ? 'les cours officiels CoursVirement publiés par Bank Al-Maghrib' : 'des estimations indicatives basées sur les données BCE'}.
         Ils ne constituent pas des prix de transaction. Pour toute opération de change, adressez-vous à un établissement de crédit agréé par Bank Al-Maghrib (Art. 3, LC/BKAM/2018/2).
-        JAD2 Advisory â€” non établissement financier (Loi n° 43-12).
+        JAD2 Advisory — non établissement financier (Loi n° 43-12).
       </p>
     </div>
   );

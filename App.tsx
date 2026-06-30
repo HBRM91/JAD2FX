@@ -3,7 +3,7 @@ import { ViewState, LiveRate, LivePriceEntry } from './types';
 import { DEFAULT_BASKET_CONFIG, MARKET_NEWS, DISCLAIMER_TEXT, DISCLAIMER_SHORT, BKAM_CURRENCIES } from './constants';
 import { fetchAllMadRates } from './services/fxRates';
 
-// P0.14 â€” Code-split all route components for fast initial load.
+// P0.14 — Code-split all route components for fast initial load.
 // Only shell components (nav, ticker, modals, charts used on home) stay eager.
 import RatesTicker        from './components/RatesTicker';
 import FloatingChat       from './components/FloatingChat';
@@ -44,12 +44,12 @@ const BkamParityMatrix      = lazy(() => import('./components/BkamParityMatrix')
 const SectorLanding         = lazy(() => import('./components/SectorLanding'));
 const FxCrossMatrix         = lazy(() => import('./components/FxCrossMatrix'));
 const MarketRadar           = lazy(() => import('./components/MarketRadar'));
-// P3 â€” Funnel tools
+// P3 — Funnel tools
 const PmeDiagnostic         = lazy(() => import('./components/PmeDiagnostic'));
 const ImportCostCalc        = lazy(() => import('./components/ImportCostCalc'));
 const QuarterlyHedge        = lazy(() => import('./components/QuarterlyHedge'));
 const Watchlist             = lazy(() => import('./components/Watchlist'));
-// P4 â€” Content authority
+// P4 — Content authority
 const Glossary              = lazy(() => import('./components/Glossary'));
 const Blog                  = lazy(() => import('./components/Blog'));
 const BasketExplainer       = lazy(() => import('./components/BasketExplainer'));
@@ -62,7 +62,7 @@ const Podcast               = lazy(() => import('./components/Podcast'));
 const QuarterlyOutlook      = lazy(() => import('./components/QuarterlyOutlook'));
 import ThemeToggle from './components/ThemeToggle';
 import BottomNav from './components/BottomNav';
-// P3 â€” Funnel + social proof
+// P3 — Funnel + social proof
 const ServicesPage          = lazy(() => import('./components/ServicesPage'));
 const AuditLanding          = lazy(() => import('./components/AuditLanding'));
 const AuditLog              = lazy(() => import('./components/AuditLog'));
@@ -94,13 +94,13 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
-// â”€â”€â”€ Nav data is in navConfig.tsx so other components (CommandPalette) can reuse it.
+// ─── Nav data is in navConfig.tsx so other components (CommandPalette) can reuse it.
 import { NAV_GROUPS as _NAV_GROUPS, type NavGroup } from './navConfig';
 
 const NAV_GROUPS: NavGroup[] = _NAV_GROUPS as unknown as { id: string; label: string; items: { label: string; view: ViewState; icon: React.ElementType; desc: string }[] }[];
 void NAV_GROUPS; // referenced for completeness; command palette uses _NAV_GROUPS directly
 
-// â”€â”€â”€ Expandable news card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Expandable news card ─────────────────────────────────────────────────────
 
 function NewsCard({ news }: { news: typeof MARKET_NEWS[0] }) {
   const [expanded, setExpanded] = React.useState(false);
@@ -131,9 +131,9 @@ function NewsCard({ news }: { news: typeof MARKET_NEWS[0] }) {
   );
 }
 
-// â”€â”€â”€ Inner app â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Inner app ─────────────────────────────────────────────────────────────────
 
-// P0.14 â€” Skeleton shown while a route chunk is loading.
+// P0.14 — Skeleton shown while a route chunk is loading.
 function RouteFallback({ name }: { name?: string } = {}) {
   const { t } = useI18n();
   return (
@@ -163,16 +163,16 @@ function AppInner() {
   const [tickerRates, setTickerRates] = useState<LiveRate[]>([]);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // P4.16 â€” Dynamic per-view OG image & title (sets document head for SEO/sharing)
+  // P4.16 — Dynamic per-view OG image & title (sets document head for SEO/sharing)
   useEffect(() => {
     const titles: Partial<Record<ViewState, string>> = {
-      HOME: 'JAD2FX â€” Conseil FX & Stratégie Maroc',
+      HOME: 'JAD2FX — Conseil FX & Stratégie Maroc',
       DASHBOARD: 'Tableau de Bord FX | JAD2FX',
       FORWARDS: 'Forward Calculator & CIP | JAD2FX',
       FIXING: 'Fixing Officiel BKAM | JAD2FX',
       VOL_SURFACE: 'Surface de Volatilité G10-MAD | JAD2FX',
       BANK_RATES: 'Comparatif 5 Banques Marocaines | JAD2FX',
-      COCKPIT: 'Cockpit FX â€” Desk de Trading | JAD2FX',
+      COCKPIT: 'Cockpit FX — Desk de Trading | JAD2FX',
       GLOSSARY: 'Glossaire FX & Marché Marocain | JAD2FX',
       BLOG: 'Recherche & Analyses FX | JAD2FX',
       REPORT: 'Morning Briefing FX | JAD2FX',
@@ -201,7 +201,7 @@ function AppInner() {
       QUARTERLY_OUTLOOK: 'Perspectives trimestrielles · Phosphate · Tourisme · MRE',
       AUDIT_LOG: 'Traçabilité session · Export CSV',
     };
-    const t = titles[view] ?? 'JAD2FX â€” Taux de Change MAD | Bank Al-Maghrib';
+    const t = titles[view] ?? 'JAD2FX — Taux de Change MAD | Bank Al-Maghrib';
     const s = subs[view] ?? 'Terminal pédagogique · Bank Al-Maghrib';
     document.title = t;
     const setMeta = (prop: string, val: string) => {
@@ -220,7 +220,7 @@ function AppInner() {
   const { t, locale, setLocale, isRTL } = useI18n();
   const navDropdownRef = useRef<HTMLDivElement>(null);
 
-  // B1.3 â€” Deep link from ?view=... on mount + popstate for back/forward.
+  // B1.3 — Deep link from ?view=... on mount + popstate for back/forward.
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const apply = () => {
@@ -247,7 +247,7 @@ function AppInner() {
     };
   }, [contactDrawerOpen]);
 
-  // P2.3 + P2.12 â€” Global keyboard shortcuts: Cmd+K (palette), ? (cheatsheet), h, etc.
+  // P2.3 + P2.12 — Global keyboard shortcuts: Cmd+K (palette), ? (cheatsheet), h, etc.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const tag = (e.target as HTMLElement)?.tagName;
@@ -332,10 +332,10 @@ function AppInner() {
   const LOCALE_OPTIONS: { code: Locale; label: string }[] = [
     { code: 'fr', label: 'FR' },
     { code: 'en', label: 'EN' },
-    { code: 'ar', label: 'Ø¹Ø±Ø¨ÙŠ' },
+    { code: 'ar', label: 'عربي' },
   ];
 
-  // â”€â”€ Page title chip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Page title chip ───────────────────────────────────────────────────────
   const allItems = NAV_GROUPS.flatMap(g => g.items);
   const activeItem = allItems.find(i => i.view === view);
 
@@ -365,7 +365,7 @@ function AppInner() {
             <button
               className="flex-shrink-0 focus:outline-none"
               onClick={() => navTo('HOME')}
-              aria-label="JAD2FX â€” Accueil"
+              aria-label="JAD2FX — Accueil"
             >
               <LogoJad2Fx height={34} dark={true} showSub={false} />
             </button>
@@ -454,7 +454,7 @@ function AppInner() {
                 ))}
               </div>
 
-              {/* P3.22 â€” external Advisory link removed from top nav (was bypassing funnel).
+              {/* P3.22 — external Advisory link removed from top nav (was bypassing funnel).
                   In-domain primary CTAs: Audit Gratuit + Morning Briefing. */}
               <div className="hidden md:flex items-center gap-2">
                 <ThemeToggle />
@@ -465,7 +465,7 @@ function AppInner() {
                 >
                   <Search size={11} />
                   <span>{t('app.searchPlaceholder')}</span>
-                  <kbd className="hidden lg:flex items-center gap-0.5 ml-1 px-1 py-0.5 text-[9px] font-mono text-slate-500 bg-navy-800 border border-navy-700 rounded">âŒ˜K</kbd>
+                  <kbd className="hidden lg:flex items-center gap-0.5 ml-1 px-1 py-0.5 text-[9px] font-mono text-slate-500 bg-navy-800 border border-navy-700 rounded">⌘K</kbd>
                 </button>
                 <button
                   onClick={() => setContactDrawerOpen(true)}
@@ -588,12 +588,12 @@ function AppInner() {
         return (
           <div className="sticky top-14 z-40 border-b border-gold-600/20 bg-gold-500/5 px-4 py-1 text-center">
             <p className="text-[9px] text-gold-600/80 font-medium">
-              Taux JAD2FX strictement indicatifs â€” non utilisables pour des opérations de change
+              Taux JAD2FX strictement indicatifs — non utilisables pour des opérations de change
               (BKAM Méthodologie 2024, §II) · Pour un cours ferme : votre banque domiciliataire agréée BAM
             </p>
             {isSimView && (
               <p className="lg:hidden text-[9px] font-bold text-amber-300 uppercase tracking-widest mt-0.5">
-                Mode Simulateur â€” Résultats Non-Exécutables · Usage Pédagogique Uniquement
+                Mode Simulateur — Résultats Non-Exécutables · Usage Pédagogique Uniquement
               </p>
             )}
           </div>
@@ -632,11 +632,11 @@ function AppInner() {
       <main id="main-content" role="main" className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-6 view-enter">
         <Suspense fallback={<RouteFallback />}>
 
-        {/* â”€â”€â”€ HOME â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ─── HOME ──────────────────────────────────────────────────────── */}
         {view === 'HOME' && (
           <div className="space-y-6">
 
-            {/* â”€â”€ Persona split hero (Task 2.1) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            {/* ── Persona split hero (Task 2.1) ───────────────────────────── */}
             <div className="grid grid-cols-1 gap-4">
               {/* Corporate MAD persona */}
               <div className="bg-navy-900 border border-gold-700/30 rounded-2xl p-6 flex flex-col gap-4 hover:border-gold-600/50 transition-colors">
@@ -650,7 +650,7 @@ function AppInner() {
                     Maîtrisez votre exposition de change MAD
                   </h2>
                   <p className="text-sm text-slate-400 leading-relaxed">
-                    Forward, swap, conformité OC 01/2024 â€” outils pédagogiques, Morning Briefing
+                    Forward, swap, conformité OC 01/2024 — outils pédagogiques, Morning Briefing
                     quotidien et accompagnement stratégique pour les trésoriers marocains.
                   </p>
                 </div>
@@ -670,10 +670,10 @@ function AppInner() {
                 </div>
               </div>
 
-              {/* P2.19 â€” Removed: European Fintech persona per plan (single PME hero) */}
+              {/* P2.19 — Removed: European Fintech persona per plan (single PME hero) */}
             </div>
 
-            {/* â”€â”€ B4.4 â€” Dashboard summary: top 4 watched rates â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            {/* ── B4.4 — Dashboard summary: top 4 watched rates ─────────────── */}
             {tickerRates.length > 0 && (
               <div className="bg-navy-900 border border-navy-700 rounded-2xl p-4">
                 <div className="flex items-center justify-between mb-2.5">
@@ -702,7 +702,7 @@ function AppInner() {
                         <p className="text-[9px] text-slate-500 uppercase tracking-wider">{r.pair}</p>
                         <p className="text-sm font-bold text-white font-mono mt-0.5">{r.mid.toFixed(4)}</p>
                         <p className={`text-[9px] font-mono mt-0.5 ${chgColor}`}>
-                          {isUp ? '▲' : isDn ? '▼' : 'â€”'} {Math.abs(chg).toFixed(2)}%
+                          {isUp ? '▲' : isDn ? '▼' : '—'} {Math.abs(chg).toFixed(2)}%
                         </p>
                       </button>
                     );
@@ -711,7 +711,7 @@ function AppInner() {
               </div>
             )}
 
-            {/* â”€â”€ Drift alert chip (Task 2.3) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            {/* ── Drift alert chip (Task 2.3) ──────────────────────────────── */}
             {config.corsProxyUrl && (
               <DriftAlertChip
                 proxyUrl={config.corsProxyUrl}
@@ -719,7 +719,7 @@ function AppInner() {
               />
             )}
 
-            {/* â”€â”€ Trust bar (Task 2.2) — P2-1: now clickable sector tiles â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            {/* ── Trust bar (Task 2.2) — P2-1: now clickable sector tiles ──────── */}
             <div className="bg-navy-900/60 border border-navy-800 rounded-xl px-5 py-3">
               <p className="text-[9px] text-slate-600 uppercase tracking-wider text-center mb-2.5 font-bold">
                 Accompagne des entreprises dans leur gestion de change MAD
@@ -744,7 +744,7 @@ function AppInner() {
               </div>
             </div>
 
-            {/* â”€â”€ P3 Funnel: Diagnostic FX PME (highest-intent tool) â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            {/* ── P3 Funnel: Diagnostic FX PME (highest-intent tool) ───────── */}
             <div className="bg-gradient-to-br from-navy-900 to-navy-950 border border-gold-700/30 rounded-2xl p-5 sm:p-6">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-center">
                 <div className="lg:col-span-1 space-y-2">
@@ -771,7 +771,7 @@ function AppInner() {
               </div>
             </div>
 
-            {/* â”€â”€ Original hero banner (now secondary / data terminal showcase) */}
+            {/* ── Original hero banner (now secondary / data terminal showcase) */}
             <div className="relative rounded-2xl overflow-hidden border border-navy-700 min-h-[280px] sm:min-h-[340px]" style={{ background: 'linear-gradient(135deg, #040C1C 0%, #081628 50%, #0E2336 100%)' }}>
               {/* Subtle gold radial accent top-right */}
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_75%_15%,rgba(212,175,55,0.12),transparent_55%)]" />
@@ -797,7 +797,7 @@ function AppInner() {
 
                 {/* Subtitle */}
                 <p className="text-slate-300 text-sm leading-relaxed mb-8">
-                  Données indicatives sur {BKAM_CURRENCIES.length} devises MAD â€” 14 cotées BKAM + {BKAM_CURRENCIES.length - 14} dérivées. Simulateur pédagogique de forwards & swaps. Référentiel réglementaire Office des Changes.
+                  Données indicatives sur {BKAM_CURRENCIES.length} devises MAD — 14 cotées BKAM + {BKAM_CURRENCIES.length - 14} dérivées. Simulateur pédagogique de forwards & swaps. Référentiel réglementaire Office des Changes.
                 </p>
 
                 {/* CTA buttons */}
@@ -823,7 +823,7 @@ function AppInner() {
                 </div>
               </div>
 
-              {/* Quick-access tool tiles â€” bottom strip inside hero */}
+              {/* Quick-access tool tiles — bottom strip inside hero */}
               <div className="relative px-7 sm:px-12 pb-7">
                 <div className="border-t border-navy-700/50 pt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
                   {[
@@ -849,10 +849,10 @@ function AppInner() {
               </div>
             </div>
 
-            {/* â”€â”€ Market sessions clock â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            {/* ── Market sessions clock ────────────────────────────────────── */}
             <MarketSessionsClock />
 
-            {/* â”€â”€ 2-col: news + sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            {/* ── 2-col: news + sidebar ───────────────────────────────────── */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
 
               {/* News feed */}
@@ -889,7 +889,7 @@ function AppInner() {
                     rel="noopener noreferrer"
                     className="block w-full py-2.5 bg-gold-500 text-navy-950 text-sm font-bold rounded-lg hover:bg-gold-400 transition-colors"
                   >
-                    jad2advisory.com â†’
+                    jad2advisory.com →
                   </a>
                   <p className="text-[11px] text-slate-500 leading-relaxed">
                     Conseil stratégique · Formation · Accompagnement réglementaire OC
@@ -927,22 +927,22 @@ function AppInner() {
               </div>
             </div>
 
-            {/* Market Radar â€” full width */}
+            {/* Market Radar — full width */}
             <MarketRadar tickerRates={tickerRates} />
 
-            {/* P2.4 â€” Watchlist (persistent, drag-to-reorder) */}
+            {/* P2.4 — Watchlist (persistent, drag-to-reorder) */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
               <Watchlist rates={tickerRates} isRTL={isRTL} />
               <NewsletterSignup proxyUrl={config.corsProxyUrl} source="home_watchlist_card" variant="card" />
             </div>
 
-            {/* P3.8 â€” Social proof: Stats + Testimonials + LogoWall */}
+            {/* P3.8 — Social proof: Stats + Testimonials + LogoWall */}
             <SocialProofModule />
 
-            {/* P3.5 â€” Contextual CTA (engagement-based) */}
+            {/* P3.5 — Contextual CTA (engagement-based) */}
             <ContextualCTA variant="banner" pageKey="home" navTo={navTo} />
 
-            {/* â”€â”€ Advisory CTA strip â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+            {/* ── Advisory CTA strip ───────────────────────────────────── */}
             <div className="bg-navy-900 border border-navy-700 rounded-2xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <p className="text-base font-bold text-white mb-1">Formation & Conseil en Gestion du Risque de Change</p>
@@ -972,7 +972,7 @@ function AppInner() {
           </div>
         )}
 
-        {/* â”€â”€â”€ DASHBOARD â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ─── DASHBOARD ─────────────────────────────────────────────────── */}
         {view === 'DASHBOARD' && (
           <div className="space-y-6">
             <FxDashboard />
@@ -981,7 +981,7 @@ function AppInner() {
           </div>
         )}
 
-        {/* â”€â”€â”€ Other views â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ─── Other views ───────────────────────────────────────────────── */}
         {view === 'ANALYSIS'    && <MarketAnalysis />}
         {view === 'FIXING'      && <BkamFixing />}
         {view === 'BILLETS'     && <BilletsPage />}
@@ -1055,7 +1055,7 @@ function AppInner() {
           </div>
         )}
 
-        {/* â”€â”€â”€ ABOUT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
+        {/* ─── ABOUT ─────────────────────────────────────────────────────── */}
         {view === 'ABOUT' && (
           <div className="max-w-3xl mx-auto space-y-5">
             {/* Casablanca hero image */}
@@ -1081,7 +1081,7 @@ function AppInner() {
                   comprendre les dynamiques du marché des changes MAD et la réglementation de l'Office des Changes.
                 </p>
                 <p>
-                  JAD2FX est un outil de référence et de simulation pédagogique â€” il ne constitue pas un conseil en investissement.
+                  JAD2FX est un outil de référence et de simulation pédagogique — il ne constitue pas un conseil en investissement.
                   Pour toute transaction ou conseil personnalisé, consultez un{' '}
                   <strong className="text-slate-200">établissement de crédit agréé par Bank Al-Maghrib</strong>.
                 </p>
@@ -1115,7 +1115,7 @@ function AppInner() {
                 <div className="mt-4 p-3 bg-amber-500/5 border border-amber-500/20 rounded-lg">
                   <p className="text-[11px] text-amber-400/90">
                     ℹï¸ <strong className="text-amber-300">JAD2 Advisory fournit exclusivement</strong>{' '}
-                    conseil stratégique et formation en gestion du risque de change â€” sans exécution de transactions de change ni conseil en investissement.
+                    conseil stratégique et formation en gestion du risque de change — sans exécution de transactions de change ni conseil en investissement.
                     Pour vos opérations, adressez-vous à un établissement bancaire agréé.
                   </p>
                 </div>
@@ -1188,7 +1188,7 @@ function AppInner() {
               onClick={() => setContactDrawerOpen(true)}
               className="flex-shrink-0 px-5 py-2 bg-gold-500 text-navy-950 text-sm font-bold rounded hover:bg-gold-400 transition-colors"
             >
-              Parler à un expert â†’
+              Parler à un expert →
             </button>
           </div>
         </div>
@@ -1196,7 +1196,7 @@ function AppInner() {
         {/* Legal + content links */}
         <div className="py-6">
           <div className="max-w-[1440px] mx-auto px-4 sm:px-6">
-            {/* P4 â€” Footer resource links (SEO internal linking) */}
+            {/* P4 — Footer resource links (SEO internal linking) */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-6 pb-6 border-b border-navy-800">
               <div className="col-span-2 sm:col-span-3 md:col-span-2">
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold mb-2">Ressources</p>
@@ -1254,7 +1254,7 @@ function AppInner() {
               Market data from Yahoo Finance for educational purposes only. Not for commercial trading.
             </p>
             <p className="text-[10px] mt-2 text-slate-600 leading-relaxed max-w-3xl mx-auto">
-              JAD2 Advisory â€” Cabinet de conseil en management · Non établissement financier agréé BAM/AMMC ·
+              JAD2 Advisory — Cabinet de conseil en management · Non établissement financier agréé BAM/AMMC ·
               Loi n° 43-12 &amp; Dahir n° 1-13-21 · Les taux JAD2FX ne peuvent être utilisés comme
               référence d'exécution conformément à la Méthodologie BKAM 2024 (§II) ·
               Données personnelles : Loi marocaine 09-08 · CNDP Déclaration en cours
@@ -1267,7 +1267,7 @@ function AppInner() {
   );
 }
 
-// â”€â”€â”€ Root export â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Root export ──────────────────────────────────────────────────────────────
 
 export default function App() {
   return (

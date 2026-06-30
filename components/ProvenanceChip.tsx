@@ -12,36 +12,36 @@ interface ProvenanceMeta {
 
 const PROVENANCE: Record<string, ProvenanceMeta> = {
   BKAM_OFFICIAL: {
-    source: 'Bank Al-Maghrib â€” Cours de change officiels',
+    source: 'Bank Al-Maghrib — Cours de change officiels',
     publishedAt: '12:30 / 16:15 Casablanca',
-    methodology: 'Doc 1 §I.1.a â€” Moyenne pondérée des transactions interbancaires',
+    methodology: 'Doc 1 §I.1.a — Moyenne pondérée des transactions interbancaires',
     url: BKAM_LINKS.mainSite,
   },
   ECB_PROXY: {
     source: 'ECB / Frankfurter (fallback)',
     publishedAt: '~16:00 CET quotidien',
-    methodology: 'Taux de change BCE â€” proxy pour le calcul du panier',
+    methodology: 'Taux de change BCE — proxy pour le calcul du panier',
     url: 'https://www.frankfurter.app',
   },
   YAHOO_INTRADAY: {
-    source: 'Yahoo Finance â€” 1h intraday',
+    source: 'Yahoo Finance — 1h intraday',
     publishedAt: 'Continu pendant les heures de marché',
     methodology: 'Ticks 1h agrégés depuis le carnet d\'ordres Yahoo',
   },
   END_OF_DAY: {
-    source: 'JAD2FX â€” Données fin de journée uniquement',
+    source: 'JAD2FX — Données fin de journée uniquement',
     publishedAt: '16:15 Casablanca',
-    methodology: 'Taux de référence (mid) du jour â€” pas d\'historique intraday disponible',
+    methodology: 'Taux de référence (mid) du jour — pas d\'historique intraday disponible',
   },
   CALCULATED: {
-    source: 'JAD2FX â€” Calcul interne',
+    source: 'JAD2FX — Calcul interne',
     publishedAt: 'Maintenant',
     methodology: 'Mid calculé à partir de la formule panier BKAM et des taux ECB',
   },
 };
 
 /**
- * P1.21 â€” Data Provenance Chip
+ * P1.21 — Data Provenance Chip
  * Click any rate → see its source, publication time, and methodology.
  */
 export default function ProvenanceChip({ rate, isRTL }: { rate: LiveRate; isRTL?: boolean }) {
@@ -98,7 +98,7 @@ export default function ProvenanceChip({ rate, isRTL }: { rate: LiveRate; isRTL?
                     rate.feedStatus === 'STALE' ? 'text-orange-400' :
                     'text-red-400'
                   }>
-                    â— {rate.feedStatus}
+                    ● {rate.feedStatus}
                   </span>
                 </dd>
               </div>
@@ -106,7 +106,7 @@ export default function ProvenanceChip({ rate, isRTL }: { rate: LiveRate; isRTL?
             {meta.url && (
               <div className="pt-1.5 border-t border-navy-800">
                 <a href={meta.url} target="_blank" rel="noopener noreferrer" className="text-gold-400 hover:text-gold-300 text-[10px]">
-                  â†— Source officielle
+                  ↗ Source officielle
                 </a>
               </div>
             )}

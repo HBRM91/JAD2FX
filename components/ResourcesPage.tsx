@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ExternalLink, ChevronDown, ChevronUp, Shield, Globe, TrendingUp, BookOpen, Building2 } from 'lucide-react';
 import { BKAM_LINKS } from '../constants/bkamLinks';
 
-// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface ResourceLink {
   name: string;
@@ -22,7 +22,7 @@ interface ResourceSection {
   links: ResourceLink[];
 }
 
-// â”€â”€â”€ Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Data ─────────────────────────────────────────────────────────────────────
 
 const SECTIONS: ResourceSection[] = [
   {
@@ -32,12 +32,12 @@ const SECTIONS: ResourceSection[] = [
     bgColor: 'bg-red-500/8',
     borderColor: 'border-red-500/20',
     title: 'Autorités de Régulation Marocaines',
-    subtitle: 'Sources officielles â€” réglementation & fixings',
+    subtitle: 'Sources officielles — réglementation & fixings',
     links: [
       { name: 'Bank Al-Maghrib (BKAM)', url: BKAM_LINKS.mainSite, desc: 'Banque centrale. Fixing officiel, politique monétaire, circulaires, statistiques.', tag: 'Officiel' },
       { name: 'Office des Changes (OC)', url: 'https://www.oc.gov.ma', desc: 'Réglementation des changes, circulaires, instructions, statistiques des flux.', tag: 'Officiel' },
-      { name: 'AMMC', url: 'https://www.ammc.ma', desc: 'Autorité Marocaine du Marché des Capitaux â€” marchés financiers, OPCVM, OPCI.', tag: 'Officiel' },
-      { name: 'Bourse de Casablanca', url: 'https://www.casablanca-bourse.com', desc: 'Marché des actions et obligations au Maroc â€” cotations et rapports.', tag: 'Marché' },
+      { name: 'AMMC', url: 'https://www.ammc.ma', desc: 'Autorité Marocaine du Marché des Capitaux — marchés financiers, OPCVM, OPCI.', tag: 'Officiel' },
+      { name: 'Bourse de Casablanca', url: 'https://www.casablanca-bourse.com', desc: 'Marché des actions et obligations au Maroc — cotations et rapports.', tag: 'Marché' },
     ],
   },
   {
@@ -49,11 +49,11 @@ const SECTIONS: ResourceSection[] = [
     title: 'Institutions Internationales',
     subtitle: 'Données macro-économiques & recherche mondiale',
     links: [
-      { name: 'FMI â€” Maroc', url: 'https://www.imf.org/en/Countries/MAR', desc: 'Article IV, revue du PLL (Precautionary Liquidity Line), rapports WEO pour le Maroc.', tag: 'Macro' },
-      { name: 'Banque Mondiale â€” Maroc', url: 'https://www.worldbank.org/en/country/morocco', desc: 'Indicateurs macro, rapports de développement, statistiques balance des paiements.', tag: 'Macro' },
+      { name: 'FMI — Maroc', url: 'https://www.imf.org/en/Countries/MAR', desc: 'Article IV, revue du PLL (Precautionary Liquidity Line), rapports WEO pour le Maroc.', tag: 'Macro' },
+      { name: 'Banque Mondiale — Maroc', url: 'https://www.worldbank.org/en/country/morocco', desc: 'Indicateurs macro, rapports de développement, statistiques balance des paiements.', tag: 'Macro' },
       { name: 'Banque des Règlements Internationaux (BRI)', url: 'https://www.bis.org', desc: 'Standards Bâle III/IV, triennial FX survey, taux directeurs mondiaux.', tag: 'Réglementation' },
-      { name: 'Banque Centrale Européenne (BCE)', url: 'https://www.ecb.europa.eu', desc: 'Décisions de politique monétaire â€” EUR est à 60% du panier MAD.', tag: 'Banque centrale' },
-      { name: 'Réserve Fédérale américaine (Fed)', url: 'https://www.federalreserve.gov', desc: 'FOMC minutes, dot plot, politique taux â€” USD à 40% du panier MAD.', tag: 'Banque centrale' },
+      { name: 'Banque Centrale Européenne (BCE)', url: 'https://www.ecb.europa.eu', desc: 'Décisions de politique monétaire — EUR est à 60% du panier MAD.', tag: 'Banque centrale' },
+      { name: 'Réserve Fédérale américaine (Fed)', url: 'https://www.federalreserve.gov', desc: 'FOMC minutes, dot plot, politique taux — USD à 40% du panier MAD.', tag: 'Banque centrale' },
       { name: 'Banque de France', url: 'https://www.banque-france.fr', desc: 'Études zone euro, relations bilatérales franco-marocaines, statistiques BAFrance.', tag: 'Recherche' },
     ],
   },
@@ -67,10 +67,10 @@ const SECTIONS: ResourceSection[] = [
     subtitle: 'Référentiels de cotation & flux de données',
     links: [
       { name: 'Bloomberg', url: 'https://www.bloomberg.com/markets/currencies', desc: 'Terminal de référence mondial. Cotations FX, taux, matières premières.', tag: 'Terminal' },
-      { name: 'Reuters / LSEG', url: 'https://www.lseg.com/en/data-analytics', desc: 'Plateforme LSEG Eikon â€” flux temps réel, analytics, actualité financière.', tag: 'Terminal' },
-      { name: 'Investing.com â€” MAD', url: 'https://fr.investing.com/currencies/usd-mad', desc: 'Cotations accessibles USD/MAD, EUR/MAD, graphiques, calendrier économique.', tag: 'Open' },
+      { name: 'Reuters / LSEG', url: 'https://www.lseg.com/en/data-analytics', desc: 'Plateforme LSEG Eikon — flux temps réel, analytics, actualité financière.', tag: 'Terminal' },
+      { name: 'Investing.com — MAD', url: 'https://fr.investing.com/currencies/usd-mad', desc: 'Cotations accessibles USD/MAD, EUR/MAD, graphiques, calendrier économique.', tag: 'Open' },
       { name: 'Xe.com', url: 'https://www.xe.com/currencyconverter/convert/?From=EUR&To=MAD', desc: 'Convertisseur EUR/MAD, USD/MAD en temps réel. Usage grand public.', tag: 'Open' },
-      { name: 'Macrotrends â€” Maroc', url: 'https://www.macrotrends.net/countries/MAR/morocco/exchange-rate-historical-chart', desc: 'Historique long-terme des taux de change MAD. Séries temporelles 1993â€“présent.', tag: 'Historique' },
+      { name: 'Macrotrends — Maroc', url: 'https://www.macrotrends.net/countries/MAR/morocco/exchange-rate-historical-chart', desc: 'Historique long-terme des taux de change MAD. Séries temporelles 1993–présent.', tag: 'Historique' },
     ],
   },
   {
@@ -79,7 +79,7 @@ const SECTIONS: ResourceSection[] = [
     color: 'text-gold-400',
     bgColor: 'bg-gold-500/8',
     borderColor: 'border-gold-500/20',
-    title: 'Banques Marocaines â€” Services Change',
+    title: 'Banques Marocaines — Services Change',
     subtitle: 'Établissements habilités à exécuter les opérations de change',
     links: [
       { name: 'Attijariwafa Bank', url: 'https://www.attijariwafabank.com', desc: 'Première banque marocaine. Services change corporate, salle des marchés, produits de couverture.', tag: 'SBIC' },
@@ -98,8 +98,8 @@ const SECTIONS: ResourceSection[] = [
     title: 'Recherche Académique & Formation',
     subtitle: 'Publications scientifiques et ressources pédagogiques',
     links: [
-      { name: 'SSRN â€” FX Research Maroc', url: 'https://www.ssrn.com/index.cfm/en/', desc: 'Recherches académiques sur les marchés de change, modèles de parité, gestion du risque.', tag: 'Académique' },
-      { name: 'HEC Paris â€” Finance Executive', url: 'https://www.hec.edu/fr/executive-education', desc: 'Formation continue finance internationale, marchés de capitaux, trésorerie.', tag: 'Formation' },
+      { name: 'SSRN — FX Research Maroc', url: 'https://www.ssrn.com/index.cfm/en/', desc: 'Recherches académiques sur les marchés de change, modèles de parité, gestion du risque.', tag: 'Académique' },
+      { name: 'HEC Paris — Finance Executive', url: 'https://www.hec.edu/fr/executive-education', desc: 'Formation continue finance internationale, marchés de capitaux, trésorerie.', tag: 'Formation' },
       { name: 'ISCAE Casablanca', url: 'https://www.iscae.ac.ma', desc: 'Institut Supérieur de Commerce. Formation gestion financière, risk management.', tag: 'Formation' },
       { name: 'ENCG Maroc', url: 'https://www.encg.ac.ma', desc: 'Écoles Nationales de Commerce et Gestion. Finance d\'entreprise, change.', tag: 'Formation' },
       { name: 'CFA Institute', url: 'https://www.cfainstitute.org', desc: 'Certification internationale en analyse financière. Standards GIPS, éthique.', tag: 'Certification' },
@@ -107,7 +107,7 @@ const SECTIONS: ResourceSection[] = [
   },
 ];
 
-// â”€â”€â”€ Component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ResourcesPage() {
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(['authorities', 'international']));

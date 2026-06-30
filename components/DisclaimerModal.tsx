@@ -4,7 +4,7 @@ import { Shield } from 'lucide-react';
 const STORAGE_KEY = 'jad2fx_disclaimer_v1';
 
 const DISCLAIMER_POINTS = [
-  "Les taux de change affichés sont <strong>indicatifs et pédagogiques uniquement</strong> â€” ils ne constituent pas des prix de transaction fermes ni des cours officiels Bank Al-Maghrib.",
+  "Les taux de change affichés sont <strong>indicatifs et pédagogiques uniquement</strong> — ils ne constituent pas des prix de transaction fermes ni des cours officiels Bank Al-Maghrib.",
   "JAD2 Advisory est un cabinet de <strong>conseil stratégique et de formation</strong> en gestion du risque de change. Il ne fournit pas de conseil en investissement et n'exécute aucune transaction de change.",
   "Les simulations de forwards et de swaps sont des <strong>outils pédagogiques</strong> basés sur la formule CIP. Elles ne constituent pas une offre commerciale d'instruments financiers.",
   "Pour toute opération de change, adressez-vous exclusivement à un <strong>établissement de crédit agréé par Bank Al-Maghrib</strong>.",
@@ -43,7 +43,7 @@ export default function DisclaimerModal() {
     >
       <div className="bg-navy-900 border border-navy-700 rounded-t-2xl sm:rounded-xl shadow-2xl shadow-black/60 max-w-md w-full overflow-hidden">
 
-        {/* Header â€” more compact */}
+        {/* Header — more compact */}
         <div className="px-5 py-3 border-b border-navy-800 flex items-center gap-3">
           <div className="w-8 h-8 rounded-lg bg-gold-500/15 border border-gold-500/30 flex items-center justify-center flex-shrink-0">
             <Shield size={16} className="text-gold-400" />
@@ -56,7 +56,7 @@ export default function DisclaimerModal() {
           </div>
         </div>
 
-        {/* Body â€” compact list */}
+        {/* Body — compact list */}
         <div className="px-5 py-4 space-y-3">
           <ol className="list-none space-y-2">
             {DISCLAIMER_POINTS.map((text, i) => (
@@ -74,18 +74,18 @@ export default function DisclaimerModal() {
 
           <div className="p-2 bg-amber-500/5 border border-amber-500/20 rounded">
             <p className="text-[9.5px] text-amber-400/80 leading-snug">
-              âš ï¸ Lois 19-14 &amp; 103-12 · Réservé information et formation.
+              ⚠️ Lois 19-14 &amp; 103-12 · Réservé information et formation.
             </p>
           </div>
         </div>
 
-        {/* Footer â€” bigger, more visible primary action */}
+        {/* Footer — bigger, more visible primary action */}
         <div className="px-5 py-3 border-t border-navy-800 bg-navy-950/30">
           <button
             onClick={accept}
             className="w-full px-6 py-3 bg-gold-500 text-navy-950 text-sm font-bold rounded hover:bg-gold-400 transition-colors shadow-lg shadow-gold-900/30"
           >
-            J'ai compris â€” Accéder aux taux
+            J'ai compris — Accéder aux taux
           </button>
           <p className="text-[9px] text-slate-500 mt-1.5 text-center">
             ou appuyez sur <kbd className="px-1 bg-navy-800 border border-navy-700 rounded">Échap</kbd> · clic en dehors pour accepter

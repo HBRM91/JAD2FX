@@ -11,7 +11,7 @@ import { computeForward } from '../services/forwardEngine';
 import { Skeleton } from './Skeleton';
 
 /**
- * AdminCockpit â€” Master flight cockpit for the FX desk.
+ * AdminCockpit — Master flight cockpit for the FX desk.
  * One-screen situational awareness:
  *   - Top: 4 hero KPIs (PnL day, PnL MTD, VaR, Sharpe-like)
  *   - Mid: live positions table with per-pair P&L and Greeks
@@ -266,7 +266,7 @@ export default function AdminCockpit({ navTo }: { navTo?: (v: any) => void }) {
         ts: new Date().toISOString(),
         level: 'INFO',
         source: 'Desk',
-        message: 'Aucune alerte active â€” book dans la bande de risque',
+        message: 'Aucune alerte active — book dans la bande de risque',
       });
     }
     return out.slice(0, 8);
@@ -288,7 +288,7 @@ export default function AdminCockpit({ navTo }: { navTo?: (v: any) => void }) {
         <div className="flex items-center gap-2">
           <Layers size={16} className="text-gold-500" />
           <h1 className="text-sm sm:text-base font-bold text-white uppercase tracking-wider">
-            Cockpit Maître â€” Desk FX
+            Cockpit Maître — Desk FX
           </h1>
           {/* P2-6: positions/P&L/VaR below are synthetic (see comments at 209,237,240) */}
           <span className="text-[9px] font-black text-amber-300 bg-amber-900/40 border border-amber-700/50 px-1.5 py-0.5 rounded uppercase tracking-widest">
@@ -392,7 +392,7 @@ export default function AdminCockpit({ navTo }: { navTo?: (v: any) => void }) {
 
       {/* Main grid: positions + alerts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4">
-        {/* Positions table â€” 2/3 on desktop */}
+        {/* Positions table — 2/3 on desktop */}
         <div className="lg:col-span-2 bg-navy-900 border border-navy-700 rounded-xl overflow-hidden">
           <div className="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-navy-800">
             <div className="flex items-center gap-2">
@@ -425,7 +425,7 @@ export default function AdminCockpit({ navTo }: { navTo?: (v: any) => void }) {
           </div>
         </div>
 
-        {/* Alerts feed â€” 1/3 on desktop */}
+        {/* Alerts feed — 1/3 on desktop */}
         <div className="bg-navy-900 border border-navy-700 rounded-xl overflow-hidden">
           <div className="flex items-center justify-between px-3 sm:px-4 py-2 border-b border-navy-800">
             <div className="flex items-center gap-2">

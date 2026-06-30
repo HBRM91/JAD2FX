@@ -1,12 +1,12 @@
 import { Globe, TrendingUp, Award, TrendingDown } from 'lucide-react';
 
 /**
- * P1.10 â€” Sovereign spread module.
+ * P1.10 — Sovereign spread module.
  * Morocco 5Y CDS, EMBI+ Morocco, OAT vs Bund spread.
  * Synthetic data calibrated to Q2 2026 levels (real implementation needs Reuters/Bloomberg feed).
  */
 export default function SovereignPage() {
-  // Synthetic data â€” calibrated to Q2 2026
+  // Synthetic data — calibrated to Q2 2026
   const cds5Y = {
     morocco:    { bps: 92,  change: -3,  changePct: -3.2 },
     turkey:     { bps: 285, change: +12, changePct: +4.4 },
@@ -70,7 +70,7 @@ export default function SovereignPage() {
                 <tr key={country} className={isMA ? 'bg-gold-500/5' : 'hover:bg-navy-800/30'}>
                   <td className="px-2 py-1.5 font-bold text-slate-200">
                     {country.charAt(0).toUpperCase() + country.slice(1)}
-                    {isMA && <span className="ml-1 text-[9px] text-gold-400">â˜…</span>}
+                    {isMA && <span className="ml-1 text-[9px] text-gold-400">★</span>}
                   </td>
                   <td className="px-2 py-1.5 text-right font-mono text-slate-200">{data.bps}</td>
                   <td className={`px-2 py-1.5 text-right font-mono ${data.change > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
@@ -110,7 +110,7 @@ export default function SovereignPage() {
                 <tr key={country} className={isMA ? 'bg-gold-500/5' : 'hover:bg-navy-800/30'}>
                   <td className="px-2 py-1.5 font-bold text-slate-200">
                     {country.charAt(0).toUpperCase() + country.slice(1)}
-                    {isMA && <span className="ml-1 text-[9px] text-gold-400">â˜…</span>}
+                    {isMA && <span className="ml-1 text-[9px] text-gold-400">★</span>}
                   </td>
                   <td className="px-2 py-1.5 text-right font-mono text-slate-200">{data.bps}</td>
                   <td className={`px-2 py-1.5 text-right font-mono ${data.change > 0 ? 'text-red-400' : 'text-emerald-400'}`}>

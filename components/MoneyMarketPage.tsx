@@ -6,14 +6,14 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import { BKAM_CURRENCIES } from '../constants';
 
 /**
- * P1.9 â€” Money market page (standalone view).
+ * P1.9 — Money market page (standalone view).
  * Combines the macroData data (already defined) with a dedicated page layout.
  */
 export default function MoneyMarketPage() {
   const mad = DEFAULT_MONEY_MARKET.find((m) => m.currency === 'MAD');
   const inflationMAD = DEFAULT_INFLATION.find((i) => i.currency === 'MAD');
 
-  // Simulated MONIA time series (last 30 days) â€” synthetic for now
+  // Simulated MONIA time series (last 30 days) — synthetic for now
   const moniaSeries = useMemo(() => {
     const data = [];
     const base = mad?.overnightRate || 0.025;
@@ -55,7 +55,7 @@ export default function MoneyMarketPage() {
           {/* MONIA chart */}
           <div className="bg-navy-900 border border-navy-700 rounded-xl p-4">
             <h2 className="text-[11px] font-bold text-white uppercase tracking-wider mb-2 flex items-center gap-2">
-              <TrendingUp size={11} /> MONIA â€” 30 derniers jours
+              <TrendingUp size={11} /> MONIA — 30 derniers jours
             </h2>
             <div className="h-48">
               <ResponsiveContainer width="100%" height="100%">
@@ -97,7 +97,7 @@ export default function MoneyMarketPage() {
                   return (
                     <tr key={m.currency} className={isMAD ? 'bg-gold-500/5' : 'hover:bg-navy-800/30'}>
                       <td className="px-2 py-1.5 font-bold text-slate-200">
-                        {m.currency}{isMAD && <span className="ml-1 text-[9px] text-gold-400">â˜…</span>}
+                        {m.currency}{isMAD && <span className="ml-1 text-[9px] text-gold-400">★</span>}
                       </td>
                       <td className="px-2 py-1.5 text-slate-400 text-[10px]">{m.label}</td>
                       <td className="px-2 py-1.5 text-right font-mono text-gold-400">{(m.policyRate * 100).toFixed(2)}%</td>
@@ -110,7 +110,7 @@ export default function MoneyMarketPage() {
             </table>
           </div>
 
-          {/* A2.1 + A2.2 â€” Courbe des taux MAD (BDT + OAT) */}
+          {/* A2.1 + A2.2 — Courbe des taux MAD (BDT + OAT) */}
           <div className="bg-navy-900 border border-navy-700 rounded-xl p-4">
             <h2 className="text-[11px] font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
               <FileText size={11} /> Courbe des taux MAD · BDT + OAT
@@ -149,7 +149,7 @@ export default function MoneyMarketPage() {
             </p>
           </div>
 
-          {/* A1.4â€“A1.8 â€” Maroc â€” Indicateurs structurels (BKAM, HCP, OC) */}
+          {/* A1.4–A1.8 — Maroc — Indicateurs structurels (BKAM, HCP, OC) */}
           <div className="bg-navy-900 border border-gold-700/30 rounded-xl p-4">
             <h2 className="text-[11px] font-bold text-white uppercase tracking-wider mb-3 flex items-center gap-2">
               <Building2 size={11} /> Maroc · Indicateurs structurels
@@ -197,7 +197,7 @@ export default function MoneyMarketPage() {
                   return (
                     <tr key={i.currency} className={isMAD ? 'bg-gold-500/5' : 'hover:bg-navy-800/30'}>
                       <td className="px-2 py-1.5 font-bold text-slate-200">
-                        {i.currency}{isMAD && <span className="ml-1 text-[9px] text-gold-400">â˜…</span>}
+                        {i.currency}{isMAD && <span className="ml-1 text-[9px] text-gold-400">★</span>}
                       </td>
                       <td className="px-2 py-1.5 text-right font-mono">{i.cpiYoYPct.toFixed(1)}%</td>
                       <td className="px-2 py-1.5 text-right font-mono text-slate-400">{i.cpiCoreYoYPct.toFixed(1)}%</td>
@@ -257,7 +257,7 @@ function PppCalculator() {
           <label className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider block mb-1">Devise</label>
           <select value={ccy} onChange={(e) => setCcy(e.target.value)} className="w-full bg-navy-950 border border-navy-700 rounded px-2 py-1.5 text-[12px] text-slate-200">
             {BKAM_CURRENCIES.filter((c) => c.code !== 'MAD').map((c) => (
-              <option key={c.code} value={c.code}>{c.code} â€” {c.nameFr}</option>
+              <option key={c.code} value={c.code}>{c.code} — {c.nameFr}</option>
             ))}
           </select>
         </div>

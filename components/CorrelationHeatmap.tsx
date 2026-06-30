@@ -2,9 +2,9 @@ import { Grid3X3, Info } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
 /**
- * P2.9 â€” G10-MAD correlation heatmap.
+ * P2.9 — G10-MAD correlation heatmap.
  * 14×14 matrix of rolling correlations (30D or 90D).
- * Synthetic â€” in production, would compute from BKAM + ECB historical time series.
+ * Synthetic — in production, would compute from BKAM + ECB historical time series.
  */
 
 const CURRENCIES = ['EUR', 'USD', 'GBP', 'JPY', 'CHF', 'CAD', 'SEK', 'NOK', 'DKK', 'AUD', 'NZD', 'SGD', 'HKD', 'CNY'];
@@ -126,8 +126,8 @@ export default function CorrelationHeatmap() {
         <ul className="list-disc list-inside space-y-0.5 mt-1">
           <li>Les devises scandinaves (SEK, NOK, DKK) sont fortement corrélées entre elles (région, économie, banques).</li>
           <li>EUR est très corrélé avec la plupart des G10 (zone euro = 60% du panier MAD).</li>
-          <li>CNY et SGD: faible corrélation avec les G10 â€” utile pour diversification.</li>
-          <li>HKD: quasi-perfaitement corrélé avec USD (peg) â€” non affiché ici pour clarté.</li>
+          <li>CNY et SGD: faible corrélation avec les G10 — utile pour diversification.</li>
+          <li>HKD: quasi-perfaitement corrélé avec USD (peg) — non affiché ici pour clarté.</li>
         </ul>
       </div>
     </div>
